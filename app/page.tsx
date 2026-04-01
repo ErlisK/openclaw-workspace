@@ -1,17 +1,49 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useTasks }      from "@/hooks/useTasks";
-import { useKeyboard }   from "@/hooks/useKeyboard";
-import { TodayView }     from "@/components/TodayView";
-import { BacklogView }   from "@/components/BacklogView";
-import { TaskInput }     from "@/components/TaskInput";
-import { HelpModal }     from "@/components/HelpModal";
-import { Dashboard }     from "@/components/Dashboard";
-import { AuthModal }     from "@/components/AuthModal";
-import { getCompletedTasks } from "@/lib/tasks";
+import { useTasks }            from "@/hooks/useTasks";
+import { useKeyboard }         from "@/hooks/useKeyboard";
+import { TodayView }           from "@/components/TodayView";
+import { BacklogView }         from "@/components/BacklogView";
+import { TaskInput }           from "@/components/TaskInput";
+import { HelpModal }           from "@/components/HelpModal";
+import { Dashboard }           from "@/components/Dashboard";
+import { AuthModal }           from "@/components/AuthModal";
+import { OnboardingPrompt }    from "@/components/OnboardingPrompt";
+import { getCompletedTasks }   from "@/lib/tasks";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { logEnvStatus } from "@/lib/env";
+import { logEnvStatus }        from "@/lib/env";
+
+// ── Onboarding: has the user ever added a task? ───────────────────────────────
+const ONBOARDING_KEY = "focusdo:onboarded";
+
+function useOnboarding(hasAnyTasks: boolean) {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const done = localStorage.getItem(ONBOARDING_KEY) === "1";
+    // Show if not done and no existing tasks
+    if (!done && !hasAnyTasks) setShow(true);
+  }, [hasAnyTasks]);
+
+  const dismiss = useCallback(() => {
+    setShow(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(ONBOARDING_KEY, "1");
+    }
+  }, []);
+
+  // Auto-dismiss once tasks exist
+  useEffect(() => {
+    if (hasAnyTasks && show) {
+      localStorage.setItem(ONBOARDING_KEY, "1");
+      setShow(false);
+    }
+  }, [hasAnyTasks, show]);
+
+  return { show, dismiss };
+}
 
 export default function Home() {
   const {
@@ -31,6 +63,9 @@ export default function Home() {
   const [showAuth,      setShowAuth]      = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [pwaInstall,    setPwaInstall]    = useState<Event | null>(null);
+
+  const activeTasks  = tasks.filter((t) => t.status === "active");
+  const { show: showOnboarding, dismiss: dismissOnboarding } = useOnboarding(activeTasks.length > 0);
 
   // Log env status in dev
   useEffect(() => { logEnvStatus(); }, []);
@@ -90,6 +125,15 @@ export default function Home() {
     const result = await (pwaInstall as any).prompt();
     if (result?.outcome === "accepted") setPwaInstall(null);
   };
+
+  // Onboarding add handler — adds task then auto-dismisses at 3
+  const handleOnboardingAdd = useCallback(
+    (text: string, priority: "high" | "medium" | "low", list: "backlog") => {
+      addTask(text, priority, list, "keyboard");
+      localStorage.setItem(ONBOARDING_KEY, "1");
+    },
+    [addTask]
+  );
 
   return (
     <div className="min-h-svh bg-[#0a0a0a] text-gray-100 flex flex-col">
@@ -192,28 +236,38 @@ export default function Home() {
       {/* ── Main content ─────────────────────────────────────────────────── */}
       <main className="flex-1 max-w-3xl mx-auto w-full px-3 sm:px-4 py-4 pb-20">
 
+        {/* Onboarding prompt — only for first-time empty state */}
+        {showOnboarding && (
+          <OnboardingPrompt
+            onAddTask={handleOnboardingAdd}
+            onDismiss={dismissOnboarding}
+          />
+        )}
+
         {/* New task input */}
-        {isInputOpen ? (
-          <div className="mb-4">
-            <TaskInput
-              defaultList={focusMode ? "today" : activeView}
-              canAddToToday={canPromote || activeView === "today"}
-              onSubmit={(text, priority, list) => addTask(text, priority, list, "keyboard")}
-              onCancel={closeInput}
-            />
-          </div>
-        ) : (
-          <button
-            onClick={openInput}
-            className="w-full mb-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border border-dashed border-[#222] text-gray-600 hover:border-[#333] hover:text-gray-400 active:bg-white/5 transition-all text-sm touch-manipulation min-h-[44px]"
-            aria-label="Add new task"
-          >
-            <span className="text-emerald-500 text-lg leading-none">+</span>
-            <span>Add a task…</span>
-            <span className="ml-auto text-[10px] text-gray-700 hidden sm:block">
-              <kbd className="bg-[#181818] border border-[#272727] px-1.5 py-0.5 rounded">N</kbd>
-            </span>
-          </button>
+        {!showOnboarding && (
+          isInputOpen ? (
+            <div className="mb-4">
+              <TaskInput
+                defaultList={focusMode ? "today" : activeView}
+                canAddToToday={canPromote || activeView === "today"}
+                onSubmit={(text, priority, list) => addTask(text, priority, list, "keyboard")}
+                onCancel={closeInput}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={openInput}
+              className="w-full mb-4 flex items-center gap-2.5 px-4 py-3 rounded-xl border border-dashed border-[#1e1e1e] text-gray-700 hover:border-[#2a2a2a] hover:text-gray-500 active:bg-white/5 transition-all text-sm touch-manipulation min-h-[44px]"
+              aria-label="Add new task"
+            >
+              <span className="text-emerald-700 text-lg leading-none">+</span>
+              <span>Add a task…</span>
+              <span className="ml-auto text-[10px] text-gray-800 hidden sm:block">
+                <kbd className="bg-[#141414] border border-[#222] px-1.5 py-0.5 rounded">N</kbd>
+              </span>
+            </button>
+          )
         )}
 
         {/* Focus mode: single-column Today */}
@@ -223,6 +277,7 @@ export default function Home() {
             {...panelProps}
             focusMode
             onDemote={demoteTaskById}
+            backlogCount={backlogTasks.length}
           />
         ) : (
           <>
@@ -233,12 +288,14 @@ export default function Home() {
                 {...panelProps}
                 focusMode={false}
                 onDemote={demoteTaskById}
+                backlogCount={backlogTasks.length}
               />
               <BacklogView
                 tasks={backlogTasks}
                 {...panelProps}
                 canPromote={canPromote}
                 onPromote={promoteTaskById}
+                onAddTask={openInput}
               />
             </div>
 
@@ -250,6 +307,7 @@ export default function Home() {
                   {...panelProps}
                   focusMode={false}
                   onDemote={demoteTaskById}
+                  backlogCount={backlogTasks.length}
                 />
               ) : (
                 <BacklogView
@@ -257,6 +315,7 @@ export default function Home() {
                   {...panelProps}
                   canPromote={canPromote}
                   onPromote={promoteTaskById}
+                  onAddTask={openInput}
                 />
               )}
             </div>
@@ -301,40 +360,38 @@ export default function Home() {
         style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
         <div className="max-w-3xl mx-auto px-3 sm:px-4 h-8 flex items-center gap-2 text-[11px] text-gray-700">
-          <span className={todayTasks.length === 3 ? "text-emerald-600" : "text-gray-700"}>
+          <span className={todayTasks.length === 3 ? "text-emerald-700" : "text-gray-700"}>
             {todayTasks.length}/3 today
           </span>
-          <span className="text-[#222]">·</span>
+          <span className="text-[#1e1e1e]">·</span>
           <span>{backlogTasks.length} backlog</span>
 
           {selectedId && (
             <>
-              <span className="text-[#222]">·</span>
-              <span className="text-gray-600 hidden sm:block">
-                <kbd className="text-gray-500 text-[10px]">Space</kbd> done ·{" "}
-                <kbd className="text-gray-500 text-[10px]">P</kbd> today ·{" "}
-                <kbd className="text-gray-500 text-[10px]">B</kbd> back ·{" "}
-                <kbd className="text-gray-500 text-[10px]">E</kbd> edit ·{" "}
-                <kbd className="text-gray-500 text-[10px]">D</kbd> del
+              <span className="text-[#1e1e1e]">·</span>
+              <span className="text-gray-700 hidden sm:block">
+                <kbd className="text-gray-600 text-[10px]">Space</kbd> done ·{" "}
+                <kbd className="text-gray-600 text-[10px]">P</kbd> today ·{" "}
+                <kbd className="text-gray-600 text-[10px]">E</kbd> edit ·{" "}
+                <kbd className="text-gray-600 text-[10px]">D</kbd> del
               </span>
             </>
           )}
 
           <div className="ml-auto flex items-center gap-2">
-            {/* Mobile: auth + focus toggle */}
             <button onClick={() => setShowAuth(true)}
-              className="sm:hidden text-[11px] text-gray-700 hover:text-emerald-500 transition-colors min-h-[32px] px-1">
+              className="sm:hidden text-[11px] text-gray-700 hover:text-emerald-600 transition-colors min-h-[32px] px-1">
               {user ? "●" : "Sync"}
             </button>
             <button onClick={toggleFocusMode}
               className={`sm:hidden text-[11px] transition-colors min-h-[32px] px-1 ${
-                focusMode ? "text-emerald-500" : "text-gray-700 hover:text-gray-400"
+                focusMode ? "text-emerald-600" : "text-gray-700 hover:text-gray-500"
               }`}>
               Focus
             </button>
             <span className="hidden sm:block">
-              <kbd className="text-gray-600 text-[10px]">Tab</kbd> switch ·{" "}
-              <kbd className="text-gray-600 text-[10px]">?</kbd> help
+              <kbd className="text-gray-700 text-[10px]">Tab</kbd> switch ·{" "}
+              <kbd className="text-gray-700 text-[10px]">?</kbd> help
             </span>
           </div>
         </div>
