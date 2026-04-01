@@ -10,6 +10,7 @@ import { HelpModal }           from "@/components/HelpModal";
 import { Dashboard }           from "@/components/Dashboard";
 import { AuthModal }           from "@/components/AuthModal";
 import { OnboardingPrompt }    from "@/components/OnboardingPrompt";
+import { ExportModal }         from "@/components/ExportModal";
 import { getCompletedTasks }   from "@/lib/tasks";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { logEnvStatus }        from "@/lib/env";
@@ -61,6 +62,7 @@ export default function Home() {
   const [showHelp,      setShowHelp]      = useState(false);
   const [showDash,      setShowDash]      = useState(false);
   const [showAuth,      setShowAuth]      = useState(false);
+  const [showExport,    setShowExport]    = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [pwaInstall,    setPwaInstall]    = useState<Event | null>(null);
 
@@ -389,9 +391,16 @@ export default function Home() {
               }`}>
               Focus
             </button>
-            <span className="hidden sm:block">
-              <kbd className="text-gray-700 text-[10px]">Tab</kbd> switch ·{" "}
-              <kbd className="text-gray-700 text-[10px]">?</kbd> help
+            <span className="hidden sm:flex items-center gap-2">
+              <kbd className="text-gray-700 text-[10px]">Tab</kbd>
+              <span className="text-gray-800">switch</span>
+              <span className="text-gray-800">·</span>
+              <kbd className="text-gray-700 text-[10px]">?</kbd>
+              <span className="text-gray-800">help</span>
+              <span className="text-gray-800">·</span>
+              <a href="/privacy" className="text-gray-800 hover:text-gray-600 transition-colors">Privacy</a>
+              <span className="text-gray-800">·</span>
+              <a href="/terms" className="text-gray-800 hover:text-gray-600 transition-colors">Terms</a>
             </span>
           </div>
         </div>
@@ -399,7 +408,14 @@ export default function Home() {
 
       {/* ── Modals ───────────────────────────────────────────────────────── */}
       {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
-      {showDash && <Dashboard onClose={() => setShowDash(false)} />}
+      {showDash && (
+        <Dashboard
+          tasks={tasks}
+          onClose={() => setShowDash(false)}
+          onExport={() => setShowExport(true)}
+        />
+      )}
+      {showExport && <ExportModal tasks={tasks} onClose={() => setShowExport(false)} />}
       {showAuth && (
         <AuthModal
           onSendLink={sendMagicLink}

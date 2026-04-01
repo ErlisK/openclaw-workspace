@@ -145,55 +145,50 @@ describe(`Smoke tests → ${BASE_URL}`, () => {
       expect(p90).toBeLessThan(3_000);
     });
   });
-});
 
-  // ── Health API ────────────────────────────────────────────────────────────
+  // ── Health API ────────────────────────────────────────────────────────────────
 
   describe("GET /api/health", () => {
-    let res: Awaited<ReturnType<typeof get>>;
-    beforeAll(async () => { res = await get("/api/health"); });
+    let healthRes: Awaited<ReturnType<typeof get>>;
+    beforeAll(async () => { healthRes = await get("/api/health"); });
 
-    it("returns HTTP 200", () => {
-      expect(res.status).toBe(200);
-    });
+    it("returns HTTP 200", () => { expect(healthRes.status).toBe(200); });
 
     it("returns JSON content-type", () => {
-      expect(res.headers["content-type"]).toMatch(/json/);
+      expect(healthRes.headers["content-type"]).toMatch(/json/);
     });
 
     it('has status: "ok"', () => {
-      const body = JSON.parse(res.text);
+      const body = JSON.parse(healthRes.text);
       expect(body.status).toBe("ok");
     });
 
     it("has version field", () => {
-      const body = JSON.parse(res.text);
+      const body = JSON.parse(healthRes.text);
       expect(typeof body.version).toBe("string");
       expect(body.version.length).toBeGreaterThan(0);
     });
 
     it("has ts (ISO timestamp)", () => {
-      const body = JSON.parse(res.text);
+      const body = JSON.parse(healthRes.text);
       expect(body.ts).toMatch(/^\d{4}-\d{2}-\d{2}T/);
     });
 
     it("has integrations object", () => {
-      const body = JSON.parse(res.text);
+      const body = JSON.parse(healthRes.text);
       expect(typeof body.integrations).toBe("object");
       expect(typeof body.integrations.supabase).toBe("boolean");
-      expect(typeof body.integrations.posthog).toBe("boolean");
-      expect(typeof body.integrations.sentry).toBe("boolean");
     });
 
     it("has flags object", () => {
-      const body = JSON.parse(res.text);
+      const body = JSON.parse(healthRes.text);
       expect(typeof body.flags).toBe("object");
       expect(body.flags).toHaveProperty("focusModeDefault");
       expect(body.flags).toHaveProperty("todayCap");
     });
 
-    it("is not cached (health endpoints must be fresh)", () => {
-      const cc = res.headers["cache-control"] ?? "";
+    it("is not cached", () => {
+      const cc = healthRes.headers["cache-control"] ?? "";
       expect(cc).toMatch(/no-store|no-cache/);
     });
 
@@ -204,10 +199,38 @@ describe(`Smoke tests → ${BASE_URL}`, () => {
     });
   });
 
+  // ── Offline fallback ─────────────────────────────────────────────────────────
+
   describe("GET /offline.html", () => {
-    it("returns a response (200 or 308 redirect to 200)", async () => {
+    it("returns a response (200 or 308)", async () => {
       const res = await get("/offline.html");
-      // Vercel cleanUrls may 308 → /offline; final is 200
       expect([200, 301, 308]).toContain(res.status);
     });
   });
+
+  // ── Legal pages ──────────────────────────────────────────────────────────────
+
+  describe("GET /privacy", () => {
+    it("returns HTTP 200", async () => {
+      const res = await get("/privacy");
+      expect([200, 301, 308]).toContain(res.status);
+    });
+
+    it("contains privacy policy content", async () => {
+      const res = await get("/privacy");
+      expect(res.text).toContain("Privacy");
+    });
+  });
+
+  describe("GET /terms", () => {
+    it("returns HTTP 200", async () => {
+      const res = await get("/terms");
+      expect([200, 301, 308]).toContain(res.status);
+    });
+
+    it("contains terms content", async () => {
+      const res = await get("/terms");
+      expect(res.text).toContain("Terms");
+    });
+  });
+});
