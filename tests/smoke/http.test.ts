@@ -146,3 +146,68 @@ describe(`Smoke tests → ${BASE_URL}`, () => {
     });
   });
 });
+
+  // ── Health API ────────────────────────────────────────────────────────────
+
+  describe("GET /api/health", () => {
+    let res: Awaited<ReturnType<typeof get>>;
+    beforeAll(async () => { res = await get("/api/health"); });
+
+    it("returns HTTP 200", () => {
+      expect(res.status).toBe(200);
+    });
+
+    it("returns JSON content-type", () => {
+      expect(res.headers["content-type"]).toMatch(/json/);
+    });
+
+    it('has status: "ok"', () => {
+      const body = JSON.parse(res.text);
+      expect(body.status).toBe("ok");
+    });
+
+    it("has version field", () => {
+      const body = JSON.parse(res.text);
+      expect(typeof body.version).toBe("string");
+      expect(body.version.length).toBeGreaterThan(0);
+    });
+
+    it("has ts (ISO timestamp)", () => {
+      const body = JSON.parse(res.text);
+      expect(body.ts).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    });
+
+    it("has integrations object", () => {
+      const body = JSON.parse(res.text);
+      expect(typeof body.integrations).toBe("object");
+      expect(typeof body.integrations.supabase).toBe("boolean");
+      expect(typeof body.integrations.posthog).toBe("boolean");
+      expect(typeof body.integrations.sentry).toBe("boolean");
+    });
+
+    it("has flags object", () => {
+      const body = JSON.parse(res.text);
+      expect(typeof body.flags).toBe("object");
+      expect(body.flags).toHaveProperty("focusModeDefault");
+      expect(body.flags).toHaveProperty("todayCap");
+    });
+
+    it("is not cached (health endpoints must be fresh)", () => {
+      const cc = res.headers["cache-control"] ?? "";
+      expect(cc).toMatch(/no-store|no-cache/);
+    });
+
+    it("responds in < 500ms", async () => {
+      const start = Date.now();
+      await get("/api/health");
+      expect(Date.now() - start).toBeLessThan(500);
+    });
+  });
+
+  describe("GET /offline.html", () => {
+    it("returns a response (200 or 308 redirect to 200)", async () => {
+      const res = await get("/offline.html");
+      // Vercel cleanUrls may 308 → /offline; final is 200
+      expect([200, 301, 308]).toContain(res.status);
+    });
+  });
