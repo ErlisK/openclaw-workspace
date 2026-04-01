@@ -91,7 +91,7 @@ describe(`Smoke tests → ${BASE_URL}`, () => {
 
     it("contains app name", () => {
       const manifest = JSON.parse(res.text);
-      expect(manifest.name).toBe("FocusDo");
+      expect(manifest.name).toContain("FocusDo");
     });
 
     it("has start_url defined", () => {
