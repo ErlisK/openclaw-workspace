@@ -1,0 +1,57 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Uptime Monitor — runs every 15 minutes, pages on failure
+# ─────────────────────────────────────────────────────────────────────────────
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every 15 minutes
+  workflow_dispatch:          # manual trigger
+
+jobs:
+  check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check production URL
+        id: check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 10 \
+            --retry 2 \
+            --retry-delay 3 \
+            https://focusdo-mvp.vercel.app)
+          echo "status=$STATUS" >> $GITHUB_OUTPUT
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ DOWNTIME DETECTED — HTTP $STATUS"
+            exit 1
+          fi
+          echo "✅ Healthy — HTTP $STATUS"
+
+      - name: Check manifest.json
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 10 \
+            https://focusdo-mvp.vercel.app/manifest.json)
+          [ "$STATUS" = "200" ] && echo "✅ manifest.json OK" || (echo "❌ manifest.json $STATUS" && exit 1)
+
+      - name: Check service worker
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 10 \
+            https://focusdo-mvp.vercel.app/sw.js)
+          [ "$STATUS" = "200" ] && echo "✅ sw.js OK" || (echo "❌ sw.js $STATUS" && exit 1)
+
+      - name: Alert on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 DOWNTIME ALERT — ${new Date().toISOString()}`,
+              body: `Production health check failed.\n\nURL: https://focusdo-mvp.vercel.app\nTime: ${new Date().toISOString()}\n\nCheck Vercel dashboard for details.`,
+              labels: ['incident', 'production']
+            });

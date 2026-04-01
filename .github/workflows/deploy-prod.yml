@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy to Production — runs on push to main after CI passes
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy Production
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false   # never cancel an in-flight production deploy
+
+jobs:
+  deploy:
+    name: Vercel Production Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://focusdo-mvp.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+      - name: Deploy to Vercel (production)
+        id: deploy
+        run: |
+          DEPLOY_URL=$(npx vercel --prod \
+            --token ${{ secrets.VERCEL_ACCESS_TOKEN }} \
+            --yes \
+            --env NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} \
+            --env NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} \
+            --env NEXT_PUBLIC_POSTHOG_KEY=${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }} \
+            --env NEXT_PUBLIC_POSTHOG_HOST=${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }} \
+            --env NEXT_PUBLIC_SENTRY_DSN=${{ secrets.NEXT_PUBLIC_SENTRY_DSN }} \
+            2>&1 | grep "Production:" | awk '{print $2}')
+          echo "deploy_url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+
+      - name: Post-deploy smoke check
+        run: |
+          sleep 10
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://focusdo-mvp.vercel.app)
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Production smoke check failed (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "✅ Production is live (HTTP $STATUS)"
+
+      - name: Notify Sentry of release
+        if: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN != '' }}
+        run: |
+          npx @sentry/cli releases new ${{ github.sha }} || true
+          npx @sentry/cli releases set-commits ${{ github.sha }} --auto || true
+          npx @sentry/cli releases finalize ${{ github.sha }} || true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: focusdo

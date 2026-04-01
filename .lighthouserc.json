@@ -1,0 +1,44 @@
+{
+  "ci": {
+    "collect": {
+      "url": ["https://focusdo-mvp.vercel.app"],
+      "numberOfRuns": 3,
+      "settings": {
+        "emulatedFormFactor": "desktop",
+        "throttlingMethod": "simulate",
+        "throttling": {
+          "rttMs": 40,
+          "throughputKbps": 10240,
+          "cpuSlowdownMultiplier": 1
+        }
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:no-pwa",
+      "assertions": {
+        "categories:performance": ["error", { "minScore": 0.85 }],
+        "categories:accessibility": ["warn",  { "minScore": 0.90 }],
+        "categories:best-practices": ["warn",  { "minScore": 0.90 }],
+        "categories:seo": ["warn",  { "minScore": 0.85 }],
+
+        "first-contentful-paint": ["error", { "maxNumericValue": 1800 }],
+        "largest-contentful-paint": ["error", { "maxNumericValue": 2500 }],
+        "interactive":              ["error", { "maxNumericValue": 3500 }],
+        "total-blocking-time":      ["warn",  { "maxNumericValue": 300 }],
+        "cumulative-layout-shift":  ["error", { "maxNumericValue": 0.1 }],
+        "speed-index":              ["warn",  { "maxNumericValue": 3000 }],
+
+        "uses-https":               ["error", true],
+        "no-vulnerable-libraries":  ["warn",  true],
+        "is-on-https":              ["error", true],
+
+        "uses-responsive-images":   ["warn",  true],
+        "uses-optimized-images":    ["warn",  true],
+        "render-blocking-resources":["warn",  true]
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}
