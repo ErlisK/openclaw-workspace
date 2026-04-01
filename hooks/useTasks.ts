@@ -9,7 +9,8 @@ import {
 } from "@/lib/tasks";
 import { track } from "@/lib/analytics";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { getIntegrationFlags } from "@/lib/env";
+import { getIntegrationFlags, getFeatureFlags } from "@/lib/env";
+import { injectSeedTasks } from "@/lib/seed";
 
 // ── Supabase task sync helpers ────────────────────────────────────────────────
 
@@ -54,7 +55,8 @@ async function upsertSupabaseTask(task: Task, userId: string) {
 export function useTasks() {
   const [tasks,      setTasks]      = useState<Task[]>([]);
   const [user,       setUser]       = useState<AppUser | null>(null);
-  const [focusMode,  setFocusMode]  = useState(false);
+  // ── Auth ─────────────────────────────────────────────────────────────────
+
   const [activeView, setActiveView] = useState<TaskList>("today");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isInputOpen, setIsInputOpen] = useState(false);
@@ -62,9 +64,11 @@ export function useTasks() {
   const [authLoading, setAuthLoading] = useState(false);
   const [authError,   setAuthError]   = useState<string | null>(null);
 
-  const flags = getIntegrationFlags();
+  const flags        = getIntegrationFlags();
+  const featureFlags = getFeatureFlags();
 
-  // ── Auth ─────────────────────────────────────────────────────────────────
+  // Initialise focusMode from feature flag (runs once, stable default)
+  const [focusMode,  setFocusMode]  = useState(() => featureFlags.focusModeDefault);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -92,14 +96,19 @@ export function useTasks() {
 
   useEffect(() => {
     const local = loadTasks();
-    setTasks(local);
+    // If seed flag is on and localStorage is empty, inject demo tasks
+    const effective = (featureFlags.seedData && local.length === 0)
+      ? injectSeedTasks()
+      : local;
+    setTasks(effective);
     track<Extract<AppEvent, { event: "session_started" }>>({
       event:        "session_started",
-      active_tasks: local.filter((t) => t.status === "active").length,
+      active_tasks: effective.filter((t) => t.status === "active").length,
       has_supabase: flags.supabase,
       has_posthog:  flags.posthog,
       is_authed:    false,
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

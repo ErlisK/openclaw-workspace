@@ -153,7 +153,7 @@ test.describe(`FocusDo E2E — ${BASE_URL}`, () => {
     await page.keyboard.press("j");
     await page.keyboard.press("e");
 
-    const editInput = page.locator("input[aria-label='Edit task text']");
+    const editInput = page.locator("input[aria-label='Edit task text']").first();
     await expect(editInput).toBeVisible({ timeout: 3000 });
     await editInput.fill("Edited text E2E");
     await page.keyboard.press("Enter");
@@ -185,10 +185,11 @@ test.describe(`FocusDo E2E — ${BASE_URL}`, () => {
   // ──────────────────────────────────────────────────────────────────────────
   test("US-08 Focus Mode shows FOCUS badge and toggles", async ({ page }) => {
     await page.keyboard.press("f");
-    await expect(page.locator("text=FOCUS").first()).toBeVisible({ timeout: 2000 });
+    // Exact "FOCUS" text (not "FocusDo")
+    await expect(page.getByText("FOCUS", { exact: true }).first()).toBeVisible({ timeout: 2000 });
 
     await page.keyboard.press("f");
-    await expect(page.locator("text=FOCUS").first()).not.toBeVisible({ timeout: 2000 });
+    await expect(page.getByText("FOCUS", { exact: true }).first()).not.toBeVisible({ timeout: 2000 });
   });
 
   // ──────────────────────────────────────────────────────────────────────────

@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
     branches: [main]
 
@@ -12,10 +12,11 @@ concurrency:
 
 env:
   NODE_VERSION: "22"
-  SMOKE_URL: "https://focusdo-rho.vercel.app"
+  PROD_URL:    "https://focusdo-rho.vercel.app"
+  STAGING_URL: "https://focusdo-rho.vercel.app"   # same domain; staging uses preview URL
 
 jobs:
-  # ── 1. Type check + unit tests ────────────────────────────────────────────
+  # ── 1. Type-check + unit tests ────────────────────────────────────────────
   unit:
     name: Type-check + Unit Tests
     runs-on: ubuntu-latest
@@ -28,12 +29,14 @@ jobs:
       - run: npm ci
       - name: TypeScript
         run: npm run type-check
-      - name: Unit tests
+      - name: Unit tests (47 tests, 2 files)
         run: npm run test:unit -- --reporter=verbose
+      - name: Coverage summary
+        run: npm run test:unit -- --coverage --reporter=dot 2>&1 | grep -E "All files|Statements|Branches" || true
 
-  # ── 2. Build ──────────────────────────────────────────────────────────────
+  # ── 2. Next.js production build ───────────────────────────────────────────
   build:
-    name: Next.js Production Build
+    name: Production Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,16 +47,16 @@ jobs:
       - run: npm ci
       - name: Build
         run: npm run build
-      - name: Bundle size report
+      - name: Bundle report
         run: |
-          echo "## Bundle size" >> $GITHUB_STEP_SUMMARY
-          du -sh .next/static/chunks/*.js 2>/dev/null | sort -h | tail -5 >> $GITHUB_STEP_SUMMARY || true
-          echo "Total .next/static:" >> $GITHUB_STEP_SUMMARY
-          du -sh .next/static >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Bundle Report" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          du -sh .next/static 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
   # ── 3. HTTP smoke tests ───────────────────────────────────────────────────
   smoke:
-    name: HTTP Smoke Tests (staging)
+    name: HTTP Smoke (staging)
     runs-on: ubuntu-latest
     needs: [unit, build]
     steps:
@@ -63,8 +66,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Smoke tests
-        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npm run test:smoke -- --reporter=verbose
+      - name: HTTP smoke tests
+        run: SMOKE_BASE_URL=${{ env.PROD_URL }} npm run test:smoke -- --reporter=verbose
 
   # ── 4. Playwright E2E ────────────────────────────────────────────────────
   e2e:
@@ -78,21 +81,24 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Install Playwright Chromium
+      - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
-      - name: Run E2E
-        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npx playwright test tests/e2e/app.spec.ts --timeout=30000
+      - name: E2E — critical path + analytics
+        run: >
+          SMOKE_BASE_URL=${{ env.PROD_URL }}
+          npx playwright test tests/e2e/app.spec.ts
+          --project=chromium --timeout=30000
         timeout-minutes: 10
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-report
+          name: playwright-report-e2e
           path: playwright-report/
           retention-days: 7
 
   # ── 5. Performance + observability E2E ───────────────────────────────────
   perf:
-    name: Performance & Observability Tests
+    name: Performance & Observability
     runs-on: ubuntu-latest
     needs: [smoke]
     steps:
@@ -102,19 +108,22 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Install Playwright Chromium
+      - name: Install Playwright browsers
         run: npx playwright install chromium --with-deps
-      - name: Run perf tests
-        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npx playwright test tests/e2e/perf-observability.spec.ts --timeout=30000
+      - name: Perf + Sentry + PWA tests
+        run: >
+          SMOKE_BASE_URL=${{ env.PROD_URL }}
+          npx playwright test tests/e2e/perf-observability.spec.ts
+          --project=chromium --timeout=30000
         timeout-minutes: 10
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: perf-playwright-report
+          name: playwright-report-perf
           path: playwright-report/
           retention-days: 7
 
-  # ── 6. Lighthouse CI (weekly on main) ────────────────────────────────────
+  # ── 6. Lighthouse CI (on main push only) ─────────────────────────────────
   lighthouse:
     name: Lighthouse CI
     runs-on: ubuntu-latest
@@ -127,25 +136,8 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Install LHCI
-        run: npm install -g @lhci/cli@0.14.x
-      - name: Run Lighthouse
+      - run: npm install -g @lhci/cli@0.14.x
+      - name: Run LHCI
         run: lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-      - name: Summary
-        run: |
-          echo "## Lighthouse Results" >> $GITHUB_STEP_SUMMARY
-          cat .lighthouseci/lhr-*.json 2>/dev/null | python3 -c "
-          import json,sys
-          for line in sys.stdin:
-            try:
-              d=json.loads(line)
-              cats=d.get('categories',{})
-              print('| Category | Score |')
-              print('|----------|-------|')
-              for k,v in cats.items():
-                score=v.get('score',0)
-                print(f'| {k} | {score*100:.0f} |')
-            except: pass
-          " >> $GITHUB_STEP_SUMMARY || true

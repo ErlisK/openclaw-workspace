@@ -1,5 +1,5 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Deploy Preview — runs on every PR, posts Vercel preview URL as PR comment
+# Deploy Preview — PR previews on Vercel
 # ─────────────────────────────────────────────────────────────────────────────
 name: Deploy Preview
 
@@ -25,25 +25,46 @@ jobs:
           cache: npm
       - run: npm ci
 
-      - name: Deploy preview to Vercel
+      - name: Build preview
+        run: npx vercel build --token ${{ secrets.VERCEL_ACCESS_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Deploy preview
         id: deploy
         run: |
-          DEPLOY_OUTPUT=$(npx vercel \
-            --token ${{ secrets.VERCEL_ACCESS_TOKEN }} \
-            --yes 2>&1)
-          PREVIEW_URL=$(echo "$DEPLOY_OUTPUT" | grep "Preview:" | awk '{print $2}' | head -1)
-          echo "preview_url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-          echo "Preview URL: $PREVIEW_URL"
+          PREVIEW_URL=$(npx vercel deploy --prebuilt \
+            --token ${{ secrets.VERCEL_ACCESS_TOKEN }} 2>&1 \
+            | grep -E "^https://" | tail -1)
+          echo "preview_url=${PREVIEW_URL}" >> $GITHUB_OUTPUT
+          echo "Preview URL: ${PREVIEW_URL}"
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Comment preview URL on PR
         uses: actions/github-script@v7
         with:
           script: |
             const url = '${{ steps.deploy.outputs.preview_url }}';
-            const sha = context.sha.slice(0, 7);
-            github.rest.issues.createComment({
+            const sha  = context.sha.slice(0, 7);
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `## 🚀 Preview Deployed\n\n**URL:** ${url || 'Check Vercel dashboard'}\n**Commit:** \`${sha}\`\n\n_Smoke tests and Lighthouse budget run on merge to main._`
+              repo:  context.repo.repo,
+              body: [
+                '## 🚀 Preview Deployed',
+                '',
+                `**URL:** ${url || '_Check Vercel dashboard_'}`,
+                `**Commit:** \`${sha}\``,
+                '',
+                '### Quick checks',
+                '- [ ] Add task with `N` key → verify it appears',
+                '- [ ] Press `P` → task promotes to Today',
+                '- [ ] Press `Space` → task completes (moves to Completed)',
+                '- [ ] Press `?` → keyboard shortcut help appears',
+                '',
+                '_Full smoke tests + Lighthouse run on merge to main._',
+              ].join('\n'),
             });

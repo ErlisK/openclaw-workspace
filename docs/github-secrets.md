@@ -1,101 +1,54 @@
-# GitHub Secrets Setup Guide
-**Project:** FocusDo MVP  
-**Date:** 2025-07-07
+# GitHub Secrets — Setup Guide
 
-This file documents all secrets that must be configured in the GitHub repository
-before CI/CD workflows will fully function.
+Configure these secrets at: `https://github.com/ErlisK/openclaw-workspace/settings/secrets/actions`
 
----
+## Required for CI/CD
 
-## How to Add Secrets
+| Secret | Required | Value | Where to find |
+|--------|----------|-------|---------------|
+| `VERCEL_ACCESS_TOKEN` | ✅ | Vercel personal token | vercel.com → Settings → Tokens |
+| `VERCEL_ORG_ID` | ✅ | `team_J0gjGtYSAnuiHxa1M2p643ON` | From .vercel/project.json |
+| `VERCEL_PROJECT_ID` | ✅ | `prj_5gYahyjr16BDnJf2J7fSN209FQnV` | From .vercel/project.json |
 
-1. Go to **GitHub → ErlisK/openclaw-workspace → Settings → Secrets and variables → Actions**
-2. Click **New repository secret**
-3. Add each secret below
+## Required for integrations (set when ready)
 
----
+| Secret | Required | Purpose |
+|--------|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | When using Supabase | Cloud task sync |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | When using Supabase | Auth + data access |
+| `NEXT_PUBLIC_POSTHOG_KEY` | When using PostHog | Analytics events |
+| `NEXT_PUBLIC_POSTHOG_HOST` | Optional | Custom PostHog host |
+| `NEXT_PUBLIC_SENTRY_DSN` | When using Sentry | Error monitoring |
+| `SENTRY_AUTH_TOKEN` | For source maps | Error grouping |
+| `SENTRY_ORG` | For source maps | Your Sentry org slug |
 
-## Required Secrets
+## Feature Flags
 
-### Vercel (REQUIRED for deploy workflows)
+Feature flags are set as Vercel **environment variables** (not GitHub secrets) —
+they are `NEXT_PUBLIC_` vars that are baked in at build time.
 
-| Secret | Value | How to get |
-|--------|-------|-----------|
-| `VERCEL_ACCESS_TOKEN` | Your Vercel token | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID` | `team_J0gjGtYSAnuiHxa1M2p643ON` | Already known |
-| `VERCEL_PROJECT_ID` | `prj_SBJyPIJbPzDUaywggtWsCdyqPaUv` | Already known |
+**Already configured via Vercel API:**
 
----
+| Variable | Production | Staging (preview) |
+|----------|-----------|-------------------|
+| `NEXT_PUBLIC_FLAG_FOCUS_MODE_DEFAULT` | `0` (opt-in) | `1` (on by default) |
+| `NEXT_PUBLIC_FLAG_TODAY_CAP` | `3` | `3` |
+| `NEXT_PUBLIC_FLAG_AUTH_ENABLED` | `1` | `1` |
+| `NEXT_PUBLIC_SEED_DATA` | `false` | `true` |
 
-## Optional Secrets (for full observability)
+## Vercel GitHub Integration
 
-### Supabase
+For production deploys to work via CI (deploy-prod.yml), the workflow
+uses VERCEL_ORG_ID + VERCEL_PROJECT_ID to link to the correct project.
 
-| Secret | Value | How to get |
-|--------|-------|-----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://xxxx.supabase.co` | Supabase dashboard → Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJhbGci...` | Supabase dashboard → Settings → API |
-| `SUPABASE_ACCESS_TOKEN` | Personal access token | [app.supabase.com/account/tokens](https://app.supabase.com/account/tokens) |
-| `SUPABASE_PROJECT_ID` | Project ref ID | Supabase dashboard → Settings → General |
+These values are already in `.vercel/project.json` — copy them to GitHub Secrets.
 
-### PostHog
+## Rotation Policy
 
-| Secret | Value | How to get |
-|--------|-------|-----------|
-| `NEXT_PUBLIC_POSTHOG_KEY` | `phc_...` | PostHog → Project Settings → Project API Key |
-| `NEXT_PUBLIC_POSTHOG_HOST` | `https://app.posthog.com` | Default unless self-hosted |
-
-### Sentry
-
-| Secret | Value | How to get |
-|--------|-------|-----------|
-| `NEXT_PUBLIC_SENTRY_DSN` | `https://xxx@oyyy.ingest.sentry.io/zzz` | Sentry → Project Settings → Client Keys |
-| `SENTRY_AUTH_TOKEN` | Auth token | [sentry.io/settings/account/api/auth-tokens](https://sentry.io/settings/account/api/auth-tokens) |
-| `SENTRY_ORG` | Your Sentry org slug | Sentry → Organization Settings |
-
-### Lighthouse CI (optional)
-
-| Secret | Value | How to get |
-|--------|-------|-----------|
-| `LHCI_GITHUB_APP_TOKEN` | GitHub app token | [github.com/apps/lighthouse-ci](https://github.com/apps/lighthouse-ci) |
-
----
-
-## Environments
-
-Configure GitHub environments for deployment gates:
-
-1. **production** — requires manual approval + Vercel secrets
-   - Go to Settings → Environments → New environment → "production"
-   - Add required reviewers (optional)
-   - Add environment secrets (Vercel, Supabase, PostHog, Sentry)
-
----
-
-## Secret Rotation Policy
-
-| Secret | Rotation frequency |
-|--------|-------------------|
-| `VERCEL_ACCESS_TOKEN` | Every 90 days |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | On compromise only (safe to expose) |
-| `SUPABASE_SERVICE_ROLE_KEY` | Every 30 days if used |
-| `SENTRY_AUTH_TOKEN` | Every 90 days |
-| `NEXT_PUBLIC_POSTHOG_KEY` | On compromise only (safe to expose) |
-
----
-
-## Secrets That Must NEVER Be in Code
-
-| Secret | Risk if exposed |
-|--------|----------------|
-| `SUPABASE_SERVICE_ROLE_KEY` | Full database access, bypasses RLS |
-| `SENTRY_AUTH_TOKEN` | Can delete Sentry data |
-| `VERCEL_ACCESS_TOKEN` | Can deploy/delete all Vercel projects |
-| Any private API key | Varies |
-
-These must ONLY be in:
-- GitHub Secrets (server-side workflows)
-- Vercel Environment Variables (server-side only)
-- Local `.env.local` (gitignored)
-
-**Never in `.env.example`, commit history, PR descriptions, or issue comments.**
+| Secret | Rotation | Action |
+|--------|----------|--------|
+| VERCEL_ACCESS_TOKEN | 90 days | Revoke old, generate new at vercel.com/account/tokens |
+| SUPABASE_ANON_KEY | On breach | Rotate in Supabase → Settings → API |
+| POSTHOG_KEY | On breach | Rotate in PostHog → Project Settings |
+| SENTRY_AUTH_TOKEN | 90 days | Revoke in Sentry → Settings → Auth Tokens |
+| GITHUB_PERSONAL_ACCESS_TOKEN | 90 days | Rotate in GitHub → Settings → Developer settings |
