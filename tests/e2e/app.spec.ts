@@ -20,6 +20,8 @@ async function clearState(page: Page) {
     localStorage.removeItem("focusdo:tasks");
     localStorage.removeItem("focusdo:events");
     sessionStorage.removeItem("focusdo:session_id");
+    // Skip onboarding prompt in tests — mark as completed
+    localStorage.setItem("focusdo:onboarded", "1");
   });
 }
 
@@ -384,5 +386,77 @@ test.describe(`FocusDo E2E — ${BASE_URL}`, () => {
     // May be keyboard if N was pressed; check that event exists at minimum
     expect(events.some((e) => e.event === "task_created")).toBe(true);
     void created; // suppress unused warning
+  });
+});
+
+// ── Onboarding flow ───────────────────────────────────────────────────────────
+
+test.describe("Onboarding", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(BASE_URL, { waitUntil: "domcontentloaded" });
+    // Clear onboarding flag so prompt shows
+    await page.evaluate(() => {
+      localStorage.removeItem("focusdo:tasks");
+      localStorage.removeItem("focusdo:events");
+      localStorage.removeItem("focusdo:onboarded");
+      sessionStorage.removeItem("focusdo:session_id");
+    });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(300);
+  });
+
+  test("shows welcome prompt on first visit (empty state)", async ({ page }) => {
+    await expect(page.getByText("Welcome to FocusDo").first()).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText("Add your first tasks").first()).toBeVisible();
+    await expect(page.getByText("Core loop").first()).not.toBeVisible(); // not yet in step 2
+  });
+
+  test("transitions to add step when CTA clicked", async ({ page }) => {
+    await page.click('button:has-text("Add your first tasks")');
+    await page.waitForTimeout(100);
+    await expect(page.getByPlaceholder("What needs to be done", { exact: false }).first()).toBeVisible({ timeout: 2000 });
+  });
+
+  test("skip dismisses onboarding permanently", async ({ page }) => {
+    await page.click('button[aria-label="Skip onboarding"]');
+    await page.waitForTimeout(100);
+    await expect(page.getByText("Welcome to FocusDo").first()).not.toBeVisible({ timeout: 2000 });
+
+    // Verify persisted
+    const onboarded = await page.evaluate(() => localStorage.getItem("focusdo:onboarded"));
+    expect(onboarded).toBe("1");
+  });
+
+  test("auto-dismisses after adding first task", async ({ page }) => {
+    // Go to add step
+    await page.click('button:has-text("Add your first tasks")');
+    await page.waitForTimeout(300);
+
+    const getInput = () => page.getByPlaceholder("What needs to be done", { exact: false }).first();
+    await expect(getInput()).toBeVisible({ timeout: 5000 });
+
+    // Adding a task triggers hasAnyTasks=true → parent auto-dismisses onboarding
+    await getInput().fill("My first task");
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(300);
+
+    // Onboarding dismissed — task should be visible in main UI
+    await expect(page.getByText("My first task").first()).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText("Welcome to FocusDo").first()).not.toBeVisible({ timeout: 2000 });
+  });
+
+  test("onboarding does not show after tasks exist", async ({ page }) => {
+    // Set tasks in localStorage before load
+    await page.evaluate(() => {
+      localStorage.setItem("focusdo:tasks", JSON.stringify([{
+        id: "existing-1", text: "Already here", status: "active",
+        priority: "medium", list: "backlog", order: 0, createdAt: Date.now(),
+      }]));
+      localStorage.removeItem("focusdo:onboarded");
+    });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(300);
+    // Onboarding should not appear since tasks exist
+    await expect(page.getByText("Welcome to FocusDo").first()).not.toBeVisible({ timeout: 2000 });
   });
 });
