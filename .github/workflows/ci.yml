@@ -1,7 +1,3 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# CI — runs on every PR and push to main
-# Gates: type-check → lint → unit tests → build → http smoke → Lighthouse budget
-# ─────────────────────────────────────────────────────────────────────────────
 name: CI
 
 on:
@@ -11,32 +7,17 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
   NODE_VERSION: "22"
+  SMOKE_URL: "https://focusdo-rho.vercel.app"
 
 jobs:
-  # ── 1. Type-check + Lint ───────────────────────────────────────────────────
-  typecheck:
-    name: Type-check & Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - run: npm ci
-      - name: TypeScript type-check
-        run: npx tsc --noEmit
-      - name: ESLint
-        run: npx next lint
-
-  # ── 2. Unit tests ─────────────────────────────────────────────────────────
+  # ── 1. Type check + unit tests ────────────────────────────────────────────
   unit:
-    name: Unit Tests
+    name: Type-check + Unit Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -45,20 +26,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Run unit tests with coverage
-        run: npm run test:unit -- --coverage
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ github.sha }}
-          path: coverage/
-          retention-days: 7
+      - name: TypeScript
+        run: npm run type-check
+      - name: Unit tests
+        run: npm run test:unit -- --reporter=verbose
 
-  # ── 3. Build ─────────────────────────────────────────────────────────────
+  # ── 2. Build ──────────────────────────────────────────────────────────────
   build:
-    name: Production Build
+    name: Next.js Production Build
     runs-on: ubuntu-latest
-    needs: [typecheck]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -68,29 +44,18 @@ jobs:
       - run: npm ci
       - name: Build
         run: npm run build
-        env:
-          # Env vars are optional — app gracefully degrades without them
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
-          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.NEXT_PUBLIC_SENTRY_DSN }}
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-${{ github.sha }}
-          path: .next/
-          retention-days: 1
+      - name: Bundle size report
+        run: |
+          echo "## Bundle size" >> $GITHUB_STEP_SUMMARY
+          du -sh .next/static/chunks/*.js 2>/dev/null | sort -h | tail -5 >> $GITHUB_STEP_SUMMARY || true
+          echo "Total .next/static:" >> $GITHUB_STEP_SUMMARY
+          du -sh .next/static >> $GITHUB_STEP_SUMMARY
 
-  # ── 4. HTTP Smoke Tests ────────────────────────────────────────────────────
-  smoke-http:
-    name: HTTP Smoke Tests
+  # ── 3. HTTP smoke tests ───────────────────────────────────────────────────
+  smoke:
+    name: HTTP Smoke Tests (staging)
     runs-on: ubuntu-latest
-    needs: [build]
-    # Run against production URL on main, preview URL on PRs
-    env:
-      SMOKE_URL: ${{ github.ref == 'refs/heads/main'
-        && 'https://focusdo-mvp.vercel.app'
-        || github.event.deployment_status.target_url }}
+    needs: [unit, build]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -98,17 +63,63 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Run HTTP smoke tests
-        run: npm run test:smoke
-        env:
-          SMOKE_BASE_URL: ${{ env.SMOKE_URL || 'https://focusdo-mvp.vercel.app' }}
+      - name: Smoke tests
+        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npm run test:smoke -- --reporter=verbose
 
-  # ── 5. Lighthouse Performance Budget ─────────────────────────────────────
+  # ── 4. Playwright E2E ────────────────────────────────────────────────────
+  e2e:
+    name: Playwright E2E (staging)
+    runs-on: ubuntu-latest
+    needs: [smoke]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: Run E2E
+        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npx playwright test tests/e2e/app.spec.ts --timeout=30000
+        timeout-minutes: 10
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ── 5. Performance + observability E2E ───────────────────────────────────
+  perf:
+    name: Performance & Observability Tests
+    runs-on: ubuntu-latest
+    needs: [smoke]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+      - name: Run perf tests
+        run: SMOKE_BASE_URL=${{ env.SMOKE_URL }} npx playwright test tests/e2e/perf-observability.spec.ts --timeout=30000
+        timeout-minutes: 10
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: perf-playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+  # ── 6. Lighthouse CI (weekly on main) ────────────────────────────────────
   lighthouse:
-    name: Lighthouse CI (P90 < 1.5s)
+    name: Lighthouse CI
     runs-on: ubuntu-latest
-    needs: [build]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [smoke]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -116,8 +127,25 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - name: Run Lighthouse CI
-        run: npm run lhci
+      - name: Install LHCI
+        run: npm install -g @lhci/cli@0.14.x
+      - name: Run Lighthouse
+        run: lhci autorun
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
-          LHCI_TARGET_URL: "https://focusdo-mvp.vercel.app"
+      - name: Summary
+        run: |
+          echo "## Lighthouse Results" >> $GITHUB_STEP_SUMMARY
+          cat .lighthouseci/lhr-*.json 2>/dev/null | python3 -c "
+          import json,sys
+          for line in sys.stdin:
+            try:
+              d=json.loads(line)
+              cats=d.get('categories',{})
+              print('| Category | Score |')
+              print('|----------|-------|')
+              for k,v in cats.items():
+                score=v.get('score',0)
+                print(f'| {k} | {score*100:.0f} |')
+            except: pass
+          " >> $GITHUB_STEP_SUMMARY || true

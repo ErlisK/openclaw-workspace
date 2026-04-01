@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const BASE_URL = process.env.SMOKE_BASE_URL ?? "https://focusdo-mvp.vercel.app";
+const BASE_URL = process.env.SMOKE_BASE_URL ?? "https://focusdo-rho.vercel.app";
 
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -13,15 +13,19 @@ export default defineConfig({
 
   use: {
     baseURL: BASE_URL,
-    trace: "on-first-retry",
+    trace:      "on-first-retry",
     screenshot: "only-on-failure",
-    video: "off",
+    video:      "off",
   },
 
   projects: [
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "mobile-chrome",
+      use: { ...devices["Pixel 5"] },
     },
   ],
 
@@ -30,7 +34,7 @@ export default defineConfig({
     ? {
         command: "npm run dev",
         url: BASE_URL,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: true,
         timeout: 60_000,
       }
     : undefined,
