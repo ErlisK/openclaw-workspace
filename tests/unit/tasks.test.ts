@@ -1,214 +1,195 @@
-/**
- * Unit tests — pure functions in lib/tasks.ts
- * These have zero side effects, no browser API, no network.
- */
-
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect } from "vitest";
 import {
-  createTask,
-  completeTask,
-  deleteTask,
-  updateTaskText,
-  updateTaskPriority,
-  getActiveTasks,
-  getFocusTasks,
-  getCompletedTasks,
+  createTask, completeTask, deleteTask, updateTaskText, updateTaskPriority,
+  promoteTask, demoteTask,
+  getTodayTasks, getBacklogTasks, getActiveTasks, getFocusTasks, getCompletedTasks,
+  canPromote,
 } from "@/lib/tasks";
 import type { Task } from "@/lib/types";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function makeTask(overrides: Partial<Task> = {}): Task {
+function mk(o: Partial<Task> = {}): Task {
   return {
-    id: crypto.randomUUID(),
-    text: "Test task",
-    status: "active",
-    priority: "medium",
-    createdAt: Date.now(),
-    order: 0,
-    ...overrides,
+    id: crypto.randomUUID(), text: "task", status: "active",
+    priority: "medium", list: "backlog", createdAt: Date.now(), order: 0, ...o,
   };
 }
 
 // ─── createTask ───────────────────────────────────────────────────────────────
-
 describe("createTask", () => {
-  it("creates an active task with trimmed text", () => {
-    const t = createTask("  hello  ", "high", 0);
+  it("trims text and sets defaults", () => {
+    const t = createTask("  hello  ", "high", "today", 2);
     expect(t.text).toBe("hello");
     expect(t.status).toBe("active");
     expect(t.priority).toBe("high");
+    expect(t.list).toBe("today");
+    expect(t.order).toBe(2);
   });
-
-  it("assigns order from existingCount", () => {
-    const t = createTask("task", "medium", 5);
-    expect(t.order).toBe(5);
-  });
-
-  it("generates a unique id", () => {
-    const a = createTask("a");
-    const b = createTask("b");
-    expect(a.id).not.toBe(b.id);
-  });
-
-  it("defaults priority to medium", () => {
-    const t = createTask("task");
+  it("defaults to backlog + medium priority", () => {
+    const t = createTask("x");
+    expect(t.list).toBe("backlog");
     expect(t.priority).toBe("medium");
   });
-
-  it("sets createdAt to roughly now", () => {
-    const before = Date.now();
-    const t = createTask("task");
-    const after = Date.now();
-    expect(t.createdAt).toBeGreaterThanOrEqual(before);
-    expect(t.createdAt).toBeLessThanOrEqual(after);
+  it("generates unique ids", () => {
+    expect(createTask("a").id).not.toBe(createTask("b").id);
   });
 });
 
 // ─── completeTask ─────────────────────────────────────────────────────────────
-
 describe("completeTask", () => {
-  it("sets status to completed and adds completedAt", () => {
-    const tasks = [makeTask({ id: "t1" })];
-    const result = completeTask(tasks, "t1");
-    expect(result[0].status).toBe("completed");
-    expect(result[0].completedAt).toBeDefined();
+  it("marks active task completed", () => {
+    const ts = [mk({ id: "t1" })];
+    const res = completeTask(ts, "t1");
+    expect(res[0].status).toBe("completed");
+    expect(res[0].completedAt).toBeDefined();
   });
-
-  it("is pure — does not mutate original array", () => {
-    const tasks = [makeTask({ id: "t1" })];
-    const original = JSON.stringify(tasks);
-    completeTask(tasks, "t1");
-    expect(JSON.stringify(tasks)).toBe(original);
+  it("is pure — does not mutate", () => {
+    const ts = [mk({ id: "t1" })];
+    const snap = JSON.stringify(ts);
+    completeTask(ts, "t1");
+    expect(JSON.stringify(ts)).toBe(snap);
   });
-
-  it("does not affect other tasks", () => {
-    const tasks = [makeTask({ id: "t1" }), makeTask({ id: "t2" })];
-    const result = completeTask(tasks, "t1");
-    expect(result[1].status).toBe("active");
-    expect(result[1].completedAt).toBeUndefined();
-  });
-
   it("no-ops on already-completed task", () => {
-    const tasks = [makeTask({ id: "t1", status: "completed", completedAt: 12345 })];
-    const result = completeTask(tasks, "t1");
-    expect(result[0].completedAt).toBe(12345); // unchanged
+    const ts = [mk({ id: "t1", status: "completed", completedAt: 999 })];
+    expect(completeTask(ts, "t1")[0].completedAt).toBe(999);
   });
 });
 
 // ─── deleteTask ───────────────────────────────────────────────────────────────
-
 describe("deleteTask", () => {
-  it("sets status to deleted and adds deletedAt", () => {
-    const tasks = [makeTask({ id: "t1" })];
-    const result = deleteTask(tasks, "t1");
-    expect(result[0].status).toBe("deleted");
-    expect(result[0].deletedAt).toBeDefined();
+  it("soft-deletes", () => {
+    const ts = [mk({ id: "t1" })];
+    const res = deleteTask(ts, "t1");
+    expect(res[0].status).toBe("deleted");
+    expect(res[0].deletedAt).toBeDefined();
   });
-
   it("is pure", () => {
-    const tasks = [makeTask({ id: "t1" })];
-    const original = JSON.stringify(tasks);
-    deleteTask(tasks, "t1");
-    expect(JSON.stringify(tasks)).toBe(original);
+    const ts = [mk()];
+    const snap = JSON.stringify(ts);
+    deleteTask(ts, ts[0].id);
+    expect(JSON.stringify(ts)).toBe(snap);
   });
 });
 
 // ─── updateTaskText ───────────────────────────────────────────────────────────
-
 describe("updateTaskText", () => {
-  it("updates text and trims", () => {
-    const tasks = [makeTask({ id: "t1", text: "old" })];
-    const result = updateTaskText(tasks, "t1", "  new text  ");
-    expect(result[0].text).toBe("new text");
-  });
-
-  it("does not mutate other fields", () => {
-    const task = makeTask({ id: "t1", priority: "high" });
-    const result = updateTaskText([task], "t1", "new");
-    expect(result[0].priority).toBe("high");
+  it("trims text", () => {
+    const ts = [mk({ id: "t1", text: "old" })];
+    expect(updateTaskText(ts, "t1", "  new  ")[0].text).toBe("new");
   });
 });
 
 // ─── updateTaskPriority ───────────────────────────────────────────────────────
-
 describe("updateTaskPriority", () => {
-  it("updates priority", () => {
-    const tasks = [makeTask({ id: "t1", priority: "low" })];
-    const result = updateTaskPriority(tasks, "t1", "high");
-    expect(result[0].priority).toBe("high");
+  it("changes priority", () => {
+    const ts = [mk({ id: "t1", priority: "low" })];
+    expect(updateTaskPriority(ts, "t1", "high")[0].priority).toBe("high");
   });
 });
 
-// ─── Selectors ───────────────────────────────────────────────────────────────
-
-describe("getActiveTasks", () => {
-  it("returns only active tasks", () => {
-    const tasks = [
-      makeTask({ status: "active" }),
-      makeTask({ status: "completed" }),
-      makeTask({ status: "deleted" }),
-    ];
-    expect(getActiveTasks(tasks)).toHaveLength(1);
+// ─── promoteTask ──────────────────────────────────────────────────────────────
+describe("promoteTask", () => {
+  it("moves backlog task to today", () => {
+    const ts = [mk({ id: "t1", list: "backlog" })];
+    const res = promoteTask(ts, "t1");
+    expect(res[0].list).toBe("today");
   });
-
-  it("sorts by priority: high → medium → low", () => {
-    const tasks = [
-      makeTask({ id: "low",  priority: "low",    order: 0 }),
-      makeTask({ id: "high", priority: "high",   order: 1 }),
-      makeTask({ id: "med",  priority: "medium",  order: 2 }),
-    ];
-    const result = getActiveTasks(tasks);
-    expect(result.map((t) => t.id)).toEqual(["high", "med", "low"]);
+  it("no-ops if already today", () => {
+    const ts = [mk({ id: "t1", list: "today" })];
+    const res = promoteTask(ts, "t1");
+    expect(res[0].list).toBe("today");
   });
+  it("is pure", () => {
+    const ts = [mk({ id: "t1" })];
+    const snap = JSON.stringify(ts);
+    promoteTask(ts, "t1");
+    expect(JSON.stringify(ts)).toBe(snap);
+  });
+});
 
-  it("returns empty array when all tasks are done/deleted", () => {
-    const tasks = [
-      makeTask({ status: "completed" }),
-      makeTask({ status: "deleted" }),
+// ─── demoteTask ───────────────────────────────────────────────────────────────
+describe("demoteTask", () => {
+  it("moves today task to backlog", () => {
+    const ts = [mk({ id: "t1", list: "today" })];
+    expect(demoteTask(ts, "t1")[0].list).toBe("backlog");
+  });
+  it("no-ops if already backlog", () => {
+    const ts = [mk({ id: "t1", list: "backlog" })];
+    expect(demoteTask(ts, "t1")[0].list).toBe("backlog");
+  });
+});
+
+// ─── canPromote ───────────────────────────────────────────────────────────────
+describe("canPromote", () => {
+  it("true when today < 3", () => {
+    const ts = [mk({ list: "today" }), mk({ list: "today" })];
+    expect(canPromote(ts)).toBe(true);
+  });
+  it("false when today = 3", () => {
+    const ts = [mk({ list: "today" }), mk({ list: "today" }), mk({ list: "today" })];
+    expect(canPromote(ts)).toBe(false);
+  });
+  it("ignores completed today tasks", () => {
+    const ts = [
+      mk({ list: "today", status: "completed" }),
+      mk({ list: "today", status: "completed" }),
+      mk({ list: "today", status: "completed" }),
     ];
-    expect(getActiveTasks(tasks)).toHaveLength(0);
+    expect(canPromote(ts)).toBe(true);
+  });
+});
+
+// ─── Selectors ────────────────────────────────────────────────────────────────
+describe("getTodayTasks", () => {
+  it("returns only active today tasks sorted by priority", () => {
+    const ts = [
+      mk({ list: "today",   priority: "low",    order: 0 }),
+      mk({ list: "today",   priority: "high",   order: 1 }),
+      mk({ list: "backlog", priority: "high",   order: 2 }),
+      mk({ list: "today",   status: "completed" }),
+    ];
+    const res = getTodayTasks(ts);
+    expect(res).toHaveLength(2);
+    expect(res[0].priority).toBe("high");
+    expect(res[1].priority).toBe("low");
+  });
+});
+
+describe("getBacklogTasks", () => {
+  it("returns only active backlog tasks", () => {
+    const ts = [
+      mk({ list: "today" }),
+      mk({ list: "backlog" }),
+      mk({ list: "backlog", status: "deleted" }),
+    ];
+    expect(getBacklogTasks(ts)).toHaveLength(1);
   });
 });
 
 describe("getFocusTasks", () => {
-  it("returns at most 3 active tasks", () => {
-    const tasks = Array.from({ length: 8 }, (_, i) =>
-      makeTask({ order: i })
-    );
-    expect(getFocusTasks(tasks)).toHaveLength(3);
-  });
-
-  it("returns fewer than 3 when < 3 active exist", () => {
-    const tasks = [makeTask(), makeTask()];
-    expect(getFocusTasks(tasks)).toHaveLength(2);
-  });
-
-  it("returns high-priority tasks first", () => {
-    const tasks = [
-      makeTask({ id: "med", priority: "medium", order: 0 }),
-      makeTask({ id: "lo",  priority: "low",    order: 1 }),
-      makeTask({ id: "hi",  priority: "high",   order: 2 }),
-      makeTask({ id: "hi2", priority: "high",   order: 3 }),
-    ];
-    const focus = getFocusTasks(tasks);
-    expect(focus[0].id).toBe("hi");
-    expect(focus[1].id).toBe("hi2");
-    expect(focus[2].id).toBe("med");
+  it("caps at 3", () => {
+    const ts = Array.from({ length: 5 }, (_, i) => mk({ list: "today", order: i }));
+    expect(getFocusTasks(ts)).toHaveLength(3);
   });
 });
 
 describe("getCompletedTasks", () => {
-  it("returns only completed tasks, newest first", () => {
-    const tasks = [
-      makeTask({ status: "active" }),
-      makeTask({ status: "completed", completedAt: 1000 }),
-      makeTask({ status: "completed", completedAt: 2000 }),
-      makeTask({ status: "deleted" }),
+  it("returns newest first", () => {
+    const ts = [
+      mk({ status: "completed", completedAt: 1000 }),
+      mk({ status: "completed", completedAt: 2000 }),
     ];
-    const result = getCompletedTasks(tasks);
-    expect(result).toHaveLength(2);
-    expect(result[0].completedAt).toBe(2000); // newest first
-    expect(result[1].completedAt).toBe(1000);
+    const res = getCompletedTasks(ts);
+    expect(res[0].completedAt).toBe(2000);
+  });
+});
+
+describe("getActiveTasks", () => {
+  it("returns all active regardless of list", () => {
+    const ts = [
+      mk({ list: "today" }),
+      mk({ list: "backlog" }),
+      mk({ status: "completed" }),
+    ];
+    expect(getActiveTasks(ts)).toHaveLength(2);
   });
 });

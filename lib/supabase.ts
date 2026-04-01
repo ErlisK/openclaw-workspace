@@ -1,33 +1,45 @@
 /**
- * Supabase client — browser + server
+ * Supabase client — browser-safe with graceful no-op when env vars absent.
  *
- * Environment variables required (add to .env.local + Vercel dashboard):
- *   NEXT_PUBLIC_SUPABASE_URL       = https://xxxx.supabase.co
- *   NEXT_PUBLIC_SUPABASE_ANON_KEY  = eyJhbGci...
- *
- * The anon key is safe to expose client-side; RLS policies enforce data isolation.
- * NEVER expose the service_role key client-side.
+ * NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are optional.
+ * When missing, isSupabaseConfigured = false and the app runs in localStorage mode.
  */
 
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "./database.types";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabaseUrl     = process.env.NEXT_PUBLIC_SUPABASE_URL     ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
-/**
- * Browser-safe client (uses anon key, respects RLS)
- */
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-});
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+// Use a lazy null pattern — only create the real client when configured.
+// This prevents "supabaseUrl is required" errors during SSR/static builds.
+let _client: SupabaseClient<Database> | null = null;
+
+function getClient(): SupabaseClient<Database> {
+  if (!_client) {
+    if (!isSupabaseConfigured) {
+      throw new Error("Supabase is not configured. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.");
+    }
+    _client = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession:    true,
+        autoRefreshToken:  true,
+        detectSessionInUrl: true,
+      },
+    });
+  }
+  return _client;
+}
 
 /**
- * Returns true if Supabase is configured (env vars present).
- * When false, the app falls back to localStorage-only mode.
+ * Proxy object: all property accesses lazily initialise the real client.
+ * This allows `import { supabase }` everywhere while deferring construction
+ * until the first actual call — safely skipped during SSR/static rendering.
  */
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const supabase = new Proxy({} as SupabaseClient<Database>, {
+  get(_target, prop) {
+    return (getClient() as unknown as Record<string | symbol, unknown>)[prop];
+  },
+});

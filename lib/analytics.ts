@@ -190,6 +190,7 @@ if (typeof window !== "undefined") {
   window.addEventListener("error", (e) => {
     track<Extract<AppEvent, { event: "error_caught" }>>({
       event: "error_caught",
+      source: "window_error" as const,
       message: e.message,
       stack: (e.error as Error)?.stack,
     });
@@ -197,6 +198,7 @@ if (typeof window !== "undefined") {
   window.addEventListener("unhandledrejection", (e) => {
     track<Extract<AppEvent, { event: "error_caught" }>>({
       event: "error_caught",
+      source: "unhandled_rejection" as const,
       message: String(e.reason),
     });
   });
