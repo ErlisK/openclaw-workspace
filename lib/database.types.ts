@@ -37,6 +37,7 @@ export interface Database {
           text: string;
           status: "active" | "completed" | "deleted";
           priority: "high" | "medium" | "low";
+          list: "today" | "backlog";
           sort_order: number;
           focus_slot: 1 | 2 | 3 | null;
           created_at: string;
@@ -50,6 +51,7 @@ export interface Database {
           text: string;
           status?: "active" | "completed" | "deleted";
           priority?: "high" | "medium" | "low";
+          list?: "today" | "backlog";
           sort_order?: number;
           focus_slot?: 1 | 2 | 3 | null;
           created_at?: string;
@@ -61,6 +63,7 @@ export interface Database {
           text?: string;
           status?: "active" | "completed" | "deleted";
           priority?: "high" | "medium" | "low";
+          list?: "today" | "backlog";
           sort_order?: number;
           focus_slot?: 1 | 2 | 3 | null;
           completed_at?: string | null;

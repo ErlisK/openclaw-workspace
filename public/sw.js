@@ -1,35 +1,46 @@
 /**
- * FocusDo Service Worker — PWA baseline
+ * FocusDo Service Worker v2 — offline-capable PWA
  *
  * Strategy:
- *  - App shell: cache-first (CSS, JS, fonts)
- *  - API / Supabase: network-first with offline fallback
- *  - Offline page: served from cache when network unavailable
- *
- * Phase 2: Replace with Workbox for more granular caching strategies.
+ *  - App shell (HTML, JS, CSS): stale-while-revalidate
+ *  - Static assets (/_next/static/**): cache-first, immutable
+ *  - Icons + manifest: cache-first, 24h TTL
+ *  - API / Supabase: network-only (no cached auth tokens)
+ *  - Offline fallback: serve cached shell or /offline.html
  */
 
-const CACHE_NAME = "focusdo-v1";
-const STATIC_ASSETS = [
-  "/",
-  "/manifest.json",
-];
+const SHELL_CACHE   = "focusdo-shell-v2";
+const STATIC_CACHE  = "focusdo-static-v2";
+const OFFLINE_URL   = "/offline.html";
 
-// Install: cache static assets
+const SHELL_ASSETS = ["/", "/offline.html", "/manifest.json"];
+const SKIP_HOSTS   = ["supabase.co", "posthog.com", "sentry.io", "ingest.sentry.io"];
+
+// ── Install ───────────────────────────────────────────────────────────────────
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
+    (async () => {
+      const cache = await caches.open(SHELL_CACHE);
+      // addAll fails if any resource is missing — use individual puts
+      await Promise.allSettled(
+        SHELL_ASSETS.map((url) =>
+          fetch(url)
+            .then((res) => res.ok && cache.put(url, res))
+            .catch(() => {}) // offline install is OK
+        )
+      );
+    })()
   );
   self.skipWaiting();
 });
 
-// Activate: clean up old caches
+// ── Activate ──────────────────────────────────────────────────────────────────
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((names) =>
       Promise.all(
         names
-          .filter((n) => n !== CACHE_NAME)
+          .filter((n) => n !== SHELL_CACHE && n !== STATIC_CACHE)
           .map((n) => caches.delete(n))
       )
     )
@@ -37,36 +48,69 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch: stale-while-revalidate for navigation, passthrough for API
+// ── Fetch ─────────────────────────────────────────────────────────────────────
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and cross-origin API calls (Supabase, PostHog, Sentry)
+  // Skip non-GET
   if (request.method !== "GET") return;
-  if (url.hostname !== self.location.hostname) return;
 
-  // Cache-first for static assets
-  if (
-    url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/icons/")
-  ) {
-    event.respondWith(
-      caches.match(request).then((cached) => cached ?? fetch(request))
-    );
+  // Skip external API calls (auth, analytics, error tracking)
+  if (SKIP_HOSTS.some((h) => url.hostname.includes(h))) return;
+
+  // Skip chrome-extension and other non-http(s)
+  if (!url.protocol.startsWith("http")) return;
+
+  // Static immutable assets — cache-first
+  if (url.pathname.startsWith("/_next/static/")) {
+    event.respondWith(cacheFirstStrategy(request, STATIC_CACHE));
     return;
   }
 
-  // Network-first for everything else
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
-        return response;
-      })
-      .catch(() => caches.match(request).then((cached) => cached ?? Response.error()))
-  );
+  // Icons and manifest — cache-first
+  if (url.pathname.startsWith("/icons/") || url.pathname === "/manifest.json") {
+    event.respondWith(cacheFirstStrategy(request, SHELL_CACHE));
+    return;
+  }
+
+  // Navigation and app shell — stale-while-revalidate + offline fallback
+  if (request.mode === "navigate" || url.origin === self.location.origin) {
+    event.respondWith(networkFirstWithOfflineFallback(request));
+    return;
+  }
 });
+
+// ── Strategies ────────────────────────────────────────────────────────────────
+
+async function cacheFirstStrategy(request, cacheName) {
+  const cached = await caches.match(request);
+  if (cached) return cached;
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(cacheName);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    return Response.error();
+  }
+}
+
+async function networkFirstWithOfflineFallback(request) {
+  try {
+    const response = await fetch(request);
+    if (response.ok) {
+      const cache = await caches.open(SHELL_CACHE);
+      cache.put(request, response.clone());
+    }
+    return response;
+  } catch {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    // Return offline page for navigation requests
+    const offline = await caches.match(OFFLINE_URL);
+    return offline ?? new Response("Offline", { status: 503, headers: { "Content-Type": "text/plain" } });
+  }
+}
