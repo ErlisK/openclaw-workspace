@@ -51,6 +51,15 @@ export default function EmailGateModal({ sessionId, onSkip, onSent, trigger }: P
       localStorage.setItem('kc_pending_return', window.location.pathname)
 
       const redirectTo = `${window.location.origin}/auth/callback?session=${sessionId}&return=${encodeURIComponent(window.location.pathname)}`
+      // Track email gate event
+      try {
+        await fetch('/api/v1/event', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'magic_link_requested', sessionId, props: { trigger } }),
+        })
+      } catch { /* non-critical */ }
+
       const { error: authErr } = await sendMagicLink(emailLower, redirectTo)
 
       if (authErr) {

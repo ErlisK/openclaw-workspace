@@ -59,7 +59,7 @@ export default function InterestsPage() {
     })
 
     try {
-      const resp = await fetch('/api/v1/session', {
+    const resp = await fetch('/api/v1/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
