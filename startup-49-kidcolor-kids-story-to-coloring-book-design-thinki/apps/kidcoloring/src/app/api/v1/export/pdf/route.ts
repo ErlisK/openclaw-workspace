@@ -6,7 +6,7 @@
  * (bucket: exports), saves the URL back to trial_sessions.pdf_url, and returns a
  * signed/public download URL.
  *
- * Schema: v1.8.0 — trial_sessions.pdf_url + trial_sessions.pdf_generated_at
+ * Schema: v1.8.0 - trial_sessions.pdf_url + trial_sessions.pdf_generated_at
  */
 
 import { NextRequest, NextResponse }              from 'next/server'
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
   pdfDoc.setAuthor('KidColoring')
   pdfDoc.setSubject('Personalized Coloring Book')
   pdfDoc.setKeywords(['coloring', 'kids', 'printable'])
-  pdfDoc.setCreator('KidColoring — kidcoloring-research.vercel.app')
+  pdfDoc.setCreator('KidColoring - kidcoloring-research.vercel.app')
   pdfDoc.setProducer('KidColoring pdf-lib v1.8.0')
   pdfDoc.setCreationDate(new Date())
 
@@ -217,10 +217,10 @@ export async function POST(req: NextRequest) {
   drawBorder(coverPage, 28, 1.5, rgb(0.75, 0.60, 0.95))
 
   // Brand logo text
-  drawCentredText(coverPage, '🎨  KidColoring', fontBold, 18, PH - 72, VIOLET)
+  drawCentredText(coverPage, '[ KidColoring ]', fontBold, 18, PH - 72, VIOLET)
 
   // Decorative star strip
-  const stars = '★  ★  ★  ★  ★  ★  ★'
+  const stars = '*  *  *  *  *  *  *'
   drawCentredText(coverPage, stars, fontRegular, 10, PH - 98, rgb(0.75, 0.60, 0.95))
 
   // Main title
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
 
     // Header: concept / subject
     const subject = (p.subject as string | undefined) || title
-    const subjectLabel = subject.length > 50 ? subject.slice(0, 47) + '…' : subject
+    const subjectLabel = subject.length > 50 ? subject.slice(0, 47) + '...' : subject
     pg.drawText(subjectLabel, {
       x: MARGIN, y: PH - MARGIN - 30,
       size: 11, font: fontBold, color: BLACK,
@@ -317,7 +317,7 @@ export async function POST(req: NextRequest) {
 
         // Line-weight check indicator (small badge, top-right of image)
         if (!checkInfo.ok) {
-          pg.drawText('⚠ re-generate recommended', {
+          pg.drawText('! re-generate recommended', {
             x: PW - MARGIN - 160, y: PH - MARGIN - 18,
             size: 7, font: fontRegular, color: rgb(0.9, 0.5, 0.1),
           })
@@ -328,7 +328,7 @@ export async function POST(req: NextRequest) {
           x: MARGIN, y: imgAreaBot, width: imgAreaW, height: imgAreaH,
           borderColor: LGRAY, borderWidth: 1, color: rgb(0.98, 0.98, 0.98),
         })
-        drawCentredText(pg, '(image unavailable — please re-generate)', fontRegular, 10, imgAreaBot + imgAreaH / 2, LGRAY)
+        drawCentredText(pg, '(image unavailable - please re-generate)', fontRegular, 10, imgAreaBot + imgAreaH / 2, LGRAY)
       }
     } else {
       // No image bytes: draw placeholder
@@ -355,14 +355,14 @@ export async function POST(req: NextRequest) {
       end:   { x: PW - MARGIN, y: MARGIN + 18 },
       thickness: 0.5, color: rgb(0.88, 0.88, 0.88),
     })
-    drawCentredText(pg, 'KidColoring  ·  Color me! 🎨', fontRegular, 8, MARGIN + 6, LGRAY)
+    drawCentredText(pg, 'KidColoring  --  Color me!', fontRegular, 8, MARGIN + 6, LGRAY)
   }
 
   // ── Back cover page ─────────────────────────────────────────────────────
   const backCover = pdfDoc.addPage([PW, PH])
   backCover.drawRectangle({ x: 0, y: 0, width: PW, height: PH, color: rgb(1, 1, 1) })
   drawBorder(backCover, 18, 4)
-  drawCentredText(backCover, '🎨  KidColoring', fontBold, 20, PH / 2 + 80, VIOLET)
+  drawCentredText(backCover, '[ KidColoring ]', fontBold, 20, PH / 2 + 80, VIOLET)
   drawCentredText(backCover, 'Make more personalized coloring books!', fontRegular, 13, PH / 2 + 40, BLACK)
   drawCentredText(backCover, 'kidcoloring-research.vercel.app', fontBold, 14, PH / 2 + 14, VIOLET)
   drawCentredText(backCover, 'Free trial · 4 pages · No account needed', fontRegular, 11, PH / 2 - 16, LGRAY)
@@ -432,7 +432,7 @@ export async function POST(req: NextRequest) {
   })
 }
 
-// ── GET /api/v1/export/pdf?sessionId=… — check if PDF already exists ────────
+// ── GET /api/v1/export/pdf?sessionId=... - check if PDF already exists ────────
 export async function GET(req: NextRequest) {
   const sessionId = req.nextUrl.searchParams.get('sessionId')
   if (!sessionId) return NextResponse.json({ error: 'sessionId_required' }, { status: 400 })
