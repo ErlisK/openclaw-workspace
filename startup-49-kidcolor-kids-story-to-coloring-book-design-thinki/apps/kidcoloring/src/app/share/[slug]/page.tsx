@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 interface Props { params: Promise<{ slug: string }> }
+interface TrialPage { id: string; image_url: string; sort_order: number; status: string }
 
 async function getSessionBySlug(slug: string) {
   const sb = createClient(
@@ -10,97 +11,180 @@ async function getSessionBySlug(slug: string) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     { auth: { persistSession: false } }
   )
-  const { data: session } = await sb
-    .from('trial_sessions')
-    .select('id,share_slug,concept,config,preview_image_url,page_count,created_at')
-    .eq('share_slug', slug)
-    .single()
-  return session
+  const [{ data: session }, ] = await Promise.all([
+    sb.from('trial_sessions')
+      .select('id,share_slug,concept,config,preview_image_url,page_count,created_at')
+      .eq('share_slug', slug)
+      .single(),
+  ])
+
+  // Fetch pages separately to get the first generated image
+  let firstImg: string | null = null
+  if (session) {
+    const { data: pages } = await sb
+      .from('trial_pages')
+      .select('id,image_url,sort_order,status')
+      .eq('session_id', session.id)
+      .eq('status', 'complete')
+      .order('sort_order')
+      .limit(1)
+    const p = pages?.[0] as TrialPage | undefined
+    firstImg = p?.image_url || session.preview_image_url || null
+  }
+
+  return { session, firstImg }
+}
+
+function buildOgUrl(base: string, params: Record<string, string>): string {
+  const url = new URL('/api/og', base)
+  Object.entries(params).forEach(([k, v]) => { if (v) url.searchParams.set(k, v) })
+  return url.toString()
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const session = await getSessionBySlug(slug)
-  if (!session) return { title: 'KidColoring — Personalized Coloring Books' }
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kidcoloring-research.vercel.app'
+  const { session, firstImg } = await getSessionBySlug(slug)
 
-  const heroName = (session.config?.heroName as string) ||
-    ((session.config?.interests as string[])?.join(' & ')) || 'A child'
-  const desc = `${heroName}'s personalized coloring book — made with KidColoring in minutes!`
-  const imageUrl = session.preview_image_url || 'https://kidcoloring-research.vercel.app/og-default.png'
+  if (!session) {
+    return {
+      title: 'KidColoring — Personalized Coloring Books',
+      openGraph: { images: [buildOgUrl(appUrl, {})] },
+    }
+  }
+
+  const cfg = session.config as Record<string, unknown>
+  const heroName  = (cfg?.heroName  as string) || ''
+  const interests = (cfg?.interests as string[]) || []
+  const concept   = session.concept as string
+
+  const title    = heroName ? `${heroName}'s Coloring Book` : interests.length ? `${interests.slice(0, 2).join(' & ')} Book` : 'My Coloring Book'
+  const subtitle = `${session.page_count} custom pages · Made with KidColoring`
+  const interest = interests[0] || ''
+
+  const ogImageUrl = buildOgUrl(appUrl, {
+    title,
+    subtitle,
+    concept,
+    interest,
+    ...(firstImg ? { img: firstImg } : {}),
+  })
 
   return {
-    title: `${heroName}'s Coloring Book — KidColoring`,
-    description: desc,
+    title: `${title} — KidColoring`,
+    description: `${title}: a personalized coloring book made with KidColoring. ${subtitle}`,
+    keywords: ['kids coloring book', 'AI coloring book', 'personalized coloring pages', 'children activity'],
     openGraph: {
-      title: `${heroName}'s Coloring Book`,
-      description: desc,
-      images: [{ url: imageUrl, width: 768, height: 1024, alt: `${heroName}'s first coloring page` }],
+      title,
+      description: `${title}: ${subtitle}. Make your own free at KidColoring!`,
+      images: [{
+        url: ogImageUrl,
+        width: 1200,
+        height: 630,
+        alt: `${title} — KidColoring preview`,
+      }],
       type: 'website',
     },
-    twitter: { card: 'summary_large_image', title: `${heroName}'s Coloring Book`, description: desc },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: `${subtitle}. Make your own — free!`,
+      images: [ogImageUrl],
+    },
   }
 }
 
 export default async function SharePage({ params }: Props) {
   const { slug } = await params
-  const session = await getSessionBySlug(slug)
+  const { session, firstImg } = await getSessionBySlug(slug)
 
-  if (!session) return (
-    <div className="min-h-screen flex items-center justify-center text-center px-4">
-      <div>
-        <p className="text-4xl mb-4">😔</p>
-        <p className="text-xl font-bold text-gray-800 mb-2">Book not found</p>
-        <Link href="/create" className="text-violet-600 underline">Make your own →</Link>
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-violet-50 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <p className="text-4xl mb-4">🎨</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Book not found</h1>
+          <p className="text-gray-500 mb-6">This link may have expired or been removed.</p>
+          <Link href="/create"
+            className="bg-violet-600 text-white font-bold px-6 py-3 rounded-2xl hover:bg-violet-700">
+            Make your own book →
+          </Link>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
-  const heroName = (session.config?.heroName as string) ||
-    ((session.config?.interests as string[])?.join(' & ')) || 'A child'
-  const concept  = session.concept === 'story-to-book' ? '📖 Story' : '🎯 Interest Pack'
+  const cfg       = session.config as Record<string, unknown>
+  const heroName  = (cfg?.heroName  as string) || ''
+  const interests = (cfg?.interests as string[]) || []
+  const concept   = session.concept as string
+  const title     = heroName ? `${heroName}'s Coloring Book` : interests.length ? `${interests.slice(0, 2).join(' & ')} Book` : 'My Coloring Book'
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white">
-      <div className="max-w-2xl mx-auto px-4 py-16 text-center">
-
-        {/* Logo */}
+      {/* Hero */}
+      <div className="max-w-2xl mx-auto px-4 py-12 text-center">
+        {/* Brand */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <span className="text-2xl">🎨</span>
-          <span className="font-bold text-gray-700">KidColoring</span>
+          <span className="font-bold text-gray-700 text-lg">KidColoring</span>
         </div>
 
-        {/* Book preview */}
-        {session.preview_image_url ? (
-          <div className="relative mx-auto mb-8 rounded-2xl overflow-hidden shadow-2xl border-4 border-violet-200"
-            style={{ maxWidth: '320px' }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={session.preview_image_url} alt="First page preview"
-              className="w-full" />
-            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-violet-700">
-              {heroName}&apos;s Book
-            </div>
-          </div>
-        ) : (
-          <div className="w-64 h-80 mx-auto mb-8 bg-violet-100 rounded-2xl flex items-center justify-center text-5xl shadow-lg">
-            🎨
-          </div>
-        )}
+        {/* Preview image */}
+        <div className="w-56 h-72 mx-auto mb-8 bg-white rounded-2xl shadow-lg border border-violet-100 overflow-hidden flex items-center justify-center">
+          {firstImg ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={firstImg} alt={title}
+              className="w-full h-full object-contain" />
+          ) : (
+            <span className="text-6xl">🎨</span>
+          )}
+        </div>
 
-        <h1 className="text-3xl font-extrabold text-gray-900 mb-3">
-          {heroName}&apos;s Coloring Book
-        </h1>
-        <p className="text-gray-500 mb-2">{concept} · {session.page_count} custom pages</p>
-        <p className="text-gray-600 mb-8">
-          Made with KidColoring — personalized coloring books in minutes!
+        {/* Title */}
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">{title}</h1>
+        <p className="text-gray-500 mb-1">
+          {concept === 'interest-packs' ? '🎯 Interest Pack' : '📖 Story'} · {session.page_count} custom pages
         </p>
+        {interests.length > 0 && (
+          <p className="text-sm text-violet-600 font-medium mb-1">
+            {interests.join(' · ')}
+          </p>
+        )}
+        <p className="text-gray-600 mb-8 text-sm">Made with KidColoring — personalized coloring books in minutes!</p>
 
-        {/* CTA */}
+        {/* Primary CTA */}
         <Link href="/create"
           className="inline-block bg-gradient-to-r from-violet-600 to-blue-600 text-white text-lg font-bold px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:from-violet-700 hover:to-blue-700 transition-all mb-4">
           ✨ Make your own book — free
         </Link>
-        <p className="text-xs text-gray-400">No account · No credit card · 4 pages free</p>
+        <p className="text-xs text-gray-400 mb-8">No account · No credit card · 4 pages free</p>
 
+        {/* View this book */}
+        <Link href={`/create/preview/${session.id}`}
+          className="text-sm text-violet-600 hover:underline font-medium">
+          View this book →
+        </Link>
+      </div>
+
+      {/* How it works */}
+      <div className="max-w-2xl mx-auto px-4 pb-16">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
+          <h2 className="text-xl font-bold text-gray-900 text-center mb-6">How it works</h2>
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {[
+              { icon: '🎨', title: 'Pick interests', desc: 'Choose characters & themes' },
+              { icon: '✨', title: 'We generate', desc: '4 custom coloring pages' },
+              { icon: '🖨️', title: 'Print & color', desc: 'Download your PDF' },
+            ].map(step => (
+              <div key={step.title}>
+                <div className="text-4xl mb-2">{step.icon}</div>
+                <p className="font-bold text-gray-800 text-sm mb-1">{step.title}</p>
+                <p className="text-xs text-gray-500">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )

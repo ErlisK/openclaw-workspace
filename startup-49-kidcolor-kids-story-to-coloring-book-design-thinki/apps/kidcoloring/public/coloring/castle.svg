@@ -1,0 +1,70 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🏰  The Magic Castle</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Ground -->
+  <rect x="80" y="820" width="608" height="110" rx="0" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Main wall -->
+  <rect x="145" y="450" width="478" height="380" fill="none" stroke="black" stroke-width="9"/>
+  <!-- Wall battlements -->
+  <rect x="145" y="410" width="55" height="45" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="230" y="410" width="55" height="45" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="510" y="410" width="55" height="45" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="565" y="410" width="55" height="45" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Gate -->
+  <path d="M320,825 L320,620 Q384,570 448,620 L448,825 Z" fill="none" stroke="black" stroke-width="9"/>
+  <rect x="340" y="700" width="88" height="18" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Gate details (portcullis) -->
+  <line x1="362" y1="620" x2="362" y2="700" stroke="black" stroke-width="5"/>
+  <line x1="384" y1="600" x2="384" y2="700" stroke="black" stroke-width="5"/>
+  <line x1="406" y1="620" x2="406" y2="700" stroke="black" stroke-width="5"/>
+  <line x1="322" y1="645" x2="446" y2="645" stroke="black" stroke-width="4"/>
+  <line x1="322" y1="670" x2="446" y2="670" stroke="black" stroke-width="4"/>
+  <!-- Left tower -->
+  <rect x="80" y="350" width="140" height="480" fill="none" stroke="black" stroke-width="9"/>
+  <!-- Left tower battlements -->
+  <rect x="80" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="128" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="176" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Left tower window -->
+  <path d="M118,460 L118,540 Q150,575 182,540 L182,460 Q150,440 118,460 Z" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Right tower -->
+  <rect x="548" y="350" width="140" height="480" fill="none" stroke="black" stroke-width="9"/>
+  <rect x="548" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="596" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="644" y="308" width="38" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Right tower window -->
+  <path d="M586,460 L586,540 Q618,575 650,540 L650,460 Q618,440 586,460 Z" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Center tower -->
+  <rect x="284" y="230" width="200" height="230" fill="none" stroke="black" stroke-width="9"/>
+  <!-- Center tower battlements -->
+  <rect x="284" y="188" width="45" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="337" y="188" width="45" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="390" y="188" width="45" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <rect x="443" y="188" width="45" height="48" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Flags -->
+  <line x1="150" y1="308" x2="150" y2="245" stroke="black" stroke-width="5"/>
+  <path d="M150,245 L190,258 L150,272 Z" fill="none" stroke="black" stroke-width="5"/>
+  <line x1="618" y1="308" x2="618" y2="245" stroke="black" stroke-width="5"/>
+  <path d="M618,245 L658,258 L618,272 Z" fill="none" stroke="black" stroke-width="5"/>
+  <line x1="384" y1="188" x2="384" y2="125" stroke="black" stroke-width="5"/>
+  <path d="M384,125 L430,140 L384,156 Z" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Stars -->
+  <text x="100" y="230" font-size="26" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="600" y="210" font-size="22" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="655" y="290" font-size="18" fill="none" stroke="black" stroke-width="2">✦</text>
+
+
+</svg>

@@ -1,0 +1,80 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🐠  Under the Sea!</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Water surface waves -->
+  <path d="M60,230 Q130,200 200,230 Q270,260 340,230 Q410,200 480,230 Q550,260 620,230 Q690,200 750,230" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M60,250 Q130,220 200,250 Q270,280 340,250 Q410,220 480,250 Q550,280 620,250 Q690,220 750,250" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Big fish (clownfish) -->
+  <ellipse cx="340" cy="470" rx="100" ry="65" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Clown fish stripes -->
+  <path d="M295,410 Q285,470 295,530" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M385,410 Q375,470 385,530" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Fish tail -->
+  <path d="M240,470 L175,430 L175,510 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Fins -->
+  <path d="M320,408 Q300,370 360,378 Q380,395 340,413" fill="white" stroke="black" stroke-width="7"/>
+  <path d="M360,408 Q380,368 420,380 Q435,395 380,414" fill="white" stroke="black" stroke-width="7"/>
+  <path d="M310,520 Q285,555 330,552 Q348,540 330,522" fill="white" stroke="black" stroke-width="6"/>
+  <!-- Big eye -->
+  <circle cx="412" cy="455" r="32" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="412" cy="455" r="18" fill="black"/>
+  <circle cx="406" cy="448" r="6" fill="white"/>
+  <!-- Mouth smile -->
+  <path d="M432,478 Q445,500 432,512" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Small fish group -->
+  <ellipse cx="560" cy="350" rx="42" ry="28" fill="white" stroke="black" stroke-width="7"/>
+  <path d="M518,350 L490,335 L490,365 Z" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="574" cy="344" r="10" fill="black"/>
+  <ellipse cx="600" cy="420" rx="35" ry="23" fill="white" stroke="black" stroke-width="6"/>
+  <path d="M565,420 L540,407 L540,433 Z" fill="white" stroke="black" stroke-width="6"/>
+  <circle cx="613" cy="415" r="8" fill="black"/>
+  <ellipse cx="150" cy="620" rx="48" ry="30" fill="white" stroke="black" stroke-width="7"/>
+  <path d="M198,620 L228,606 L228,634 Z" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="138" cy="614" r="12" fill="black"/>
+  <!-- Octopus -->
+  <circle cx="560" cy="680" r="65" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Eyes -->
+  <circle cx="538" cy="658" r="20" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="582" cy="658" r="20" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="538" cy="658" r="10" fill="black"/>
+  <circle cx="582" cy="658" r="10" fill="black"/>
+  <!-- Tentacles -->
+  <path d="M500,730 Q480,790 500,840 Q515,870 505,890" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M525,740 Q510,800 520,850 Q528,875 520,895" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M560,745 Q555,808 560,855 Q562,880 555,900" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M595,740 Q608,800 598,850 Q590,876 596,896" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M620,730 Q640,790 618,840 Q605,870 612,890" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Suction cups on tentacles -->
+  <circle cx="492" cy="790" r="6" fill="none" stroke="black" stroke-width="3"/>
+  <circle cx="505" cy="840" r="5" fill="none" stroke="black" stroke-width="3"/>
+  <!-- Coral -->
+  <path d="M110,880 Q100,840 110,810 Q118,795 110,775 Q118,760 110,750" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M90,860 Q80,820 95,795" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M130,860 Q138,820 125,795" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M680,870 Q670,830 680,800 Q688,785 680,765 Q688,750 678,738" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Bubbles -->
+  <circle cx="430" cy="310" r="12" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="445" cy="268" r="8" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="438" cy="232" r="5" fill="none" stroke="black" stroke-width="3"/>
+  <circle cx="200" cy="380" r="10" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="215" cy="345" r="7" fill="none" stroke="black" stroke-width="3"/>
+  <!-- Starfish on bottom -->
+  <path d="M240,890 L252,862 L264,890 L238,874 L266,874 Z" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Seabed -->
+  <path d="M60,900 Q200,882 400,890 Q560,898 710,886" fill="none" stroke="black" stroke-width="8"/>
+
+
+</svg>

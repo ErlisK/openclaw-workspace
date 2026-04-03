@@ -1,0 +1,68 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🧜  Marina the Mermaid</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Tail -->
+  <path d="M310,600 Q270,700 250,790 Q240,840 260,870 Q300,900 340,875 Q370,855 380,820 Q390,855 420,875 Q460,900 500,870 Q520,840 510,790 Q490,700 458,600 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Tail fin -->
+  <path d="M245,862 Q210,900 195,940 Q240,920 280,940 Q330,960 380,940" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M515,862 Q550,900 565,940 Q520,920 480,940 Q430,960 380,940" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Scales pattern -->
+  <path d="M320,620 Q330,640 340,620 Q350,640 360,620 Q370,640 380,620 Q390,640 400,620 Q410,640 420,620 Q430,640 440,620" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M310,660 Q325,680 340,660 Q355,680 370,660 Q385,680 400,660 Q415,680 430,660 Q445,680 460,660" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M305,700 Q320,720 335,700 Q350,720 365,700 Q380,720 395,700 Q410,720 425,700 Q440,720 455,700 Q465,720 475,700" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Body -->
+  <path d="M285,500 Q290,580 310,600 Q340,620 384,618 Q428,620 458,600 Q478,580 483,500 Q480,430 384,420 Q288,430 285,500 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Bikini top -->
+  <path d="M320,490 Q350,510 384,505 Q418,510 448,490 Q440,455 418,452 Q400,445 384,450 Q368,445 350,452 Q328,458 320,490 Z" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Star/shell decorations -->
+  <path d="M340,472 Q350,460 360,472 Q365,480 355,485 Q345,485 340,472 Z" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M408,472 Q418,460 428,472 Q433,480 423,485 Q413,485 408,472 Z" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Neck and head -->
+  <path d="M340,420 Q345,365 384,350 Q423,365 428,420" fill="none" stroke="black" stroke-width="9"/>
+  <circle cx="384" cy="310" r="85" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Eyes -->
+  <circle cx="350" cy="295" r="22" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="418" cy="295" r="22" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="350" cy="295" r="11" fill="black"/>
+  <circle cx="418" cy="295" r="11" fill="black"/>
+  <!-- Lashes -->
+  <path d="M333,278 L326,266" stroke="black" stroke-width="4"/>
+  <path d="M342,274 L337,261" stroke="black" stroke-width="4"/>
+  <!-- Smile -->
+  <path d="M358,330 Q384,348 410,330" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Hair -->
+  <path d="M308,268 Q270,300 265,360 Q268,400 290,420" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M316,260 Q278,305 275,370 Q278,420 302,445" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M460,268 Q498,300 503,360 Q500,400 478,420" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Arms -->
+  <path d="M295,500 Q240,470 210,500 Q190,525 215,555 Q240,570 285,545" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M473,500 Q528,470 558,500 Q578,525 553,555 Q528,570 483,545" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Bubbles -->
+  <circle cx="130" cy="380" r="18" fill="none" stroke="black" stroke-width="5"/>
+  <circle cx="160" cy="335" r="12" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="148" cy="290" r="8" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="620" cy="400" r="15" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="640" cy="355" r="10" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Seaweed -->
+  <path d="M90,900 Q110,860 90,830 Q110,800 90,770 Q110,745 100,730" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M660,900 Q640,855 660,825 Q640,795 660,765 Q640,740 650,725" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Fish -->
+  <ellipse cx="120" cy="540" rx="28" ry="18" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M92,540 L72,525 L72,555 Z" fill="none" stroke="black" stroke-width="5"/>
+  <circle cx="133" cy="536" r="5" fill="black"/>
+
+
+</svg>

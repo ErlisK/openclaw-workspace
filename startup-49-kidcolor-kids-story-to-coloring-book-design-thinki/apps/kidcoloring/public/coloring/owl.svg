@@ -1,0 +1,74 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🦉  Oliver the Owl</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Branch -->
+  <path d="M80,720 Q250,700 500,710 Q620,715 700,700" fill="none" stroke="black" stroke-width="12"/>
+  <!-- Branch texture -->
+  <path d="M100,716 Q130,725 150,715" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M300,706 Q340,716 360,706" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Branch leaves -->
+  <path d="M680,700 Q700,670 720,690 Q705,710 688,705" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M660,695 Q675,665 698,680 Q685,705 668,700" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Body -->
+  <ellipse cx="384" cy="580" rx="140" ry="160" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Wing left -->
+  <path d="M250,540 Q200,580 195,650 Q200,700 255,720 Q300,730 345,700 Q365,670 360,600" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Wing feather lines left -->
+  <path d="M220,570 Q248,590 265,580" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M207,610 Q238,630 258,618" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M200,650 Q232,670 255,657" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M205,688 Q232,702 255,692" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Wing right -->
+  <path d="M518,540 Q568,580 573,650 Q568,700 513,720 Q468,730 423,700 Q403,670 408,600" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Wing feather lines right -->
+  <path d="M548,570 Q520,590 503,580" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M561,610 Q530,630 510,618" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M568,650 Q536,670 513,657" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M563,688 Q536,702 513,692" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Chest feathers (V pattern) -->
+  <path d="M320,520 Q360,580 384,560 Q408,580 448,520" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M315,580 Q355,640 384,620 Q413,640 453,580" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M318,640 Q358,690 384,672 Q410,690 450,640" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Head -->
+  <circle cx="384" cy="365" r="120" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Ear tufts -->
+  <path d="M310,260 L285,190 L330,248 Z" fill="white" stroke="black" stroke-width="8"/>
+  <path d="M458,260 L483,190 L438,248 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Big eyes -->
+  <circle cx="340" cy="370" r="52" fill="white" stroke="black" stroke-width="9"/>
+  <circle cx="428" cy="370" r="52" fill="white" stroke="black" stroke-width="9"/>
+  <circle cx="340" cy="370" r="34" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="428" cy="370" r="34" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="345" cy="365" r="18" fill="black"/>
+  <circle cx="433" cy="365" r="18" fill="black"/>
+  <!-- Beak -->
+  <path d="M364,408 L384,440 L404,408 Q404,392 384,388 Q364,392 364,408 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Facial disc ring -->
+  <path d="M295,330 Q310,270 384,255 Q458,270 473,330 Q490,395 473,440 Q450,480 384,488 Q318,480 295,440 Q278,395 295,330 Z" fill="none" stroke="black" stroke-width="5" stroke-dasharray="8 6"/>
+  <!-- Talons -->
+  <path d="M330,720 L300,760 L320,758 L308,790" stroke="black" stroke-width="7" fill="none"/>
+  <path d="M340,722 L328,765 L348,762 L340,793" stroke="black" stroke-width="7" fill="none"/>
+  <path d="M350,722 L352,768 L372,762 L366,792" stroke="black" stroke-width="7" fill="none"/>
+  <path d="M430,720 L460,760 L440,758 L452,790" stroke="black" stroke-width="7" fill="none"/>
+  <path d="M420,722 L432,765 L412,762 L420,793" stroke="black" stroke-width="7" fill="none"/>
+  <!-- Moon -->
+  <path d="M105,280 Q80,340 105,400 Q145,380 148,318 Q138,285 105,280 Z" fill="none" stroke="black" stroke-width="7"/>
+  <circle cx="130" cy="238" r="18" fill="none" stroke="black" stroke-width="5"/>
+  <text x="580" y="250" font-size="28" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="640" y="310" font-size="20" fill="none" stroke="black" stroke-width="2">★</text>
+
+
+</svg>

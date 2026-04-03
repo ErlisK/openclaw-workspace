@@ -1,0 +1,66 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🦋  Flutter the Butterfly</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="384" cy="512" rx="22" ry="110" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Head -->
+  <circle cx="384" cy="375" r="35" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Antennae -->
+  <path d="M370,343 Q340,280 310,255" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="308" cy="252" r="10" fill="white" stroke="black" stroke-width="6"/>
+  <path d="M398,343 Q428,280 458,255" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="460" cy="252" r="10" fill="white" stroke="black" stroke-width="6"/>
+  <!-- Eyes -->
+  <circle cx="370" cy="368" r="10" fill="white" stroke="black" stroke-width="5"/>
+  <circle cx="398" cy="368" r="10" fill="white" stroke="black" stroke-width="5"/>
+  <circle cx="370" cy="368" r="5" fill="black"/>
+  <circle cx="398" cy="368" r="5" fill="black"/>
+  <!-- Upper left wing -->
+  <path d="M362,430 Q230,340 145,380 Q100,420 125,510 Q160,590 260,580 Q330,565 362,510 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Upper right wing -->
+  <path d="M406,430 Q538,340 623,380 Q668,420 643,510 Q608,590 508,580 Q438,565 406,510 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Lower left wing -->
+  <path d="M362,530 Q250,530 195,600 Q165,645 195,690 Q235,730 300,710 Q360,690 368,620 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Lower right wing -->
+  <path d="M406,530 Q518,530 573,600 Q603,645 573,690 Q533,730 468,710 Q408,690 400,620 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Wing decorations - upper left -->
+  <circle cx="220" cy="460" r="40" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="220" cy="460" r="20" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M175,420 Q200,440 220,420 Q245,400 280,430" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M155,490 Q185,505 220,495 Q255,485 280,500" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Wing decorations - upper right -->
+  <circle cx="548" cy="460" r="40" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="548" cy="460" r="20" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M593,420 Q568,440 548,420 Q523,400 488,430" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M613,490 Q583,505 548,495 Q513,485 488,500" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Wing decorations - lower wings -->
+  <path d="M230,590 Q260,610 280,645 Q270,660 240,650" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M538,590 Q508,610 488,645 Q498,660 528,650" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Dots on wings -->
+  <circle cx="165" cy="500" r="8" fill="none" stroke="black" stroke-width="5"/>
+  <circle cx="603" cy="500" r="8" fill="none" stroke="black" stroke-width="5"/>
+  <circle cx="220" cy="560" r="6" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="548" cy="560" r="6" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Flowers -->
+  <circle cx="130" cy="820" r="25" fill="none" stroke="black" stroke-width="6"/>
+  <line x1="130" y1="845" x2="130" y2="880" stroke="black" stroke-width="5"/>
+  <circle cx="640" cy="815" r="25" fill="none" stroke="black" stroke-width="6"/>
+  <line x1="640" y1="840" x2="640" y2="878" stroke="black" stroke-width="5"/>
+  <!-- Grass -->
+  <path d="M80,900 Q250,880 500,888 Q640,894 710,882" fill="none" stroke="black" stroke-width="5"/>
+
+
+</svg>

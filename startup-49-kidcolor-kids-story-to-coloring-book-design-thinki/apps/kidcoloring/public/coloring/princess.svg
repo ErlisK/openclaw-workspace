@@ -1,0 +1,84 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">👑  Princess Rose</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Dress bottom / skirt -->
+  <path d="M235,600 Q180,700 160,800 Q148,860 180,890 Q250,915 384,910 Q518,915 588,890 Q620,860 608,800 Q588,700 533,600 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Dress layers -->
+  <path d="M250,680 Q200,730 185,800" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M518,680 Q568,730 583,800" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M220,750 Q384,790 548,750" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M180,820 Q384,850 588,820" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Dress bodice -->
+  <path d="M280,380 Q265,490 235,600 Q300,630 384,625 Q468,630 533,600 Q503,490 488,380 Q460,355 384,350 Q308,355 280,380 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Bodice decoration -->
+  <path d="M340,400 Q355,450 384,445 Q413,450 428,400" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Small roses on dress -->
+  <circle cx="280" cy="700" r="15" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M268,700 Q280,688 292,700 Q280,712 268,700 Z" fill="none" stroke="black" stroke-width="4"/>
+  <circle cx="488" cy="700" r="15" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M476,700 Q488,688 500,700 Q488,712 476,700 Z" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Belt / waist bow -->
+  <path d="M308,580 L248,555 L308,575" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M460,580 L520,555 L460,575" fill="none" stroke="black" stroke-width="7"/>
+  <circle cx="384" cy="577" r="20" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Arms -->
+  <path d="M285,390 Q225,430 205,490 Q195,530 215,560 Q248,580 285,555 Q300,530 310,490" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Gloves -->
+  <path d="M200,555 Q185,590 188,625 Q218,645 248,630 Q272,610 268,575 Q260,555 248,548 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Hand holding wand -->
+  <line x1="192" y1="595" x2="130" y2="488" stroke="black" stroke-width="7"/>
+  <!-- Wand star -->
+  <path d="M130,488 L118,458 L108,488 L78,492 L100,513 L92,543 L120,526 L148,543 L140,513 L162,492 Z" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Sparkles from wand -->
+  <path d="M78,460 L68,445" stroke="black" stroke-width="4"/>
+  <path d="M68,475 L55,470" stroke="black" stroke-width="4"/>
+  <path d="M80,490 L65,490" stroke="black" stroke-width="4"/>
+  <!-- Right arm -->
+  <path d="M483,390 Q543,430 563,490 Q573,530 553,560 Q520,580 483,555 Q468,530 458,490" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M558,555 Q573,590 570,625 Q540,645 510,630 Q486,610 490,575 Q498,555 510,548 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Neck -->
+  <path d="M335,350 Q340,280 384,265 Q428,280 433,350" fill="none" stroke="black" stroke-width="9"/>
+  <!-- Head -->
+  <circle cx="384" cy="215" r="100" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Crown -->
+  <path d="M285,172 L285,130 L318,158 L350,120 L384,155 L418,120 L450,158 L483,130 L483,172 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Crown jewels -->
+  <circle cx="318" cy="148" r="12" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="384" cy="138" r="15" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="450" cy="148" r="12" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Eyes -->
+  <path d="M345,202 Q360,188 375,202" fill="none" stroke="black" stroke-width="7"/>
+  <circle cx="358" cy="210" r="15" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="358" cy="210" r="7" fill="black"/>
+  <path d="M393,202 Q408,188 423,202" fill="none" stroke="black" stroke-width="7"/>
+  <circle cx="412" cy="210" r="15" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="412" cy="210" r="7" fill="black"/>
+  <!-- Smile + cheeks -->
+  <path d="M360,250 Q384,268 408,250" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="338" cy="248" r="14" fill="none" stroke="black" stroke-width="4" stroke-dasharray="4 3"/>
+  <circle cx="430" cy="248" r="14" fill="none" stroke="black" stroke-width="4" stroke-dasharray="4 3"/>
+  <!-- Hair with curls -->
+  <path d="M290,168 Q260,205 255,255 Q260,290 285,300" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M478,168 Q508,205 513,255 Q508,290 483,300" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M295,295 Q280,325 295,350" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M473,295 Q488,325 473,350" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Stars -->
+  <text x="580" y="200" font-size="28" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="600" y="350" font-size="22" fill="none" stroke="black" stroke-width="2">✦</text>
+  <text x="640" y="420" font-size="18" fill="none" stroke="black" stroke-width="2">★</text>
+
+
+</svg>

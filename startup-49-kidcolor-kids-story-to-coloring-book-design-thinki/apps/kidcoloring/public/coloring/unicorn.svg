@@ -1,0 +1,65 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🦄  Luna the Unicorn</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="350" cy="620" rx="175" ry="120" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Neck -->
+  <path d="M430,510 Q450,450 430,380" fill="none" stroke="black" stroke-width="10"/>
+  <path d="M480,520 Q510,460 490,390" fill="none" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <ellipse cx="460" cy="340" rx="80" ry="65" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Snout -->
+  <path d="M510,360 Q560,365 570,390 Q565,415 510,415 Q480,410 470,395 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Nostril -->
+  <path d="M530,395 Q540,390 550,395" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Eye -->
+  <circle cx="440" cy="318" r="20" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="440" cy="318" r="10" fill="black"/>
+  <!-- Lashes -->
+  <path d="M425,302 L418,290" stroke="black" stroke-width="4"/>
+  <path d="M435,298 L430,285" stroke="black" stroke-width="4"/>
+  <path d="M445,297 L443,283" stroke="black" stroke-width="4"/>
+  <!-- Horn -->
+  <path d="M440,262 L420,160 L455,262 Z" fill="white" stroke="black" stroke-width="8"/>
+  <path d="M430,250 L425,210" stroke="black" stroke-width="3"/>
+  <path d="M437,228 L433,190" stroke="black" stroke-width="3"/>
+  <!-- Ear -->
+  <path d="M400,285 L390,230 L420,268 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Mane -->
+  <path d="M395,285 Q370,340 360,400 Q355,450 370,510" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M405,288 Q385,345 378,405 Q375,455 385,515" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M415,290 Q400,350 395,410 Q393,460 400,520" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Legs -->
+  <path d="M240,710 L220,830 Q218,855 240,858 Q265,858 268,835 L270,710" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M300,720 L290,835 Q288,858 308,860 Q328,860 332,836 L335,720" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M390,720 L385,835 Q383,858 403,860 Q423,860 427,836 L430,720" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M450,710 L455,830 Q457,856 477,856 Q497,855 494,832 L490,710" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Tail -->
+  <path d="M185,640 Q120,620 90,660 Q75,700 110,730 Q145,745 185,720 Q215,700 215,665" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M180,645 Q125,690 115,730" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Stars -->
+  <text x="100" y="250" font-size="32" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="620" y="280" font-size="28" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="560" y="200" font-size="22" fill="none" stroke="black" stroke-width="2">✦</text>
+  <text x="130" y="350" font-size="20" fill="none" stroke="black" stroke-width="2">✦</text>
+  <!-- Ground flowers -->
+  <circle cx="160" cy="865" r="12" fill="white" stroke="black" stroke-width="5"/>
+  <line x1="160" y1="877" x2="160" y2="900" stroke="black" stroke-width="4"/>
+  <circle cx="590" cy="862" r="12" fill="white" stroke="black" stroke-width="5"/>
+  <line x1="590" y1="874" x2="590" y2="898" stroke="black" stroke-width="4"/>
+
+
+</svg>
