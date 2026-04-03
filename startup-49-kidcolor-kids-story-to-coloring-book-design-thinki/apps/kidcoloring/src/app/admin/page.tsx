@@ -180,6 +180,25 @@ export default function AdminPage() {
               </div>
             </div>
 
+            {/* Quick links */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[
+                { href: '/admin/storyboards', icon: '🎭', label: 'Persona Storyboards', desc: '3 personas · 14 scenes · evidence-linked' },
+                { href: '/admin/competitors', icon: '🏢', label: 'Competitor Matrix', desc: '20 products · screenshots · teardowns' },
+                { href: '/dashboard', icon: '📊', label: 'Research Dashboard', desc: 'Full data explorer' },
+              ].map(link => (
+                <a key={link.href} href={link.href}
+                  className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:border-purple-300 hover:shadow-md transition-all group flex items-start gap-3">
+                  <span className="text-2xl">{link.icon}</span>
+                  <div>
+                    <div className="font-semibold text-gray-900 group-hover:text-purple-700 text-sm">{link.label}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{link.desc}</div>
+                  </div>
+                  <span className="ml-auto text-gray-300 group-hover:text-purple-400 text-lg">→</span>
+                </a>
+              ))}
+            </div>
+
             {/* Sentiment distribution */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <h2 className="text-lg font-bold text-gray-800 mb-4">Sentiment Distribution</h2>
