@@ -184,6 +184,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { href: '/admin/define', icon: '🎯', label: 'Phase 2: Define', desc: 'POV · HMW · Assumptions · Schema v0 · v0.2' },
+                { href: '/admin/funnel', icon: '📈', label: 'Funnel Report', desc: 'Visitor→Start→First Page→Export · conversion rates · daily trend · by concept' },
                 { href: '/admin/tradeoffs', icon: '🧭', label: 'Trade-Off Analysis & Concept Selection', desc: 'Quality × Cost × Safety matrix · 3 concepts · provider selection · 6-risk register · final decision' },
                 { href: '/admin/sandbox', icon: '📊', label: 'Sandbox Dashboard', desc: '112 tests · p50/p95 latency · failure rates · style×concept heatmap · cost vs quality' },
                 { href: '/sandbox', icon: '🎨', label: 'Generation Sandbox', desc: 'Live prompt tester · Pollinations.ai free tier · logs to Supabase gen_tests' },
