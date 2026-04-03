@@ -184,6 +184,8 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { href: '/admin/define', icon: '🎯', label: 'Phase 2: Define', desc: 'POV · HMW · Assumptions · Schema v0 · v0.2' },
+                { href: '/admin/sandbox', icon: '📊', label: 'Sandbox Dashboard', desc: '112 tests · p50/p95 latency · failure rates · style×concept heatmap · cost vs quality' },
+                { href: '/sandbox', icon: '🎨', label: 'Generation Sandbox', desc: 'Live prompt tester · Pollinations.ai free tier · logs to Supabase gen_tests' },
                 { href: '/admin/spike', icon: '🧪', label: 'Phase 3 · Tech Spike', desc: '57 tests · 8 providers · latency/cost/quality dashboard · model selection' },
                 { href: '/admin/analytics', icon: '📊', label: 'Analytics & Events', desc: '8 core events · 5 funnels · props reference · session tracking' },
                 { href: '/admin/schema', icon: '🗄️', label: 'Domain Model & Schema', desc: 'generation_jobs · moderation_events · view aliases · RLS · migrations' },
