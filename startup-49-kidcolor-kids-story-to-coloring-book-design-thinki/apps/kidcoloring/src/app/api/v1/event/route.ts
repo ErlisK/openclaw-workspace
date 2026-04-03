@@ -21,6 +21,8 @@ const VALID_EVENTS = new Set([
   'page_view', 'wizard_step_complete', 'interests_selected',
   // UI interactions
   'save_prompted', 'upsell_shown', 'upsell_clicked',
+  // PDF export pipeline
+  'pdf_export_started', 'pdf_generated', 'pdf_download_clicked',
   // Errors
   'generation_failed', 'session_error',
 ])

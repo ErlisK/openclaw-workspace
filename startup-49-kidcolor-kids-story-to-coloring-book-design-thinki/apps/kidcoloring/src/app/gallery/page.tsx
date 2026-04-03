@@ -69,6 +69,7 @@ export default function GalleryPage() {
               {/* SVG preview */}
               <a href={`/coloring/${p.file}.svg`} target="_blank" rel="noopener noreferrer"
                 className="block aspect-[3/4] bg-white overflow-hidden relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/coloring/${p.file}.svg`}
                   alt={p.label}
