@@ -184,6 +184,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 { href: '/admin/define', icon: '🎯', label: 'Phase 2: Define', desc: 'POV · HMW · Assumptions · Schema v0 · v0.2' },
+                { href: '/admin/schema', icon: '🗄️', label: 'Domain Model & Schema', desc: 'generation_jobs · moderation_events · view aliases · RLS · migrations' },
                 { href: '/admin/guardrails', icon: '🛡️', label: 'Guardrails', desc: 'Parent accounts · Data minimization · Deletion flows · COPPA' },
                 { href: '/admin/storyboards', icon: '🎭', label: 'Persona Storyboards', desc: '3 personas · 14 scenes · evidence-linked' },
                 { href: '/admin/competitors', icon: '🏢', label: 'Competitor Matrix', desc: '20 products · screenshots · teardowns' },
