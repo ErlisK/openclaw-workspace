@@ -1,10 +1,8 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type JsonPrimitive = string | number | boolean | null
+export type JsonObject = { [key: string]: JsonValue }
+export type JsonArray = JsonValue[]
+export type JsonValue = JsonPrimitive | JsonObject | JsonArray
+export type Json = JsonValue
 
 export interface Database {
   public: {
@@ -169,8 +167,8 @@ export interface Database {
         }
       }
     }
-    Views: {}
-    Functions: {}
-    Enums: {}
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
   }
 }
