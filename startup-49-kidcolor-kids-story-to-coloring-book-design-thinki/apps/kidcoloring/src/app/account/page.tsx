@@ -345,6 +345,86 @@ function BookCard({ session }: { session: Session }) {
   )
 }
 
+// ── Referral Credits Section ─────────────────────────────────────────────────
+function ReferralCreditsSection({ userId }: { userId?: string }) {
+  const [data, setData] = useState<{
+    credits: number; invitesNeeded: number; stats: { conversions: number; clicks: number }; referralCode?: string
+  } | null>(null)
+
+  useEffect(() => {
+    if (!userId) return
+    fetch(`/api/v1/referral-credits?userId=${userId}`)
+      .then(r => r.json())
+      .then((d: { credits?: number; invitesNeeded?: number; stats?: { conversions: number; clicks: number }; referralCode?: string }) => {
+        setData({
+          credits: d.credits ?? 0,
+          invitesNeeded: d.invitesNeeded ?? 3,
+          stats: d.stats ?? { conversions: 0, clicks: 0 },
+          referralCode: d.referralCode,
+        })
+      })
+      .catch(() => {})
+  }, [userId])
+
+  if (!userId || !data) return null
+
+  const referralUrl = data.referralCode
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://kidcoloring-research.vercel.app'}/refer/${data.referralCode}`
+    : null
+
+  const progress = data.invitesNeeded === 0 ? 100 : Math.round(((3 - data.invitesNeeded) / 3) * 100)
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+      <div className="flex items-center justify-between">
+        <h2 className="font-bold text-gray-800">Referral credits</h2>
+        {data.credits > 0 && (
+          <span className="bg-violet-100 text-violet-700 font-extrabold text-sm px-3 py-1 rounded-full">
+            {data.credits} free {data.credits === 1 ? 'book' : 'books'}
+          </span>
+        )}
+      </div>
+
+      <p className="text-sm text-gray-500">
+        Invite 3 families and get 1 free book download. Every 3 conversions = 1 credit.
+      </p>
+
+      {/* Progress bar */}
+      <div>
+        <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+          <span>{3 - data.invitesNeeded}/3 successful invites</span>
+          <span>{data.invitesNeeded} more needed</span>
+        </div>
+        <div className="w-full bg-gray-100 rounded-full h-2.5">
+          <div className="h-2.5 bg-violet-500 rounded-full transition-all" style={{ width: `${progress}%` }}/>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-2 text-center text-xs">
+        <div className="bg-gray-50 rounded-xl p-2">
+          <p className="font-extrabold text-gray-800">{data.stats.clicks}</p>
+          <p className="text-gray-400">Link clicks</p>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-2">
+          <p className="font-extrabold text-gray-800">{data.stats.conversions}</p>
+          <p className="text-gray-400">Joined</p>
+        </div>
+        <div className="bg-violet-50 rounded-xl p-2">
+          <p className="font-extrabold text-violet-700">{data.credits}</p>
+          <p className="text-violet-500">Credits</p>
+        </div>
+      </div>
+
+      {referralUrl && (
+        <p className="text-xs text-gray-400">
+          Share: <span className="font-mono text-violet-600">{referralUrl}</span>
+        </p>
+      )}
+    </div>
+  )
+}
+
 // ── Referral Section ─────────────────────────────────────────────────────────
 function ReferralSection({ userId }: { userId?: string }) {
   const [code, setCode] = useState<string | null>(null)
@@ -724,6 +804,8 @@ export default function AccountPage() {
                 </div>
               </div>
 
+              {/* Referral credits */}
+              <ReferralCreditsSection userId={user?.id} />
               {/* Referral link */}
               <ReferralSection userId={user?.id} />
 

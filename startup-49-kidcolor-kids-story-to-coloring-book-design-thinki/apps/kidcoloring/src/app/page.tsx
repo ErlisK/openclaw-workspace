@@ -245,14 +245,48 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="text-center pb-8 text-xs text-gray-400 space-x-4">
-        <span>© 2025 KidColoring</span>
-        <span>·</span>
-        <span>COPPA compliant · No child PII stored</span>
-        <span>·</span>
-        <Link href="/gallery" className="hover:text-gray-600">Gallery</Link>
-        <span>·</span>
-        <a href="/admin" className="hover:text-gray-600">Admin</a>
+      <footer className="bg-white border-t border-gray-100 py-10 px-6 mt-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mb-8">
+            <div>
+              <p className="font-bold text-gray-700 mb-2">Free pages</p>
+              <ul className="space-y-1 text-sm text-gray-500">
+                <li><Link href="/free-coloring-pages" className="hover:text-violet-600">Free coloring pages</Link></li>
+                <li><Link href="/free" className="hover:text-violet-600">Weekly free pack</Link></li>
+                <li><Link href="/coloring-books/dinosaurs" className="hover:text-violet-600">Dinosaur pages</Link></li>
+                <li><Link href="/coloring-books/unicorns" className="hover:text-violet-600">Unicorn pages</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-bold text-gray-700 mb-2">Popular themes</p>
+              <ul className="space-y-1 text-sm text-gray-500">
+                <li><Link href="/coloring-books/space" className="hover:text-violet-600">Space</Link></li>
+                <li><Link href="/coloring-books/superheroes" className="hover:text-violet-600">Superheroes</Link></li>
+                <li><Link href="/coloring-books/puppies" className="hover:text-violet-600">Puppies</Link></li>
+                <li><Link href="/coloring-books/princesses" className="hover:text-violet-600">Princesses</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-bold text-gray-700 mb-2">Make a book</p>
+              <ul className="space-y-1 text-sm text-gray-500">
+                <li><Link href="/create/interests" className="hover:text-violet-600">Start free →</Link></li>
+                <li><Link href="/account" className="hover:text-violet-600">My account</Link></li>
+                <li><Link href="/gallery" className="hover:text-violet-600">Gallery</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="font-bold text-gray-700 mb-2">About</p>
+              <ul className="space-y-1 text-sm text-gray-500">
+                <li><span className="text-gray-400">COPPA compliant</span></li>
+                <li><span className="text-gray-400">No child PII stored</span></li>
+                <li><a href="/admin" className="hover:text-violet-600">Admin</a></li>
+              </ul>
+            </div>
+          </div>
+          <p className="text-xs text-gray-400 text-center border-t border-gray-100 pt-6">
+            © 2026 KidColoring · Personalized coloring books for kids
+          </p>
+        </div>
       </footer>
     </div>
   )

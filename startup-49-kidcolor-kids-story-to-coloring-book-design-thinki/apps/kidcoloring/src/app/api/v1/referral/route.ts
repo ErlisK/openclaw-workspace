@@ -107,9 +107,10 @@ export async function POST(req: NextRequest) {
   }
 
   if (action === 'convert') {
+    const newConversions = (r.conversions ?? 0) + 1
     await sb.from('referrals')
       .update({
-        conversions:  (r.conversions ?? 0) + 1,
+        conversions:  newConversions,
         converted_at: new Date().toISOString(),
         referred_session_id: sessionId ?? null,
       })
@@ -118,9 +119,28 @@ export async function POST(req: NextRequest) {
     await sb.from('events').insert({
       event_name: 'referral_convert',
       session_id: sessionId ?? null,
-      properties: { referral_code: code },
+      properties: { referral_code: code, conversion_number: newConversions },
     })
-    return NextResponse.json({ ok: true, action: 'convert' })
+
+    // Award referral credit: 1 free book credit per conversion
+    // Look up referrer profile to award credit
+    const { data: refRow } = await sb.from('referrals').select('referrer_id').eq('id', r.id).single()
+    const referrerId = (refRow as { referrer_id?: string } | null)?.referrer_id
+    if (referrerId) {
+      const { data: prof } = await sb.from('profiles')
+        .select('referral_credits, total_referrals').eq('id', referrerId).single()
+      const cur  = (prof as { referral_credits?: number } | null)?.referral_credits ?? 0
+      const refs = (prof as { total_referrals?: number } | null)?.total_referrals ?? 0
+      await sb.from('profiles')
+        .update({ referral_credits: cur + 1, total_referrals: refs + 1 })
+        .eq('id', referrerId)
+      // Update credits_awarded on referral row
+      await sb.from('referrals')
+        .update({ credits_awarded: newConversions })
+        .eq('id', r.id)
+    }
+
+    return NextResponse.json({ ok: true, action: 'convert', creditAwarded: Boolean(referrerId) })
   }
 
   return NextResponse.json({ error: `Unknown action: ${action}` }, { status: 400 })
