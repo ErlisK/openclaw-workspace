@@ -100,7 +100,8 @@ export async function checkRateLimit(
     // 2. Upsert the incremented count
     if (currentCount === 0) {
       // Insert new window row
-      await sb.from('rate_limit_windows').insert({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (sb.from('rate_limit_windows') as any).insert({
         key, window_key: windowKey, count: 1,
       })
     } else {

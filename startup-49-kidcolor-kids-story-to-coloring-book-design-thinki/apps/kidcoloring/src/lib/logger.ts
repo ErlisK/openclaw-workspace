@@ -69,7 +69,8 @@ async function writeLog(
   if (process.env.NODE_ENV === 'test') return
   try {
     const sb = getAdmin()
-    await sb.from('error_logs').insert({  // eslint-disable-line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb.from('error_logs') as any).insert({
       session_id:    opts.sessionId ?? null,
       error_type:    opts.errorType ?? 'server',
       error_code:    opts.errorCode ?? null,
@@ -102,7 +103,8 @@ async function writeMetric(
   // Always log 4xx/5xx
   try {
     const sb = getAdmin()
-    await sb.from('api_metrics').insert({  // eslint-disable-line
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (sb.from('api_metrics') as any).insert({  // eslint-disable-line
       endpoint,
       method,
       status_code: statusCode,
