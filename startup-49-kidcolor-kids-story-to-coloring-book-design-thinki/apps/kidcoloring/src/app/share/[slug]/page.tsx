@@ -185,6 +185,15 @@ export default async function SharePage({ params }: Props) {
             ))}
           </div>
         </div>
+
+          {/* Viral referral CTA */}
+          <div className="mt-4 bg-gradient-to-br from-violet-600 to-pink-600 rounded-2xl p-4 text-center text-white">
+            <p className="font-extrabold text-sm mb-1">🎁 Invite friends — get a free book!</p>
+            <p className="text-violet-200 text-xs mb-2">Share your invite link: 3 friends = 1 free coloring book</p>
+            <Link href="/account" className="inline-block bg-white text-violet-700 font-bold px-4 py-2 rounded-xl text-xs hover:bg-violet-50 transition-colors">
+              Get your invite link →
+            </Link>
+          </div>
       </div>
     </div>
   )

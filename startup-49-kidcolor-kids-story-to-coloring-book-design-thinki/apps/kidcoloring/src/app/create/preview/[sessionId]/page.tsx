@@ -1,4 +1,5 @@
 'use client'
+import NpsRating from '@/components/NpsRating'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
@@ -52,6 +53,7 @@ export default function PreviewPage() {
   const [savedNotice,  setSavedNotice]  = useState(false)
   const [pdfLoading,   setPdfLoading]   = useState(false)
   const [pdfUrl,       setPdfUrl]       = useState<string | null>(null)
+  const [showNps,      setShowNps]      = useState(false)
   const [pdfError,     setPdfError]     = useState('')
   const [showUpsell,   setShowUpsell]   = useState(false)
   const [showCSAT,     setShowCSAT]     = useState(false)
@@ -181,6 +183,7 @@ export default function PreviewPage() {
 
     setGenerating(false)
     generatingRef.current = false
+    setShowNps(true)
 
     await fetch(`/api/v1/session/${sessionId}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
@@ -751,6 +754,14 @@ export default function PreviewPage() {
             </div>
           </div>
         </div>
+      )}
+    
+      {showNps && (
+        <NpsRating
+          sessionId={sessionId}
+          trigger="book_complete"
+          onDismiss={() => setShowNps(false)}
+        />
       )}
     </div>
   )

@@ -1,4 +1,6 @@
 import { buildPrompts } from '@/lib/prompts'
+import { checkRateLimit, rateLimit429 } from '@/lib/rate-limit'
+import { logger, startTimer, getClientIp } from '@/lib/logger'
 import { getFlags } from '@/lib/flags'
 import {
   runSafetyFilter,
@@ -32,6 +34,16 @@ export async function POST(request: NextRequest) {
     storyMode?:  boolean
     pageCount?:  number
   }
+
+  // ── Rate limiting ──────────────────────────────────────────────────────
+  const _t  = startTimer()
+  const _ip = getClientIp(request.headers) ?? 'unknown'
+  const _rl = await checkRateLimit(_ip, 'session_create')
+  if (!_rl.allowed) {
+    logger.warn('/api/v1/session', 'rate_limit_exceeded', { ip: _ip })
+    return rateLimit429(_rl)
+  }
+
 
   // Support both nested { concept, config } and flat { heroName, interests, ... }
   let concept = body.concept ?? 'interest-packs'
@@ -193,6 +205,7 @@ export async function POST(request: NextRequest) {
     },
   })
 
+  logger.metric('/api/v1/session', 'POST', 201, _t(), { ip: _ip })
   return NextResponse.json({
     sessionId:    session.id,
     sessionToken: session.session_token,

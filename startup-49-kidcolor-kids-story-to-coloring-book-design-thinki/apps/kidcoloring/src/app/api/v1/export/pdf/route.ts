@@ -1,3 +1,5 @@
+import { checkRateLimit, rateLimit429 } from '@/lib/rate-limit'
+import { getClientIp } from '@/lib/logger'
 /**
  * POST /api/v1/export/pdf
  *
@@ -119,6 +121,10 @@ function drawBorder(
 
 // ── Main handler ────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
+  const _ip = getClientIp(req.headers) ?? 'unknown'
+  const _rl = await checkRateLimit(_ip, 'export_pdf')
+  if (!_rl.allowed) return rateLimit429(_rl)
+
   // ── 1. Parse & validate request ─────────────────────────────────────────
   let sessionId: string
   try {

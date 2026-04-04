@@ -1,3 +1,5 @@
+import { checkRateLimit, rateLimit429 } from '@/lib/rate-limit'
+import { getClientIp } from '@/lib/logger'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { generateAndStore } from '@/lib/generator'
@@ -42,6 +44,10 @@ function admin() {
 }
 
 export async function POST(req: NextRequest) {
+  const _ip = getClientIp(req.headers) ?? 'unknown'
+  const _rl = await checkRateLimit(_ip, 'generate')
+  if (!_rl.allowed) return rateLimit429(_rl)
+
   let body: { sessionId?: string }
   try {
     body = await req.json() as typeof body

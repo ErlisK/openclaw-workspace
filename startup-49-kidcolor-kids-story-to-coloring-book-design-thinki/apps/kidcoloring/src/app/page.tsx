@@ -277,7 +277,10 @@ export default function LandingPage() {
             <div>
               <p className="font-bold text-gray-700 mb-2">About</p>
               <ul className="space-y-1 text-sm text-gray-500">
-                <li><span className="text-gray-400">COPPA compliant</span></li>
+                <li><span className="text-gray-400">COPPA compliant</span>
+                <li><Link href="/privacy" className="hover:text-violet-600">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-violet-600">Terms of Service</Link></li>
+                <li><Link href="/coppa" className="hover:text-violet-600">COPPA Notice</Link></li></li>
                 <li><span className="text-gray-400">No child PII stored</span></li>
                 <li><a href="/admin" className="hover:text-violet-600">Admin</a></li>
               </ul>
