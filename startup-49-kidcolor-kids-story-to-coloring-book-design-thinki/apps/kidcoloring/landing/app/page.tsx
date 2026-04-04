@@ -11,7 +11,12 @@ const PACKS = [
   { emoji: '🌊', name: 'Ocean', color: '#cffafe', border: '#0891b2' },
 ]
 
-const AGE_BRACKETS = ['2–3', '4–5', '6–7', '8–9', '10–12', '13+']
+const AGE_BRACKETS = [
+  { label: '3–4 years', value: '3-4' },
+  { label: '5–7 years', value: '5-7' },
+  { label: '8–10 years', value: '8-10' },
+  { label: '11–12 years', value: '11-12' },
+]
 
 const styles: Record<string, React.CSSProperties> = {
   hero: {
@@ -308,7 +313,7 @@ export default function Home() {
                 >
                   <option value="">Select age range</option>
                   {AGE_BRACKETS.map((b) => (
-                    <option key={b} value={b}>{b} years</option>
+                    <option key={b.value} value={b.value}>{b.label}</option>
                   ))}
                 </select>
               </div>
