@@ -1,8 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useTextToSpeech } from '@/hooks/useTTS'
 import TTSButton from '@/components/TTSButton'
 
@@ -32,13 +32,64 @@ const AGES = [
   { id: '8-11', label: '8–11', desc: 'Detailed' },
 ]
 
-export default function InterestsPage() {
+export default function InterestsPageWrapper() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-2 border-violet-200 border-t-violet-500 rounded-full animate-spin"/></div>}>
+      <InterestsPage />
+    </Suspense>
+  )
+}
+
+function InterestsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const voiceMode = searchParams.get('mode') === 'voice'
   const [selected, setSelected] = useState<string[]>([])
   const [age, setAge]           = useState('4-6')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
+  const [listening, setListening] = useState(false)
+  const [transcript, setTranscript] = useState('')
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null)
   const tts = useTextToSpeech()
+
+  // Voice stub: start/stop mic
+  const startListening = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      setError('Voice input not supported in this browser — please tap the tiles below.')
+      return
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rec = new (SpeechRecognition as any)()
+    rec.continuous = false; rec.interimResults = true; rec.lang = 'en-US'
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    rec.onresult = (e: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const t = Array.from(e.results).map((r: any) => r[0].transcript).join(' ')
+      setTranscript(t)
+      // Auto-select any interests that match spoken words
+      const words = t.toLowerCase()
+      INTERESTS.forEach(interest => {
+        if (words.includes(interest.id) || words.includes(interest.label.toLowerCase())) {
+          setSelected(s => s.includes(interest.id) || s.length >= 3 ? s : [...s, interest.id])
+        }
+      })
+    }
+    rec.onend = () => setListening(false)
+    rec.onerror = () => { setListening(false); setError('Mic error — tap the tiles instead.') }
+    rec.start()
+    recognitionRef.current = rec
+    setListening(true)
+    setTranscript('')
+  }
+
+  const stopListening = () => {
+    recognitionRef.current?.stop()
+    setListening(false)
+  }
 
   // Announce selection changes to TTS
   useEffect(() => {
@@ -69,23 +120,43 @@ export default function InterestsPage() {
     setError('')
     tts.speak('Making your coloring book now! Get ready.')
 
-    await fetch('/api/v1/event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: 'configure_complete', props: { concept: 'interest-packs', interests: selected, age } }),
-    })
-
     try {
       const resp = await fetch('/api/v1/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           concept: 'interest-packs',
-          config: { interests: selected, ageRange: age },
+          config: {
+            interests: selected, ageRange: age,
+            sourceVariant: voiceMode ? 'voice' : 'tiles',
+          },
         }),
       })
-      const data = await resp.json() as { sessionId?: string; error?: string }
+      const data = await resp.json() as { sessionId?: string; sessionToken?: string; error?: string }
       if (!resp.ok || !data.sessionId) throw new Error(data.error || 'Failed to create session')
+
+      await fetch('/api/v1/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'configure_complete',
+          sessionId: data.sessionId,
+          props: {
+            concept: 'interest-packs', interests: selected, age_range: age,
+            input_mode: voiceMode ? 'voice' : 'tiles',
+            experiment_variant: voiceMode ? 'C' : 'A',
+          },
+        }),
+      }).catch(() => {})
+
+      // Log experiment assignments
+      if (data.sessionToken) {
+        fetch('/api/v1/assign', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: data.sessionId, sessionToken: data.sessionToken }),
+        }).catch(() => {})
+      }
+
       router.push(`/create/preview/${data.sessionId}`)
     } catch (e) {
       setError(String(e))
@@ -119,6 +190,44 @@ export default function InterestsPage() {
             </h1>
             <p className="text-gray-600">Pick 2 or 3 things — we&apos;ll make their book</p>
           </div>
+
+          {/* ── Variant C: Voice stub ────────────────────────────────────── */}
+          {voiceMode && (
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 rounded-3xl p-6 mb-6 text-center">
+              <p className="font-bold text-gray-800 mb-1 text-lg">Speak what your kid loves 🎤</p>
+              <p className="text-sm text-gray-500 mb-4">
+                Say things like &quot;dinosaurs, space, and unicorns&quot;
+              </p>
+              <button
+                onClick={listening ? stopListening : startListening}
+                aria-pressed={listening}
+                aria-label={listening ? 'Stop listening' : 'Start voice input'}
+                className={`w-20 h-20 rounded-full text-4xl flex items-center justify-center mx-auto mb-4 transition-all shadow-lg
+                  ${listening
+                    ? 'bg-red-500 text-white animate-pulse scale-110'
+                    : 'bg-violet-600 text-white hover:bg-violet-700'
+                  }`}
+              >
+                {listening ? '⏹' : '🎤'}
+              </button>
+              {listening && (
+                <p className="text-sm text-violet-600 font-medium animate-pulse">
+                  Listening… speak now
+                </p>
+              )}
+              {transcript && (
+                <p className="text-sm text-gray-600 mt-2 italic">&quot;{transcript}&quot;</p>
+              )}
+              {selected.length > 0 && (
+                <p className="text-sm text-green-600 font-medium mt-2">
+                  Heard: {selected.map(s => INTERESTS.find(i => i.id === s)?.label).join(', ')}
+                </p>
+              )}
+              <p className="text-xs text-gray-400 mt-3">
+                Or tap the tiles below to pick manually
+              </p>
+            </div>
+          )}
 
           {/* Interest grid — ARIA group with live status */}
           <div

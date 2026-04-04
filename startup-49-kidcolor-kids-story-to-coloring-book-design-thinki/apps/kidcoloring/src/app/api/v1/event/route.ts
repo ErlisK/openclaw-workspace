@@ -22,7 +22,8 @@ const VALID_EVENTS = new Set([
   // UI interactions
   'save_prompted', 'upsell_shown', 'upsell_clicked',
   // PDF export pipeline
-  'pdf_export_started', 'pdf_generated', 'pdf_download_clicked', 'flag_changed',
+  'pdf_export_started', 'pdf_generated', 'pdf_download_clicked',
+  'flag_changed', 'experiment_assigned', 'upsell_dismissed', 'csat_submitted', 'paywall_shown', 'survey_submitted',
   // Errors
   'generation_failed', 'session_error',
 ])

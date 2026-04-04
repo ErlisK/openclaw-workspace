@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useParams, useSearchParams } from 'next/navigation'
+import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/auth-client'
 import { useTextToSpeech } from '@/hooks/useTTS'
 import TTSButton from '@/components/TTSButton'
 import { useFlags } from '@/hooks/useFlags'
+import { getVariantConfig } from '@/lib/experiments'
 
-// Lazy-load the email gate to keep initial bundle small
+// Lazy-load modals to keep initial bundle small
 const EmailGateModal = dynamic(() => import('@/components/EmailGateModal'), { ssr: false })
+const UpsellModal    = dynamic(() => import('@/components/UpsellModal'),    { ssr: false })
+const CSATWidget     = dynamic(() => import('@/components/CSATWidget'),     { ssr: false })
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Page {
@@ -50,11 +53,25 @@ export default function PreviewPage() {
   const [pdfLoading,   setPdfLoading]   = useState(false)
   const [pdfUrl,       setPdfUrl]       = useState<string | null>(null)
   const [pdfError,     setPdfError]     = useState('')
+  const [showUpsell,   setShowUpsell]   = useState(false)
+  const [showCSAT,     setShowCSAT]     = useState(false)
+  const [upsellDone,   setUpsellDone]   = useState(false)
   const generatingRef  = useRef(false)
   const tts            = useTextToSpeech()
+  const router         = useRouter()
   const { flags }      = useFlags()
   // Track which pages we've already announced via TTS (to avoid repeats)
   const announcedPages = useRef<Set<string>>(new Set())
+
+  // ── Experiment variants (derived from session token once loaded) ──────────
+  const [expVariants, setExpVariants] = useState<Record<string, string>>({})
+  const upsellVariant = expVariants['upsell_price_v1'] ?? 'B'
+  const upsellConfig  = getVariantConfig(session?.session_token ?? '', 'upsell_price_v1') as
+    { price?: number; pages?: number }
+  const exportVariant = expVariants['export_cta_v1'] ?? 'A'
+
+  // Derive CTA label from export_cta_v1 experiment
+  const exportCtaLabel = exportVariant === 'B' ? 'Get my coloring book' : 'Download PDF'
 
   // ── Auth check ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -184,6 +201,17 @@ export default function PreviewPage() {
 
       setShareUrl(`${window.location.origin}/share/${data.session.share_slug}`)
 
+      // Log experiment assignments (fire-and-forget)
+      fetch('/api/v1/assign', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          sessionToken: data.session.session_token,
+        }),
+      }).then(r => r.json()).then((d: { variants?: Record<string, string> }) => {
+        if (d.variants) setExpVariants(d.variants)
+      }).catch(() => {})
+
       await fetch(`/api/v1/session/${sessionId}`, {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ preview_opened_at: new Date().toISOString() }),
@@ -232,11 +260,12 @@ export default function PreviewPage() {
       const checkData = await checkRes.json() as { exists: boolean; pdfUrl?: string }
       if (checkData.exists && checkData.pdfUrl) {
         setPdfUrl(checkData.pdfUrl)
-        window.open(checkData.pdfUrl, '_blank')
         fetch('/api/v1/event', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event: 'pdf_download_clicked', sessionId, props: { source: 'cached' } }),
         }).catch(() => {/* non-critical */})
+        // Route to paywall with existing PDF URL
+        router.push(`/create/preview/${sessionId}/paywall?pdf=${encodeURIComponent(checkData.pdfUrl)}`)
         return
       }
 
@@ -253,11 +282,12 @@ export default function PreviewPage() {
       }
       const data = await res.json() as { pdfUrl: string; pdfSizeKb: number; qualityCheck: { pass: number; fail: number } }
       setPdfUrl(data.pdfUrl)
-      window.open(data.pdfUrl, '_blank')
       fetch('/api/v1/event', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: 'pdf_download_clicked', sessionId, props: { source: 'generated', sizeKb: data.pdfSizeKb } }),
       }).catch(() => {/* non-critical */})
+      // Redirect to paywall (fake-door) with PDF URL as query param
+      router.push(`/create/preview/${sessionId}/paywall?pdf=${encodeURIComponent(data.pdfUrl)}`)
     } catch {
       setPdfError('Could not generate PDF — opening print view instead')
       window.open(`/create/preview/${sessionId}/print`, '_blank')
@@ -309,6 +339,15 @@ export default function PreviewPage() {
   const heroName  = session?.config?.heroName as string | undefined
   const concept   = session?.concept === 'story-to-book' ? '📖 Story' : '🎯 Interest Pack'
 
+  // Show upsell modal 1.5s after book completes (only once)
+  useEffect(() => {
+    if (!allDone || upsellDone || donePages.length === 0) return
+    const t = setTimeout(() => {
+      setShowUpsell(true)
+    }, 1500)
+    return () => clearTimeout(t)
+  }, [allDone, upsellDone, donePages.length])
+
   if (loadError) return (
     <div className="min-h-screen flex items-center justify-center text-center px-4">
       <div>
@@ -345,6 +384,27 @@ export default function PreviewPage() {
           onSkip={() => { setShowGate(false); if (gateAction === 'export') doExport() }}
           onSent={() => { setShowGate(false) }}
           onAuthed={() => { setShowGate(false); setIsAuthed(true); setIsSaved(true); doExport() }}
+        />
+      )}
+
+      {/* Upsell modal (fake-door pricing) — shown 1.5s after book complete */}
+      {showUpsell && session && (
+        <UpsellModal
+          price={upsellConfig.price ?? 9.99}
+          pages={upsellConfig.pages ?? 12}
+          variant={upsellVariant}
+          sessionId={sessionId}
+          onClose={() => {
+            setShowUpsell(false)
+            setUpsellDone(true)
+            // Show CSAT after brief pause
+            setTimeout(() => setShowCSAT(true), 800)
+          }}
+          onSkipToExport={() => {
+            setShowUpsell(false)
+            setUpsellDone(true)
+            doExport()
+          }}
         />
       )}
 
@@ -393,7 +453,7 @@ export default function PreviewPage() {
                   className="text-sm px-3 py-2 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1">
                   {pdfLoading
                     ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block"/></>
-                    : <>🖨️ <span className="hidden sm:inline">{pdfUrl ? 'Re-download PDF' : 'Download PDF'}</span></>
+                    : <>🖨️ <span className="hidden sm:inline">{pdfUrl ? 'Re-download PDF' : exportCtaLabel}</span></>
                   }
                 </button>
               </>
@@ -443,7 +503,7 @@ export default function PreviewPage() {
                 className="bg-green-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-green-700 whitespace-nowrap disabled:opacity-60 flex items-center gap-1.5">
                 {pdfLoading
                   ? <><span className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block"/> Generating PDF…</>
-                  : <>{pdfUrl ? '↓ Re-download PDF' : '↓ Download PDF'}</>
+                  : <>{pdfUrl ? '↓ Re-download PDF' : '↓ ' + exportCtaLabel}</>
                 }
               </button>
             </div>
@@ -541,15 +601,30 @@ export default function PreviewPage() {
               </div>
             )}
 
-            {/* Full book upsell */}
-            <div className="bg-gradient-to-r from-violet-600 to-blue-600 rounded-2xl p-6 text-white text-center">
-              <p className="text-xl font-extrabold mb-1">Love it? Get all 12 pages! 🎨</p>
-              <p className="text-violet-200 text-sm mb-4">Full 12-page book · Custom cover · PDF download · $9.99</p>
-              <button className="bg-white text-violet-700 font-bold px-6 py-3 rounded-xl hover:bg-violet-50 transition-colors">
-                Upgrade — $9.99
-              </button>
-              <p className="text-xs text-violet-300 mt-2">Coming soon · Join waitlist</p>
-            </div>
+            {/* CSAT widget — shown after upsell is dismissed */}
+            {showCSAT && (
+              <CSATWidget
+                sessionId={sessionId}
+                onDone={() => setShowCSAT(false)}
+              />
+            )}
+
+            {/* Full book upsell — shown if upsell modal hasn't fired yet or was skipped */}
+            {upsellDone && (
+              <div className="bg-gradient-to-r from-violet-600 to-blue-600 rounded-2xl p-6 text-white text-center">
+                <p className="text-xl font-extrabold mb-1">Want all 12 pages? 🎨</p>
+                <p className="text-violet-200 text-sm mb-4">
+                  Full {upsellConfig.pages ?? 12}-page book · Custom cover · PDF download ·
+                  {' '}${(upsellConfig.price ?? 9.99).toFixed(2)}
+                </p>
+                <button
+                  onClick={() => setShowUpsell(true)}
+                  className="bg-white text-violet-700 font-bold px-6 py-3 rounded-xl hover:bg-violet-50 transition-colors">
+                  Upgrade — ${(upsellConfig.price ?? 9.99).toFixed(2)}
+                </button>
+                <p className="text-xs text-violet-300 mt-2">Joining waitlist · Launching soon</p>
+              </div>
+            )}
           </div>
         )}
 
