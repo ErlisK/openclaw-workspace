@@ -1,9 +1,52 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const RISK_COLORS: Record<string, string> = { high: "#ef4444", medium: "#f59e0b", low: "#10b981" };
 const RISK_BG: Record<string, string> = { high: "rgba(239,68,68,0.1)", medium: "rgba(245,158,11,0.1)", low: "rgba(16,185,129,0.1)" };
 const CAT_ICONS: Record<string, string> = { pricing: "💰", legal: "⚖️", operational: "🔧", security: "🔒", vendor_risk: "🏢" };
+
+const REASON_TAGS: Record<string, { label: string; color: string }[]> = {
+  useful: [
+    { label: "pricing_change", color: "#f59e0b" },
+    { label: "terms_change", color: "#ef4444" },
+    { label: "security_risk", color: "#ef4444" },
+    { label: "affects_billing", color: "#f59e0b" },
+    { label: "affects_api", color: "#6366f1" },
+    { label: "operational_impact", color: "#10b981" },
+  ],
+  acknowledge: [
+    { label: "already_aware", color: "#6366f1" },
+    { label: "monitoring", color: "#6366f1" },
+    { label: "escalated", color: "#f59e0b" },
+    { label: "scheduled", color: "#10b981" },
+  ],
+  snooze: [
+    { label: "investigating", color: "#f59e0b" },
+    { label: "low_priority_now", color: "#6366f1" },
+    { label: "not_applicable", color: "var(--muted)" },
+    { label: "deferred", color: "var(--muted)" },
+  ],
+  not_useful: [
+    { label: "false_positive", color: "#ef4444" },
+    { label: "not_applicable", color: "var(--muted)" },
+    { label: "out_of_scope", color: "var(--muted)" },
+    { label: "duplicate", color: "var(--muted)" },
+  ],
+};
+
+const SNOOZE_OPTIONS = [
+  { key: "1h", label: "1 hour" },
+  { key: "24h", label: "24 hours" },
+  { key: "7d", label: "7 days" },
+  { key: "30d", label: "30 days" },
+];
+
+const REACTION_DISPLAY: Record<string, { emoji: string; label: string; bg: string; color: string }> = {
+  useful: { emoji: "👍", label: "Useful", bg: "rgba(16,185,129,0.15)", color: "#10b981" },
+  acknowledge: { emoji: "✓", label: "Acknowledged", bg: "rgba(99,102,241,0.15)", color: "#6366f1" },
+  snooze: { emoji: "💤", label: "Snoozed", bg: "rgba(255,255,255,0.08)", color: "var(--muted)" },
+  not_useful: { emoji: "👎", label: "Not useful", bg: "rgba(239,68,68,0.15)", color: "#ef4444" },
+};
 
 interface Alert {
   id: string;
@@ -15,7 +58,7 @@ interface Alert {
   source_url?: string;
   is_read: boolean;
   created_at: string;
-  reaction?: { reaction: string } | null;
+  reaction?: { reaction: string; reason_tag?: string | null; snoozed_until?: string | null } | null;
 }
 
 interface Brief {
@@ -24,6 +67,7 @@ interface Brief {
   alerts_count: number;
   critical_count: number;
   email_status: string;
+  sent_at?: string | null;
 }
 
 interface Connector {
@@ -34,22 +78,100 @@ interface Connector {
   last_diff_count: number;
 }
 
-function AlertCard({ alert, token, onReacted }: { alert: Alert; token: string; onReacted: (id: string, r: string) => void }) {
+// Reason tag picker popover
+function ReasonTagPicker({
+  reaction, onSelect, onClose,
+}: { reaction: string; onSelect: (tag: string | null, snooze?: string) => void; onClose: () => void }) {
+  const [snooze, setSnooze] = useState("24h");
+  const tags = REASON_TAGS[reaction] ?? [];
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [onClose]);
+
+  return (
+    <div ref={ref} style={{
+      position: "absolute", bottom: "calc(100% + 8px)", right: 0, zIndex: 100,
+      background: "var(--card-bg)", border: "1px solid var(--border)", borderRadius: 10,
+      padding: "0.75rem", minWidth: 240, boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+    }}>
+      {reaction === "snooze" && (
+        <div style={{ marginBottom: "0.6rem" }}>
+          <div style={{ fontSize: "0.7rem", color: "var(--muted)", textTransform: "uppercase", marginBottom: "0.4rem" }}>Snooze duration</div>
+          <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap" }}>
+            {SNOOZE_OPTIONS.map(o => (
+              <button key={o.key} onClick={() => setSnooze(o.key)} style={{
+                fontSize: "0.7rem", padding: "2px 8px", borderRadius: 9999, cursor: "pointer",
+                background: snooze === o.key ? "var(--accent)" : "transparent",
+                border: `1px solid ${snooze === o.key ? "var(--accent)" : "var(--border)"}`,
+                color: snooze === o.key ? "#fff" : "var(--muted)",
+              }}>{o.label}</button>
+            ))}
+          </div>
+        </div>
+      )}
+      <div style={{ fontSize: "0.7rem", color: "var(--muted)", textTransform: "uppercase", marginBottom: "0.4rem" }}>
+        Reason tag <span style={{ opacity: 0.5 }}>(optional)</span>
+      </div>
+      <div style={{ display: "flex", gap: "0.3rem", flexWrap: "wrap", marginBottom: "0.5rem" }}>
+        {tags.map(t => (
+          <button key={t.label} onClick={() => onSelect(t.label, reaction === "snooze" ? snooze : undefined)} style={{
+            fontSize: "0.7rem", padding: "2px 8px", borderRadius: 9999, cursor: "pointer",
+            background: "transparent", border: `1px solid ${t.color}30`, color: t.color,
+          }}>{t.label.replace(/_/g, " ")}</button>
+        ))}
+      </div>
+      <button onClick={() => onSelect(null, reaction === "snooze" ? snooze : undefined)} style={{
+        fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, cursor: "pointer",
+        background: "transparent", border: "1px solid var(--border)", color: "var(--muted)", width: "100%",
+      }}>
+        {reaction === "snooze" ? `💤 Snooze ${SNOOZE_OPTIONS.find(o => o.key === snooze)?.label ?? "24h"} (no tag)` : "Skip tag"}
+      </button>
+    </div>
+  );
+}
+
+function AlertCard({ alert, token, onReacted }: {
+  alert: Alert; token: string;
+  onReacted: (id: string, r: string, reason?: string | null, snoozedUntil?: string | null) => void;
+}) {
   const [loading, setLoading] = useState(false);
   const [localReaction, setLocalReaction] = useState(alert.reaction?.reaction ?? null);
+  const [localReason, setLocalReason] = useState(alert.reaction?.reason_tag ?? null);
+  const [localSnooze, setLocalSnooze] = useState(alert.reaction?.snoozed_until ?? null);
+  const [pendingReaction, setPendingReaction] = useState<string | null>(null);
 
-  async function react(reaction: string) {
+  async function react(reaction: string, reason_tag?: string | null, snooze_duration?: string) {
     if (loading) return;
     setLoading(true);
     try {
+      const body: Record<string, string> = { alert_id: alert.id, reaction };
+      if (reason_tag) body.reason_tag = reason_tag;
+      if (snooze_duration) body.snooze_duration = snooze_duration;
       const res = await fetch("/api/react", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Org-Token": token },
-        body: JSON.stringify({ alert_id: alert.id, reaction }),
+        body: JSON.stringify(body),
       });
-      if (res.ok) { setLocalReaction(reaction); onReacted(alert.id, reaction); }
-    } finally { setLoading(false); }
+      if (res.ok) {
+        const data = await res.json();
+        setLocalReaction(reaction);
+        setLocalReason(reason_tag ?? null);
+        setLocalSnooze(data.snoozed_until ?? null);
+        onReacted(alert.id, reaction, reason_tag, data.snoozed_until);
+      }
+    } finally {
+      setLoading(false);
+      setPendingReaction(null);
+    }
   }
+
+  const rd = localReaction ? REACTION_DISPLAY[localReaction] : null;
 
   return (
     <div style={{
@@ -74,20 +196,55 @@ function AlertCard({ alert, token, onReacted }: { alert: Alert; token: string; o
           {alert.summary.slice(0, 200)}{alert.summary.length > 200 ? "…" : ""}
         </div>
       )}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative" }}>
         {alert.source_url
           ? <a href={alert.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.7rem", color: "var(--accent-light)", textDecoration: "none" }}>View source →</a>
           : <span />}
-        <div style={{ display: "flex", gap: "0.35rem" }}>
-          {localReaction ? (
-            <span style={{ fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, background: localReaction === "useful" ? "rgba(16,185,129,0.15)" : localReaction === "not_useful" ? "rgba(239,68,68,0.15)" : "rgba(255,255,255,0.08)", color: localReaction === "useful" ? "#10b981" : localReaction === "not_useful" ? "#ef4444" : "var(--muted)" }}>
-              {localReaction === "useful" ? "👍 Useful" : localReaction === "not_useful" ? "👎 Not useful" : "✓ Acknowledged"}
-            </span>
+
+        <div style={{ display: "flex", gap: "0.35rem", alignItems: "center", position: "relative" }}>
+          {rd ? (
+            <div style={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
+              <span style={{ fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, background: rd.bg, color: rd.color }}>
+                {rd.emoji} {rd.label}
+              </span>
+              {localReason && (
+                <span style={{ fontSize: "0.63rem", padding: "2px 7px", borderRadius: 9999, background: "rgba(255,255,255,0.06)", color: "var(--muted)" }}>
+                  {localReason.replace(/_/g, " ")}
+                </span>
+              )}
+              {localSnooze && (
+                <span style={{ fontSize: "0.63rem", color: "var(--muted)" }}>
+                  until {new Date(localSnooze).toLocaleDateString()}
+                </span>
+              )}
+            </div>
           ) : (
             <>
-              <button onClick={() => react("useful")} disabled={loading} style={{ fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, border: "1px solid rgba(16,185,129,0.3)", background: "transparent", color: "#10b981", cursor: "pointer" }}>👍 Useful</button>
-              <button onClick={() => react("acknowledge")} disabled={loading} style={{ fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, border: "1px solid var(--border)", background: "transparent", color: "var(--muted)", cursor: "pointer" }}>✓ Ack</button>
-              <button onClick={() => react("not_useful")} disabled={loading} style={{ fontSize: "0.7rem", padding: "3px 10px", borderRadius: 9999, border: "1px solid rgba(239,68,68,0.2)", background: "transparent", color: "#ef4444", cursor: "pointer" }}>👎 Not useful</button>
+              {(["useful", "acknowledge", "snooze", "not_useful"] as const).map(r => {
+                const disp = REACTION_DISPLAY[r];
+                return (
+                  <div key={r} style={{ position: "relative" }}>
+                    <button
+                      onClick={() => setPendingReaction(pendingReaction === r ? null : r)}
+                      disabled={loading}
+                      style={{
+                        fontSize: "0.7rem", padding: "3px 8px", borderRadius: 9999,
+                        border: `1px solid ${r === "useful" ? "rgba(16,185,129,0.3)" : r === "not_useful" ? "rgba(239,68,68,0.2)" : r === "snooze" ? "rgba(255,255,255,0.1)" : "var(--border)"}`,
+                        background: pendingReaction === r ? (disp.bg) : "transparent",
+                        color: disp.color, cursor: "pointer",
+                      }}>
+                      {disp.emoji} {r === "acknowledge" ? "Ack" : r === "not_useful" ? "Not useful" : r.charAt(0).toUpperCase() + r.slice(1)}
+                    </button>
+                    {pendingReaction === r && (
+                      <ReasonTagPicker
+                        reaction={r}
+                        onSelect={(tag, snooze) => react(r, tag, snooze)}
+                        onClose={() => setPendingReaction(null)}
+                      />
+                    )}
+                  </div>
+                );
+              })}
             </>
           )}
         </div>
@@ -109,13 +266,14 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState("");
 
-  function onReacted(alertId: string, reaction: string) {
-    setAlerts(prev => prev.map(a => a.id === alertId ? { ...a, is_read: true, reaction: { reaction } } : a));
+  function onReacted(alertId: string, reaction: string, reason?: string | null, snoozedUntil?: string | null) {
+    setAlerts(prev => prev.map(a => a.id === alertId
+      ? { ...a, is_read: true, reaction: { reaction, reason_tag: reason ?? null, snoozed_until: snoozedUntil ?? null } }
+      : a));
   }
 
   async function handleRefresh() {
-    setRefreshing(true);
-    setRefreshMsg("");
+    setRefreshing(true); setRefreshMsg("");
     try {
       const res = await fetch("/api/alerts/generate", {
         method: "POST",
@@ -135,8 +293,14 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
     medium: alerts.filter(a => a.risk_level === "medium").length,
     low: alerts.filter(a => a.risk_level === "low").length,
     unread: alerts.filter(a => !a.is_read).length,
+    reacted: alerts.filter(a => !!a.reaction).length,
   };
   const filtered = filter === "all" ? alerts : alerts.filter(a => a.risk_level === filter);
+
+  // Engagement metrics
+  const reactedAlerts = alerts.filter(a => !!a.reaction);
+  const engagementRate = alerts.length > 0 ? Math.round(100 * reactedAlerts.length / alerts.length) : 0;
+  const fpRate = reactedAlerts.length > 0 ? Math.round(100 * reactedAlerts.filter(a => a.reaction?.reaction === "not_useful").length / reactedAlerts.length) : 0;
 
   return (
     <div style={{ padding: "2rem 0" }}>
@@ -157,7 +321,7 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
         </div>
 
         {/* Connectors */}
-        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.5rem", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "0.5rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
           {connectors.map(c => (
             <div key={c.type} className="tag" style={{ padding: "0.3rem 0.75rem", fontSize: "0.72rem", borderColor: "rgba(99,102,241,0.4)" }}>
               {c.type === "workspace" ? "🔵" : c.type === "stripe" ? "💳" : "🔗"} {c.label}
@@ -166,18 +330,19 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
           ))}
         </div>
 
-        {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(110px,1fr))", gap: "0.65rem", marginBottom: "1.5rem" }}>
+        {/* Stats strip */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px,1fr))", gap: "0.65rem", marginBottom: "1.5rem" }}>
           {[
             { label: "Total Alerts", value: liveStats.total, color: "var(--accent-light)" },
-            { label: "Unread", value: liveStats.unread, color: "var(--warning)" },
+            { label: "Unread", value: liveStats.unread, color: "#f59e0b" },
             { label: "🔴 High", value: liveStats.high, color: "#ef4444" },
-            { label: "🟡 Medium", value: liveStats.medium, color: "#f59e0b" },
-            { label: "🟢 Low", value: liveStats.low, color: "#10b981" },
+            { label: "Reacted", value: liveStats.reacted, color: "#10b981" },
+            { label: "Engagement", value: `${engagementRate}%`, color: "#10b981" },
+            { label: "FP Rate", value: `${fpRate}%`, color: fpRate > 25 ? "#ef4444" : "#10b981" },
           ].map(s => (
-            <div key={s.label} className="card" style={{ padding: "0.9rem 1rem", textAlign: "center" }}>
-              <div style={{ fontSize: "1.6rem", fontWeight: 800, color: s.color }}>{s.value}</div>
-              <div style={{ fontSize: "0.67rem", color: "var(--muted)", textTransform: "uppercase", marginTop: 2 }}>{s.label}</div>
+            <div key={s.label} className="card" style={{ padding: "0.75rem 0.5rem", textAlign: "center" }}>
+              <div style={{ fontSize: "1.35rem", fontWeight: 800, color: s.color }}>{s.value}</div>
+              <div style={{ fontSize: "0.63rem", color: "var(--muted)", textTransform: "uppercase", marginTop: 2 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -191,7 +356,7 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
           ))}
         </div>
 
-        {/* Alerts */}
+        {/* Alert list */}
         {filtered.length === 0 ? (
           <div className="card" style={{ padding: "2.5rem", textAlign: "center", color: "var(--muted)" }}>
             <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>📡</div>
@@ -202,7 +367,7 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
           filtered.map(alert => <AlertCard key={alert.id} alert={alert} token={token} onReacted={onReacted} />)
         )}
 
-        {/* Weekly briefs */}
+        {/* Weekly brief history */}
         {briefs.length > 0 && (
           <div style={{ marginTop: "2rem" }}>
             <h3 style={{ fontSize: "0.875rem", fontWeight: 700, marginBottom: "0.65rem", color: "var(--muted)", textTransform: "uppercase" }}>📧 Weekly Brief History</h3>
@@ -214,6 +379,7 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
                     <span className="tag" style={{ fontSize: "0.67rem" }}>{b.alerts_count} alerts</span>
                     {b.critical_count > 0 && <span style={{ fontSize: "0.67rem", color: "#ef4444" }}>{b.critical_count} critical</span>}
                     <span style={{ fontSize: "0.67rem", color: b.email_status === "sent" ? "#10b981" : "var(--muted)" }}>{b.email_status === "sent" ? "✓ Sent" : b.email_status}</span>
+                    {b.sent_at && <span style={{ fontSize: "0.63rem", color: "var(--muted)" }}>{new Date(b.sent_at).toLocaleDateString()}</span>}
                   </div>
                 </div>
               ))}
@@ -221,10 +387,26 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
           </div>
         )}
 
+        {/* Reaction legend */}
+        <div style={{ marginTop: "1.5rem", padding: "0.75rem 1rem", background: "rgba(255,255,255,0.03)", borderRadius: 8, border: "1px solid var(--border)" }}>
+          <div style={{ fontSize: "0.68rem", color: "var(--muted)", textTransform: "uppercase", marginBottom: "0.4rem" }}>How to use reactions</div>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+            {Object.entries(REACTION_DISPLAY).map(([r, d]) => (
+              <div key={r} style={{ display: "flex", gap: "0.3rem", alignItems: "center", fontSize: "0.72rem", color: d.color }}>
+                <span>{d.emoji}</span><span>{d.label}</span>
+                {r === "snooze" && <span style={{ color: "var(--muted)", fontSize: "0.65rem" }}>(1h–30d)</span>}
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: "0.68rem", color: "var(--muted)", marginTop: "0.4rem" }}>
+            Click any reaction to optionally add a reason tag. Reason tags improve alert quality over time.
+          </div>
+        </div>
+
         {/* Footer */}
         <div style={{ marginTop: "2rem", padding: "1rem", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
           <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>Member since {new Date(orgCreatedAt).toLocaleDateString()} · ToS accepted {new Date(orgTosAt).toLocaleDateString()}</span>
-          <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>Questions? Reply to any brief email · All deposits 100% refundable</span>
+          <span style={{ fontSize: "0.7rem", color: "var(--muted)" }}>Questions? Reply to any brief email · Deposits 100% refundable</span>
         </div>
       </div>
     </div>

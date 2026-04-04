@@ -59,12 +59,17 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     supabaseAdmin.from("crr_visitors").select("session_id, created_at, path, variant").order("created_at", { ascending: false }),
     supabaseAdmin.from("crr_waitlist").select("email, company, role, created_at").order("created_at", { ascending: false }),
     supabaseAdmin.from("crr_deposits").select("email, status, amount_cents, created_at").order("created_at", { ascending: false }),
+    supabaseAdmin.from("crr_alert_reactions").select("alert_id, org_id, reaction, reason_tag, snoozed_until, created_at"),
+    supabaseAdmin.from("crr_tos_snapshots").select("url, vendor_slug, content_hash, change_count, status_code, last_checked_at"),
+    supabaseAdmin.from("crr_detector_runs").select("detector_type, run_at, new_diffs, orgs_alerted, error").order("run_at", { ascending: false }).limit(20),
+    supabaseAdmin.from("crr_webhook_events").select("source, event_type, risk_level, created_at").order("created_at", { ascending: false }).limit(30),
   ]);
 
   const orgList = orgs ?? [];
   const connList = connectors ?? [];
   const alertList = allAlerts ?? [];
-  const rxList = reactions ?? [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rxList: any[] = reactions ?? [];
   const briefList = briefs ?? [];
 
   // Per-org stats
@@ -75,7 +80,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     const orgBriefs = briefList.filter((b: { org_id: string }) => b.org_id === orgId);
     const orgConn = connList.filter((c: { org_id: string }) => c.org_id === orgId);
 
-    const engaged = orgRx.filter((r: { reaction: string }) => ["useful", "acknowledge"].includes(r.reaction)).length;
+    const engaged = orgRx.filter((r: { reaction: string }) => ["useful", "acknowledge", "snooze"].includes(r.reaction)).length;
     const notUseful = orgRx.filter((r: { reaction: string }) => r.reaction === "not_useful").length;
     const engagementRate = orgRx.length > 0 ? (engaged / orgRx.length) * 100 : null;
     const fpRate = orgRx.length > 0 ? (notUseful / orgRx.length) * 100 : null;
@@ -105,7 +110,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const orgsWithAlerts24h = orgList.filter(o => orgStats(o.id, o).firstAlertWithin24h).length;
   const totalAlerts = alertList.length;
   const totalRx = rxList.length;
-  const engaged = rxList.filter((r: { reaction: string }) => ["useful", "acknowledge"].includes(r.reaction)).length;
+  const engaged = rxList.filter((r: { reaction: string }) => ["useful", "acknowledge", "snooze"].includes(r.reaction)).length;
   const notUseful = rxList.filter((r: { reaction: string }) => r.reaction === "not_useful").length;
   const globalEngagement = totalRx > 0 ? (engaged / totalRx * 100).toFixed(1) : "—";
   const globalFP = totalRx > 0 ? (notUseful / totalRx * 100).toFixed(1) : "—";
@@ -255,7 +260,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
               <>
                 {[
                   { label: "👍 Useful", count: rxList.filter((r: { reaction: string }) => r.reaction === "useful").length, color: "#10b981" },
-                  { label: "✓ Acknowledge", count: rxList.filter((r: { reaction: string }) => r.reaction === "acknowledge").length, color: "var(--muted)" },
+                  { label: "✓ Acknowledge", count: rxList.filter((r: { reaction: string }) => r.reaction === "acknowledge").length, color: "#6366f1" },
+                  { label: "💤 Snooze", count: rxList.filter((r: { reaction: string }) => r.reaction === "snooze").length, color: "#888" },
                   { label: "👎 Not useful", count: notUseful, color: "#ef4444" },
                 ].map(r => (
                   <div key={r.label} style={{ marginBottom: "0.5rem" }}>
