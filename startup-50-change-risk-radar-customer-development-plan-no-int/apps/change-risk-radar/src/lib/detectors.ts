@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "./supabase";
 import { evaluateEvent, diffToRawEvent, type RawEvent } from "./rule-engine";
+import { diffToFacts, lookupTemplate, logSummaryAudit } from "./summarizer";
 
 // Vendor slugs mapped to each detector type
 export const DETECTOR_VENDOR_SLUGS: Record<string, string[]> = {
@@ -126,9 +127,18 @@ export async function runDetectorsForOrg(orgId: string): Promise<{
       const result = await evaluateEvent(event, { orgId });
 
       if (result.top_match) {
-        // Rule engine found a matching rule — use enriched classification
+        // Rule engine found a matching rule — use enriched classification + template
         const match = result.top_match;
         if (!existingTitles.has(match.title)) {
+          // Build full template output (impact + action)
+          const facts = diffToFacts({ ...diff, description: diff.description ?? "" });
+          facts.event_name = event.event_name;
+          facts.rule_name = match.rule.rule_name;
+          facts.confidence_score = match.score;
+          facts.match_reason = match.match_reason;
+          const { fn, key } = lookupTemplate(facts, match.risk_category, match.rule.detection_method);
+          const tpl = fn(facts);
+
           alertRows.push({
             org_id: orgId,
             diff_id: diff.id,
@@ -136,9 +146,16 @@ export async function runDetectorsForOrg(orgId: string): Promise<{
             risk_level: match.risk_level,
             risk_category: match.risk_category,
             severity: match.severity,
-            title: match.title,
-            summary: match.summary,
+            title: tpl.title.includes("change detected") ? match.title : tpl.title,
+            summary: tpl.summary,
+            impact_text: tpl.impact,
+            action_text: tpl.action,
             source_url: diff.source_url ?? "",
+            confidence: Math.round(match.score * 1000) / 1000,
+            raw_facts: facts,
+            template_key: key,
+            summary_method: "template",
+            detection_method: match.rule.detection_method,
           });
           existingDiffIds.add(diff.id);
           existingTitles.add(match.title);
@@ -148,6 +165,9 @@ export async function runDetectorsForOrg(orgId: string): Promise<{
         // No rule match: fall back to diff's own classification (passthrough)
         const fallbackTitle = diff.title;
         if (!existingTitles.has(fallbackTitle)) {
+          const facts = diffToFacts({ ...diff, description: diff.description ?? "" });
+          const { fn, key } = lookupTemplate(facts, diff.risk_category, diff.detection_method);
+          const tpl = fn(facts);
           alertRows.push({
             org_id: orgId,
             diff_id: diff.id,
@@ -155,9 +175,15 @@ export async function runDetectorsForOrg(orgId: string): Promise<{
             risk_level: diff.risk_level,
             risk_category: diff.risk_category,
             severity: diff.risk_level === "high" ? "critical" : "high",
-            title: fallbackTitle,
-            summary: diff.description ?? diff.summary ?? "",
+            title: tpl.title.includes("change detected") ? fallbackTitle : tpl.title,
+            summary: tpl.summary || diff.description || diff.summary || "",
+            impact_text: tpl.impact,
+            action_text: tpl.action,
             source_url: diff.source_url ?? "",
+            raw_facts: facts,
+            template_key: key,
+            summary_method: "passthrough",
+            detection_method: diff.detection_method,
           });
           existingDiffIds.add(diff.id);
           existingTitles.add(fallbackTitle);
@@ -166,10 +192,22 @@ export async function runDetectorsForOrg(orgId: string): Promise<{
     }
 
     if (alertRows.length) {
-      const { error: insertError } = await supabaseAdmin
+      const { data: inserted, error: insertError } = await supabaseAdmin
         .from("crr_org_alerts")
-        .insert(alertRows);
-      if (!insertError) totalNew += alertRows.length;
+        .insert(alertRows)
+        .select("id, org_id, template_key, summary_method");
+      if (!insertError) {
+        totalNew += alertRows.length;
+        // Log audit entries async (no await)
+        for (const row of (inserted ?? [])) {
+          logSummaryAudit(row.id, orgId, {
+            title: "", summary: "", impact: "", action: "",
+            method: row.summary_method as "template" | "passthrough",
+            templateKey: row.template_key ?? "unknown",
+            rawFacts: {},
+          }, 0);
+        }
+      }
     }
 
     // Update connector metadata

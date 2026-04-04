@@ -44,7 +44,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
   // Fetch alerts
   const { data: alerts } = await supabaseAdmin
     .from("crr_org_alerts")
-    .select("*")
+    .select("id, org_id, vendor_slug, risk_level, risk_category, severity, title, summary, impact_text, action_text, template_key, summary_method, confidence, source_url, is_read, created_at")
     .eq("org_id", org.id)
     .order("risk_level", { ascending: false })
     .order("created_at", { ascending: false })

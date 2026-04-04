@@ -53,8 +53,14 @@ interface Alert {
   vendor_slug: string;
   risk_level: string;
   risk_category: string;
+  severity?: string;
   title: string;
   summary?: string;
+  impact_text?: string;
+  action_text?: string;
+  template_key?: string;
+  summary_method?: string;
+  confidence?: number;
   source_url?: string;
   is_read: boolean;
   created_at: string;
@@ -192,8 +198,20 @@ function AlertCard({ alert, token, onReacted }: {
       </div>
       <div style={{ fontWeight: 700, fontSize: "0.875rem", marginBottom: "0.3rem" }}>{alert.title}</div>
       {alert.summary && (
-        <div style={{ fontSize: "0.8rem", color: "var(--muted)", marginBottom: "0.65rem", lineHeight: 1.5 }}>
-          {alert.summary.slice(0, 200)}{alert.summary.length > 200 ? "…" : ""}
+        <div style={{ fontSize: "0.8rem", color: "var(--muted)", marginBottom: alert.impact_text ? "0.4rem" : "0.65rem", lineHeight: 1.5 }}>
+          {alert.summary.slice(0, 220)}{alert.summary.length > 220 ? "…" : ""}
+        </div>
+      )}
+      {alert.impact_text && (
+        <div style={{ fontSize: "0.77rem", padding: "0.5rem 0.75rem", background: "rgba(245,158,11,0.07)", borderLeft: "3px solid rgba(245,158,11,0.4)", borderRadius: "0 4px 4px 0", marginBottom: "0.35rem", lineHeight: 1.45 }}>
+          <span style={{ fontWeight: 700, color: "#f59e0b", marginRight: "0.3rem" }}>Impact:</span>
+          <span style={{ color: "var(--muted)" }}>{alert.impact_text.slice(0, 180)}{alert.impact_text.length > 180 ? "…" : ""}</span>
+        </div>
+      )}
+      {alert.action_text && (
+        <div style={{ fontSize: "0.77rem", padding: "0.5rem 0.75rem", background: "rgba(99,102,241,0.07)", borderLeft: "3px solid rgba(99,102,241,0.3)", borderRadius: "0 4px 4px 0", marginBottom: "0.65rem", lineHeight: 1.45 }}>
+          <span style={{ fontWeight: 700, color: "var(--accent)", marginRight: "0.3rem" }}>Action:</span>
+          <span style={{ color: "var(--muted)" }}>{alert.action_text.slice(0, 180)}{alert.action_text.length > 180 ? "…" : ""}</span>
         </div>
       )}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative" }}>

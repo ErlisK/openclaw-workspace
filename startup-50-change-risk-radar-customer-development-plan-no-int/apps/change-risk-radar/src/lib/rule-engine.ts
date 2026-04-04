@@ -21,6 +21,7 @@
  */
 
 import { supabaseAdmin } from "./supabase";
+import { summarize, diffToFacts, lookupTemplate, type RawFacts } from "./summarizer";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -244,6 +245,18 @@ function buildAlertTitle(rule: StoredRule, event: RawEvent): string {
   if (event.title && event.title.length > 5 && !event.title.startsWith("[E2E")) {
     return event.title;
   }
+  // Try the template engine for a better title
+  const facts: RawFacts = {
+    event_name: event.event_name,
+    vendor_slug: event.vendor_slug,
+    source: event.source,
+    snippet: event.description?.slice(0, 200),
+  };
+  const { fn } = lookupTemplate(facts, rule.risk_category, rule.detection_method);
+  const out = fn(facts);
+  if (out.title && !out.title.includes("change detected") && out.title.length > 8) {
+    return out.title;
+  }
   // Fall back to rule-based title
   const categoryLabel: Record<string, string> = {
     pricing: "💰 Pricing Change",
@@ -258,13 +271,21 @@ function buildAlertTitle(rule: StoredRule, event: RawEvent): string {
 }
 
 function buildAlertSummary(rule: StoredRule, event: RawEvent, matchReason: string): string {
-  if (event.description && event.description.length > 10) {
-    return event.description;
-  }
-  const eventPart = event.event_name ? ` triggered by \`${event.event_name}\`` : "";
-  const methodPart = ` (${rule.detection_method.replace(/_/g, " ")})`;
-  return `${rule.rule_name}${eventPart} — matched via ${matchReason}${methodPart}. ` +
-    `Risk: ${rule.risk_level} ${rule.risk_category}. Confidence: ${(Math.random() * 0.1 + 0.9).toFixed(2)}.`;
+  // Use template engine for plain-English summary
+  const facts: RawFacts = {
+    event_name: event.event_name,
+    vendor_slug: event.vendor_slug,
+    vendor_display: event.vendor_slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase()),
+    source: event.source,
+    snippet: event.description?.slice(0, 200),
+    rule_name: rule.rule_name,
+    rule_category: rule.risk_category,
+    match_reason: matchReason,
+  };
+  const { fn } = lookupTemplate(facts, rule.risk_category, rule.detection_method);
+  const out = fn(facts);
+  // Return template summary; impact and action are stored separately (see evaluateAndGenerateAlerts)
+  return out.summary;
 }
 
 // ─── Core Rule Engine ────────────────────────────────────────────────────────
@@ -365,10 +386,17 @@ export async function evaluateAndGenerateAlerts(
   severity: string;
   title: string;
   summary: string;
+  impact_text: string;
+  action_text: string;
   source_url: string;
   rule_id: string | null;
   rule_name: string | null;
   rule_score: number | null;
+  confidence: number | null;
+  raw_facts: RawFacts | null;
+  template_key: string | null;
+  summary_method: string;
+  detection_method: string | null;
 }>> {
   const { deduplicate = true, maxAlertsPerEvent = 1 } = opts;
   const alertRows = [];
@@ -381,6 +409,37 @@ export async function evaluateAndGenerateAlerts(
 
     const topMatches = result.matches.slice(0, maxAlertsPerEvent);
     for (const match of topMatches) {
+      // Build RawFacts from the event for audit trail
+      const facts: RawFacts = diffToFacts({
+        id: event.diff_id,
+        vendor_slug: event.vendor_slug,
+        title: event.title,
+        description: event.description,
+        source_url: event.url,
+        risk_category: match.risk_category,
+        detection_method: match.rule.detection_method,
+      });
+      // Merge in event-specific facts
+      if (event.event_name) facts.event_name = event.event_name;
+      if (event.payload) {
+        const p = event.payload as Record<string, unknown>;
+        if (p.aws_user_name) facts.aws_user_name = p.aws_user_name as string;
+        if (p.aws_region) facts.aws_region = p.aws_region as string;
+        if (p.aws_source_ip) facts.aws_source_ip = p.aws_source_ip as string;
+        if (p.trail_name) facts.trail_name = p.trail_name as string;
+        if (p.bucket_name) facts.bucket_name = p.bucket_name as string;
+        if (p.workspace_actor) facts.workspace_actor = p.workspace_actor as string;
+        if (p.workspace_target) facts.workspace_target = p.workspace_target as string;
+      }
+      facts.rule_id = match.rule.id;
+      facts.rule_name = match.rule.rule_name;
+      facts.confidence_score = match.score;
+      facts.match_reason = match.match_reason;
+
+      // Get full template output (title + summary + impact + action)
+      const { fn, key } = lookupTemplate(facts, match.risk_category, match.rule.detection_method);
+      const templateOut = fn(facts);
+
       alertRows.push({
         org_id: orgId,
         diff_id: event.diff_id ?? null,
@@ -388,12 +447,19 @@ export async function evaluateAndGenerateAlerts(
         risk_level: match.risk_level,
         risk_category: match.risk_category,
         severity: match.severity,
-        title: match.title,
-        summary: match.summary,
+        title: templateOut.title !== "generic" ? templateOut.title : match.title,
+        summary: templateOut.summary,
+        impact_text: templateOut.impact,
+        action_text: templateOut.action,
         source_url: event.url ?? "",
         rule_id: match.rule.id,
         rule_name: match.rule.rule_name,
         rule_score: match.score,
+        confidence: Math.round(match.score * 1000) / 1000,
+        raw_facts: facts,
+        template_key: key,
+        summary_method: "template",
+        detection_method: match.rule.detection_method,
       });
 
       // Record rule trigger in background (don't await to keep latency low)
