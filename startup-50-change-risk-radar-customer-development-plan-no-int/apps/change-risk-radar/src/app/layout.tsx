@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Geist } from "next/font/google";
 import "./globals.css";
 import Nav from "@/components/Nav";
-
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"], display: "swap" });
 
 export const metadata: Metadata = {
   title: "Change Risk Radar – Know Before Vendor Changes Break Your Business",
@@ -30,7 +27,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable}`}>
+      <body>
         <Nav />
         <main id="main-content">{children}</main>
         <footer>
