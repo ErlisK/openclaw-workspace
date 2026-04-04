@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import { runDetectorsForOrg } from "@/lib/detectors";
+import { notifyBatch, type AlertPayload } from "@/lib/notifier";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -39,6 +40,19 @@ export async function POST(req: NextRequest) {
 
   if (orgId) {
     const result = await runDetectorsForOrg(orgId);
+    // Trigger notifications for new critical/high alerts
+    if (result.newAlerts > 0) {
+      const { data: newAlerts } = await supabaseAdmin
+        .from("crr_org_alerts")
+        .select("id, org_id, vendor_slug, risk_level, risk_category, severity, title, summary, source_url, created_at")
+        .eq("org_id", orgId)
+        .in("severity", ["critical", "high"])
+        .gte("created_at", new Date(Date.now() - 60 * 1000).toISOString())
+        .limit(10);
+      if (newAlerts?.length) {
+        await notifyBatch(orgId, newAlerts as AlertPayload[]).catch(() => null);
+      }
+    }
     return NextResponse.json({ ok: true, ...result });
   }
   return runAllOrgs();

@@ -254,13 +254,15 @@ function AlertCard({ alert, token, onReacted }: {
 }
 
 interface Props {
+  orgId: string;
   orgName: string; orgSlug: string; orgEmail: string; orgPlan: string;
   orgCreatedAt: string; orgTosAt: string; token: string;
   alerts: Alert[]; stats: { total: number; unread: number; high: number; medium: number; low: number };
   briefs: Brief[]; connectors: Connector[];
+  notifChannelCount?: number;
 }
 
-export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors }: Props) {
+export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0 }: Props) {
   const [alerts, setAlerts] = useState(initialAlerts);
   const [filter, setFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
@@ -314,6 +316,15 @@ export default function DashboardClient({ orgName, orgSlug, orgEmail, orgPlan, o
           </div>
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             {refreshMsg && <span style={{ fontSize: "0.72rem", color: "var(--success)" }}>{refreshMsg}</span>}
+            <a href={`/dashboard/${orgSlug}/notifications?token=${token}`}
+              className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}>
+              🔔 Notifications
+              {notifChannelCount > 0 && <span style={{ background: "#10b981", color: "white", borderRadius: 999, padding: "0 5px", fontSize: "0.6rem", fontWeight: 700 }}>{notifChannelCount}</span>}
+            </a>
+            <a href={`/dashboard/${orgSlug}/connect?token=${token}`}
+              className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none" }}>
+              + Connector
+            </a>
             <button onClick={handleRefresh} disabled={refreshing} className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem" }}>
               {refreshing ? "⏳ Checking…" : "🔄 Refresh Alerts"}
             </button>

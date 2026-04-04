@@ -85,6 +85,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
   // All data passed as props — no onClick in server component
   return (
     <DashboardClient
+      orgId={org.id}
       orgName={org.name}
       orgSlug={orgSlug}
       orgEmail={org.email}
@@ -96,6 +97,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
       stats={stats}
       briefs={briefs ?? []}
       connectors={(connectors ?? []) as Array<{ type: string; label: string; status: string; last_run_at?: string; last_diff_count: number }>}
+      notifChannelCount={0}
     />
   );
 }
