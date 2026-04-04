@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
+import Analytics from "@/components/Analytics";
 
 export const metadata: Metadata = {
   title: "Change Risk Radar – Know Before Vendor Changes Break Your Business",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <Analytics />
         <Nav />
         <main id="main-content">{children}</main>
         <footer>
