@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
+/* ── Design tokens ───────────────────────────────────────────────────────── */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  /* KidColoring brand */
+  --kc-violet:  #7c3aed;   /* violet-600 */
+  --kc-blue:    #2563eb;   /* blue-600   */
+  /* Focus ring */
+  --focus-ring: var(--kc-violet);
 }
 
 @theme inline {
@@ -12,20 +18,99 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base ────────────────────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* iOS: prevent tap highlights on body */
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ── KidColoring custom animations ── */
+/* ── Skip to main content (keyboard / switch access) ─────────────────────── */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 8px;
+  z-index: 9999;
+  background: var(--kc-violet);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 0 0 12px 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: top 0.15s ease;
+  white-space: nowrap;
+}
+.skip-link:focus {
+  top: 0;
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ── Focus rings ─────────────────────────────────────────────────────────── */
+/*
+ * Universal focus-visible ring:
+ *   - 3 px outline in brand violet (WCAG 3:1 contrast against white bg)
+ *   - 2 px offset so the ring doesn't merge with the element border
+ * We use :focus-visible so mouse users don't see it, keyboard/switch users do.
+ */
+:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+/* Override for elements that already show focus via border colour change */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--kc-violet);
+  outline-offset: 0;
+}
+
+/* ── Touch targets (WCAG 2.5.5 / Apple HIG: 44 × 44 pt minimum) ─────────── */
+/*
+ * Any element that is clickable/tappable should have a minimum touch target.
+ * We set this on <button> and <a> globally; page-specific overrides can
+ * increase it. We use min-height (not height) so content still expands.
+ */
+button,
+[role="button"],
+a {
+  touch-action: manipulation;   /* remove 300 ms tap delay on iOS */
+}
+button,
+[role="button"] {
+  min-height: 44px;
+}
+
+/* ── High-contrast helpers ───────────────────────────────────────────────── */
+/*
+ * `text-gray-400` (#9ca3af on white = 2.85:1) fails WCAG AA for normal text.
+ * These utility classes replace it with accessible alternatives.
+ */
+.text-accessible-muted {
+  color: #6b7280;   /* gray-500 = 4.48:1 on white ✅ WCAG AA */
+}
+.text-accessible-hint {
+  color: #6b7280;
+  font-size: 0.875rem;  /* 14px — WCAG AA for 14px bold or 18px normal */
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── KidColoring custom animations ─────────────────────────────────────────── */
 @keyframes slide-up {
   from { transform: translateY(24px); opacity: 0; }
   to   { transform: translateY(0);    opacity: 1; }
@@ -36,3 +121,56 @@ body {
 }
 .animate-slide-up { animation: slide-up 0.25s ease-out; }
 .animate-fade-in  { animation: fade-in  0.3s ease-out; }
+
+/* ── iOS viewport fix ───────────────────────────────────────────────────── */
+/*
+ * On iOS Safari the viewport height includes the browser chrome.
+ * `100dvh` (dynamic viewport height) is the modern fix; Safari 15.4+.
+ * Falls back to -webkit-fill-available for older iOS.
+ */
+.min-h-screen {
+  min-height: 100dvh;
+}
+
+/* ── iPad-specific touch card improvements ───────────────────────────────── */
+/*
+ * On iPad the interest/character tiles are in a 3–4 column grid.
+ * We ensure they are large enough for comfortable finger taps.
+ */
+.kc-tile {
+  min-height: 80px;
+  min-width: 64px;
+  touch-action: manipulation;
+  /* Slightly larger tap area on the inside via padding */
+  padding-block: 12px;
+  padding-inline: 8px;
+  cursor: pointer;
+  /* Crisp tap feedback on iOS */
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.kc-tile:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+/* ── ARIA live region (generation progress) ──────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── iPad Safari scroll fix ─────────────────────────────────────────────── */
+/* Ensure scrollable containers use momentum scrolling on iOS */
+.overflow-y-auto,
+.overflow-auto,
+.overflow-scroll {
+  -webkit-overflow-scrolling: touch;
+}

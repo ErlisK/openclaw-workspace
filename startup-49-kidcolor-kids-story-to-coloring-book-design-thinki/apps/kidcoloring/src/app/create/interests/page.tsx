@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useTextToSpeech } from '@/hooks/useTTS'
+import TTSButton from '@/components/TTSButton'
 
 const INTERESTS = [
   { id: 'dinosaurs',   emoji: '🦖', label: 'Dinosaurs' },
@@ -37,21 +38,37 @@ export default function InterestsPage() {
   const [age, setAge]           = useState('4-6')
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
+  const tts = useTextToSpeech()
+
+  // Announce selection changes to TTS
+  useEffect(() => {
+    if (selected.length === 0) return
+    const last = selected[selected.length - 1]
+    const item = INTERESTS.find(i => i.id === last)
+    if (item) {
+      tts.speak(`${item.label} selected. ${
+        selected.length < 2 ? 'Pick one more to continue.' :
+        selected.length === 2 ? 'You can add one more, or make your book now.' :
+        'All 3 picked!'
+      }`)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected])
 
   const toggle = (id: string) => {
-    if (selected.includes(id)) {
-      setSelected(s => s.filter(x => x !== id))
-    } else if (selected.length < 3) {
-      setSelected(s => [...s, id])
-    }
+    setSelected(s => {
+      if (s.includes(id)) return s.filter(x => x !== id)
+      if (s.length >= 3)  return s
+      return [...s, id]
+    })
   }
 
   const handleGenerate = async () => {
     if (selected.length < 2) return
     setLoading(true)
     setError('')
+    tts.speak('Making your coloring book now! Get ready.')
 
-    // Track event
     await fetch('/api/v1/event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -59,7 +76,7 @@ export default function InterestsPage() {
     })
 
     try {
-    const resp = await fetch('/api/v1/session', {
+      const resp = await fetch('/api/v1/session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -76,119 +93,186 @@ export default function InterestsPage() {
     }
   }
 
+  const selectionStatusText = selected.length === 0
+    ? 'Pick at least 2 things'
+    : selected.length === 1
+    ? 'Pick 1 more to continue'
+    : `${selected.length} selected — ${3 - selected.length > 0 ? `you can add ${3 - selected.length} more` : 'all set!'}`
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white py-10 px-4">
       <div className="max-w-2xl mx-auto">
-
-        {/* Back */}
-        <Link href="/create" className="flex items-center gap-2 text-gray-400 hover:text-gray-600 text-sm mb-8">
+        {/* Back link — large tap target */}
+        <Link
+          href="/create"
+          className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-800
+                     text-sm font-medium mb-8 min-h-[44px] px-1"
+          aria-label="Back to create options"
+        >
           ← Back
         </Link>
 
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
-            What does your child love? 🎨
-          </h1>
-          <p className="text-gray-500">Pick 2 or 3 things — we&apos;ll make their book</p>
-        </div>
+        <main id="main-content">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+              What does your child love?
+            </h1>
+            <p className="text-gray-600">Pick 2 or 3 things — we&apos;ll make their book</p>
+          </div>
 
-        {/* Interest grid */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          {INTERESTS.map(interest => {
-            const isSelected = selected.includes(interest.id)
-            const isDisabled = !isSelected && selected.length >= 3
-            return (
-              <button
-                key={interest.id}
-                onClick={() => toggle(interest.id)}
-                disabled={isDisabled}
-                className={`relative flex flex-col items-center gap-1 p-3 rounded-2xl border-2 transition-all
-                  ${isSelected
-                    ? 'border-violet-500 bg-violet-50 shadow-md scale-105'
-                    : isDisabled
-                    ? 'border-gray-100 bg-gray-50 opacity-40 cursor-not-allowed'
-                    : 'border-gray-200 bg-white hover:border-violet-300 hover:bg-violet-50 cursor-pointer'
-                  }`}>
-                {isSelected && (
-                  <span className="absolute -top-2 -right-2 w-5 h-5 bg-violet-500 rounded-full flex items-center justify-center text-white text-xs font-bold shadow">
-                    {selected.indexOf(interest.id) + 1}
+          {/* Interest grid — ARIA group with live status */}
+          <div
+            role="group"
+            aria-label="Choose interests — select 2 or 3"
+            className="grid grid-cols-4 gap-3 mb-6"
+          >
+            {INTERESTS.map(interest => {
+              const isSelected = selected.includes(interest.id)
+              const isDisabled = !isSelected && selected.length >= 3
+              return (
+                <button
+                  key={interest.id}
+                  onClick={() => toggle(interest.id)}
+                  disabled={isDisabled}
+                  aria-pressed={isSelected}
+                  aria-label={`${interest.label}${isSelected ? ', selected' : ''}${isDisabled ? ', not available' : ''}`}
+                  className={`kc-tile relative flex flex-col items-center justify-center gap-1
+                    rounded-2xl border-2 transition-all
+                    focus-visible:ring-0
+                    ${isSelected
+                      ? 'border-violet-500 bg-violet-50 shadow-md scale-105'
+                      : isDisabled
+                      ? 'border-gray-100 bg-gray-50 opacity-40 cursor-not-allowed'
+                      : 'border-gray-200 bg-white hover:border-violet-300 hover:bg-violet-50 cursor-pointer'
+                    }`}
+                >
+                  {isSelected && (
+                    <span
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-violet-500 rounded-full
+                                 flex items-center justify-center text-white text-xs font-bold shadow"
+                      aria-hidden="true"
+                    >
+                      {selected.indexOf(interest.id) + 1}
+                    </span>
+                  )}
+                  <span className="text-3xl leading-none" aria-hidden="true">
+                    {interest.emoji}
                   </span>
-                )}
-                <span className="text-3xl">{interest.emoji}</span>
-                <span className="text-xs font-medium text-gray-700 text-center leading-tight">{interest.label}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Selection status */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-1">
-            {[0, 1, 2].map(i => (
-              <div key={i} className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center text-xl transition-all ${
-                selected[i] ? 'border-violet-400 bg-violet-50' : 'border-dashed border-gray-200 bg-gray-50'
-              }`}>
-                {selected[i] ? INTERESTS.find(x => x.id === selected[i])?.emoji : '?'}
-              </div>
-            ))}
+                  <span className="text-xs font-semibold text-gray-700 text-center leading-tight">
+                    {interest.label}
+                  </span>
+                </button>
+              )
+            })}
           </div>
-          <p className="text-sm text-gray-500">
-            {selected.length === 0 ? 'Pick at least 2 things'
-            : selected.length === 1 ? 'Pick 1 more to continue'
-            : `${selected.length} selected — ${3 - selected.length > 0 ? `you can add ${3 - selected.length} more` : 'all set!'}`}
-          </p>
-        </div>
 
-        {/* Age */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6">
-          <p className="text-sm font-semibold text-gray-700 mb-3">How old is your child?</p>
-          <div className="grid grid-cols-4 gap-2">
-            {AGES.map(a => (
-              <button key={a.id} onClick={() => setAge(a.id)}
-                className={`text-center py-2 px-2 rounded-xl border-2 transition-all ${
-                  age === a.id ? 'border-violet-500 bg-violet-50' : 'border-gray-100 hover:border-violet-200'
-                }`}>
-                <p className="font-bold text-sm text-gray-900">{a.label}</p>
-                <p className="text-xs text-gray-400">{a.desc}</p>
-              </button>
-            ))}
+          {/* Selection status — aria-live so screen readers announce changes */}
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            className="text-center mb-6"
+          >
+            <div className="flex items-center justify-center gap-2 mb-2" aria-hidden="true">
+              {[0, 1, 2].map(i => (
+                <div
+                  key={i}
+                  className={`w-11 h-11 rounded-xl border-2 flex items-center justify-center text-xl
+                    transition-all ${
+                    selected[i] ? 'border-violet-400 bg-violet-50' : 'border-dashed border-gray-200 bg-gray-50'
+                  }`}
+                >
+                  {selected[i] ? INTERESTS.find(x => x.id === selected[i])?.emoji : '?'}
+                </div>
+              ))}
+            </div>
+            <p className="text-sm font-medium text-gray-600">
+              {selectionStatusText}
+            </p>
           </div>
-        </div>
 
-        {/* Error */}
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-xl mb-4">
-            {error}
+          {/* Age selector */}
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 mb-6">
+            <p
+              id="age-group-label"
+              className="text-sm font-semibold text-gray-800 mb-3"
+            >
+              How old is your child?
+            </p>
+            <div
+              role="radiogroup"
+              aria-labelledby="age-group-label"
+              className="grid grid-cols-4 gap-2"
+            >
+              {AGES.map(a => (
+                <button
+                  key={a.id}
+                  role="radio"
+                  aria-checked={age === a.id}
+                  onClick={() => {
+                    setAge(a.id)
+                    tts.speak(`Age ${a.label} selected. ${a.desc} coloring detail.`)
+                  }}
+                  className={`text-center py-3 px-2 rounded-xl border-2 transition-all
+                    min-h-[56px]
+                    ${age === a.id
+                      ? 'border-violet-500 bg-violet-50'
+                      : 'border-gray-200 hover:border-violet-200 bg-white'
+                    }`}
+                >
+                  <p className="font-bold text-sm text-gray-900">{a.label}</p>
+                  <p className="text-xs text-gray-600 mt-0.5">{a.desc}</p>
+                </button>
+              ))}
+            </div>
           </div>
-        )}
 
-        {/* CTA */}
-        <button
-          onClick={handleGenerate}
-          disabled={selected.length < 2 || loading}
-          className={`w-full py-5 rounded-2xl font-extrabold text-xl transition-all ${
-            selected.length >= 2 && !loading
-              ? 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:from-violet-600 hover:to-violet-700'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}>
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-              </svg>
-              Setting up your book…
-            </span>
-          ) : (
-            selected.length >= 2 ? '✨ Make My Book!' : 'Pick 2+ interests to continue'
+          {/* Error */}
+          {error && (
+            <div role="alert" className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-xl mb-4 border border-red-200">
+              {error} — please try again.
+            </div>
           )}
-        </button>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
-          Free trial · 4 coloring pages · No account required
-        </p>
+          {/* Generate button */}
+          <button
+            onClick={handleGenerate}
+            disabled={selected.length < 2 || loading}
+            aria-disabled={selected.length < 2 || loading}
+            aria-label={
+              selected.length < 2
+                ? 'Make my book — pick at least 2 interests first'
+                : loading
+                ? 'Making your book, please wait'
+                : `Make my coloring book with ${selected.map(id => INTERESTS.find(i => i.id === id)?.label).join(', ')}`
+            }
+            className={`w-full py-4 rounded-2xl font-extrabold text-lg transition-all
+              min-h-[56px]
+              ${selected.length >= 2 && !loading
+                ? 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg hover:shadow-xl hover:from-violet-600 hover:to-violet-700 cursor-pointer'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed opacity-70'
+              }`}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-3">
+                <span
+                  className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin"
+                  aria-hidden="true"
+                />
+                Making your book…
+              </span>
+            ) : (
+              '✨ Make My Book!'
+            )}
+          </button>
+
+          <p className="text-center text-xs text-gray-500 mt-3">
+            Free trial · 4 custom pages · No account needed
+          </p>
+        </main>
       </div>
+
+      {/* Floating TTS toggle */}
+      <TTSButton tts={tts} />
     </div>
   )
 }

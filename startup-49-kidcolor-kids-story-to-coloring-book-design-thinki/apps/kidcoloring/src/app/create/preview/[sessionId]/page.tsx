@@ -5,6 +5,8 @@ import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/auth-client'
+import { useTextToSpeech } from '@/hooks/useTTS'
+import TTSButton from '@/components/TTSButton'
 
 // Lazy-load the email gate to keep initial bundle small
 const EmailGateModal = dynamic(() => import('@/components/EmailGateModal'), { ssr: false })
@@ -48,6 +50,9 @@ export default function PreviewPage() {
   const [pdfUrl,       setPdfUrl]       = useState<string | null>(null)
   const [pdfError,     setPdfError]     = useState('')
   const generatingRef  = useRef(false)
+  const tts            = useTextToSpeech()
+  // Track which pages we've already announced via TTS (to avoid repeats)
+  const announcedPages = useRef<Set<string>>(new Set())
 
   // ── Auth check ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -128,6 +133,16 @@ export default function PreviewPage() {
         setPages(prev => prev.map(p =>
           p.page_number === page.page_number ? { ...p, image_url: imageUrl, status: 'complete' } : p
         ))
+        // Announce page via TTS (if enabled) — once per page
+        if (!announcedPages.current.has(page.id)) {
+          announcedPages.current.add(page.id)
+          const subject = (page.subject as string | undefined) || `page ${page.page_number}`
+          if (i === 0) {
+            tts.speak(`First page ready! ${subject}`)
+          } else {
+            tts.speak(`Page ${page.page_number} ready. ${subject}`)
+          }
+        }
         if (i === 0) {
           await fetch('/api/v1/event', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -154,6 +169,7 @@ export default function PreviewPage() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ event: 'book_complete', sessionId, props: { page_count: pgs.length } }),
     })
+    tts.speak(`Your book is ready! ${pgs.length} coloring pages. Tap Download PDF to save it.`)
     setSession(prev => prev ? { ...prev, status: 'complete' } : prev)
   }, [sessionId, generatePage])
 
@@ -293,6 +309,21 @@ export default function PreviewPage() {
   return (
     <div className="min-h-screen bg-gray-50">
 
+      {/* ARIA live region — announces generation progress to screen readers */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="false"
+        className="sr-only"
+      >
+        {generating
+          ? `Generating page ${donePages.length + 1} of ${session?.page_count || 4}`
+          : allDone && donePages.length > 0
+          ? `Your book is ready! ${donePages.length} pages generated.`
+          : ''
+        }
+      </div>
+
       {/* Email gate modal */}
       {showGate && (
         <EmailGateModal
@@ -313,13 +344,13 @@ export default function PreviewPage() {
       )}
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 shadow-sm px-4 py-4 sticky top-0 z-10">
+      <header className="bg-white border-b border-gray-100 shadow-sm px-4 py-4 sticky top-0 z-10">
         <div className="max-w-3xl mx-auto flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="font-bold text-gray-900 truncate">
+            <h1 className="font-bold text-gray-900 truncate" id="main-content">
               {heroName ? `${heroName}'s Coloring Book` : 'Your Coloring Book'}
             </h1>
-            <p className="text-xs text-gray-400">{concept} · {session?.page_count || 4} pages</p>
+            <p className="text-xs text-gray-600">{concept} · {session?.page_count || 4} pages</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             {/* Auth state indicator */}
@@ -354,9 +385,9 @@ export default function PreviewPage() {
             )}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <main id="main-content-body" className="max-w-3xl mx-auto px-4 py-8">
 
         {/* Generation progress */}
         {generating && (
@@ -507,7 +538,10 @@ export default function PreviewPage() {
           </div>
         )}
 
-      </div>
+      </main>
+
+      {/* Floating TTS button — reads page descriptions aloud as they generate */}
+      <TTSButton tts={tts} />
     </div>
   )
 }
