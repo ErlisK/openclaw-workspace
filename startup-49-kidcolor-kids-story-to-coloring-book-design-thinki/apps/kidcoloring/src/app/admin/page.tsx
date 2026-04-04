@@ -189,6 +189,7 @@ export default function AdminPage() {
                 { href: '/admin/paywall', icon: '💰', label: 'Paywall Analytics', desc: '3 price anchors · CTR by anchor · revenue projection · A/B layout test' },
                 { href: '/admin/csat', icon: '😊', label: 'CSAT & Micro-Survey', desc: '1-click emoji CSAT + follow-up · 70%+ good · product insights' },
                 { href: '/admin/safety', icon: '🛡️', label: 'Content Safety', desc: 'Filter v1.2 · prompt blocks · sanitize queue · COPPA compliance' },
+                { href: '/admin/security', icon: '🔐', label: 'Security & Compliance', desc: 'Error logs · rate limits · abuse flags · COPPA consent · data requests' },
                 { href: '/admin/rls', icon: '🔐', label: 'RLS & Auth', desc: 'Schema v4.0.0 · per-table policies · COPPA isolation · auth trigger' },
                               { href: '/admin/pricing-experiments', icon: '💰', label: 'Pricing Experiments', desc: 'pricing_v1: control $6.99 vs low $4.99 vs premium $9.99 vs anchor — live experiment' },
                 { href: '/admin/cohorts', icon: '📊', label: 'Cohorts', desc: 'D1/D7 retention · activation funnel · conversion pipeline · unit economics · LTV' },

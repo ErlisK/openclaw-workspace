@@ -6,6 +6,7 @@ import { useEffect, useState, useRef, Suspense, useMemo } from 'react'
 import { useTextToSpeech } from '@/hooks/useTTS'
 import TTSButton from '@/components/TTSButton'
 import { hashBucket, pickVariant } from '@/lib/experiments'
+import CoppaConsentBanner from '@/components/CoppaConsentBanner'
 
 // Default ordering (control — variant A)
 const INTERESTS_DEFAULT = [
@@ -206,7 +207,9 @@ function InterestsPage() {
     : `${selected.length} selected — ${3 - selected.length > 0 ? `you can add ${3 - selected.length} more` : 'all set!'}`
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white py-10 px-4">
+    <>
+      <CoppaConsentBanner onConsented={() => { /* consent recorded in cookie */ }} />
+      <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white py-10 px-4">
       <div className="max-w-2xl mx-auto">
         {/* Back link — large tap target */}
         <Link
@@ -418,5 +421,6 @@ function InterestsPage() {
       {/* Floating TTS toggle */}
       <TTSButton tts={tts} />
     </div>
+    </>
   )
 }

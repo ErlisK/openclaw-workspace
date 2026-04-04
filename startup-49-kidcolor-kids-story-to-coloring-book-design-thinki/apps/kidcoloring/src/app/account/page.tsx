@@ -818,8 +818,13 @@ export default function AccountPage() {
                                text-sm font-semibold hover:bg-gray-50 transition-colors">
                     Sign out of this device
                   </button>
+                  <p className="text-xs text-gray-400 text-center mt-2">
+                    <a href="/account/privacy" className="text-violet-500 underline font-semibold">
+                      Manage your privacy, data export &amp; account deletion
+                    </a>
+                  </p>
                   <p className="text-xs text-gray-400 text-center">
-                    To delete your account and all data, contact{' '}
+                    Or contact{' '}
                     <a href="mailto:privacy@kidcoloring.app" className="text-violet-600 underline">
                       privacy@kidcoloring.app
                     </a>
