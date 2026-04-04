@@ -11,6 +11,10 @@
     {
       "path": "/api/weekly-brief",
       "schedule": "0 9 * * 1"
+    },
+    {
+      "path": "/api/detectors/tos-diff",
+      "schedule": "0 0 * * *"
     }
   ]
 }

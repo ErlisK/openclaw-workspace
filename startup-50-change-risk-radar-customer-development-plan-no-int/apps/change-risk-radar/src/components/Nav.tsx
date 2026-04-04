@@ -15,7 +15,7 @@ export default function Nav() {
         <div className="nav-links">
           <Link href="/demo" style={active("/demo")}>🔴 Live Demo</Link>
           <Link href="/observatory" style={active("/observatory")}>Observatory</Link>
-          <Link href="/taxonomy" style={active("/taxonomy")}>Taxonomy</Link>
+          <Link href="/detectors" style={active("/detectors")}>⚡ Detectors</Link>
           <Link href="/stats" style={{...active("/stats"), fontSize: "0.8rem", opacity: 0.7}}>📊 Stats</Link>
           <Link href="/onboard" className="btn-primary" style={{padding: "0.5rem 1rem", fontSize: "0.875rem"}}>
             🚀 Early Access
