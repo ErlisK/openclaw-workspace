@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createHash } from 'crypto'
 
 // ── Supabase service-role client ─────────────────────────────────────────────
 function getServiceClient() {
@@ -12,7 +13,13 @@ function getServiceClient() {
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
-const DOMAIN = 'https://kidcoloring-landing.vercel.app'
+function getSiteOrigin(req: NextRequest): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, '')
+  const host = req.headers.get('host') ?? 'kidcoloring-landing.vercel.app'
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
+  return `${proto}://${host}`
+}
 
 function htmlResponse(body: string, status = 200) {
   return new NextResponse(body, {
@@ -24,6 +31,7 @@ function htmlResponse(body: string, status = 200) {
 // ── GET /api/unsubscribe?token={token} ───────────────────────────────────────
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')
+  const origin = getSiteOrigin(req)
 
   // ── Validate token param ──────────────────────────────────────────────────
   if (!token || token.trim().length < 10) {
@@ -42,10 +50,10 @@ export async function GET(req: NextRequest) {
     This unsubscribe link is invalid or has expired.
   </p>
   <p style="font-size:15px;">
-    If you need help, please <a href="${DOMAIN}/contact" style="color:#7c3aed;">contact us</a>.
+    If you need help, please <a href="${origin}/contact" style="color:#7c3aed;">contact us</a>.
   </p>
   <p style="margin-top:32px;">
-    <a href="${DOMAIN}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
+    <a href="${origin}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
   </p>
 </body>
 </html>`,
@@ -79,10 +87,10 @@ export async function GET(req: NextRequest) {
     We couldn't find a subscription associated with this link. It may have already been processed.
   </p>
   <p style="font-size:15px;">
-    Need help? <a href="${DOMAIN}/contact" style="color:#7c3aed;">Contact us</a>.
+    Need help? <a href="${origin}/contact" style="color:#7c3aed;">Contact us</a>.
   </p>
   <p style="margin-top:32px;">
-    <a href="${DOMAIN}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
+    <a href="${origin}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
   </p>
 </body>
 </html>`,
@@ -110,10 +118,10 @@ export async function GET(req: NextRequest) {
     You've already been removed from our mailing list. We won't send you any more emails.
   </p>
   <p style="margin-top:32px;">
-    <a href="${DOMAIN}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
+    <a href="${origin}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
   </p>
   <p style="font-size:12px;color:#9ca3af;margin-top:16px;">
-    <a href="${DOMAIN}/privacy" style="color:#9ca3af;">Privacy Policy</a>
+    <a href="${origin}/privacy" style="color:#9ca3af;">Privacy Policy</a>
   </p>
 </body>
 </html>`
@@ -129,17 +137,23 @@ export async function GET(req: NextRequest) {
       })
       .eq('id', row.id)
 
-    // ── Log unsubscribe event (best-effort) ───────────────────────────────
+    // ── Track via /api/track (PII-safe: hash the email) ───────────────────
+    const emailHash = createHash('sha256').update(row.email.toLowerCase().trim()).digest('hex')
     try {
-      await client.from('events').insert([
-        {
-          event_type: 'email_unsubscribe',
-          email: row.email,
-          meta: { source: 'email_link' },
-        },
-      ])
-    } catch (_err) {
-      // events table column schema may differ — skip gracefully
+      await fetch(`${origin}/api/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_name: 'waitlist_unsubscribe',
+          props: {
+            email_hash: emailHash,
+            via: 'email_footer',
+            token_present: true,
+          },
+        }),
+      })
+    } catch (_trackErr) {
+      // Tracking is non-critical
     }
 
     return htmlResponse(
@@ -158,15 +172,15 @@ export async function GET(req: NextRequest) {
   </p>
   <p style="font-size:15px;line-height:1.6;">
     Changed your mind? You can always 
-    <a href="${DOMAIN}" style="color:#7c3aed;">sign up again</a> on our website.
+    <a href="${origin}" style="color:#7c3aed;">sign up again</a> on our website.
   </p>
   <p style="margin-top:32px;">
-    <a href="${DOMAIN}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
+    <a href="${origin}" style="color:#7c3aed;text-decoration:none;">← Back to KidColoring</a>
   </p>
   <p style="font-size:12px;color:#9ca3af;margin-top:16px;">
-    <a href="${DOMAIN}/privacy" style="color:#9ca3af;">Privacy Policy</a>
+    <a href="${origin}/privacy" style="color:#9ca3af;">Privacy Policy</a>
     &nbsp;&nbsp;·&nbsp;&nbsp;
-    <a href="${DOMAIN}/contact" style="color:#9ca3af;">Contact Us</a>
+    <a href="${origin}/contact" style="color:#9ca3af;">Contact Us</a>
   </p>
 </body>
 </html>`
@@ -187,7 +201,7 @@ export async function GET(req: NextRequest) {
   <h2 style="color:#1f2937;">Something went wrong</h2>
   <p style="font-size:15px;line-height:1.6;">
     We encountered an error processing your request. Please try again or 
-    <a href="${DOMAIN}/contact" style="color:#7c3aed;">contact us</a> for help.
+    <a href="${origin}/contact" style="color:#7c3aed;">contact us</a> for help.
   </p>
 </body>
 </html>`,

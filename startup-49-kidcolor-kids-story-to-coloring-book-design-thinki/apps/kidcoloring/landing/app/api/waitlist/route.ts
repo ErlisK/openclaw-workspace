@@ -17,17 +17,29 @@ function getServiceClient() {
   return createClient(url, serviceKey, { auth: { persistSession: false } })
 }
 
-const PRODUCTION_DOMAIN = 'https://kidcoloring-landing.vercel.app'
 const WELCOME_TEMPLATE = 'waitlist_welcome_v1'
-const WELCOME_SUBJECT = "Welcome to KidColoring! You're on the list 🖍️"
+const WELCOME_SUBJECT = "Welcome to KidColoring! You're on the list 🎨"
+
+// ── Derive canonical site origin ─────────────────────────────────────────────
+function getSiteOrigin(req: NextRequest): string {
+  // Prefer explicit env vars so emails always link to the live domain
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, '')
+  // Fall back to request origin (works in preview deployments too)
+  const host = req.headers.get('host') ?? 'kidcoloring-landing.vercel.app'
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
+  return `${proto}://${host}`
+}
 
 // ── Email composer ────────────────────────────────────────────────────────────
 function buildWelcomeEmail(
+  origin: string,
   parentFirstName: string | null | undefined,
   unsubscribeToken: string
 ): { html: string; text: string } {
   const greeting = parentFirstName ? `Hi ${parentFirstName}!` : 'Hi there!'
-  const unsubscribeUrl = `${PRODUCTION_DOMAIN}/api/unsubscribe?token=${unsubscribeToken}`
+  const unsubscribeUrl = `${origin}/api/unsubscribe?token=${unsubscribeToken}`
+  const ctaUrl = `${origin}/r/welcome-cta?utm_source=welcome&utm_medium=email&utm_campaign=waitlist_v1`
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -58,17 +70,26 @@ function buildWelcomeEmail(
     <li>We'll email you the moment we're ready to launch</li>
   </ul>
 
+  <div style="text-align:center;margin:32px 0;">
+    <a href="${ctaUrl}"
+       style="display:inline-block;background:#7c3aed;color:#fff;font-size:16px;font-weight:bold;
+              padding:14px 32px;border-radius:8px;text-decoration:none;letter-spacing:0.3px;">
+      🎨 See Examples
+    </a>
+    <p style="font-size:12px;color:#9ca3af;margin-top:8px;">Check out what kids will be creating!</p>
+  </div>
+
   <p style="font-size:15px;line-height:1.7;">
     Know another parent who'd love this? Share the magic! ✨
   </p>
 
   <div style="margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;text-align:center;">
     <p style="margin:0 0 8px;font-size:14px;color:#6b7280;">
-      <a href="${PRODUCTION_DOMAIN}/contact" style="color:#7c3aed;text-decoration:none;">Contact Us</a>
+      <a href="${origin}/contact" style="color:#7c3aed;text-decoration:none;">Contact Us</a>
       &nbsp;&nbsp;·&nbsp;&nbsp;
-      <a href="${PRODUCTION_DOMAIN}/privacy" style="color:#7c3aed;text-decoration:none;">Privacy Policy</a>
+      <a href="${origin}/privacy" style="color:#7c3aed;text-decoration:none;">Privacy Policy</a>
       &nbsp;&nbsp;·&nbsp;&nbsp;
-      <a href="${PRODUCTION_DOMAIN}/terms" style="color:#7c3aed;text-decoration:none;">Terms of Service</a>
+      <a href="${origin}/terms" style="color:#7c3aed;text-decoration:none;">Terms of Service</a>
     </p>
     <p style="margin:0;font-size:12px;color:#9ca3af;">
       You're receiving this because you signed up at KidColoring.<br>
@@ -88,12 +109,14 @@ What happens next?
 - Early waitlist members get first access and a special surprise
 - We'll email you the moment we're ready to launch
 
+See examples of what kids will create: ${ctaUrl}
+
 Know another parent who'd love this? Share the magic!
 
 ---
-Questions? ${PRODUCTION_DOMAIN}/contact
-Privacy Policy: ${PRODUCTION_DOMAIN}/privacy
-Terms of Service: ${PRODUCTION_DOMAIN}/terms
+Questions? ${origin}/contact
+Privacy Policy: ${origin}/privacy
+Terms of Service: ${origin}/terms
 
 You're receiving this because you signed up at KidColoring.
 To unsubscribe: ${unsubscribeUrl}`
@@ -149,6 +172,7 @@ export async function POST(req: NextRequest) {
     if (utm_medium) payload.utm_medium = utm_medium
 
     const client = getServiceClient()
+    const origin = getSiteOrigin(req)
 
     // ── 1. Upsert the signup row ──────────────────────────────────────────────
     const { data: upsertData, error } = await client
@@ -192,15 +216,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, note: 'already_registered' })
     }
 
-    // ── 4. Idempotency: skip if sent/queued within last 24 hours ─────────────
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    // ── 4. Idempotency: skip if sent/queued within last 10 minutes ────────────
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
     const { data: recentSends } = await client
       .from('email_sends')
       .select('id')
       .eq('to_email', normalizedEmail)
       .eq('template', WELCOME_TEMPLATE)
       .in('status', ['queued', 'sent'])
-      .gte('created_at', oneDayAgo)
+      .gte('created_at', tenMinutesAgo)
       .limit(1)
 
     if (recentSends && recentSends.length > 0) {
@@ -211,7 +235,7 @@ export async function POST(req: NextRequest) {
           subject: WELCOME_SUBJECT,
           status: 'skipped',
           provider: 'agentmail',
-          meta: { reason: 'duplicate_24h', signup_id: row.id },
+          meta: { reason: 'duplicate_suppressed', signup_id: row.id },
         },
       ])
       return NextResponse.json({ ok: true, note: 'already_registered' })
@@ -219,32 +243,67 @@ export async function POST(req: NextRequest) {
 
     // ── 5. Compose & send welcome email ─────────────────────────────────────
     const { html, text } = buildWelcomeEmail(
+      origin,
       row.parent_first_name,
       unsubscribeToken!
     )
 
-    const sendResult = await sendTransactionalEmail({
-      to: normalizedEmail,
-      subject: WELCOME_SUBJECT,
-      html,
-      text,
-      template: WELCOME_TEMPLATE,
-      meta: { signup_id: row.id },
-    })
+    // Fire email in background — don't block the response
+    ;(async () => {
+      try {
+        // Insert 'queued' log first
+        const { data: logRow } = await client.from('email_sends').insert([
+          {
+            to_email: normalizedEmail,
+            template: WELCOME_TEMPLATE,
+            subject: WELCOME_SUBJECT,
+            status: 'queued',
+            provider: 'agentmail',
+            meta: { signup_id: row.id },
+          },
+        ]).select('id').single()
 
-    // ── 6. Log the send attempt ──────────────────────────────────────────────
-    await client.from('email_sends').insert([
-      {
-        to_email: normalizedEmail,
-        template: WELCOME_TEMPLATE,
-        subject: WELCOME_SUBJECT,
-        status: sendResult.status,
-        provider: 'agentmail',
-        response_id: sendResult.responseId ?? null,
-        error: sendResult.error ?? null,
-        meta: { signup_id: row.id },
-      },
-    ])
+        const sendResult = await sendTransactionalEmail({
+          to: normalizedEmail,
+          subject: WELCOME_SUBJECT,
+          html,
+          text,
+          template: WELCOME_TEMPLATE,
+          meta: { signup_id: row.id },
+        })
+
+        // Update log row with result
+        if (logRow?.id) {
+          await client.from('email_sends')
+            .update({
+              status: sendResult.status,
+              response_id: sendResult.responseId ?? null,
+              error: sendResult.error ?? null,
+            })
+            .eq('id', logRow.id)
+        }
+
+        // Track via /api/track
+        const trackEvent = sendResult.status === 'sent'
+          ? 'email_welcome_sent'
+          : 'email_welcome_failed'
+        const trackProps: Record<string, unknown> = { template: WELCOME_TEMPLATE }
+        if (sendResult.status !== 'sent') trackProps.error = sendResult.error
+
+        try {
+          await fetch(`${origin}/api/track`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ event_name: trackEvent, props: trackProps }),
+          })
+        } catch (_trackErr) {
+          // Tracking is non-critical
+        }
+      } catch (bgErr: unknown) {
+        const msg = bgErr instanceof Error ? bgErr.message : String(bgErr)
+        console.error('[waitlist] Background email error:', msg)
+      }
+    })()
 
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
