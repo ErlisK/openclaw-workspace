@@ -2,6 +2,18 @@
 
 import { useState, useEffect } from 'react'
 
+interface PricingConfig {
+  variant:      string
+  priceCents:   number
+  displayPrice: string
+  pageCount:    number
+  badge:        string | null
+  headline:     string
+  description:  string
+  anchorPrice:  string | null
+  urgencyLine:  string | null
+}
+
 interface UpsellModalProps {
   /** $7.99 | $9.99 | $12.99 */
   price: number
@@ -11,14 +23,40 @@ interface UpsellModalProps {
   variant: string
   /** Session id for event logging */
   sessionId: string
+  /** Session token for pricing experiment assignment */
+  sessionToken?: string
   onClose: () => void
   /** Called when "just download" is clicked (triggers export) */
   onSkipToExport: () => void
 }
 
 export default function UpsellModal({
-  price, pages = 12, variant, sessionId, onClose, onSkipToExport,
+  price, pages = 12, variant, sessionId, sessionToken, onClose, onSkipToExport,
 }: UpsellModalProps) {
+  const [pricingConfig, setPricingConfig] = useState<PricingConfig | null>(null)
+
+  // Fetch pricing experiment config
+  useEffect(() => {
+    if (!sessionToken) return
+    fetch(`/api/v1/pricing?sessionToken=${sessionToken}`)
+      .then(r => r.json() as Promise<PricingConfig>)
+      .then(cfg => {
+        setPricingConfig(cfg)
+        // Log pricing exposure
+        fetch('/api/v1/pricing', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionToken, action: 'click' }),
+        }).catch(() => {})
+      })
+      .catch(() => {})
+  }, [sessionToken])
+
+  // Use experiment price if available, otherwise fall back to prop
+  const effectivePrice = pricingConfig ? pricingConfig.priceCents / 100 : price
+  // Used below in JSX
+  const anchorPrice    = pricingConfig?.anchorPrice ?? null
+  const urgencyLine    = pricingConfig?.urgencyLine ?? null
   const [clicked, setClicked] = useState(false)
   const [dismissed, setDismissed] = useState(false)
 
@@ -104,14 +142,20 @@ export default function UpsellModal({
             Keep the whole adventure!
           </h2>
           <p className="text-violet-200 text-sm">
-            Your {pages}-page full coloring book · custom cover · instant PDF
+            Your {pricingConfig?.pageCount ?? pages}-page full coloring book · custom cover · instant PDF
           </p>
         </div>
 
         {/* Price bubble (overlapping) */}
         <div className="-mt-7 flex justify-center">
           <div className="bg-white rounded-2xl shadow-lg px-6 py-3 border-2 border-violet-200 text-center">
-            <span className="text-4xl font-extrabold text-violet-700">${price.toFixed(2)}</span>
+            {anchorPrice && (
+              <span className="text-sm text-gray-400 line-through mr-2">{anchorPrice}</span>
+            )}
+            {urgencyLine && (
+              <p className="text-xs text-amber-600 font-semibold text-center block w-full mt-0.5">{urgencyLine}</p>
+            )}
+            <span className="text-4xl font-extrabold text-violet-700">${effectivePrice.toFixed(2)}</span>
             <span className="text-gray-400 text-sm ml-1">one-time</span>
           </div>
         </div>
@@ -119,7 +163,7 @@ export default function UpsellModal({
         {/* Feature list */}
         <ul className="px-8 pt-5 pb-2 space-y-2 text-sm text-gray-700">
           {[
-            `All ${pages} coloring pages (vs 4 in free)`,
+            `All ${pricingConfig?.pageCount ?? pages} coloring pages (vs 4 in free)`,
             'Custom illustrated cover with your kid\'s name',
             'Print-quality PDF — ready in 60 seconds',
             'Keep forever — re-print any time',
@@ -143,7 +187,7 @@ export default function UpsellModal({
                   <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>
                   Joining waitlist…
                 </span>
-              : `Upgrade — $${price.toFixed(2)}`
+              : `Upgrade — $${effectivePrice.toFixed(2)}`
             }
           </button>
           {clicked && (

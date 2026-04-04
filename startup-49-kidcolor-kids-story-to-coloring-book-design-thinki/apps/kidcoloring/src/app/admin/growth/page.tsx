@@ -282,7 +282,7 @@ export default function GrowthDashboard() {
                           <div key={i} className="flex items-start gap-3 text-sm border-b border-gray-50 pb-2">
                             <span className="text-xl shrink-0">{emojis[score - 1] ?? '?'}</span>
                             <div className="flex-1 min-w-0">
-                              {comment && <p className="text-gray-600 italic">&ldquo;{String(comment)}&rdquo;</p>}
+                              {typeof comment === 'string' && comment ? <p className="text-gray-600 italic">&ldquo;{comment}&rdquo;</p> : null}
                               <p className="text-xs text-gray-400">{new Date(r.createdAt as string).toLocaleDateString()}</p>
                             </div>
                           </div>

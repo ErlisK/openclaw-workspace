@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getStripe, isStripeConfigured, isTestMode, PRODUCTS, buildLineItems, buildTaxOptions, PriceId } from '@/lib/stripe'
+import { getPricingConfig, buildPriceData } from '@/lib/pricing-experiments'
 
 
 /**
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
   let body: {
     priceId?:   string
     sessionId?: string
+    sessionToken?: string
     email?:     string
     userId?:    string
   }
@@ -50,7 +52,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { priceId = 'per_book_999', sessionId, email, userId } = body
+  const { priceId: _reqPriceId, sessionId, email, userId, sessionToken } = body
+
+  // Use pricing experiment variant if sessionToken provided and no explicit priceId
+  const expConfig  = sessionToken ? getPricingConfig(sessionToken) : null
+  const priceId    = _reqPriceId ?? expConfig?.priceId ?? 'per_book_999'
+  const _expVariant = expConfig?.variant ?? null
+  const _expPrice   = expConfig?.priceCents ?? null
   const product = PRODUCTS[priceId as PriceId]
 
   if (!product) {
@@ -63,6 +71,7 @@ export async function POST(req: NextRequest) {
     const sb = admin()
     void sb.from('orders').insert({
       price_id:    priceId,
+      metadata:    { fake_door: true, pricing_variant: _expVariant, pricing_experiment: 'pricing_v1' },
       amount_cents: product.amountCents,
       currency:    'usd',
       status:      'pending',
@@ -111,7 +120,10 @@ export async function POST(req: NextRequest) {
     }
 
     const taxOptions = buildTaxOptions()
-    const lineItems  = buildLineItems(product)
+    // Use experiment price if assigned; fall back to standard product price
+    const lineItems = (expConfig && _expVariant && _expVariant !== 'control')
+      ? [{ price_data: buildPriceData(expConfig), quantity: 1 }]
+      : buildLineItems(product)
 
     const params: Parameters<typeof stripe.checkout.sessions.create>[0] = {
       mode:          product.mode,
@@ -124,6 +136,8 @@ export async function POST(req: NextRequest) {
       phone_number_collection:    { enabled: false },
       metadata: {
         kidcoloring_session_id: sessionId ?? '',
+        pricing_variant:        _expVariant ?? 'unknown',
+        pricing_experiment:     'pricing_v1',
         price_id:               priceId,
         user_id:                userId ?? '',
         test_mode:              isTestMode() ? 'true' : 'false',
