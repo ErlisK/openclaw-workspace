@@ -96,6 +96,24 @@ export async function middleware(request: NextRequest) {
   // ── Observability: echo request ID for tracing ────────────────────────────
   supabaseResponse.headers.set('X-Request-Id', requestId)
 
+  // ── UTM / referral source tracking ──────────────────────────────────────
+  // Read UTM params and persist as cookie for attribution
+  const utmSource   = req.nextUrl.searchParams.get('utm_source')
+  const utmMedium   = req.nextUrl.searchParams.get('utm_medium')
+  const utmCampaign = req.nextUrl.searchParams.get('utm_campaign')
+  const ref         = req.nextUrl.searchParams.get('ref')
+
+  if (utmSource || ref) {
+    const source = utmSource ?? ref ?? 'direct'
+    supabaseResponse.cookies.set('_kc_src', source, {
+      maxAge:   7 * 24 * 3600,
+      sameSite: 'lax',
+      path:     '/',
+    })
+    if (utmMedium)   supabaseResponse.cookies.set('_kc_med', utmMedium,   { maxAge: 7 * 24 * 3600, sameSite: 'lax', path: '/' })
+    if (utmCampaign) supabaseResponse.cookies.set('_kc_cmp', utmCampaign, { maxAge: 7 * 24 * 3600, sameSite: 'lax', path: '/' })
+  }
+
   return supabaseResponse
 }
 

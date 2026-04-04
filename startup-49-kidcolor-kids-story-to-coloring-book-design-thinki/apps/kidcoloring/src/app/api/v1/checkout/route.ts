@@ -70,12 +70,11 @@ export async function POST(req: NextRequest) {
     const sb = admin()
     void sb.from('orders').insert({
       price_id:    priceId,
-      metadata:    { fake_door: true, pricing_variant: _expVariant, pricing_experiment: 'pricing_v1' },
+      metadata:    { fake_door: true, pricing_variant: _expVariant ?? 'unknown', pricing_experiment: 'pricing_v1', session_id: sessionId, no_stripe_key: true },
       amount_cents: product.amountCents,
       currency:    'usd',
       status:      'pending',
       receipt_email: email ?? null,
-      metadata:    { fake_door: true, session_id: sessionId, no_stripe_key: true },
     })
 
     void sb.from('events').insert({
