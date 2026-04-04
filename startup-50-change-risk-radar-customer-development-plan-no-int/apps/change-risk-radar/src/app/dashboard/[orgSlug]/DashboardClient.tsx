@@ -278,10 +278,12 @@ interface Props {
   alerts: Alert[]; stats: { total: number; unread: number; high: number; medium: number; low: number };
   briefs: Brief[]; connectors: Connector[];
   notifChannelCount?: number;
+  privacyMode?: boolean;
 }
 
-export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0 }: Props) {
+export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0, privacyMode: initialPrivacyMode = true }: Props) {
   const [alerts, setAlerts] = useState(initialAlerts);
+  const [privacyMode, setPrivacyMode] = useState(initialPrivacyMode);
   const [filter, setFilter] = useState("all");
   const [refreshing, setRefreshing] = useState(false);
   const [refreshMsg, setRefreshMsg] = useState("");
@@ -305,6 +307,15 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
       if ((data.newAlerts ?? 0) > 0) setTimeout(() => window.location.reload(), 800);
     } catch { setRefreshMsg("Error refreshing"); }
     finally { setRefreshing(false); }
+  }
+
+  async function togglePrivacyMode() {
+    const next = !privacyMode;
+    setPrivacyMode(next);
+    await fetch(`/api/orgs/privacy?token=${token}`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ privacy_mode: next }),
+    }).catch(() => null);
   }
 
   const liveStats = {
@@ -334,6 +345,16 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
           </div>
           <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
             {refreshMsg && <span style={{ fontSize: "0.72rem", color: "var(--success)" }}>{refreshMsg}</span>}
+            <button onClick={togglePrivacyMode}
+              style={{
+                padding: "0.4rem 0.8rem", fontSize: "0.72rem", borderRadius: 6, cursor: "pointer",
+                border: `1px solid ${privacyMode ? "rgba(16,185,129,0.35)" : "rgba(245,158,11,0.35)"}`,
+                color: privacyMode ? "#10b981" : "#f59e0b",
+                background: "transparent", fontWeight: 600,
+              }}
+              title={privacyMode ? "PII redacted — click to show full details" : "Full details shown — click to enable privacy mode"}>
+              {privacyMode ? "🔒 Privacy" : "👁 Full"}
+            </button>
             <a href={`/dashboard/${orgSlug}/notifications?token=${token}`}
               className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               🔔 Notifications

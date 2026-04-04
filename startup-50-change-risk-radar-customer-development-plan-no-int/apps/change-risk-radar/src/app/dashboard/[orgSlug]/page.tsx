@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import { applyAlertsPrivacy } from "@/lib/privacy";
 import DashboardClient from "./DashboardClient";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +61,10 @@ export default async function DashboardPage({ params, searchParams }: Props) {
   for (const r of reactions ?? []) reactionMap[r.alert_id] = { reaction: r.reaction };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const alertList = (alerts ?? []).map((a: any) => ({ ...a, reaction: reactionMap[a.id] ?? null }));
+  const alertListRaw = (alerts ?? []).map((a: any) => ({ ...a, reaction: reactionMap[a.id] ?? null }));
+  const privacyMode = org.privacy_mode ?? true;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const alertList = applyAlertsPrivacy(alertListRaw as any, privacyMode) as typeof alertListRaw;
 
   const stats = {
     total: alertList.length,
@@ -98,6 +102,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
       briefs={briefs ?? []}
       connectors={(connectors ?? []) as Array<{ type: string; label: string; status: string; last_run_at?: string; last_diff_count: number }>}
       notifChannelCount={0}
+      privacyMode={privacyMode}
     />
   );
 }
