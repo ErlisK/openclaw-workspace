@@ -1,6 +1,11 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
+// SocialProofBadge is client-only (uses localStorage + experiment hash)
+// It must be imported inside a 'use client' boundary or via the layout
+// For server-component pages, we use a wrapper island
+import SocialProofBadgeIsland from '@/components/SocialProofBadgeIsland'
+
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kidcoloring-research.vercel.app'
 
 export const metadata: Metadata = {
@@ -91,6 +96,9 @@ export default function LandingPage() {
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 pt-16 pb-16 text-center">
+        {/* social_proof_v1 — variant B shows family count badge */}
+        <SocialProofBadgeIsland />
+
         <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 text-sm font-semibold px-4 py-2 rounded-full mb-6">
           ✨ Free trial — 4 pages, no account needed
         </div>

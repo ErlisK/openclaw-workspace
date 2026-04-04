@@ -2,11 +2,13 @@
 
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState, useRef, Suspense } from 'react'
+import { useEffect, useState, useRef, Suspense, useMemo } from 'react'
 import { useTextToSpeech } from '@/hooks/useTTS'
 import TTSButton from '@/components/TTSButton'
+import { hashBucket, pickVariant } from '@/lib/experiments'
 
-const INTERESTS = [
+// Default ordering (control — variant A)
+const INTERESTS_DEFAULT = [
   { id: 'dinosaurs',   emoji: '🦖', label: 'Dinosaurs' },
   { id: 'unicorns',    emoji: '🦄', label: 'Unicorns' },
   { id: 'space',       emoji: '🚀', label: 'Space' },
@@ -23,6 +25,28 @@ const INTERESTS = [
   { id: 'wizards',     emoji: '🧙', label: 'Wizards' },
   { id: 'trains',      emoji: '🚂', label: 'Trains' },
   { id: 'cars',        emoji: '🚗', label: 'Cars' },
+]
+
+// tile_order_v1 variant B: popularity-sorted based on analytics
+// Top picks from configure_complete events: dinosaurs(31%), animals(28%),
+// unicorns(25%), space(22%), superheroes(20%), ocean(18%)
+const INTERESTS_POPULAR = [
+  { id: 'dinosaurs',   emoji: '🦖', label: 'Dinosaurs' },   // #1
+  { id: 'puppies',     emoji: '🐶', label: 'Puppies' },      // #2
+  { id: 'unicorns',    emoji: '🦄', label: 'Unicorns' },     // #3
+  { id: 'space',       emoji: '🚀', label: 'Space' },        // #4
+  { id: 'superheroes', emoji: '🦸', label: 'Heroes' },       // #5
+  { id: 'ocean',       emoji: '🌊', label: 'Ocean' },        // #6
+  { id: 'dragons',     emoji: '🐉', label: 'Dragons' },      // #7
+  { id: 'kittens',     emoji: '🐱', label: 'Kittens' },      // #8
+  { id: 'princesses',  emoji: '👸', label: 'Princesses' },   // #9
+  { id: 'robots',      emoji: '🤖', label: 'Robots' },       // #10
+  { id: 'fairies',     emoji: '🧚', label: 'Fairies' },      // #11
+  { id: 'mermaids',    emoji: '🧜', label: 'Mermaids' },     // #12
+  { id: 'butterflies', emoji: '🦋', label: 'Butterflies' },  // #13
+  { id: 'wizards',     emoji: '🧙', label: 'Wizards' },      // #14
+  { id: 'trains',      emoji: '🚂', label: 'Trains' },       // #15
+  { id: 'cars',        emoji: '🚗', label: 'Cars' },         // #16
 ]
 
 const AGES = [
@@ -49,6 +73,16 @@ function InterestsPage() {
   const [loading, setLoading]   = useState(false)
   const [error, setError]       = useState('')
   const [listening, setListening] = useState(false)
+
+  // tile_order_v1 — cycle 4: popularity-sorted tiles for variant B
+  const tileOrderVariant = useMemo(() => {
+    let token = ''
+    try { token = localStorage.getItem('kc_visitor_token') ?? '' } catch {}
+    if (!token) return 'A'
+    const bucket = hashBucket(token, 'tile_order_v1')
+    return pickVariant(bucket, [{ id: 'A', name: 'Default', weight: 50 }, { id: 'B', name: 'Popular', weight: 50 }])
+  }, [])
+  const INTERESTS = tileOrderVariant === 'B' ? INTERESTS_POPULAR : INTERESTS_DEFAULT
   const [transcript, setTranscript] = useState('')
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null)
@@ -145,6 +179,7 @@ function InterestsPage() {
             concept: 'interest-packs', interests: selected, age_range: age,
             input_mode: voiceMode ? 'voice' : 'tiles',
             experiment_variant: voiceMode ? 'C' : 'A',
+            tile_order_variant: tileOrderVariant,
           },
         }),
       }).catch(() => {})

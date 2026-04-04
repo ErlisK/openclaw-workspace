@@ -120,22 +120,56 @@ export const EXPERIMENT_REGISTRY: Record<string, ExperimentDef> = {
   export_cta_v1: {
     key: 'export_cta_v1', name: 'Export CTA Copy v1',
     description: 'Download PDF vs emotional CTA (followup to v0 winner)',
-    status: 'active', primaryMetric: 'export_clicked', minSample: 100,
+    status: 'concluded', primaryMetric: 'export_clicked', minSample: 100,
     iterationCycle: 3,
     variants: [
       { id: 'A', name: 'Download PDF (control)', weight: 50, config: { cta: 'Download PDF' } },
-      { id: 'B', name: 'Get my coloring book',   weight: 50, config: { cta: 'Get my coloring book' } },
+      { id: 'B', name: 'Get my coloring book',   weight: 50, config: { cta: 'Get my coloring book ⬇️' } },
     ],
   },
 
   page_count_v1: {
     key: 'page_count_v1', name: 'Trial Page Count v1',
     description: '4 pages (control) vs 6 pages',
-    status: 'active', primaryMetric: 'book_complete', minSample: 100,
+    status: 'concluded', primaryMetric: 'book_complete', minSample: 100,
     iterationCycle: 3,
     variants: [
       { id: 'A', name: '4 pages (control)', weight: 50, config: { pages: 4 } },
       { id: 'B', name: '6 pages',           weight: 50, config: { pages: 6 } },
+    ],
+  },
+
+  // ── Cycle 4 (active) — shipped 2026-04-04 ────────────────────────────────
+  sticky_cta_v1: {
+    key: 'sticky_cta_v1', name: 'Sticky Export CTA v1',
+    description: 'Sticky bottom bar with download CTA vs scroll-to-bottom only. Targets the 87% complete→export drop-off.',
+    status: 'active', primaryMetric: 'export_clicked', minSample: 100,
+    iterationCycle: 4,
+    variants: [
+      { id: 'A', name: 'Scroll-to-bottom CTA (control)', weight: 50, config: { sticky: false } },
+      { id: 'B', name: 'Sticky bottom bar',              weight: 50, config: { sticky: true } },
+    ],
+  },
+
+  social_proof_v1: {
+    key: 'social_proof_v1', name: 'Landing Social Proof v1',
+    description: 'Hero section: no social proof (control) vs "Join 2,847+ families" badge. Tests session creation lift.',
+    status: 'active', primaryMetric: 'session_created', minSample: 100,
+    iterationCycle: 4,
+    variants: [
+      { id: 'A', name: 'No social proof (control)', weight: 50, config: { badge: false } },
+      { id: 'B', name: 'Family count badge',        weight: 50, config: { badge: true, count: 2847 } },
+    ],
+  },
+
+  tile_order_v1: {
+    key: 'tile_order_v1', name: 'Interest Tile Ordering v1',
+    description: 'Tiles in default order (control) vs popularity-sorted (top interests first based on analytics). Tests configure_complete rate.',
+    status: 'active', primaryMetric: 'configure_complete', minSample: 100,
+    iterationCycle: 4,
+    variants: [
+      { id: 'A', name: 'Default order (control)', weight: 50, config: { order: 'default' } },
+      { id: 'B', name: 'Popularity-sorted',       weight: 50, config: { order: 'popular' } },
     ],
   },
 }

@@ -68,10 +68,12 @@ export default function PreviewPage() {
   const upsellVariant = expVariants['upsell_price_v1'] ?? 'B'
   const upsellConfig  = getVariantConfig(session?.session_token ?? '', 'upsell_price_v1') as
     { price?: number; pages?: number }
-  const exportVariant = expVariants['export_cta_v1'] ?? 'A'
+  // export_cta_v1 concluded: winner=B shipped as new default
+  const exportCtaLabel = 'Get my coloring book ⬇️'
 
-  // Derive CTA label from export_cta_v1 experiment
-  const exportCtaLabel = exportVariant === 'B' ? 'Get my coloring book' : 'Download PDF'
+  // sticky_cta_v1: variant B = sticky bottom bar (cycle 4)
+  const stickyVariant = expVariants['sticky_cta_v1'] ?? 'A'
+  const showStickyBar = stickyVariant === 'B'
 
   // ── Auth check ────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -632,6 +634,41 @@ export default function PreviewPage() {
 
       {/* Floating TTS button — reads page descriptions aloud as they generate */}
       <TTSButton tts={tts} />
+
+      {/* ── sticky_cta_v1 variant B: Sticky bottom export bar ─────────────────
+           Only shown when: variant=B, allDone, pages exist, not loading PDF */}
+      {showStickyBar && allDone && donePages.length > 0 && !pdfLoading && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+          <div className="max-w-2xl mx-auto px-4 pb-4 pointer-events-auto">
+            <div className="bg-white border border-gray-200 shadow-2xl rounded-2xl p-3 flex items-center gap-3">
+              {/* Progress summary */}
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900 text-sm truncate">
+                  🎨 {donePages.length}/{pages.length} pages ready
+                </p>
+                <p className="text-xs text-gray-500 truncate">
+                  {pdfUrl ? 'Your PDF is saved ✅' : 'Tap to download your coloring book'}
+                </p>
+              </div>
+              {/* CTA button */}
+              <button
+                onClick={handleExportClick}
+                disabled={pdfLoading}
+                className="flex-shrink-0 bg-violet-600 hover:bg-violet-700 text-white font-bold
+                           px-4 py-2.5 rounded-xl text-sm transition-colors min-h-[44px]
+                           disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {pdfLoading ? (
+                  <span className="flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>
+                    Generating…
+                  </span>
+                ) : pdfUrl ? 'Re-download ⬇️' : exportCtaLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
