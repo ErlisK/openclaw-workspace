@@ -98,31 +98,39 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-  // Get brief history for an org
   const token = req.headers.get("x-org-token") || req.nextUrl.searchParams.get("token");
   const auth = req.headers.get("authorization");
   const secret = process.env.CRON_SECRET ?? "crr-cron-2025";
 
+  // Vercel cron invocation (no auth header) or explicit cron secret → send briefs
+  if (!token && (!auth || auth === `Bearer ${secret}`)) {
+    const weekOf = getWeekOf();
+    const { data: orgs } = await supabaseAdmin.from("crr_orgs").select("*").eq("status", "active");
+    const results = [];
+    for (const org of orgs ?? []) {
+      try {
+        const { data: alerts } = await supabaseAdmin
+          .from("crr_org_alerts").select("*").eq("org_id", org.id)
+          .gte("created_at", new Date(Date.now() - 7 * 86400000).toISOString())
+          .order("risk_level", { ascending: false }).limit(50);
+        const alertList = alerts ?? [];
+        const emailResult = await sendWeeklyBrief({ to: org.email, orgName: org.name, orgSlug: org.slug, magicToken: org.magic_token, weekOf, alerts: alertList });
+        await supabaseAdmin.from("crr_weekly_briefs").upsert({ org_id: org.id, week_of: weekOf, alerts_count: alertList.length, critical_count: alertList.filter((a: { risk_level: string }) => a.risk_level === "high").length, email_to: org.email, sent_at: emailResult.success ? new Date().toISOString() : null, email_status: emailResult.success ? "sent" : "failed", summary: {} }, { onConflict: "org_id,week_of" });
+        results.push({ org: org.slug, alerts: alertList.length, sent: emailResult.success });
+      } catch (e) { results.push({ org: (org as { slug: string }).slug, error: String(e) }); }
+    }
+    return NextResponse.json({ ok: true, cron: true, week_of: weekOf, sent: results.filter(r => (r as { sent?: boolean }).sent).length, results });
+  }
+
+  // Org token → brief history
   let orgId: string | null = null;
   if (auth === `Bearer ${secret}`) {
     orgId = req.nextUrl.searchParams.get("org_id");
   } else if (token) {
-    const { data } = await supabaseAdmin
-      .from("crr_orgs")
-      .select("id")
-      .eq("magic_token", token)
-      .single();
+    const { data } = await supabaseAdmin.from("crr_orgs").select("id").eq("magic_token", token).single();
     orgId = data?.id ?? null;
   }
-
   if (!orgId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { data: briefs } = await supabaseAdmin
-    .from("crr_weekly_briefs")
-    .select("*")
-    .eq("org_id", orgId)
-    .order("week_of", { ascending: false })
-    .limit(12);
-
+  const { data: briefs } = await supabaseAdmin.from("crr_weekly_briefs").select("*").eq("org_id", orgId).order("week_of", { ascending: false }).limit(12);
   return NextResponse.json({ briefs: briefs ?? [] });
 }

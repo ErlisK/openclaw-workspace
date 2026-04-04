@@ -3,6 +3,14 @@
     {
       "path": "/api/observatory/collect",
       "schedule": "0 */6 * * *"
+    },
+    {
+      "path": "/api/alerts/generate",
+      "schedule": "30 */6 * * *"
+    },
+    {
+      "path": "/api/weekly-brief",
+      "schedule": "0 9 * * 1"
     }
   ]
 }
