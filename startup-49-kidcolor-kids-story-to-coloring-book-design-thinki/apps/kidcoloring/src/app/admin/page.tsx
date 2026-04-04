@@ -190,6 +190,7 @@ export default function AdminPage() {
                 { href: '/admin/csat', icon: '😊', label: 'CSAT & Micro-Survey', desc: '1-click emoji CSAT + follow-up · 70%+ good · product insights' },
                 { href: '/admin/safety', icon: '🛡️', label: 'Content Safety', desc: 'Filter v1.2 · prompt blocks · sanitize queue · COPPA compliance' },
                 { href: '/admin/rls', icon: '🔐', label: 'RLS & Auth', desc: 'Schema v4.0.0 · per-table policies · COPPA isolation · auth trigger' },
+                { href: '/admin/payments', icon: '💳', label: 'Payments', desc: 'Stripe test-mode · per-book + subscription · receipts · revenue analytics' },
                 { href: '/admin/tradeoffs', icon: '🧭', label: 'Trade-Off Analysis & Concept Selection', desc: 'Quality × Cost × Safety matrix · 3 concepts · provider selection · 6-risk register · final decision' },
                 { href: '/admin/sandbox', icon: '📊', label: 'Sandbox Dashboard', desc: '112 tests · p50/p95 latency · failure rates · style×concept heatmap · cost vs quality' },
                 { href: '/sandbox', icon: '🎨', label: 'Generation Sandbox', desc: 'Live prompt tester · Pollinations.ai free tier · logs to Supabase gen_tests' },

@@ -34,17 +34,31 @@ export default function UpsellModal({
     }).catch(() => {})
   }, [price, variant, sessionId])
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     setClicked(true)
     fetch('/api/v1/event', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        event: 'upsell_clicked',
-        sessionId,
-        props: { price, variant, source: 'upsell_price_v1' },
-      }),
+      body: JSON.stringify({ event: 'upsell_clicked', sessionId, props: { price, variant, source: 'upsell_price_v1' } }),
     }).catch(() => {})
-    // Fake door — no Stripe yet
+
+    // Map price to Stripe priceId
+    const priceId = price <= 7 ? 'per_book_699' : price <= 9.99 ? 'per_book_999' : 'subscription'
+    try {
+      const res = await fetch('/api/v1/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, sessionId }),
+      })
+      const data = await res.json() as { url?: string; fakeDoor?: boolean }
+      if (data.url) { window.location.href = data.url; return }
+      // Fake-door: Stripe not configured
+      if (data.fakeDoor) {
+        await fetch('/api/v1/paywall', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId, variant: `${priceId}/${variant}`, priceLabel: `$${price}`, action: 'waitlist' }),
+        }).catch(() => {})
+      }
+    } catch { /* ignore */ }
     setTimeout(() => { setClicked(false); onClose() }, 2200)
   }
 

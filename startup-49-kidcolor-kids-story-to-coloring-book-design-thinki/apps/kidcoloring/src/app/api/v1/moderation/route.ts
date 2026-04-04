@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { runSafetyFilter } from '@/lib/safety'
+import { runSafetyFilter, AgeProfile } from '@/lib/safety'
 
 /**
  * POST /api/v1/moderation
@@ -26,15 +26,16 @@ export async function POST(req: NextRequest) {
     sessionId?: string
     pageNumber?: number
     prompt?: string
+    ageProfile?: AgeProfile
     imageUrl?: string
   }
 
-  const { sessionId, pageNumber, prompt, imageUrl } = body
+  const { sessionId, pageNumber, prompt, ageProfile, imageUrl } = body
   if (!prompt) {
     return NextResponse.json({ error: 'prompt required' }, { status: 400 })
   }
 
-  const result = runSafetyFilter(prompt)
+  const result = runSafetyFilter(prompt, ageProfile)
 
   // Log to moderation_logs
   const client = sb()

@@ -1,192 +1,254 @@
 'use client'
-
 /**
- * /admin/safety — Content Moderation & Prompt Safety Dashboard
+ * /admin/safety — Moderation Pipeline Dashboard (v1.3)
  *
- * Shows:
- * - Filter stats (total prompts, block rate, sanitize rate)
- * - Unreviewed flags queue (needs human review)
- * - Top flagged terms (bar chart)
- * - Recent blocks / sanitizations table with review actions
- * - Filter version changelog
- * - Test sandbox: run any prompt through the safety filter live
+ * Tabs:
+ *   1. Review Queue     — unreviewed flags with bulk actions
+ *   2. Escalations      — high-risk & grooming alerts
+ *   3. Stats & Trends   — 7d overview, top flag categories
+ *   4. Session Abuse    — per-session abuse level tracker
+ *   5. NSFW Heuristics  — image moderation signals
+ *   6. Filter Sandbox   — test prompts live
+ *   7. Filter Changelog — version history
  */
-
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-interface ModerationSummary {
-  total: number
-  allow: number
-  sanitize: number
-  block: number
-  blockRate: number
-  sanitizeRate: number
-  unreviewedFlags: number
-}
-
-interface TopFlag { term: string; count: number }
-
-interface ModerationLog {
+// ── Types ────────────────────────────────────────────────────────────────────
+interface QueueItem {
   id: number
   session_id: string | null
   page_number: number | null
   prompt_raw: string
   prompt_safe: string | null
   flags: string[]
-  action: string
   risk_score: number
-  filter_version: string
-  reviewed: boolean
-  review_verdict: string | null
-  created_at: string
+  nsfw_score: number
+  semantic_score: number
+  action: string
   image_url: string | null
+  reviewed: boolean
+  escalated: boolean
+  age_profile: string
+  created_at: string
+  review_verdict: string | null
+}
+interface Stats {
+  total: number; unreviewed: number; blocked: number; escalated: number
+  recent7d: { count: number; allow: number; sanitize: number; block: number; avgRisk: number }
+  topFlags: { cat: string; count: number }[]
+  filterVersion: string
+}
+interface AbuseSession {
+  session_id: string; total_attempts: number; blocked_count: number
+  sanitized_count: number; max_risk_score: number; abuse_level: string
+  last_seen_at: string; flagged_ips: string[]
 }
 
-interface ModerationData {
-  ok: boolean
-  summary: ModerationSummary
-  topFlags: TopFlag[]
-  logs: ModerationLog[]
-  generatedAt: string
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const RISK_COLOR = (score: number) =>
+  score >= 80 ? 'text-red-700 bg-red-100' :
+  score >= 50 ? 'text-orange-700 bg-orange-100' :
+  score >= 30 ? 'text-yellow-700 bg-yellow-100' :
+  'text-gray-500 bg-gray-100'
+
+const ACTION_BADGE = (action: string) =>
+  action === 'block'    ? 'bg-red-100 text-red-700' :
+  action === 'sanitize' ? 'bg-yellow-100 text-yellow-700' :
+  'bg-green-100 text-green-700'
+
+const ABUSE_COLOR = (level: string) =>
+  level === 'banned'  ? 'bg-red-600 text-white' :
+  level === 'high'    ? 'bg-red-100 text-red-700' :
+  level === 'medium'  ? 'bg-orange-100 text-orange-700' :
+  level === 'low'     ? 'bg-yellow-100 text-yellow-700' :
+  'bg-gray-100 text-gray-500'
+
+function ts(iso: string) {
+  return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
-// ── Filter version changelog ───────────────────────────────────────────────
-const FILTER_CHANGELOG = [
-  {
-    version: 'v1.2', date: '2026-04-04', status: 'current',
-    changes: [
-      'Added hero name sanitization (story mode)',
-      'Enhanced substitution map: 12 fantasy-safe swaps',
-      'PII pattern detection (phone, email, address)',
-      'Risk score calibration: soft flags 5–30 pts, hard block = 100',
-      'Free-text interest sanitization (prompt_ui_v1 variant B)',
-    ],
-    stats: { blockRate: 0, sanitizeRate: 3.2, flaggedTerms: 50 },
-  },
-  {
-    version: 'v1.1', date: '2026-03-28', status: 'retired',
-    changes: [
-      'Added PII patterns, real-person detection',
-      'Added trademark terms (Mickey Mouse, Peppa Pig, etc.)',
-      '8 new soft-flag categories',
-    ],
-    stats: { blockRate: 0.2, sanitizeRate: 2.1, flaggedTerms: 38 },
-  },
-  {
-    version: 'v1.0', date: '2026-03-15', status: 'retired',
-    changes: [
-      'Initial blocklist (50 terms)',
-      'Basic hard-block on adult/violence content',
-      'SAFETY_SUFFIX enforcement on all prompts',
-    ],
-    stats: { blockRate: 0, sanitizeRate: 0, flaggedTerms: 50 },
-  },
-]
+// ── Review Queue Item ─────────────────────────────────────────────────────────
+function QueueRow({ item, onVerdict, selected, onSelect }: {
+  item: QueueItem
+  onVerdict: (id: number, v: 'ok' | 'escalate' | 'false_positive') => void
+  selected: boolean
+  onSelect: (id: number, v: boolean) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
-// ── Action badge ──────────────────────────────────────────────────────────────
-function ActionBadge({ action }: { action: string }) {
-  const cls = action === 'block'    ? 'bg-red-100 text-red-700' :
-              action === 'sanitize' ? 'bg-amber-100 text-amber-700' :
-                                      'bg-green-100 text-green-700'
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${cls}`}>{action}</span>
+  const submit = async (v: 'ok' | 'escalate' | 'false_positive') => {
+    setSubmitting(true)
+    await onVerdict(item.id, v)
+    setSubmitting(false)
+  }
+
+  return (
+    <div className={`rounded-xl border ${item.escalated ? 'border-red-200 bg-red-50' : 'border-gray-100 bg-white'} p-3`}>
+      <div className="flex items-start gap-2">
+        <input type="checkbox" checked={selected} onChange={e => onSelect(item.id, e.target.checked)}
+          className="mt-1 accent-violet-600 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap gap-1.5 mb-1">
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${ACTION_BADGE(item.action)}`}>
+              {item.action}
+            </span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${RISK_COLOR(item.risk_score)}`}>
+              risk {item.risk_score}
+            </span>
+            {item.nsfw_score > 0 && (
+              <span className="text-xs bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">
+                nsfw {item.nsfw_score}
+              </span>
+            )}
+            {item.semantic_score > 0 && (
+              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                semantic {item.semantic_score}
+              </span>
+            )}
+            {item.escalated && (
+              <span className="text-xs bg-red-600 text-white px-2 py-0.5 rounded-full font-bold">
+                🚨 escalated
+              </span>
+            )}
+            <span className="text-xs text-gray-400">{item.age_profile}</span>
+            <span className="text-xs text-gray-400">{ts(item.created_at)}</span>
+          </div>
+
+          {/* Prompt preview */}
+          <p className="text-sm font-mono text-gray-800 break-all">
+            {expanded ? item.prompt_raw : item.prompt_raw.slice(0, 120) + (item.prompt_raw.length > 120 ? '…' : '')}
+          </p>
+          {item.prompt_safe && item.prompt_safe !== item.prompt_raw && (
+            <p className="text-xs text-gray-400 mt-0.5 font-mono">
+              → {item.prompt_safe.slice(0, 100)}
+            </p>
+          )}
+
+          {/* Flags */}
+          {item.flags?.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {item.flags.slice(0, expanded ? 999 : 5).map((f, i) => (
+                <span key={i} className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-mono">
+                  {f}
+                </span>
+              ))}
+              {!expanded && item.flags.length > 5 && (
+                <button onClick={() => setExpanded(true)}
+                  className="text-xs text-violet-500 underline">
+                  +{item.flags.length - 5} more
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Session & image links */}
+          <div className="flex gap-3 mt-1.5 text-xs text-gray-400">
+            {item.session_id && <span>session: {item.session_id.slice(0, 12)}…</span>}
+            {item.page_number && <span>page {item.page_number}</span>}
+            {item.image_url && (
+              <a href={item.image_url} target="_blank" rel="noreferrer"
+                className="text-violet-500 underline">view image ↗</a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Review buttons */}
+      {!item.reviewed && !item.review_verdict && (
+        <div className="flex gap-2 mt-2">
+          <button onClick={() => submit('ok')} disabled={submitting}
+            className="flex-1 text-xs bg-green-100 text-green-700 font-bold py-1.5 rounded-lg hover:bg-green-200 transition-colors disabled:opacity-50">
+            ✓ OK — safe
+          </button>
+          <button onClick={() => submit('false_positive')} disabled={submitting}
+            className="flex-1 text-xs bg-yellow-100 text-yellow-700 font-bold py-1.5 rounded-lg hover:bg-yellow-200 transition-colors disabled:opacity-50">
+            ⚠ False positive
+          </button>
+          <button onClick={() => submit('escalate')} disabled={submitting}
+            className="flex-1 text-xs bg-red-100 text-red-700 font-bold py-1.5 rounded-lg hover:bg-red-200 transition-colors disabled:opacity-50">
+            🚨 Escalate
+          </button>
+        </div>
+      )}
+      {item.review_verdict && (
+        <div className="mt-2 text-xs font-semibold text-gray-500">
+          Reviewed: <span className="capitalize">{item.review_verdict.replace('_', ' ')}</span>
+        </div>
+      )}
+    </div>
+  )
 }
 
-// ── Live sandbox ──────────────────────────────────────────────────────────────
-interface SandboxResult {
-  safe?: boolean; blocked?: boolean; action?: string;
-  promptSafe?: string; flags?: string[]; riskScore?: number;
-}
-function SafetySandbox() {
-  const [input, setInput]     = useState('')
-  const [result, setResult]   = useState<SandboxResult | null>(null)
-  const [loading, setLoading] = useState(false)
+// ── Sandbox ──────────────────────────────────────────────────────────────────
+function FilterSandbox() {
+  const [prompt, setPrompt] = useState('')
+  const [age, setAge]       = useState('all')
+  const [result, setResult] = useState<Record<string, unknown> | null>(null)
 
   const test = async () => {
-    if (!input.trim()) return
-    setLoading(true)
     const r = await fetch('/api/v1/moderation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: input, sessionId: 'admin_sandbox' }),
+      body: JSON.stringify({ prompt, ageProfile: age }),
     })
-    setResult(await r.json() as SandboxResult)
-    setLoading(false)
+    const d = await r.json() as Record<string, unknown>
+    setResult(d)
   }
 
-  const EXAMPLES = [
-    'cute dinosaur playing in the forest',
-    'friendly witch riding a broomstick',
-    'vampire in a scary castle',
-    'Peppa Pig having a tea party',
-    'zombie apocalypse scene',
-    'robot and space explorer on the moon',
-  ]
-
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-      <h2 className="font-bold text-gray-800">🧪 Live Filter Sandbox</h2>
-      <p className="text-xs text-gray-500">
-        Test any prompt against the v1.2 filter to see what action is taken.
-        Results are logged to moderation_logs with session_id=&apos;admin_sandbox&apos;.
-      </p>
-
-      <div className="flex gap-2">
-        <input
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && test()}
-          placeholder="Type a prompt to test…"
-          className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
+    <div className="space-y-3">
+      <div>
+        <label className="text-xs font-semibold text-gray-600 block mb-1">Test prompt</label>
+        <textarea
+          value={prompt}
+          onChange={e => setPrompt(e.target.value)}
+          rows={3}
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-violet-300"
+          placeholder="Enter a prompt to test the safety filter…"
         />
-        <button onClick={test} disabled={loading || !input.trim()}
-          className="bg-violet-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-violet-700 disabled:opacity-50 transition-colors">
-          {loading ? '…' : 'Test'}
+      </div>
+      <div className="flex gap-2">
+        <select value={age} onChange={e => setAge(e.target.value)}
+          className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm bg-white">
+          <option value="all">All ages</option>
+          <option value="toddler">Toddler (2-4)</option>
+          <option value="elementary">Elementary (5-7)</option>
+          <option value="tween">Tween (8-11)</option>
+        </select>
+        <button onClick={test} disabled={!prompt.trim()}
+          className="bg-violet-600 text-white font-bold px-4 py-1.5 rounded-lg text-sm hover:bg-violet-700 transition-colors disabled:opacity-50">
+          Test filter
         </button>
       </div>
-
-      {/* Example prompts */}
-      <div className="flex flex-wrap gap-2">
-        {EXAMPLES.map(ex => (
-          <button key={ex} onClick={() => setInput(ex)}
-            className="text-xs bg-gray-100 hover:bg-violet-100 text-gray-600 hover:text-violet-700
-                       px-2 py-1 rounded-lg transition-colors">
-            {ex}
-          </button>
-        ))}
-      </div>
-
       {result && (
-        <div className={`rounded-xl p-4 border text-sm space-y-2 ${
-          result.blocked ? 'bg-red-50 border-red-200' :
-          result.action === 'sanitize' ? 'bg-amber-50 border-amber-100' :
-          'bg-green-50 border-green-100'
+        <div className={`rounded-xl p-3 border text-sm font-mono ${
+          (result as {blocked?: boolean}).blocked ? 'bg-red-50 border-red-200' :
+          (result as {action?: string}).action === 'sanitize' ? 'bg-yellow-50 border-yellow-200' :
+          'bg-green-50 border-green-200'
         }`}>
-          <div className="flex items-center gap-2">
-            <ActionBadge action={result.action ?? 'allow'} />
-            <span className="font-semibold text-gray-800">
-              {result.blocked ? '🚫 BLOCKED' :
-               result.action === 'sanitize' ? '✏️ Sanitized' : '✅ Allowed'}
+          <div className="flex gap-2 flex-wrap mb-2">
+            <span className={`font-bold text-xs px-2 py-0.5 rounded-full ${
+              (result as {blocked?: boolean}).blocked ? 'bg-red-200 text-red-800' :
+              (result as {action?: string}).action === 'sanitize' ? 'bg-yellow-200 text-yellow-800' :
+              'bg-green-200 text-green-800'
+            }`}>
+              {(result as {action?: string}).action?.toUpperCase() ?? 'UNKNOWN'}
             </span>
-            {result.riskScore !== undefined && (
-              <span className="ml-auto text-xs text-gray-500">
-                Risk score: <strong>{result.riskScore}</strong>/100
-              </span>
-            )}
+            <span className="text-xs text-gray-500">risk: {(result as {riskScore?: number}).riskScore}</span>
+            <span className="text-xs text-gray-500">nsfw: {(result as {nsfw_score?: number}).nsfw_score}</span>
+            <span className="text-xs text-gray-500">semantic: {(result as {semanticScore?: number}).semanticScore}</span>
           </div>
-          {result.promptSafe && !result.blocked && (
-            <div>
-              <p className="text-xs text-gray-500 mb-1">Safe prompt:</p>
-              <p className="text-xs bg-white rounded-lg p-2 border font-mono break-all">
-                {String(result.promptSafe)}
-              </p>
-            </div>
+          {!((result as {blocked?: boolean}).blocked) && (result as {promptSafe?: string}).promptSafe && (
+            <p className="text-xs text-gray-700 mb-2">
+              <strong>Safe prompt:</strong> {(result as {promptSafe?: string}).promptSafe?.slice(0, 200)}
+            </p>
           )}
-          {Array.isArray(result.flags) && result.flags.length > 0 && (
+          {((result as {flags?: string[]}).flags ?? []).length > 0 && (
             <div className="flex flex-wrap gap-1">
-              {(result.flags as string[]).map(f => (
-                <span key={f} className="text-xs bg-white border border-gray-200 px-2 py-0.5 rounded font-mono">
+              {((result as {flags?: string[]}).flags ?? []).map((f, i) => (
+                <span key={i} className="text-xs bg-white/60 border border-gray-200 px-1.5 py-0.5 rounded">
                   {f}
                 </span>
               ))}
@@ -198,85 +260,108 @@ function SafetySandbox() {
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main Page ─────────────────────────────────────────────────────────────────
 export default function SafetyAdminPage() {
-  const [data, setData]         = useState<ModerationData | null>(null)
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState<'all' | 'block' | 'sanitize' | 'unreviewed'>('unreviewed')
-  const [activeTab, setActiveTab] = useState<'queue' | 'stats' | 'changelog' | 'sandbox'>('queue')
+  const [tab,      setTab]      = useState<'queue' | 'escalated' | 'stats' | 'sessions' | 'sandbox' | 'changelog'>('queue')
+  const [queue,    setQueue]    = useState<QueueItem[]>([])
+  const [stats,    setStats]    = useState<Stats | null>(null)
+  const [sessions, setSessions] = useState<AbuseSession[]>([])
+  const [total,    setTotal]    = useState(0)
+  const [loading,  setLoading]  = useState(false)
+  const [selected, setSelected] = useState<Set<number>>(new Set())
+  const [filter,   setFilter]   = useState<'unreviewed' | 'escalated' | 'blocked' | 'all'>('unreviewed')
 
-  const load = useCallback(async (action?: string) => {
+  const loadQueue = useCallback(async (f = filter) => {
     setLoading(true)
-    const params = new URLSearchParams({ limit: '200' })
-    if (action && action !== 'all') {
-      if (action === 'unreviewed') params.set('unreviewed', 'true')
-      else params.set('action', action)
+    const r = await fetch(`/api/admin/moderation?filter=${f}&limit=50`)
+    if (r.ok) {
+      const d = await r.json() as { items: QueueItem[]; total: number }
+      setQueue(d.items ?? [])
+      setTotal(d.total ?? 0)
     }
-    const res = await fetch(`/api/v1/moderation?${params}`)
-    const d   = await res.json() as ModerationData
-    setData(d)
     setLoading(false)
+  }, [filter])
+
+  const loadStats = useCallback(async () => {
+    const r = await fetch('/api/admin/moderation?view=stats')
+    if (r.ok) setStats(await r.json() as Stats)
   }, [])
 
-  useEffect(() => { load(filter) }, [load, filter])
+  const loadSessions = useCallback(async () => {
+    const r = await fetch('/api/admin/moderation?view=sessions')
+    if (r.ok) {
+      const d = await r.json() as { sessions: AbuseSession[] }
+      setSessions(d.sessions ?? [])
+    }
+  }, [])
 
-  // Mark as reviewed
-  const markReviewed = async (id: number, verdict: 'ok' | 'escalate' | 'false_positive') => {
-    await fetch('/api/v1/moderation', {
+  useEffect(() => {
+    loadStats()
+    if (tab === 'queue' || tab === 'escalated') loadQueue(tab === 'escalated' ? 'escalated' : filter)
+    if (tab === 'sessions') loadSessions()
+  }, [tab, filter]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleVerdict = async (logId: number, verdict: 'ok' | 'escalate' | 'false_positive') => {
+    await fetch('/api/admin/moderation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ _reviewId: id, verdict }),
-    }).catch(() => {})
-    // Optimistic update
-    setData(prev => prev ? {
-      ...prev,
-      logs: prev.logs.map(l => l.id === id
-        ? { ...l, reviewed: true, review_verdict: verdict }
-        : l),
-    } : prev)
+      body: JSON.stringify({ logId, verdict }),
+    })
+    setQueue(prev => prev.map(i => i.id === logId ? { ...i, reviewed: true, review_verdict: verdict } : i))
   }
 
-  const s = data?.summary
-  const maxFlag = Math.max(...(data?.topFlags ?? []).map(f => f.count), 1)
+  const handleBulkVerdict = async (verdict: 'ok' | 'escalate' | 'false_positive') => {
+    if (!selected.size) return
+    const logIds = [...selected]
+    await fetch('/api/admin/moderation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bulk: true, logIds, verdict }),
+    })
+    setQueue(prev => prev.map(i =>
+      selected.has(i.id) ? { ...i, reviewed: true, review_verdict: verdict } : i
+    ))
+    setSelected(new Set())
+  }
+
+  const toggleSelect = (id: number, v: boolean) =>
+    setSelected(prev => { const n = new Set(prev); if (v) { n.add(id) } else { n.delete(id) } return n })
+
+  const selectAll = () => setSelected(new Set(queue.filter(i => !i.reviewed).map(i => i.id)))
 
   const tabs = [
-    { id: 'queue',     label: '🚩 Review Queue' },
-    { id: 'stats',     label: '📊 Stats & Flags' },
-    { id: 'changelog', label: '📋 Filter History' },
+    { id: 'queue',     label: `📋 Queue (${stats?.unreviewed ?? '…'})` },
+    { id: 'escalated', label: `🚨 Escalated (${stats?.escalated ?? '…'})` },
+    { id: 'stats',     label: '📊 Stats' },
+    { id: 'sessions',  label: '🕵️ Abuse Sessions' },
     { id: 'sandbox',   label: '🧪 Sandbox' },
+    { id: 'changelog', label: '📜 Changelog' },
   ] as const
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-red-700 text-white px-6 py-4">
-        <div className="max-w-5xl mx-auto flex items-center gap-4">
+        <div className="max-w-6xl mx-auto flex items-center gap-4">
           <Link href="/admin" className="text-red-300 hover:text-white text-sm">← Admin</Link>
           <div className="flex-1">
-            <h1 className="text-xl font-bold">🛡️ Content Safety & Moderation</h1>
+            <h1 className="text-xl font-bold">🛡️ Content Moderation Pipeline</h1>
             <p className="text-red-200 text-xs mt-0.5">
-              Filter v1.2 · COPPA-compliant · Hard block + sanitize pipeline · Human review queue
+              Filter v1.3 · 6-stage pipeline · NSFW heuristics · session abuse tracker · Agentmail alerts
             </p>
           </div>
-          {s?.unreviewedFlags !== undefined && s.unreviewedFlags > 0 && (
-            <div className="bg-white text-red-700 text-sm font-extrabold px-3 py-1.5 rounded-xl">
-              ⚠️ {s.unreviewedFlags} unreviewed
-            </div>
-          )}
-          <button onClick={() => load(filter)}
-            className="text-sm border border-red-500 px-3 py-1.5 rounded-lg hover:bg-red-600">
+          <button onClick={() => { loadStats(); loadQueue() }}
+            className="text-sm border border-red-500 px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors">
             ↻ Refresh
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="max-w-5xl mx-auto mt-3 flex gap-1">
+        <div className="max-w-6xl mx-auto mt-3 flex gap-1 overflow-x-auto">
           {tabs.map(t => (
-            <button key={t.id} onClick={() => setActiveTab(t.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                activeTab === t.id
-                  ? 'bg-white text-red-700'
-                  : 'text-red-200 hover:text-white hover:bg-red-600'
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
+                tab === t.id ? 'bg-white/20 text-white' : 'text-red-200 hover:text-white hover:bg-red-600'
               }`}>
               {t.label}
             </button>
@@ -284,236 +369,294 @@ export default function SafetyAdminPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
-
-        {/* KPI Strip */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Total prompts logged', value: s?.total ?? 0, sub: 'all time', color: 'text-gray-700' },
-            { label: 'Block rate',   value: `${s?.blockRate ?? 0}%`,    sub: `${s?.block ?? 0} blocked`, color: 'text-red-600' },
-            { label: 'Sanitize rate', value: `${s?.sanitizeRate ?? 0}%`, sub: `${s?.sanitize ?? 0} sanitized`, color: 'text-amber-600' },
-            { label: 'Unreviewed flags', value: s?.unreviewedFlags ?? 0, sub: 'need review', color: s?.unreviewedFlags ? 'text-red-600' : 'text-green-600' },
-          ].map(k => (
-            <div key={k.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <p className={`text-2xl font-extrabold ${k.color}`}>{k.value}</p>
-              <p className="text-xs text-gray-500 mt-0.5">{k.label}</p>
-              <p className="text-xs text-gray-400">{k.sub}</p>
-            </div>
-          ))}
+      {/* Stats strip */}
+      {stats && (
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-6 py-3 grid grid-cols-5 gap-4">
+            {[
+              { label: 'Total logs',   value: stats.total.toLocaleString(),       color: 'text-gray-800' },
+              { label: 'Unreviewed',   value: stats.unreviewed.toLocaleString(),   color: 'text-orange-600' },
+              { label: 'Blocked',      value: stats.blocked.toLocaleString(),      color: 'text-red-600' },
+              { label: 'Escalated',    value: stats.escalated.toLocaleString(),    color: 'text-red-700' },
+              { label: '7d block rate',value: `${stats.recent7d.count ? Math.round(stats.recent7d.block/stats.recent7d.count*100) : 0}%`, color: 'text-violet-700' },
+            ].map(s => (
+              <div key={s.label} className="text-center">
+                <p className={`text-xl font-extrabold ${s.color}`}>{s.value}</p>
+                <p className="text-xs text-gray-400">{s.label}</p>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
 
-        {/* ── REVIEW QUEUE TAB ──────────────────────────────────────────── */}
-        {activeTab === 'queue' && (
+      <div className="max-w-6xl mx-auto px-6 py-6">
+
+        {/* ── REVIEW QUEUE ─────────────────────────────────────────────── */}
+        {(tab === 'queue' || tab === 'escalated') && (
           <div className="space-y-4">
-            {/* Filter buttons */}
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-              <div className="flex gap-2 flex-wrap">
-                {(['unreviewed', 'block', 'sanitize', 'all'] as const).map(f => (
+            {/* Filter + bulk controls */}
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex gap-1">
+                {(['unreviewed', 'blocked', 'all'] as const).map(f => (
                   <button key={f} onClick={() => setFilter(f)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                      filter === f ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    className={`text-xs px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+                      filter === f ? 'bg-red-700 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
                     }`}>
-                    {f === 'unreviewed' ? '🚩 Unreviewed' :
-                     f === 'block'     ? '🚫 Blocks' :
-                     f === 'sanitize'  ? '✏️ Sanitized' : '📋 All'}
+                    {f}
                   </button>
                 ))}
               </div>
+              {selected.size > 0 && (
+                <div className="flex gap-2 ml-auto">
+                  <span className="text-xs text-gray-500">{selected.size} selected</span>
+                  {(['ok', 'false_positive', 'escalate'] as const).map(v => (
+                    <button key={v} onClick={() => handleBulkVerdict(v)}
+                      className={`text-xs font-bold px-2 py-1 rounded-lg transition-colors ${
+                        v === 'escalate' ? 'bg-red-100 text-red-700 hover:bg-red-200' :
+                        v === 'ok' ? 'bg-green-100 text-green-700 hover:bg-green-200' :
+                        'bg-yellow-100 text-yellow-700 hover:bg-yellow-200'
+                      }`}>
+                      {v === 'false_positive' ? 'false positive' : v}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button onClick={selectAll} className="text-xs text-violet-600 underline ml-auto">
+                Select all
+              </button>
             </div>
 
+            <p className="text-xs text-gray-500">{total} total items</p>
+
             {loading ? (
-              <div className="text-center py-12 text-gray-400">
-                <div className="w-8 h-8 border-2 border-gray-200 border-t-red-500 rounded-full animate-spin mx-auto mb-3"/>
-                Loading moderation queue…
+              <div className="text-center py-8 text-gray-400">
+                <div className="w-6 h-6 border-2 border-gray-200 border-t-red-500 rounded-full animate-spin mx-auto mb-2"/>
+                Loading…
               </div>
-            ) : data?.logs.length === 0 ? (
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center">
+            ) : queue.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
                 <p className="text-3xl mb-2">✅</p>
-                <p className="font-bold text-green-800">All clear — no items need review</p>
-                <p className="text-green-600 text-sm mt-1">
-                  {filter === 'unreviewed' ? 'No unreviewed flags.' : `No ${filter} entries.`}
-                </p>
+                <p className="font-bold text-gray-700">Queue is empty</p>
+                <p className="text-sm text-gray-400">No unreviewed moderation flags.</p>
               </div>
             ) : (
-              <div className="space-y-3">
-                {data?.logs.map(log => (
-                  <div key={log.id}
-                    className={`bg-white rounded-2xl border shadow-sm p-4 space-y-2 ${
-                      log.action === 'block' ? 'border-red-200' :
-                      log.action === 'sanitize' ? 'border-amber-200' : 'border-gray-100'
-                    }`}>
-                    <div className="flex items-start gap-3">
-                      <ActionBadge action={log.action} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-mono text-gray-800 break-all line-clamp-2">
-                          {log.prompt_raw}
-                        </p>
-                        {log.prompt_safe && log.action !== 'allow' && (
-                          <p className="text-xs text-green-700 font-mono mt-1 break-all line-clamp-1">
-                            → {log.prompt_safe.split(',')[0]}…
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex-shrink-0 text-right text-xs text-gray-400">
-                        <div>Risk: {log.risk_score}/100</div>
-                        <div>{log.filter_version}</div>
-                        <div>{new Date(log.created_at).toLocaleDateString()}</div>
-                      </div>
-                    </div>
-
-                    {/* Flags */}
-                    {log.flags?.length > 0 && (
-                      <div className="flex flex-wrap gap-1">
-                        {log.flags.map(f => (
-                          <span key={f} className="text-xs bg-gray-100 border border-gray-200 px-1.5 py-0.5 rounded font-mono text-gray-600">
-                            {f}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Review actions */}
-                    {!log.reviewed && log.action !== 'allow' ? (
-                      <div className="flex gap-2 pt-1">
-                        <button onClick={() => markReviewed(log.id, 'ok')}
-                          className="text-xs bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1.5 rounded-lg font-semibold transition-colors">
-                          ✅ OK — approve
-                        </button>
-                        <button onClick={() => markReviewed(log.id, 'false_positive')}
-                          className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 rounded-lg font-semibold transition-colors">
-                          🔵 False positive
-                        </button>
-                        <button onClick={() => markReviewed(log.id, 'escalate')}
-                          className="text-xs bg-red-100 text-red-700 hover:bg-red-200 px-3 py-1.5 rounded-lg font-semibold transition-colors">
-                          🔴 Escalate
-                        </button>
-                      </div>
-                    ) : log.reviewed && (
-                      <div className="text-xs text-gray-400">
-                        Reviewed: <span className="font-semibold">{log.review_verdict}</span>
-                      </div>
-                    )}
-                  </div>
+              <div className="space-y-2">
+                {queue.map(item => (
+                  <QueueRow key={item.id} item={item}
+                    onVerdict={handleVerdict}
+                    selected={selected.has(item.id)}
+                    onSelect={toggleSelect} />
                 ))}
               </div>
             )}
           </div>
         )}
 
-        {/* ── STATS & FLAGS TAB ────────────────────────────────────────────── */}
-        {activeTab === 'stats' && (
-          <div className="space-y-6">
-            {/* Action distribution */}
+        {/* ── STATS ──────────────────────────────────────────────────────── */}
+        {tab === 'stats' && stats && (
+          <div className="grid sm:grid-cols-2 gap-6">
+            {/* 7-day overview */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h2 className="font-bold text-gray-800 mb-3">Prompt disposition</h2>
-              <div className="flex h-6 rounded-xl overflow-hidden mb-2">
-                <div className="bg-green-500" style={{ width: `${100 - (s?.blockRate ?? 0) - (s?.sanitizeRate ?? 0)}%` }}
-                  title="Allowed"/>
-                <div className="bg-amber-400" style={{ width: `${s?.sanitizeRate ?? 0}%` }} title="Sanitized"/>
-                <div className="bg-red-500"   style={{ width: `${s?.blockRate ?? 0}%` }} title="Blocked"/>
-              </div>
-              <div className="flex gap-4 text-xs text-gray-500">
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"/>Allowed ({s?.allow ?? 0})</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"/>Sanitized ({s?.sanitize ?? 0})</span>
-                <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"/>Blocked ({s?.block ?? 0})</span>
+              <h2 className="font-bold text-gray-800 mb-3">Last 7 days</h2>
+              <div className="space-y-2">
+                {[
+                  { label: 'Total prompts', value: stats.recent7d.count, pct: 100 },
+                  { label: 'Allowed',   value: stats.recent7d.allow,    pct: stats.recent7d.count ? Math.round(stats.recent7d.allow/stats.recent7d.count*100) : 0, color: 'bg-green-500' },
+                  { label: 'Sanitized', value: stats.recent7d.sanitize, pct: stats.recent7d.count ? Math.round(stats.recent7d.sanitize/stats.recent7d.count*100) : 0, color: 'bg-yellow-500' },
+                  { label: 'Blocked',   value: stats.recent7d.block,    pct: stats.recent7d.count ? Math.round(stats.recent7d.block/stats.recent7d.count*100) : 0, color: 'bg-red-500' },
+                ].map(s => (
+                  <div key={s.label} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500 w-20">{s.label}</span>
+                    <div className="flex-1 bg-gray-100 rounded-full h-2">
+                      <div className={`h-2 rounded-full ${s.color ?? 'bg-gray-300'}`} style={{ width: `${s.pct}%` }}/>
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 w-8 text-right">{s.value}</span>
+                    <span className="text-xs text-gray-400 w-8">{s.pct}%</span>
+                  </div>
+                ))}
+                <p className="text-xs text-gray-400 mt-2">Avg risk score: {stats.recent7d.avgRisk}</p>
               </div>
             </div>
 
-            {/* Top flagged terms */}
+            {/* Top flag categories */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <h2 className="font-bold text-gray-800 mb-3">Top flagged terms</h2>
-              {data?.topFlags.length === 0 ? (
-                <p className="text-sm text-gray-400">No flagged terms yet.</p>
+              <h2 className="font-bold text-gray-800 mb-3">Top flag categories (7d)</h2>
+              {stats.topFlags.length === 0 ? (
+                <p className="text-sm text-gray-400">No flags yet</p>
               ) : (
                 <div className="space-y-2">
-                  {data?.topFlags.map(f => (
-                    <div key={f.term} className="flex items-center gap-3">
-                      <span className="text-sm font-mono text-gray-600 w-36 flex-shrink-0 truncate">{f.term}</span>
-                      <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-400 rounded-full"
-                          style={{ width: `${Math.round(f.count / maxFlag * 100)}%` }}/>
+                  {stats.topFlags.map(f => (
+                    <div key={f.cat} className="flex items-center gap-2">
+                      <span className="text-xs font-mono text-gray-700 flex-1">{f.cat}</span>
+                      <div className="w-24 bg-gray-100 rounded-full h-1.5">
+                        <div className="h-1.5 rounded-full bg-red-400" style={{ width: `${Math.min((f.count / (stats.topFlags[0]?.count || 1)) * 100, 100)}%` }}/>
                       </div>
-                      <span className="text-sm font-bold text-gray-700 w-6 text-right">{f.count}</span>
+                      <span className="text-xs font-bold text-gray-600 w-6 text-right">{f.count}</span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* False positives / calibration */}
-            <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
-              <h3 className="font-bold text-amber-800 mb-2">⚖️ Filter calibration notes</h3>
-              <div className="space-y-1 text-sm text-amber-700">
-                <p>• <strong>witch / skeleton / ghost</strong>: Low risk score (5–10). OK for older kids (8+) — monitor for age context.</p>
-                <p>• <strong>pokemon / minecraft</strong>: Trademark risk — substituted to generic terms. Verify output quality.</p>
-                <p>• <strong>sword / bow</strong>: Fantasy context OK — substituted to &apos;magic wand&apos; only if risk score &gt;20.</p>
-                <p>• <strong>zombie</strong>: Medium block (20 pts) — substituted to &apos;friendly ghost&apos;. Common kid theme, watch recall rate.</p>
-                <p>• <strong>Review any &apos;escalate&apos;</strong> verdicts within 24h. No hard-blocks should go unreviewed &gt;72h.</p>
+            {/* NSFW heuristics explanation */}
+            <div className="sm:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <h2 className="font-bold text-gray-800 mb-3">NSFW Heuristics (v1.3)</h2>
+              <div className="grid sm:grid-cols-2 gap-4 text-sm text-gray-600">
+                <div>
+                  <p className="font-semibold text-gray-800 mb-2">Text-level (prompt scan)</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Hard block list (80+ terms) → score = 100</li>
+                    <li>• PII regex (phone/email/address) → block</li>
+                    <li>• Semantic combinations (grooming, violence combos) → block/flag</li>
+                    <li>• Age-adaptive: toddler blocks skeleton/spider/fire etc</li>
+                    <li>• Soft flags: trademark, mild scary, age-ambiguous</li>
+                    <li>• L33tspeak decoder before all checks</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800 mb-2">Image-level (post-generation)</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Pollinations X-Has-Warning header (+60 score)</li>
+                    <li>• Safety suffix presence in URL (+20 if missing)</li>
+                    <li>• Content-type mismatch (+30)</li>
+                    <li>• Image size heuristic (too small = +10)</li>
+                    <li>• Canvas pixel sampling: warm-pixel ratio &gt;35% (+40)</li>
+                    <li>• Low white-pixel ratio &lt;30% (not line art) (+20)</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ── FILTER CHANGELOG TAB ─────────────────────────────────────────── */}
-        {activeTab === 'changelog' && (
+        {/* ── SESSION ABUSE ──────────────────────────────────────────────── */}
+        {tab === 'sessions' && (
           <div className="space-y-4">
-            {FILTER_CHANGELOG.map(v => (
-              <div key={v.version}
-                className={`bg-white rounded-2xl border shadow-sm p-5 ${
-                  v.status === 'current' ? 'border-violet-200' : 'border-gray-100'
-                }`}>
+            <p className="text-sm text-gray-500">
+              Per-session block/flag counts. Sessions with abuse_level ≥ high trigger Agentmail alert.
+            </p>
+            {sessions.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+                <p className="text-2xl mb-2">🟢</p>
+                <p className="font-semibold text-gray-700">No abuse sessions detected</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      {['Session', 'Attempts', 'Blocked', 'Sanitized', 'Max Risk', 'Level', 'Last seen'].map(h => (
+                        <th key={h} className="px-3 py-2 text-left font-semibold text-gray-500">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sessions.map(s => (
+                      <tr key={s.session_id} className="border-b border-gray-50 hover:bg-gray-50">
+                        <td className="px-3 py-2 font-mono text-gray-700">{s.session_id.slice(0, 16)}…</td>
+                        <td className="px-3 py-2 text-center">{s.total_attempts}</td>
+                        <td className="px-3 py-2 text-center font-bold text-red-600">{s.blocked_count}</td>
+                        <td className="px-3 py-2 text-center text-yellow-600">{s.sanitized_count}</td>
+                        <td className="px-3 py-2 text-center">{s.max_risk_score}</td>
+                        <td className="px-3 py-2">
+                          <span className={`px-2 py-0.5 rounded-full font-bold ${ABUSE_COLOR(s.abuse_level)}`}>
+                            {s.abuse_level}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-gray-400">{ts(s.last_seen_at)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── SANDBOX ────────────────────────────────────────────────────── */}
+        {tab === 'sandbox' && (
+          <div className="max-w-2xl">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <h2 className="font-bold text-gray-800 mb-1">Live Filter Sandbox</h2>
+              <p className="text-xs text-gray-500 mb-4">
+                Test prompts against the v1.3 safety filter. Results are not logged.
+              </p>
+              <FilterSandbox />
+            </div>
+          </div>
+        )}
+
+        {/* ── CHANGELOG ─────────────────────────────────────────────────── */}
+        {tab === 'changelog' && (
+          <div className="max-w-3xl space-y-4">
+            {[
+              {
+                version: 'v1.3', date: 'Apr 2026',
+                changes: [
+                  'Semantic combination scanner: detect harmful word pairs (grooming, violence combos)',
+                  'Age-adaptive filtering: toddler/elementary profiles with extra blocks',
+                  'L33tspeak decoder: normalises 4→a, 3→e, 0→o before scanning',
+                  'Expanded hard block list: +30 terms (grooming, hate, self-harm)',
+                  'NSFW heuristics: canvas pixel sampling (warm-pixel ratio), Pollinations header check',
+                  'Session abuse tracker: moderation_sessions table, levels: none→low→medium→high→banned',
+                  'Agentmail escalation alerts for grooming semantics and high-risk sessions',
+                  'Post-generation image moderation: auto-delete from Storage if NSFW score ≥ 41',
+                  'nsfw_score + semanticScore added to SafetyResult and moderation_logs',
+                  'New moderation orchestration layer: src/lib/moderation.ts',
+                ],
+              },
+              {
+                version: 'v1.2', date: 'Mar 2026',
+                changes: [
+                  'Hero name sanitization: sanitizeHeroName()',
+                  'Enhanced substitution map (12 term replacements)',
+                  'Risk scoring (0–100) with calibrated weights per soft flag',
+                  'moderation_logs table with fire-and-forget logging at session creation',
+                  'Admin safety dashboard: 4-tab review queue + filter sandbox',
+                ],
+              },
+              {
+                version: 'v1.1', date: 'Feb 2026',
+                changes: [
+                  'PII regex detector (phone, email, street address, SSN)',
+                  'Real-person detection: blocks "realistic person", "celebrity", etc.',
+                  'Free-text interest sanitization: sanitizeInterest()',
+                ],
+              },
+              {
+                version: 'v1.0', date: 'Feb 2026',
+                changes: [
+                  'Initial hard block list (50 terms): violence, adult, horror, hate, drugs, self-harm',
+                  'Safe substitutions map: zombie→friendly ghost, sword→magic wand, etc.',
+                  'SAFETY_SUFFIX enforcement on all prompts',
+                  'Soft flag list (30 terms) with per-category risk scores',
+                ],
+              },
+            ].map(v => (
+              <div key={v.version} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className={`text-sm font-bold px-3 py-1 rounded-lg ${
-                    v.status === 'current' ? 'bg-violet-100 text-violet-700' : 'bg-gray-100 text-gray-500'
-                  }`}>{v.version}</span>
+                  <span className="bg-violet-100 text-violet-700 font-bold text-sm px-2.5 py-1 rounded-full">
+                    {v.version}
+                  </span>
                   <span className="text-sm text-gray-500">{v.date}</span>
-                  {v.status === 'current' && (
-                    <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">
-                      ✅ ACTIVE
+                  {v.version === 'v1.3' && (
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded-full">
+                      Current
                     </span>
                   )}
                 </div>
-                <ul className="space-y-1 mb-3">
-                  {v.changes.map(c => (
-                    <li key={c} className="text-sm text-gray-700 flex gap-2">
-                      <span className="text-gray-400 flex-shrink-0">→</span>
-                      <span>{c}</span>
+                <ul className="space-y-1">
+                  {v.changes.map((c, i) => (
+                    <li key={i} className="text-sm text-gray-600 flex gap-2">
+                      <span className="text-violet-400 flex-shrink-0">•</span>
+                      {c}
                     </li>
                   ))}
                 </ul>
-                <div className="grid grid-cols-3 gap-3 bg-gray-50 rounded-xl p-3 text-xs">
-                  <div className="text-center">
-                    <div className="font-bold text-red-600">{v.stats.blockRate}%</div>
-                    <div className="text-gray-500">Block rate</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-amber-600">{v.stats.sanitizeRate}%</div>
-                    <div className="text-gray-500">Sanitize rate</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold text-violet-600">{v.stats.flaggedTerms}</div>
-                    <div className="text-gray-500">Terms in filter</div>
-                  </div>
-                </div>
               </div>
             ))}
-
-            {/* Planned v1.3 */}
-            <div className="border-2 border-dashed border-gray-200 rounded-2xl p-5 text-gray-400">
-              <p className="font-bold mb-2">🔭 Planned: v1.3</p>
-              <ul className="text-sm space-y-1">
-                <li>→ Image-level moderation via Pollinations response headers</li>
-                <li>→ Age-gated filter profiles (2–4 stricter than 8–11)</li>
-                <li>→ ML-assisted scoring (if Replicate API key available)</li>
-                <li>→ Async review webhook → Agentmail notification on escalation</li>
-              </ul>
-            </div>
           </div>
         )}
-
-        {/* ── SANDBOX TAB ──────────────────────────────────────────────────── */}
-        {activeTab === 'sandbox' && <SafetySandbox />}
-
       </div>
     </div>
   )

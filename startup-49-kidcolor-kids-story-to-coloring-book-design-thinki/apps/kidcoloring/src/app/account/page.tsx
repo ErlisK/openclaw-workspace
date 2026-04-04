@@ -345,6 +345,60 @@ function BookCard({ session }: { session: Session }) {
   )
 }
 
+// ── Referral Section ─────────────────────────────────────────────────────────
+function ReferralSection({ userId }: { userId?: string }) {
+  const [code, setCode] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!userId) return
+    fetch(`/api/v1/referral?userId=${userId}`)
+      .then(r => r.json())
+      .then((d: { referral?: { referral_code: string } }) => {
+        if (d.referral?.referral_code) setCode(d.referral.referral_code)
+      })
+      .catch(() => {})
+  }, [userId])
+
+  const referralUrl = code
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://kidcoloring-research.vercel.app'}/refer/${code}`
+    : null
+
+  const copyLink = async () => {
+    if (!referralUrl) return
+    await navigator.clipboard.writeText(referralUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (!userId) return null
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+      <div>
+        <h2 className="font-bold text-gray-800">Share with friends</h2>
+        <p className="text-xs text-gray-500 mt-0.5">Send your unique link — friends get a personalized welcome</p>
+      </div>
+      {referralUrl ? (
+        <div className="flex gap-2">
+          <input
+            readOnly value={referralUrl}
+            className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-xs text-gray-600 bg-gray-50 font-mono overflow-hidden"
+          />
+          <button onClick={copyLink}
+            className={`px-3 py-2 rounded-xl text-xs font-bold transition-colors ${
+              copied ? 'bg-green-100 text-green-700' : 'bg-violet-100 text-violet-700 hover:bg-violet-200'
+            }`}>
+            {copied ? '✓ Copied!' : 'Copy'}
+          </button>
+        </div>
+      ) : (
+        <div className="h-8 bg-gray-100 rounded-xl animate-pulse"/>
+      )}
+    </div>
+  )
+}
+
 // ── Main Account Page ─────────────────────────────────────────────────────────
 export default function AccountPage() {
   const [user, setUser]           = useState<{ id: string; email: string } | null>(null)
@@ -669,6 +723,9 @@ export default function AccountPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Referral link */}
+              <ReferralSection userId={user?.id} />
 
               {/* Danger zone */}
               <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-5 space-y-3">

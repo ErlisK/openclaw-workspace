@@ -194,6 +194,45 @@ export default function PreviewPage() {
     setSession(prev => prev ? { ...prev, status: 'complete' } : prev)
   }, [sessionId, generatePage])
 
+    // ── Supabase Realtime: subscribe to trial_pages updates ──────────────────
+  // When the server-side worker updates a page, clients get the update immediately
+  // without polling. This works alongside the client-side fallback.
+  useEffect(() => {
+    const sb = createClient()
+    const channel = sb
+      .channel(`pages:${sessionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event:  'UPDATE',
+          schema: 'public',
+          table:  'trial_pages',
+          filter: `session_id=eq.${sessionId}`,
+        },
+        (payload: { new: Record<string, unknown> }) => {
+          const updated = payload.new as {
+            page_number: number; image_url: string | null; status: string; latency_ms: number | null
+          }
+          if (updated.image_url && updated.status === 'complete') {
+            setPages(prev => prev.map(p =>
+              p.page_number === updated.page_number
+                ? { ...p, image_url: updated.image_url, status: updated.status, latency_ms: updated.latency_ms }
+                : p
+            ))
+            setCurrentPage(prev => Math.max(prev, updated.page_number))
+            // TTS announcement via realtime path
+            if (!announcedPages.current.has(`rt-${updated.page_number}`)) {
+              announcedPages.current.add(`rt-${updated.page_number}`)
+              tts.speak(updated.page_number === 1 ? 'First page ready!' : `Page ${updated.page_number} ready.`)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { void sb.removeChannel(channel) }
+  }, [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Boot ──────────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
@@ -225,7 +264,51 @@ export default function PreviewPage() {
 
       const notStarted = data.pages.every(p => p.status === 'pending')
       if (notStarted && !generatingRef.current) {
-        await generateAll(data.session, data.pages)
+        // Try server-side batch generation first (assets go to Supabase Storage)
+        // Realtime subscription above will update the UI as pages complete.
+        // Fallback: if server-side fails (timeout/error), run client-side generation.
+        setGenerating(true)
+        generatingRef.current = true
+        try {
+          const batchRes = await fetch('/api/v1/generate/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId }),
+          })
+          if (batchRes.ok) {
+            const batchData = await batchRes.json() as {
+              ok: boolean; pages: { pageNumber: number; imageUrl: string | null }[]
+            }
+            // Apply any results that didn't arrive via Realtime
+            if (batchData.pages) {
+              setPages(prev => {
+                const updated = [...prev]
+                batchData.pages.forEach(r => {
+                  if (r.imageUrl) {
+                    const idx = updated.findIndex(p => p.page_number === r.pageNumber)
+                    if (idx >= 0) {
+                      updated[idx] = { ...updated[idx], image_url: r.imageUrl, status: 'complete' }
+                    }
+                  }
+                })
+                return updated
+              })
+            }
+            setSession(prev => prev ? { ...prev, status: 'complete' } : prev)
+            tts.speak(`Your book is ready! ${data.pages.length} coloring pages.`)
+          } else {
+            // Server-side generation failed — fall back to client-side
+            console.warn('[preview] server batch failed, falling back to client-side generation')
+            await generateAll(data.session, data.pages)
+          }
+        } catch {
+          // Network error or timeout — fall back to client-side
+          console.warn('[preview] server batch error, falling back to client-side generation')
+          await generateAll(data.session, data.pages)
+        } finally {
+          setGenerating(false)
+          generatingRef.current = false
+        }
       }
     })()
     return () => { cancelled = true }
