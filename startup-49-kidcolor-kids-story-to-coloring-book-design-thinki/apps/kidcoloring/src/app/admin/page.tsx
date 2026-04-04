@@ -188,6 +188,7 @@ export default function AdminPage() {
                 { href: '/admin/experiments', icon: '🧪', label: 'A/B Experiments', desc: '3 iteration cycles · prompt UI · export CTA · page count' },
                 { href: '/admin/paywall', icon: '💰', label: 'Paywall Analytics', desc: '3 price anchors · CTR by anchor · revenue projection · A/B layout test' },
                 { href: '/admin/csat', icon: '😊', label: 'CSAT & Micro-Survey', desc: '1-click emoji CSAT + follow-up · 70%+ good · product insights' },
+                { href: '/admin/safety', icon: '🛡️', label: 'Content Safety', desc: 'Filter v1.2 · prompt blocks · sanitize queue · COPPA compliance' },
                 { href: '/admin/tradeoffs', icon: '🧭', label: 'Trade-Off Analysis & Concept Selection', desc: 'Quality × Cost × Safety matrix · 3 concepts · provider selection · 6-risk register · final decision' },
                 { href: '/admin/sandbox', icon: '📊', label: 'Sandbox Dashboard', desc: '112 tests · p50/p95 latency · failure rates · style×concept heatmap · cost vs quality' },
                 { href: '/sandbox', icon: '🎨', label: 'Generation Sandbox', desc: 'Live prompt tester · Pollinations.ai free tier · logs to Supabase gen_tests' },
