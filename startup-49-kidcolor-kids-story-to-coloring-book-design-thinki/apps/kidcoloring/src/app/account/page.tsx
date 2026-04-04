@@ -1,9 +1,33 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+/**
+ * /account — Parent account dashboard
+ *
+ * Sections:
+ *   1. COPPA consent gate (shown first-time; required before adding children)
+ *   2. Parent profile (display name, email, stats)
+ *   3. Children profiles (add/edit/delete; max 5)
+ *   4. My books (trial sessions owned by this parent)
+ *   5. Sign out
+ *
+ * COPPA compliance notes:
+ *   - No child login credentials ever created
+ *   - Children are nicknames + age + interests only
+ *   - Parent must explicitly consent before any child data is stored
+ *   - "Right to erasure" — delete child profile removes all associated data
+ */
+
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { createClient, signOut } from '@/lib/auth-client'
 
+// ── Types ────────────────────────────────────────────────────────────────────
+interface Child {
+  id: string
+  nickname: string
+  age_years: number
+  interests: string[]
+}
 interface TrialPage { id: string; image_url: string | null; sort_order: number; status: string }
 interface Session {
   id: string; concept: string; status: string; page_count: number
@@ -11,208 +35,663 @@ interface Session {
   config: Record<string, unknown>; created_at: string; exported_at: string | null
   trial_pages: TrialPage[]
 }
-interface AccountData { user: { id: string; email: string }; sessions: Session[] }
-
-function ConceptBadge({ concept }: { concept: string }) {
-  return concept === 'interest-packs'
-    ? <span className="inline-flex items-center gap-1 text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full font-medium">🎯 Interest Pack</span>
-    : <span className="inline-flex items-center gap-1 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">📖 Story</span>
+interface Profile {
+  display_name: string | null
+  coppa_agreed: boolean
+  coppa_agreed_at: string | null
+  books_created: number
+  is_subscribed: boolean
 }
+interface AccountStats { childCount: number; sessionCount: number; exportCount: number }
 
-function BookCard({ session }: { session: Session }) {
-  const pages = (session.trial_pages || []).filter(p => p.status === 'complete').sort((a, b) => a.sort_order - b.sort_order)
-  const thumb = pages[0]?.image_url || session.preview_image_url
-  const heroName = (session.config?.heroName as string) || ''
-  const interests = (session.config?.interests as string[]) || []
-  const title = heroName ? `${heroName}'s Book` : interests.length ? `${interests.slice(0, 2).join(' + ')} Pack` : 'My Coloring Book'
+// ── Helpers ───────────────────────────────────────────────────────────────────
+const INTEREST_EMOJIS: Record<string, string> = {
+  dinosaurs:'🦖', unicorns:'🦄', space:'🚀', robots:'🤖', dragons:'🐉',
+  mermaids:'🧜', puppies:'🐶', kittens:'🐱', princesses:'👸',
+  superheroes:'🦸', butterflies:'🦋', ocean:'🌊', fairies:'🧚',
+  wizards:'🧙', trains:'🚂', cars:'🚗',
+}
+const INTERESTS_ALL = Object.keys(INTEREST_EMOJIS)
+const AGE_OPTIONS = [
+  { value: 3, label: '3 years' }, { value: 4, label: '4 years' },
+  { value: 5, label: '5 years' }, { value: 6, label: '6 years' },
+  { value: 7, label: '7 years' }, { value: 8, label: '8 years' },
+  { value: 9, label: '9 years' }, { value: 10, label: '10 years' },
+  { value: 11, label: '11 years' }, { value: 12, label: '12 years' },
+]
+
+// ── COPPA Consent Modal ───────────────────────────────────────────────────────
+function CoppaGate({ onAgree }: { onAgree: () => void }) {
+  const [agreed, setAgreed] = useState(false)
+  const [loading, setLoading] = useState(false)
+
+  const handleAgree = async () => {
+    if (!agreed) return
+    setLoading(true)
+    await fetch('/api/v1/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coppaAgreed: true }),
+    })
+    setLoading(false)
+    onAgree()
+  }
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all overflow-hidden group">
-      {/* Thumbnail */}
-      <div className="aspect-[3/4] bg-gray-50 overflow-hidden relative">
-        {thumb ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={thumb} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300">
-            <span className="text-5xl">🎨</span>
-          </div>
-        )}
-        {/* Status badge */}
-        <div className="absolute top-2 right-2">
-          {session.exported_at
-            ? <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">Printed</span>
-            : <span className="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-0.5 rounded-full">{pages.length}/{session.page_count} pages</span>
-          }
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 space-y-6">
+        <div className="text-center">
+          <span className="text-5xl">👨‍👩‍👧‍👦</span>
+          <h2 className="text-2xl font-extrabold text-gray-900 mt-3 mb-1">
+            Parent / Guardian Consent
+          </h2>
+          <p className="text-gray-500 text-sm">Required before managing child profiles</p>
+        </div>
+
+        <div className="bg-blue-50 rounded-2xl p-4 text-sm text-blue-800 space-y-2 border border-blue-100">
+          <p className="font-bold">🛡️ COPPA Compliance Notice</p>
+          <p>KidColoring is designed for children under 13. As a parent or guardian, you confirm:</p>
+          <ul className="list-disc list-inside space-y-1 text-blue-700">
+            <li>You are at least 18 years old</li>
+            <li>You have authority to create profiles for your children</li>
+            <li>No child will have their own login account</li>
+            <li>Child profiles store only a nickname, age, and interests</li>
+            <li>No child&apos;s email address or personal info is collected</li>
+            <li>You can delete child profiles at any time</li>
+          </ul>
+        </div>
+
+        <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-600 border border-gray-100">
+          <p>We comply with the Children&apos;s Online Privacy Protection Act (COPPA) and
+          do not collect personal information from children under 13 without verifiable
+          parental consent. See our <a href="/privacy" className="text-violet-600 underline">Privacy Policy</a> for details.</p>
+        </div>
+
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
+            className="mt-0.5 w-5 h-5 rounded accent-violet-600 flex-shrink-0" />
+          <span className="text-sm text-gray-700">
+            I am a parent or guardian, I am at least 18, and I consent to
+            KidColoring&apos;s use of child profile data as described above.
+          </span>
+        </label>
+
+        <button onClick={handleAgree} disabled={!agreed || loading}
+          className="w-full bg-violet-600 text-white font-extrabold py-4 rounded-2xl
+                     hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-lg">
+          {loading ? 'Saving…' : 'I Agree — Continue'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Child Form ────────────────────────────────────────────────────────────────
+function ChildForm({
+  initial,
+  onSave,
+  onCancel,
+}: {
+  initial?: Partial<Child>
+  onSave: (data: { nickname: string; ageYears: number; interests: string[] }) => Promise<void>
+  onCancel: () => void
+}) {
+  const [nickname, setNickname]   = useState(initial?.nickname ?? '')
+  const [age, setAge]             = useState(initial?.age_years ?? 6)
+  const [interests, setInterests] = useState<string[]>(initial?.interests ?? [])
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState('')
+
+  const toggleInterest = (id: string) => {
+    setInterests(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id].slice(0, 6)
+    )
+  }
+
+  const handleSubmit = async () => {
+    const trimmed = nickname.trim()
+    if (!trimmed) { setError('Please enter a nickname'); return }
+    setSaving(true)
+    setError('')
+    try {
+      await onSave({ nickname: trimmed, ageYears: age, interests })
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Something went wrong')
+    }
+    setSaving(false)
+  }
+
+  return (
+    <div className="bg-violet-50 rounded-2xl border border-violet-200 p-5 space-y-4">
+      <h3 className="font-bold text-violet-800">
+        {initial?.id ? 'Edit child profile' : 'Add a child'}
+      </h3>
+
+      {/* Nickname */}
+      <div>
+        <label className="text-xs font-semibold text-gray-600 block mb-1">
+          Nickname <span className="text-gray-400">(shown on book covers)</span>
+        </label>
+        <input
+          value={nickname}
+          onChange={e => setNickname(e.target.value)}
+          maxLength={24}
+          placeholder="E.g. Lily, Max, Little Star…"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-violet-300"
+        />
+        <p className="text-xs text-gray-400 mt-1">Use a nickname, not their full name.</p>
+      </div>
+
+      {/* Age */}
+      <div>
+        <label className="text-xs font-semibold text-gray-600 block mb-1">Age</label>
+        <select value={age} onChange={e => setAge(Number(e.target.value))}
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
+                     focus:outline-none focus:ring-2 focus:ring-violet-300 bg-white">
+          {AGE_OPTIONS.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {/* Interests */}
+      <div>
+        <label className="text-xs font-semibold text-gray-600 block mb-2">
+          Favourite themes <span className="text-gray-400">(pick up to 6)</span>
+        </label>
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+          {INTERESTS_ALL.map(id => {
+            const sel = interests.includes(id)
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => toggleInterest(id)}
+                disabled={!sel && interests.length >= 6}
+                className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 text-xs font-medium
+                            transition-all min-h-[56px] touch-manipulation
+                            ${sel
+                              ? 'border-violet-500 bg-violet-100 text-violet-700'
+                              : 'border-gray-200 bg-white text-gray-500 hover:border-violet-200 disabled:opacity-40'
+                            }`}
+              >
+                <span className="text-lg">{INTEREST_EMOJIS[id]}</span>
+                <span className="leading-tight capitalize">{id}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-4">
-        <ConceptBadge concept={session.concept} />
-        <h3 className="font-bold text-gray-900 mt-1.5 mb-0.5 truncate">{title}</h3>
-        <p className="text-xs text-gray-400">{new Date(session.created_at).toLocaleDateString()}</p>
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="flex gap-2 mt-3">
-          <Link href={`/create/preview/${session.id}`}
-            className="flex-1 py-2 bg-violet-600 text-white text-sm font-semibold rounded-xl text-center hover:bg-violet-700 transition-colors">
-            View book
-          </Link>
-          {session.share_slug && (
-            <a href={`/share/${session.share_slug}`} target="_blank" rel="noopener noreferrer"
-              className="px-3 py-2 border border-gray-200 text-gray-500 text-sm rounded-xl hover:bg-gray-50 transition-colors">
-              🔗
-            </a>
+      <div className="flex gap-2">
+        <button onClick={handleSubmit} disabled={saving}
+          className="flex-1 bg-violet-600 text-white font-bold py-3 rounded-xl
+                     hover:bg-violet-700 disabled:opacity-60 transition-colors">
+          {saving ? 'Saving…' : (initial?.id ? 'Save changes' : 'Add child')}
+        </button>
+        <button onClick={onCancel}
+          className="px-4 py-3 border border-gray-200 rounded-xl text-gray-600
+                     hover:bg-gray-50 transition-colors font-semibold">
+          Cancel
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── ChildCard ─────────────────────────────────────────────────────────────────
+function ChildCard({
+  child,
+  onEdit,
+  onDelete,
+}: {
+  child: Child
+  onEdit: () => void
+  onDelete: () => void
+}) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 space-y-2">
+      <div className="flex items-start gap-3">
+        <div className="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center text-xl flex-shrink-0">
+          {INTEREST_EMOJIS[child.interests[0]] ?? '🎨'}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-gray-900">{child.nickname}</p>
+          <p className="text-xs text-gray-500">{child.age_years} years old</p>
+        </div>
+        <div className="flex gap-1.5">
+          <button onClick={onEdit}
+            className="text-xs bg-gray-100 hover:bg-violet-100 text-gray-600 hover:text-violet-700
+                       px-2 py-1.5 rounded-lg font-semibold transition-colors">
+            Edit
+          </button>
+          {!confirmDelete ? (
+            <button onClick={() => setConfirmDelete(true)}
+              className="text-xs bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-600
+                         px-2 py-1.5 rounded-lg transition-colors">
+              ✕
+            </button>
+          ) : (
+            <div className="flex gap-1">
+              <button onClick={onDelete}
+                className="text-xs bg-red-500 text-white px-2 py-1.5 rounded-lg font-bold">
+                Delete
+              </button>
+              <button onClick={() => setConfirmDelete(false)}
+                className="text-xs bg-gray-100 text-gray-500 px-2 py-1.5 rounded-lg">
+                Cancel
+              </button>
+            </div>
           )}
         </div>
       </div>
+      {child.interests.length > 0 && (
+        <div className="flex gap-1 flex-wrap">
+          {child.interests.map(i => (
+            <span key={i} className="text-xs bg-violet-50 text-violet-700 px-2 py-0.5 rounded-full">
+              {INTEREST_EMOJIS[i] ?? '•'} {i}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
 
-export default function AccountPage() {
-  const [data,    setData]    = useState<AccountData | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState('')
+// ── BookCard ──────────────────────────────────────────────────────────────────
+function BookCard({ session }: { session: Session }) {
+  const pages = (session.trial_pages ?? []).filter(p => p.status === 'complete')
+    .sort((a, b) => a.sort_order - b.sort_order)
+  const thumb = pages[0]?.image_url ?? session.preview_image_url
+  const interests = (session.config?.interests as string[]) ?? []
+  const heroName  = (session.config?.heroName as string) ?? ''
+  const title = heroName
+    ? `${heroName}'s Book`
+    : interests.length ? `${interests.slice(0, 2).join(' + ')} Book` : 'My Coloring Book'
 
-  useEffect(() => {
-    async function load() {
-      const sb = createClient()
-      const { data: { session } } = await sb.auth.getSession()
-      if (!session) {
-        setError('not-authed')
-        setLoading(false)
-        return
-      }
-      const resp = await fetch('/api/v1/account', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      })
-      if (!resp.ok) { setError('Failed to load books'); setLoading(false); return }
-      setData(await resp.json())
-      setLoading(false)
-    }
-    load()
-  }, [])
-
-  async function handleSignOut() {
-    await signOut()
-    window.location.href = '/'
-  }
-
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <div className="text-5xl animate-bounce mb-4">🎨</div>
-        <p className="text-gray-500">Loading your books…</p>
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
+      <div className="aspect-[3/4] bg-gray-50 relative overflow-hidden">
+        {thumb ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={thumb} alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-4xl">🎨</div>
+        )}
+        {session.exported_at && (
+          <div className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            ✓ Printed
+          </div>
+        )}
       </div>
-    </div>
-  )
-
-  if (error === 'not-authed') return (
-    <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white flex items-center justify-center px-4">
-      <div className="bg-white rounded-3xl shadow-xl p-10 text-center max-w-md w-full">
-        <div className="text-6xl mb-4">🔒</div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Sign in to see your books</h1>
-        <p className="text-gray-500 mb-6">
-          Make a coloring book first, then save it with your email.
-          No password needed — we&apos;ll send a magic link.
+      <div className="p-3">
+        <p className="font-bold text-sm text-gray-900 truncate">{title}</p>
+        <p className="text-xs text-gray-400 mt-0.5">
+          {pages.length}/{session.page_count} pages · {new Date(session.created_at).toLocaleDateString()}
         </p>
-        <Link href="/create"
-          className="block w-full py-3 bg-violet-600 text-white font-bold rounded-2xl hover:bg-violet-700 transition-colors">
-          Create a book →
+        <Link href={`/create/preview/${session.id}`}
+          className="mt-2 block w-full text-center py-2 bg-violet-600 text-white text-xs
+                     font-bold rounded-xl hover:bg-violet-700 transition-colors">
+          Open book →
         </Link>
       </div>
     </div>
   )
+}
 
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <Link href="/" className="text-violet-600 underline">Back to home</Link>
+// ── Main Account Page ─────────────────────────────────────────────────────────
+export default function AccountPage() {
+  const [user, setUser]           = useState<{ id: string; email: string } | null>(null)
+  const [profile, setProfile]     = useState<Profile | null>(null)
+  const [stats, setStats]         = useState<AccountStats | null>(null)
+  const [children, setChildren]   = useState<Child[]>([])
+  const [sessions, setSessions]   = useState<Session[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [showCoppa, setShowCoppa] = useState(false)
+  const [editingChild, setEditingChild] = useState<Child | null | 'new'>(null)
+  const [displayName, setDisplayName] = useState('')
+  const [savingName, setSavingName] = useState(false)
+  const [activeTab, setActiveTab] = useState<'books' | 'children' | 'profile'>('books')
+
+  const loadAccount = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [profileRes, childrenRes] = await Promise.all([
+        fetch('/api/v1/profile'),
+        fetch('/api/v1/children'),
+      ])
+
+      if (profileRes.ok) {
+        const pd = await profileRes.json() as {
+          user: { id: string; email: string }
+          profile: Profile | null
+          stats: AccountStats
+        }
+        setUser(pd.user)
+        setProfile(pd.profile)
+        setStats(pd.stats)
+        setDisplayName(pd.profile?.display_name ?? '')
+        if (!pd.profile?.coppa_agreed) setShowCoppa(true)
+      }
+
+      if (childrenRes.ok) {
+        const cd = await childrenRes.json() as { children: Child[] }
+        setChildren(cd.children)
+      }
+
+      // Load sessions
+      const supabase = createClient()
+      const { data: { user: sbUser } } = await supabase.auth.getUser()
+      if (sbUser) {
+        const { data: sessData } = await supabase
+          .from('trial_sessions')
+          .select('id, concept, status, page_count, share_slug, preview_image_url, config, created_at, exported_at, trial_pages(id, image_url, sort_order, status)')
+          .eq('user_id', sbUser.id)
+          .order('created_at', { ascending: false })
+          .limit(20)
+        setSessions((sessData ?? []) as Session[])
+      }
+    } catch { /* ignore */ }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { loadAccount() }, [loadAccount])
+
+  const handleCoppaAgree = () => {
+    setShowCoppa(false)
+    setProfile(prev => prev ? { ...prev, coppa_agreed: true } : null)
+  }
+
+  const handleSaveDisplayName = async () => {
+    if (!displayName.trim()) return
+    setSavingName(true)
+    await fetch('/api/v1/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ displayName }),
+    })
+    setSavingName(false)
+  }
+
+  const handleAddChild = async (data: { nickname: string; ageYears: number; interests: string[] }) => {
+    const res = await fetch('/api/v1/children', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) {
+      const err = await res.json() as { message?: string; error?: string }
+      throw new Error(err.message ?? err.error ?? 'Failed to add child')
+    }
+    const { child } = await res.json() as { child: Child }
+    setChildren(prev => [...prev, child])
+    setEditingChild(null)
+  }
+
+  const handleEditChild = async (id: string, data: { nickname: string; ageYears: number; interests: string[] }) => {
+    const res = await fetch(`/api/v1/children?id=${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+    if (!res.ok) throw new Error('Failed to update child')
+    const { child } = await res.json() as { child: Child }
+    setChildren(prev => prev.map(c => c.id === id ? child : c))
+    setEditingChild(null)
+  }
+
+  const handleDeleteChild = async (id: string) => {
+    await fetch(`/api/v1/children?id=${id}`, { method: 'DELETE' })
+    setChildren(prev => prev.filter(c => c.id !== id))
+  }
+
+  const handleSignOut = async () => {
+    await signOut()
+    window.location.href = '/'
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-2 border-violet-200 border-t-violet-500 rounded-full animate-spin mx-auto"/>
+          <p className="text-sm text-gray-500">Loading your account…</p>
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
-  const { user, sessions } = data!
+  const tabs = [
+    { id: 'books',    label: `📚 My Books (${stats?.sessionCount ?? 0})` },
+    { id: 'children', label: `👧 Children (${children.length})` },
+    { id: 'profile',  label: '⚙️ Profile' },
+  ] as const
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl">🎨</span>
-            <span className="font-bold text-gray-900">KidColoring</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500 hidden sm:block">{user.email}</span>
-            <Link href="/create"
-              className="bg-violet-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-violet-700 transition-colors">
-              + New book
-            </Link>
+    <>
+      {showCoppa && <CoppaGate onAgree={handleCoppaAgree} />}
+
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b border-gray-100 px-6 py-4 sticky top-0 z-10">
+          <div className="max-w-2xl mx-auto flex items-center gap-4">
+            <Link href="/" className="text-gray-400 hover:text-gray-600 text-sm">← Home</Link>
+            <div className="flex-1">
+              <h1 className="text-lg font-extrabold text-gray-900">
+                {profile?.display_name ? `${profile.display_name}'s Account` : 'My Account'}
+              </h1>
+              <p className="text-xs text-gray-400">{user?.email}</p>
+            </div>
             <button onClick={handleSignOut}
-              className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+              className="text-sm text-gray-400 hover:text-gray-600 font-medium">
               Sign out
             </button>
           </div>
+
+          {/* Tabs */}
+          <div className="max-w-2xl mx-auto mt-3 flex gap-1">
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold transition-colors flex-1 ${
+                  activeTab === t.id
+                    ? 'bg-violet-100 text-violet-700'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                }`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-2xl mx-auto px-6 py-6 space-y-6">
+
+          {/* Stats strip */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'Books made', value: stats?.sessionCount ?? 0 },
+              { label: 'Printed', value: stats?.exportCount ?? 0 },
+              { label: 'Children', value: stats?.childCount ?? 0 },
+            ].map(s => (
+              <div key={s.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 text-center">
+                <p className="text-2xl font-extrabold text-violet-700">{s.value}</p>
+                <p className="text-xs text-gray-500">{s.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* ── BOOKS TAB ──────────────────────────────────────────────────── */}
+          {activeTab === 'books' && (
+            <div className="space-y-4">
+              {sessions.length === 0 ? (
+                <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 text-center">
+                  <p className="text-4xl mb-3">🎨</p>
+                  <p className="font-bold text-gray-800 mb-1">No books yet</p>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Make your first personalized coloring book — free, no credit card.
+                  </p>
+                  <Link href="/create/interests"
+                    className="inline-block bg-violet-600 text-white font-bold px-6 py-3 rounded-2xl
+                               hover:bg-violet-700 transition-colors">
+                    Make a book →
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {sessions.map(s => <BookCard key={s.id} session={s} />)}
+                  </div>
+                  <div className="text-center pt-2">
+                    <Link href="/create/interests"
+                      className="inline-flex items-center gap-2 bg-violet-600 text-white font-bold px-6 py-3 rounded-2xl hover:bg-violet-700 transition-colors">
+                      ✨ Make another book
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── CHILDREN TAB ───────────────────────────────────────────────── */}
+          {activeTab === 'children' && (
+            <div className="space-y-4">
+              {!profile?.coppa_agreed ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 text-center">
+                  <p className="text-2xl mb-2">⚠️</p>
+                  <p className="font-bold text-amber-800 mb-1">Parental consent required</p>
+                  <p className="text-sm text-amber-700 mb-3">
+                    You need to agree to our COPPA terms before adding child profiles.
+                  </p>
+                  <button onClick={() => setShowCoppa(true)}
+                    className="bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl hover:bg-amber-700 transition-colors">
+                    Review &amp; agree →
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Existing children */}
+                  {children.map(child => (
+                    editingChild && typeof editingChild === 'object' && editingChild.id === child.id
+                      ? <ChildForm
+                          key={child.id}
+                          initial={child}
+                          onSave={data => handleEditChild(child.id, data)}
+                          onCancel={() => setEditingChild(null)}
+                        />
+                      : <ChildCard
+                          key={child.id}
+                          child={child}
+                          onEdit={() => setEditingChild(child)}
+                          onDelete={() => handleDeleteChild(child.id)}
+                        />
+                  ))}
+
+                  {/* Add child form or button */}
+                  {editingChild === 'new' ? (
+                    <ChildForm
+                      onSave={handleAddChild}
+                      onCancel={() => setEditingChild(null)}
+                    />
+                  ) : children.length < 5 && (
+                    <button
+                      onClick={() => profile.coppa_agreed ? setEditingChild('new') : setShowCoppa(true)}
+                      className="w-full py-4 border-2 border-dashed border-violet-200 text-violet-600
+                                 rounded-2xl font-semibold hover:border-violet-400 hover:bg-violet-50
+                                 transition-all flex items-center justify-center gap-2">
+                      + Add a child
+                    </button>
+                  )}
+
+                  {children.length >= 5 && (
+                    <p className="text-xs text-center text-gray-400">
+                      Maximum of 5 child profiles per account.
+                    </p>
+                  )}
+
+                  <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-500 border border-gray-100">
+                    <p className="font-semibold mb-1">🛡️ Privacy reminder</p>
+                    <p>Child profiles contain only a nickname, age, and interests.
+                    No email, last name, or school is stored.
+                    You can delete any profile at any time from this page.</p>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* ── PROFILE TAB ────────────────────────────────────────────────── */}
+          {activeTab === 'profile' && (
+            <div className="space-y-4">
+              {/* Display name */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <h2 className="font-bold text-gray-800">Your display name</h2>
+                <div className="flex gap-2">
+                  <input
+                    value={displayName}
+                    onChange={e => setDisplayName(e.target.value)}
+                    maxLength={48}
+                    placeholder="E.g. Sarah's Household"
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2.5 text-sm
+                               focus:outline-none focus:ring-2 focus:ring-violet-300"
+                  />
+                  <button onClick={handleSaveDisplayName} disabled={savingName || !displayName.trim()}
+                    className="bg-violet-600 text-white font-bold px-4 py-2.5 rounded-xl
+                               hover:bg-violet-700 disabled:opacity-50 transition-colors text-sm">
+                    {savingName ? '…' : 'Save'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Account details */}
+              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
+                <h2 className="font-bold text-gray-800">Account details</h2>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between py-2 border-b border-gray-50">
+                    <span className="text-gray-500">Email</span>
+                    <span className="text-gray-800 font-medium">{user?.email}</span>
+                  </div>
+                  <div className="flex justify-between py-2 border-b border-gray-50">
+                    <span className="text-gray-500">COPPA consent</span>
+                    <span className={profile?.coppa_agreed ? 'text-green-600 font-semibold' : 'text-amber-600'}>
+                      {profile?.coppa_agreed ? `✅ Agreed ${profile.coppa_agreed_at ? new Date(profile.coppa_agreed_at).toLocaleDateString() : ''}` : '⚠️ Not yet agreed'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between py-2">
+                    <span className="text-gray-500">Plan</span>
+                    <span className="text-gray-800 font-medium">
+                      {profile?.is_subscribed ? '⭐ Premium' : 'Free trial'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Danger zone */}
+              <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-5 space-y-3">
+                <h2 className="font-bold text-red-700">Account actions</h2>
+                <div className="space-y-2">
+                  <button onClick={handleSignOut}
+                    className="w-full py-2.5 border border-gray-200 text-gray-600 rounded-xl
+                               text-sm font-semibold hover:bg-gray-50 transition-colors">
+                    Sign out of this device
+                  </button>
+                  <p className="text-xs text-gray-400 text-center">
+                    To delete your account and all data, contact{' '}
+                    <a href="mailto:privacy@kidcoloring.app" className="text-violet-600 underline">
+                      privacy@kidcoloring.app
+                    </a>
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
-
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Welcome */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Books</h1>
-          <p className="text-gray-500 mt-1">
-            {sessions.length === 0 ? 'No books yet — make your first one!' : `${sessions.length} book${sessions.length !== 1 ? 's' : ''} saved`}
-          </p>
-        </div>
-
-        {sessions.length === 0 ? (
-          /* Empty state */
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-12 text-center">
-            <div className="text-7xl mb-6">🎨</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Make your first book!</h2>
-            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
-              Choose your child&apos;s favorite characters and interests, and we&apos;ll generate a personalized coloring book in minutes.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link href="/create/interests"
-                className="bg-gradient-to-r from-violet-500 to-violet-600 text-white font-bold px-6 py-3 rounded-2xl hover:from-violet-600 hover:to-violet-700 transition-all">
-                🎯 Choose Interests
-              </Link>
-              <Link href="/create/story"
-                className="bg-white text-violet-700 border-2 border-violet-200 font-bold px-6 py-3 rounded-2xl hover:border-violet-300 transition-all">
-                📖 Tell a Story
-              </Link>
-            </div>
-          </div>
-        ) : (
-          /* Books grid */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {sessions.map(s => <BookCard key={s.id} session={s} />)}
-            {/* Create new card */}
-            <Link href="/create"
-              className="bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-violet-300 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center p-8 text-center group min-h-[280px]">
-              <div className="text-4xl mb-3 group-hover:scale-110 transition-transform">➕</div>
-              <p className="font-semibold text-gray-500 group-hover:text-violet-600 transition-colors text-sm">New book</p>
-            </Link>
-          </div>
-        )}
-
-        {/* Upgrade CTA (if has free sessions) */}
-        {sessions.length > 0 && sessions.some(s => s.page_count <= 4) && (
-          <div className="mt-8 bg-gradient-to-r from-violet-600 to-blue-600 rounded-2xl p-6 text-white flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex-1">
-              <h3 className="font-bold text-lg">Get the full 12-page book</h3>
-              <p className="text-violet-200 text-sm mt-0.5">Trial gives you 4 pages. Upgrade for all 12 — $9.99/book.</p>
-            </div>
-            <button className="bg-white text-violet-700 font-bold px-6 py-2.5 rounded-xl hover:bg-violet-50 transition-colors whitespace-nowrap">
-              Upgrade — $9.99
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   )
 }
