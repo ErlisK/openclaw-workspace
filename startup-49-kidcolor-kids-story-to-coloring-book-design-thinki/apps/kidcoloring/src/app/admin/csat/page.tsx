@@ -65,7 +65,7 @@ const INSIGHTS: Record<string, string> = {
   more_interests:     'More interest options is top "neutral" request. Add 8 more tiles in next sprint.',
   faster:             'Generation speed is top "neutral" pain. Target: p95 < 60s (currently ~88s Pollinations).',
   pricing:            'Price is last resort complaint among neutral users. Don\'t discount — improve value first.',
-  images_didnt_match: 'Image relevance gap is top "bad" issue. Better prompt engineering needed.',
+  images_didnt_match: 'Image relevance gap is top &quot;bad&quot; issue. Better prompt engineering needed.',
   too_slow:           'Latency is #2 bad issue. Reinforces Replicate migration priority.',
 }
 
@@ -163,7 +163,7 @@ export default function CSATAdminPage() {
                 </p>
                 {s?.meetsTarget
                   ? <p className="text-xs text-green-600 font-semibold mt-1">✅ Phase 5 success criterion met</p>
-                  : <p className="text-xs text-amber-600 mt-1">Need {70 - goodPct}pp more "good" to hit target</p>
+                  : <p className="text-xs text-amber-600 mt-1">Need {70 - goodPct}pp more &apos;good&apos; to hit target</p>
                 }
               </div>
             </div>

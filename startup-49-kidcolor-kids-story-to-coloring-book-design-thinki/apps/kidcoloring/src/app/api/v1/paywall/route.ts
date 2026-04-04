@@ -88,8 +88,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
-  const sessionId = req.nextUrl.searchParams.get('sessionId')
+export async function GET() {
 
   const client = sb()
 

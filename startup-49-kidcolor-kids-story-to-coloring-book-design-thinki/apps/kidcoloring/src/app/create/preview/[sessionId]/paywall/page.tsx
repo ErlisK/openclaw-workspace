@@ -111,12 +111,12 @@ export default function PaywallPage() {
 
   const variant = getVariant(sessionId)
   const router  = useRouter()
-  const [showCsat, setShowCsat] = useState(false)
   const [clickedAnchor, setClickedAnchor] = useState<string | null>(null)
   const [email, setEmail]   = useState('')
-  const [joining, setJoining] = useState(false)
-  const [joined,  setJoined]  = useState(false)
-  const [dismissed, setDismissed] = useState(false)
+  const [joining,   setJoining]   = useState(false)
+  const [joined,   setJoined]   = useState(false)
+  const [dismissed, _setDismissed] = useState(false)
+  void _setDismissed
   const trackedView = useRef(false)
 
   // Log paywall view for each anchor on mount

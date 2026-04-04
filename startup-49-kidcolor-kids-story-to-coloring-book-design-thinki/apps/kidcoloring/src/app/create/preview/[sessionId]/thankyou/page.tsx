@@ -30,7 +30,6 @@ function ThankYouContent() {
 
   const [downloaded, setDownloaded] = useState(false)
   const [csatDone,   setCsatDone]   = useState(false)
-  const [showSurvey, setShowSurvey] = useState(false)
   const trackedView = useRef(false)
 
   // Log page view
@@ -46,12 +45,6 @@ function ThankYouContent() {
     }).catch(() => {})
   }, [sessionId, pdfUrl])
 
-  // Show survey 800ms after CSAT done
-  useEffect(() => {
-    if (!csatDone) return
-    const t = setTimeout(() => setShowSurvey(true), 800)
-    return () => clearTimeout(t)
-  }, [csatDone])
 
   const handleDownload = () => {
     setDownloaded(true)
