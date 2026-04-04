@@ -13,8 +13,9 @@ export default function Nav() {
           Change Risk Radar
         </Link>
         <div className="nav-links">
+          <Link href="/demo" style={active("/demo")}>🔴 Live Demo</Link>
           <Link href="/observatory" style={active("/observatory")}>Observatory</Link>
-          <Link href="/taxonomy" style={active("/taxonomy")}>Risk Taxonomy</Link>
+          <Link href="/taxonomy" style={active("/taxonomy")}>Taxonomy</Link>
           <Link href="/hypothesis" style={active("/hypothesis")}>Hypothesis</Link>
           <Link href="/#waitlist" className="btn-primary" style={{padding: "0.5rem 1rem", fontSize: "0.875rem"}}>
             Join Waitlist
