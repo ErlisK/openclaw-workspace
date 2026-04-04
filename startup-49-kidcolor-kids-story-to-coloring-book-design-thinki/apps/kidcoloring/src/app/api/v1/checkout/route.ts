@@ -58,7 +58,6 @@ export async function POST(req: NextRequest) {
   const expConfig  = sessionToken ? getPricingConfig(sessionToken) : null
   const priceId    = _reqPriceId ?? expConfig?.priceId ?? 'per_book_999'
   const _expVariant = expConfig?.variant ?? null
-  const _expPrice   = expConfig?.priceCents ?? null
   const product = PRODUCTS[priceId as PriceId]
 
   if (!product) {
