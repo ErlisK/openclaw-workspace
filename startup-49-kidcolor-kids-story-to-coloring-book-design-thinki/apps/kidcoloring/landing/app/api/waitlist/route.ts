@@ -4,7 +4,6 @@ import { randomBytes } from 'crypto'
 import { sendTransactionalEmail } from '../../../lib/agentmail'
 
 // ── Supabase service-role client (bypasses RLS) ──────────────────────────────
-// Server-side only — never expose service_role key to the client
 function getServiceClient() {
   const url =
     process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -22,10 +21,8 @@ const WELCOME_SUBJECT = "Welcome to KidColoring! You're on the list 🎨"
 
 // ── Derive canonical site origin ─────────────────────────────────────────────
 function getSiteOrigin(req: NextRequest): string {
-  // Prefer explicit env vars so emails always link to the live domain
   if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, '')
   if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/$/, '')
-  // Fall back to request origin (works in preview deployments too)
   const host = req.headers.get('host') ?? 'kidcoloring-landing.vercel.app'
   const proto = req.headers.get('x-forwarded-proto') ?? 'https'
   return `${proto}://${host}`
@@ -185,7 +182,6 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Waitlist upsert error:', error.message, error.details)
-      // Unique-violation → already registered
       if (error.code === '23505') {
         return NextResponse.json({ ok: true, note: 'already_registered' })
       }
@@ -241,69 +237,83 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true, note: 'already_registered' })
     }
 
-    // ── 5. Compose & send welcome email ─────────────────────────────────────
+    // ── 5. Insert queued log row ─────────────────────────────────────────────
+    // Note: run this synchronously so log persists even if send times out
+    let logRowId: string | null = null
+    try {
+      const { data: logRow } = await client.from('email_sends').insert([
+        {
+          to_email: normalizedEmail,
+          template: WELCOME_TEMPLATE,
+          subject: WELCOME_SUBJECT,
+          status: 'queued',
+          provider: 'agentmail',
+          meta: { signup_id: row.id },
+        },
+      ]).select('id').single()
+      logRowId = logRow?.id ?? null
+    } catch (logErr) {
+      console.error('[waitlist] Failed to insert queued email_sends row:', logErr)
+    }
+
+    // ── 6. Compose & send welcome email (sync — serverless functions must    ─
+    //    complete all work before returning or the process is terminated)    ──
     const { html, text } = buildWelcomeEmail(
       origin,
       row.parent_first_name,
       unsubscribeToken!
     )
 
-    // Fire email in background — don't block the response
-    ;(async () => {
+    let sendStatus: 'sent' | 'failed' | 'skipped' = 'failed'
+    let sendResponseId: string | undefined
+    let sendError: string | undefined
+
+    try {
+      const sendResult = await sendTransactionalEmail({
+        to: normalizedEmail,
+        subject: WELCOME_SUBJECT,
+        html,
+        text,
+        template: WELCOME_TEMPLATE,
+        meta: { signup_id: row.id },
+      })
+      sendStatus = sendResult.status
+      sendResponseId = sendResult.responseId
+      sendError = sendResult.error
+    } catch (sendErr: unknown) {
+      sendError = sendErr instanceof Error ? sendErr.message : String(sendErr)
+      console.error('[waitlist] sendTransactionalEmail threw:', sendError)
+    }
+
+    // ── 7. Update log row with final status ──────────────────────────────────
+    if (logRowId) {
       try {
-        // Insert 'queued' log first
-        const { data: logRow } = await client.from('email_sends').insert([
-          {
-            to_email: normalizedEmail,
-            template: WELCOME_TEMPLATE,
-            subject: WELCOME_SUBJECT,
-            status: 'queued',
-            provider: 'agentmail',
-            meta: { signup_id: row.id },
-          },
-        ]).select('id').single()
-
-        const sendResult = await sendTransactionalEmail({
-          to: normalizedEmail,
-          subject: WELCOME_SUBJECT,
-          html,
-          text,
-          template: WELCOME_TEMPLATE,
-          meta: { signup_id: row.id },
-        })
-
-        // Update log row with result
-        if (logRow?.id) {
-          await client.from('email_sends')
-            .update({
-              status: sendResult.status,
-              response_id: sendResult.responseId ?? null,
-              error: sendResult.error ?? null,
-            })
-            .eq('id', logRow.id)
-        }
-
-        // Track via /api/track
-        const trackEvent = sendResult.status === 'sent'
-          ? 'email_welcome_sent'
-          : 'email_welcome_failed'
-        const trackProps: Record<string, unknown> = { template: WELCOME_TEMPLATE }
-        if (sendResult.status !== 'sent') trackProps.error = sendResult.error
-
-        try {
-          await fetch(`${origin}/api/track`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ event_name: trackEvent, props: trackProps }),
+        await client.from('email_sends')
+          .update({
+            status: sendStatus,
+            response_id: sendResponseId ?? null,
+            error: sendError ?? null,
           })
-        } catch (_trackErr) {
-          // Tracking is non-critical
-        }
-      } catch (bgErr: unknown) {
-        const msg = bgErr instanceof Error ? bgErr.message : String(bgErr)
-        console.error('[waitlist] Background email error:', msg)
+          .eq('id', logRowId)
+      } catch (updateErr) {
+        console.error('[waitlist] Failed to update email_sends row:', updateErr)
       }
-    })()
+    }
+
+    // ── 8. Track via /api/track ──────────────────────────────────────────────
+    const trackEvent = sendStatus === 'sent' ? 'email_welcome_sent' : 'email_welcome_failed'
+    const trackProps: Record<string, unknown> = { template: WELCOME_TEMPLATE }
+    if (sendStatus !== 'sent') trackProps.error = sendError
+
+    try {
+      await fetch(`${origin}/api/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_name: trackEvent, props: trackProps }),
+      })
+    } catch (_trackErr) {
+      // Tracking is non-critical
+    }
 
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
