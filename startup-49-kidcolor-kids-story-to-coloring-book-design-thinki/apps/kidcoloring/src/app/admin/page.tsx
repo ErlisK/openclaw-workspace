@@ -191,6 +191,7 @@ export default function AdminPage() {
                 { href: '/admin/safety', icon: '🛡️', label: 'Content Safety', desc: 'Filter v1.2 · prompt blocks · sanitize queue · COPPA compliance' },
                 { href: '/admin/rls', icon: '🔐', label: 'RLS & Auth', desc: 'Schema v4.0.0 · per-table policies · COPPA isolation · auth trigger' },
                               { href: '/admin/pricing-experiments', icon: '💰', label: 'Pricing Experiments', desc: 'pricing_v1: control $6.99 vs low $4.99 vs premium $9.99 vs anchor — live experiment' },
+                { href: '/admin/cohorts', icon: '📊', label: 'Cohorts', desc: 'D1/D7 retention · activation funnel · conversion pipeline · unit economics · LTV' },
                 { href: '/admin/distribution', icon: '📣', label: 'Distribution', desc: 'Zero-spend channels: PH, Reddit, TPT, gallery, SEO, referral — organic growth' },
                 { href: '/admin/growth', icon: '📈', label: 'Growth (Phase 7)', desc: 'Conversion rate, NPS, repeat creation, activation funnel — OKR tracking' },
                 { href: '/admin/observability', icon: '📡', label: 'Observability', desc: 'Error logs, API metrics, rate limit dashboard, health check' },

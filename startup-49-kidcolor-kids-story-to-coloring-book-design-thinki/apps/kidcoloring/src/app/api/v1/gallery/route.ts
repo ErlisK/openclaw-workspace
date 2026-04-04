@@ -109,11 +109,11 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Log event
-  void sb().from('events').insert({
+  void Promise.resolve(sb().from('events').insert({
     event_name: 'gallery_opt_in',
     session_id: sessionId,
     properties: { pageNumber, subject },
-  }).then(() => null).catch(() => null)
+  })).then(() => null).catch(() => null)
 
   return NextResponse.json({ id: data?.id, success: true })
 }
