@@ -1,4 +1,5 @@
 import { buildPrompts } from '@/lib/prompts'
+import { getFlags } from '@/lib/flags'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -24,9 +25,10 @@ export async function POST(request: Request) {
   }
 
   const sb = getAdmin()
+  const flags = await getFlags()
 
-  // Build prompts from config
-  const prompts = buildPrompts(concept, config)
+  // Build prompts from config — honours FLAG_TRIAL_PAGES for page count
+  const prompts = buildPrompts(concept, config).slice(0, flags.TRIAL_PAGES)
 
   const { data: session, error } = await sb
     .from('trial_sessions')

@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/lib/auth-client'
 import { useTextToSpeech } from '@/hooks/useTTS'
 import TTSButton from '@/components/TTSButton'
+import { useFlags } from '@/hooks/useFlags'
 
 // Lazy-load the email gate to keep initial bundle small
 const EmailGateModal = dynamic(() => import('@/components/EmailGateModal'), { ssr: false })
@@ -24,8 +25,8 @@ interface Session {
 }
 
 // ── Pollinations URL builder ──────────────────────────────────────────────────
-function buildPollinationsUrl(prompt: string, seed: number): string {
-  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=flux&width=768&height=1024&nologo=true&seed=${seed}`
+function buildPollinationsUrl(prompt: string, seed: number, model = 'flux', w = 768, h = 1024): string {
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${encodeURIComponent(model)}&width=${w}&height=${h}&nologo=true&seed=${seed}`
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
@@ -51,6 +52,7 @@ export default function PreviewPage() {
   const [pdfError,     setPdfError]     = useState('')
   const generatingRef  = useRef(false)
   const tts            = useTextToSpeech()
+  const { flags }      = useFlags()
   // Track which pages we've already announced via TTS (to avoid repeats)
   const announcedPages = useRef<Set<string>>(new Set())
 
@@ -91,7 +93,7 @@ export default function PreviewPage() {
 
   // ── Generate one page (client-side via Pollinations) ──────────────────────
   const generatePage = useCallback(async (page: Page, seed: number): Promise<string | null> => {
-    const url = buildPollinationsUrl(page.prompt || page.subject || 'cute coloring page', seed)
+    const url = buildPollinationsUrl(page.prompt || page.subject || 'cute coloring page', seed, flags.POLLINATIONS_MODEL, flags.IMAGE_WIDTH, flags.IMAGE_HEIGHT)
     const t0  = Date.now()
     return new Promise(resolve => {
       const img = new Image()
@@ -212,6 +214,18 @@ export default function PreviewPage() {
   const doExport = async () => {
     setPdfLoading(true)
     setPdfError('')
+
+    // FLAG_PDF_EXPORT = false → skip serverless PDF, open browser print page directly
+    if (!flags.PDF_EXPORT) {
+      window.open(`/create/preview/${sessionId}/print`, '_blank')
+      await fetch('/api/v1/event', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'export_clicked', sessionId, props: { method: 'browser_print', flag_override: true } }),
+      }).catch(() => {/* non-critical */})
+      setPdfLoading(false)
+      return
+    }
+
     try {
       // Check if PDF already generated for this session
       const checkRes = await fetch(`/api/v1/export/pdf?sessionId=${sessionId}`)
@@ -219,7 +233,6 @@ export default function PreviewPage() {
       if (checkData.exists && checkData.pdfUrl) {
         setPdfUrl(checkData.pdfUrl)
         window.open(checkData.pdfUrl, '_blank')
-        // Also log the download click event
         fetch('/api/v1/event', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ event: 'pdf_download_clicked', sessionId, props: { source: 'cached' } }),
@@ -235,14 +248,12 @@ export default function PreviewPage() {
       if (!res.ok) {
         const err = await res.json().catch(() => ({})) as { error?: string }
         setPdfError(err.error || 'PDF generation failed — try the print button instead')
-        // Fallback: open print page
         window.open(`/create/preview/${sessionId}/print`, '_blank')
         return
       }
       const data = await res.json() as { pdfUrl: string; pdfSizeKb: number; qualityCheck: { pass: number; fail: number } }
       setPdfUrl(data.pdfUrl)
       window.open(data.pdfUrl, '_blank')
-      // Log download click
       fetch('/api/v1/event', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ event: 'pdf_download_clicked', sessionId, props: { source: 'generated', sizeKb: data.pdfSizeKb } }),
@@ -256,7 +267,8 @@ export default function PreviewPage() {
   }
 
   const handleExportClick = () => {
-    if (isAuthed || isSaved) {
+    // FLAG_EMAIL_GATE: if false, skip the email gate and go straight to export
+    if (isAuthed || isSaved || !flags.EMAIL_GATE) {
       doExport()
     } else {
       setGateAction('export')
@@ -265,7 +277,8 @@ export default function PreviewPage() {
   }
 
   const handleSaveClick = () => {
-    if (isAuthed) {
+    // FLAG_EMAIL_GATE: if false, just show a saved notice (no gate)
+    if (isAuthed || !flags.EMAIL_GATE) {
       setIsSaved(true)
       setSavedNotice(true)
       setTimeout(() => setSavedNotice(false), 3000)
@@ -367,12 +380,14 @@ export default function PreviewPage() {
             )}
             {allDone && donePages.length > 0 && (
               <>
-                <button onClick={handleShare}
-                  className={`text-sm px-3 py-2 rounded-xl border font-medium transition-all ${
-                    copied ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
-                  }`}>
-                  {copied ? '✅' : '🔗'} <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
-                </button>
+                {flags.SHARE_BUTTON && (
+                  <button onClick={handleShare}
+                    className={`text-sm px-3 py-2 rounded-xl border font-medium transition-all ${
+                      copied ? 'bg-green-50 border-green-200 text-green-700' : 'bg-white border-gray-200 text-gray-700 hover:border-gray-300'
+                    }`}>
+                    {copied ? '✅' : '🔗'} <span className="hidden sm:inline">{copied ? 'Copied!' : 'Share'}</span>
+                  </button>
+                )}
                 <button onClick={handleExportClick}
                   disabled={pdfLoading}
                   className="text-sm px-3 py-2 rounded-xl bg-violet-600 text-white font-bold hover:bg-violet-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-1">
