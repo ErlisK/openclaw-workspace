@@ -6,7 +6,7 @@ import type { MrrSummary } from "@/lib/billing";
 const STEP_LABELS: Record<string, string> = {
   page_visit: "Page Visit", pricing_view: "Pricing View", signup_complete: "Signed Up",
   trial_start: "Trial Started", connector_add: "Connector Added",
-  first_alert: "First Alert", checkout_complete: "Paid",
+  first_alert: "First Alert", checkout_complete: "Paid", upgrade: "Upgraded",
 };
 
 export default function FunnelClient({
@@ -54,24 +54,27 @@ export default function FunnelClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {funnel.map((step, i) => {
               const pct = maxCount > 0 ? (step.unique_count / maxCount) * 100 : 0;
-              const label = STEP_LABELS[step.event_type] ?? step.event_type;
+              const label = STEP_LABELS[step.event_name] ?? step.event_name;
+              // Compute conversion from previous step
+              const prevCount = i > 0 ? funnel[i - 1].unique_count : step.unique_count;
+              const conversionPct = prevCount > 0 && i > 0 ? Math.round((step.unique_count / prevCount) * 100) : null;
               return (
-                <div key={step.event_type}>
+                <div key={step.event_name}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.2rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                       <span style={{ fontSize: "0.78rem", fontWeight: i === 0 ? 400 : 700 }}>{label}</span>
-                      {step.conversion_from_prev !== undefined && (
+                      {conversionPct !== null && (
                         <span style={{
                           fontSize: "0.6rem", padding: "1px 6px", borderRadius: 999,
-                          background: step.conversion_from_prev >= 20 ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)",
-                          color: step.conversion_from_prev >= 20 ? "#10b981" : "#f59e0b",
+                          background: conversionPct >= 20 ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)",
+                          color: conversionPct >= 20 ? "#10b981" : "#f59e0b",
                         }}>
-                          {step.conversion_from_prev}% from prev
+                          {conversionPct}% from prev
                         </span>
                       )}
                     </div>
                     <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
-                      <span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{step.total_events} events</span>
+                      <span style={{ fontSize: "0.72rem", color: "var(--muted)" }}>{step.total_count} events</span>
                       <span style={{ fontWeight: 700, fontSize: "0.8rem", minWidth: 30, textAlign: "right" }}>{step.unique_count}</span>
                     </div>
                   </div>
@@ -96,47 +99,34 @@ export default function FunnelClient({
           </div>
         </div>
 
-        {/* MRR by plan */}
+        {/* MRR Summary card */}
         <div className="card" style={{ padding: "1.5rem", marginBottom: "1.5rem" }}>
-          <h2 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "1rem" }}>💰 MRR by Plan</h2>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
-            <thead>
-              <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                {["Plan", "Paid Orgs", "Trialing", "MRR"].map(h => (
-                  <th key={h} style={{ padding: "0.4rem 0.5rem", textAlign: "left", color: "var(--muted)", fontWeight: 600, fontSize: "0.72rem" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {mrr.by_plan.length > 0 ? mrr.by_plan.map((row) => (
-                <tr key={row.plan_id} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
-                  <td style={{ padding: "0.5rem 0.5rem", fontWeight: 700, textTransform: "capitalize" }}>{row.plan_name}</td>
-                  <td style={{ padding: "0.5rem 0.5rem", color: "#10b981" }}>{row.paid}</td>
-                  <td style={{ padding: "0.5rem 0.5rem", color: "#6366f1" }}>{row.trialing}</td>
-                  <td style={{ padding: "0.5rem 0.5rem", fontWeight: 700 }}>${(row.mrr_cents / 100).toLocaleString()}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td colSpan={4} style={{ padding: "1.5rem", textAlign: "center", color: "var(--muted)", fontSize: "0.78rem" }}>
-                    No paid subscriptions yet. 7 orgs in trial. Target: $25k MRR = 17 Starter + 0 Growth.
-                  </td>
-                </tr>
-              )}
-              <tr style={{ borderTop: "2px solid var(--border)" }}>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800 }}>Total</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>{mrr.paying_orgs}</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#6366f1" }}>{mrr.trial_orgs}</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>${(mrr.current_mrr_cents / 100).toLocaleString()}</td>
-              </tr>
-            </tbody>
-          </table>
+          <h2 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "1rem" }}>💰 Revenue Summary</h2>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", fontSize: "0.82rem" }}>
+            <div>
+              <div style={{ color: "var(--muted)", fontSize: "0.7rem", textTransform: "uppercase", marginBottom: 4 }}>Paying Orgs</div>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#10b981" }}>{mrr.paying_orgs}</div>
+            </div>
+            <div>
+              <div style={{ color: "var(--muted)", fontSize: "0.7rem", textTransform: "uppercase", marginBottom: 4 }}>Trial Orgs</div>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#6366f1" }}>{mrr.trial_orgs}</div>
+            </div>
+            <div>
+              <div style={{ color: "var(--muted)", fontSize: "0.7rem", textTransform: "uppercase", marginBottom: 4 }}>Current MRR</div>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#10b981" }}>${(mrr.current_mrr_cents / 100).toLocaleString()}</div>
+            </div>
+            <div>
+              <div style={{ color: "var(--muted)", fontSize: "0.7rem", textTransform: "uppercase", marginBottom: 4 }}>Churned (30d)</div>
+              <div style={{ fontWeight: 800, fontSize: "1.1rem", color: "#f59e0b" }}>{mrr.churned_orgs_30d}</div>
+            </div>
+          </div>
         </div>
 
         {/* Success criteria */}
         <div className="card" style={{ padding: "1.5rem" }}>
           <h2 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "1rem" }}>🎯 Phase 4 Success Criteria</h2>
           {[
-            { criterion: "Trial-to-paid conversion ≥20%", target: "20%", current: mrr.paying_orgs > 0 ? `${Math.round((mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs)) * 100)}%` : "0% (0 paid)", ok: mrr.paying_orgs > 0 && (mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs)) >= 0.2 },
+            { criterion: "Trial-to-paid conversion ≥20%", target: "20%", current: mrr.paying_orgs > 0 ? `${Math.round((mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs || 1)) * 100)}%` : "0% (0 paid)", ok: mrr.paying_orgs > 0 && (mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs || 1)) >= 0.2 },
             { criterion: "Gross MRR ≥$25k", target: "$25,000", current: `$${(mrr.current_mrr_cents / 100).toLocaleString()}`, ok: mrr.current_mrr_cents >= 2500000 },
             { criterion: "Payback period ≤6 months at ~$500 CAC", target: "≤6 mo", current: mrr.current_mrr_cents > 0 ? "Calculating…" : "No revenue yet", ok: false },
           ].map((row, i) => (
@@ -152,6 +142,31 @@ export default function FunnelClient({
             </div>
           ))}
         </div>
+
+        {/* MRR Growth chart (simple table) */}
+        {growth.length > 0 && (
+          <div className="card" style={{ padding: "1.5rem", marginTop: "1.5rem" }}>
+            <h2 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "1rem" }}>📈 MRR Growth</h2>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+              <thead>
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  {["Month", "MRR", "Orgs"].map(h => (
+                    <th key={h} style={{ padding: "0.4rem 0.5rem", textAlign: "left", color: "var(--muted)", fontWeight: 600, fontSize: "0.72rem" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {growth.map((row) => (
+                  <tr key={row.month} style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+                    <td style={{ padding: "0.5rem 0.5rem" }}>{row.month}</td>
+                    <td style={{ padding: "0.5rem 0.5rem", fontWeight: 700, color: "#10b981" }}>${(row.mrr_cents / 100).toLocaleString()}</td>
+                    <td style={{ padding: "0.5rem 0.5rem" }}>{row.orgs}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
