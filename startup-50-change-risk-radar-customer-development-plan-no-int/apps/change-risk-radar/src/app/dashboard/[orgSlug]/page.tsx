@@ -86,6 +86,13 @@ export default async function DashboardPage({ params, searchParams }: Props) {
     .select("type, label, status, last_run_at, last_diff_count")
     .eq("org_id", org.id);
 
+  // Fetch notification channel count for the setup banner
+  const { count: notifChannelCount } = await supabaseAdmin
+    .from("crr_notification_channels")
+    .select("id", { count: "exact", head: true })
+    .eq("org_id", org.id)
+    .eq("is_active", true);
+
   // All data passed as props — no onClick in server component
   return (
     <DashboardClient
@@ -101,7 +108,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
       stats={stats}
       briefs={briefs ?? []}
       connectors={(connectors ?? []) as Array<{ type: string; label: string; status: string; last_run_at?: string; last_diff_count: number }>}
-      notifChannelCount={0}
+      notifChannelCount={notifChannelCount ?? 0}
       privacyMode={privacyMode}
     />
   );
