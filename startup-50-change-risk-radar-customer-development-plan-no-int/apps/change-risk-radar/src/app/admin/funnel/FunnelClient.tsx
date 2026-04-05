@@ -35,11 +35,11 @@ export default function FunnelClient({
         {/* MRR Summary */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.5rem", marginBottom: "2rem" }}>
           {[
-            { label: "Total MRR", value: `$${(mrr.total_mrr_cents / 100).toLocaleString()}`, color: "#10b981" },
-            { label: "Paid Orgs", value: mrr.paid_orgs, color: "#10b981" },
-            { label: "Trialing", value: mrr.trialing_orgs, color: "#6366f1" },
+            { label: "Total MRR", value: `$${(mrr.current_mrr_cents / 100).toLocaleString()}`, color: "#10b981" },
+            { label: "Paid Orgs", value: mrr.paying_orgs, color: "#10b981" },
+            { label: "Trialing", value: mrr.trial_orgs, color: "#6366f1" },
             { label: "Target MRR", value: "$25,000", color: "var(--muted)" },
-            { label: "MRR Gap", value: `$${((2500000 - mrr.total_mrr_cents) / 100).toLocaleString()}`, color: "#f59e0b" },
+            { label: "MRR Gap", value: `$${((2500000 - mrr.current_mrr_cents) / 100).toLocaleString()}`, color: "#f59e0b" },
           ].map(k => (
             <div key={k.label} className="card" style={{ padding: "0.75rem", textAlign: "center" }}>
               <div style={{ fontSize: "1.25rem", fontWeight: 900, color: k.color }}>{k.value}</div>
@@ -124,9 +124,9 @@ export default function FunnelClient({
               )}
               <tr style={{ borderTop: "2px solid var(--border)" }}>
                 <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800 }}>Total</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>{mrr.paid_orgs}</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#6366f1" }}>{mrr.trialing_orgs}</td>
-                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>${(mrr.total_mrr_cents / 100).toLocaleString()}</td>
+                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>{mrr.paying_orgs}</td>
+                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#6366f1" }}>{mrr.trial_orgs}</td>
+                <td style={{ padding: "0.5rem 0.5rem", fontWeight: 800, color: "#10b981" }}>${(mrr.current_mrr_cents / 100).toLocaleString()}</td>
               </tr>
             </tbody>
           </table>
@@ -136,9 +136,9 @@ export default function FunnelClient({
         <div className="card" style={{ padding: "1.5rem" }}>
           <h2 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "1rem" }}>🎯 Phase 4 Success Criteria</h2>
           {[
-            { criterion: "Trial-to-paid conversion ≥20%", target: "20%", current: mrr.paid_orgs > 0 ? `${Math.round((mrr.paid_orgs / (mrr.paid_orgs + mrr.trialing_orgs)) * 100)}%` : "0% (0 paid)", ok: mrr.paid_orgs > 0 && (mrr.paid_orgs / (mrr.paid_orgs + mrr.trialing_orgs)) >= 0.2 },
-            { criterion: "Gross MRR ≥$25k", target: "$25,000", current: `$${(mrr.total_mrr_cents / 100).toLocaleString()}`, ok: mrr.total_mrr_cents >= 2500000 },
-            { criterion: "Payback period ≤6 months at ~$500 CAC", target: "≤6 mo", current: mrr.total_mrr_cents > 0 ? "Calculating…" : "No revenue yet", ok: false },
+            { criterion: "Trial-to-paid conversion ≥20%", target: "20%", current: mrr.paying_orgs > 0 ? `${Math.round((mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs)) * 100)}%` : "0% (0 paid)", ok: mrr.paying_orgs > 0 && (mrr.paying_orgs / (mrr.paying_orgs + mrr.trial_orgs)) >= 0.2 },
+            { criterion: "Gross MRR ≥$25k", target: "$25,000", current: `$${(mrr.current_mrr_cents / 100).toLocaleString()}`, ok: mrr.current_mrr_cents >= 2500000 },
+            { criterion: "Payback period ≤6 months at ~$500 CAC", target: "≤6 mo", current: mrr.current_mrr_cents > 0 ? "Calculating…" : "No revenue yet", ok: false },
           ].map((row, i) => (
             <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "0.6rem 0", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
               <div style={{ fontSize: "0.8rem" }}>{row.criterion}</div>

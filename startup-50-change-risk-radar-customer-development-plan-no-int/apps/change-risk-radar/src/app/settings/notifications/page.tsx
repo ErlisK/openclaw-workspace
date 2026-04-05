@@ -1,91 +1,215 @@
-/**
- * /settings/notifications
- *
- * Standalone notifications settings page. Since this app uses magic-token
- * auth tied to org slugs, this page requires ?token=... and ?org=... params.
- * Without them, it shows instructions to navigate from the dashboard.
- *
- * With valid params it renders the full NotificationsClient inline.
- */
-
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import NotificationsClient from "@/components/NotificationsClient";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Notification Settings — Change Risk Radar" };
+export const metadata: Metadata = {
+  title: "Notification Settings — Change Risk Radar",
+  description: "Configure Slack, email, and webhook notifications for Change Risk Radar alerts.",
+};
 
 interface Props {
-  searchParams: Promise<{ token?: string; org?: string }>;
+  searchParams: Promise<{ token?: string }>;
 }
 
-export default async function NotificationSettingsPage({ searchParams }: Props) {
-  const { token, org: orgSlug } = await searchParams;
+export default async function SettingsNotificationsPage({ searchParams }: Props) {
+  const { token } = await searchParams;
 
-  // If org slug and token provided, render the full page
-  if (token && orgSlug) {
-    redirect(`/dashboard/${orgSlug}/notifications?token=${token}`);
+  if (!token) {
+    redirect("/auth/login?redirect=/settings/notifications");
   }
 
-  // If just token, try to find the org
-  if (token) {
-    const { data: org } = await supabaseAdmin
-      .from("crr_orgs")
-      .select("id, name, slug")
-      .eq("magic_token", token)
-      .eq("status", "active")
-      .single();
+  // Look up org by magic token (no orgSlug needed — token is unique per org)
+  const { data: org } = await supabaseAdmin
+    .from("crr_orgs")
+    .select("id, name, slug")
+    .eq("magic_token", token)
+    .eq("status", "active")
+    .single();
 
-    if (org) {
-      redirect(`/dashboard/${org.slug}/notifications?token=${token}`);
+  if (!org) {
+    redirect("/auth/login?error=invalid_token");
+  }
+
+  // Fetch notification channels for this org
+  const { data: channels } = await supabaseAdmin
+    .from("crr_notification_channels")
+    .select("id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, created_at")
+    .eq("org_id", org.id)
+    .order("created_at");
+
+  // Get dispatch stats from crr_alert_dispatches
+  const channelIds = (channels ?? []).map((c) => c.id);
+  let dispatchStats: Record<string, { sent: number; failed: number; last_sent_at: string | null }> = {};
+
+  if (channelIds.length > 0) {
+    const { data: dispatches } = await supabaseAdmin
+      .from("crr_alert_dispatches")
+      .select("channel_id, status, sent_at")
+      .in("channel_id", channelIds);
+
+    for (const d of dispatches ?? []) {
+      if (!dispatchStats[d.channel_id]) {
+        dispatchStats[d.channel_id] = { sent: 0, failed: 0, last_sent_at: null };
+      }
+      if (d.status === "sent") {
+        dispatchStats[d.channel_id].sent++;
+        if (!dispatchStats[d.channel_id].last_sent_at || d.sent_at > dispatchStats[d.channel_id].last_sent_at!) {
+          dispatchStats[d.channel_id].last_sent_at = d.sent_at;
+        }
+      } else if (d.status === "failed") {
+        dispatchStats[d.channel_id].failed++;
+      }
     }
   }
 
-  // No auth — show landing with instructions
-  return (
-    <div style={{ padding: "4rem 1.5rem", maxWidth: 600, margin: "0 auto", textAlign: "center" }}>
-      <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>🔔</div>
-      <h1 style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-        Notification Settings
-      </h1>
-      <p style={{ color: "var(--muted)", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
-        To manage your Slack and email notification channels, navigate to your
-        dashboard and click <strong>Notifications</strong> in the sidebar.
-      </p>
-      <a
-        href="/auth/login"
-        style={{
-          display: "inline-block",
-          padding: "0.6rem 1.4rem",
-          background: "var(--accent)",
-          color: "white",
-          borderRadius: 8,
-          textDecoration: "none",
-          fontWeight: 600,
-          fontSize: "0.875rem",
-        }}
-      >
-        Go to Login →
-      </a>
+  // Mask sensitive webhook URLs in server-rendered data
+  const safeChannels = (channels ?? []).map((c) => ({
+    ...c,
+    config: {
+      ...c.config,
+      webhook_url: c.config?.webhook_url
+        ? `...${String(c.config.webhook_url).slice(-8)}`
+        : undefined,
+      url: c.config?.url ? `...${String(c.config.url).slice(-8)}` : undefined,
+      secret: c.config?.secret ? "***" : undefined,
+    },
+    dispatch_sent: dispatchStats[c.id]?.sent ?? 0,
+    dispatch_failed: dispatchStats[c.id]?.failed ?? 0,
+    last_dispatched_at: dispatchStats[c.id]?.last_sent_at ?? null,
+  }));
 
-      <div style={{
-        marginTop: "2rem",
-        padding: "1rem",
-        background: "rgba(99,102,241,0.05)",
-        border: "1px solid rgba(99,102,241,0.15)",
-        borderRadius: 8,
-        fontSize: "0.78rem",
-        color: "var(--muted)",
-        textAlign: "left",
-      }}>
-        <strong style={{ color: "var(--foreground)" }}>How to add a Slack webhook:</strong>
-        <ol style={{ margin: "0.5rem 0 0 1.2rem", padding: 0, lineHeight: 1.8 }}>
-          <li>In Slack, go to <strong>Apps</strong> → search <strong>Incoming Webhooks</strong></li>
-          <li>Click <strong>Add to Slack</strong> and pick a channel</li>
-          <li>Copy the Webhook URL (starts with <code>https://hooks.slack.com/services/</code>)</li>
-          <li>Paste it in the <strong>Notifications</strong> settings page of your dashboard</li>
-        </ol>
+  const hasNoActiveEndpoints = safeChannels.filter((c) => c.is_active).length === 0;
+
+  return (
+    <div style={{ padding: "2.5rem 0" }}>
+      <div className="container" style={{ maxWidth: 800 }}>
+        {/* Breadcrumb */}
+        <div
+          style={{
+            display: "flex",
+            gap: "0.5rem",
+            alignItems: "center",
+            marginBottom: "1.5rem",
+            fontSize: "0.78rem",
+            color: "var(--muted)",
+          }}
+        >
+          <a
+            href={`/dashboard/${org.slug}?token=${token}`}
+            style={{ color: "var(--accent)" }}
+          >
+            {org.name}
+          </a>
+          <span>›</span>
+          <span>Settings</span>
+          <span>›</span>
+          <span>Notifications</span>
+        </div>
+
+        {/* Setup banner for orgs with zero active endpoints */}
+        {hasNoActiveEndpoints && (
+          <div
+            style={{
+              padding: "1rem 1.25rem",
+              marginBottom: "1.5rem",
+              borderRadius: 8,
+              background: "rgba(245,158,11,0.08)",
+              border: "1px solid rgba(245,158,11,0.25)",
+              display: "flex",
+              gap: "0.75rem",
+              alignItems: "flex-start",
+            }}
+          >
+            <span style={{ fontSize: "1.25rem" }}>⚡</span>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#f59e0b", marginBottom: "0.2rem" }}>
+                Set up Slack notifications to get alerted instantly
+              </div>
+              <p style={{ fontSize: "0.78rem", color: "var(--muted)", margin: 0 }}>
+                You have no active notification channels. Add a Slack webhook below to receive
+                real-time alerts when vendor changes are detected.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* How to create a Slack webhook — 3-step guide */}
+        <div
+          className="card"
+          style={{
+            padding: "1.1rem 1.25rem",
+            marginBottom: "1.5rem",
+            background: "rgba(99,102,241,0.04)",
+            borderColor: "rgba(99,102,241,0.15)",
+          }}
+        >
+          <div style={{ fontWeight: 700, fontSize: "0.82rem", marginBottom: "0.6rem" }}>
+            📋 How to create a Slack Incoming Webhook
+          </div>
+          <ol style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.8 }}>
+            <li>
+              Go to{" "}
+              <a
+                href="https://api.slack.com/apps"
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: "var(--accent)" }}
+              >
+                api.slack.com/apps
+              </a>{" "}
+              → <strong>Create New App</strong> → <em>From scratch</em>
+            </li>
+            <li>
+              Under <strong>Add features and functionality</strong>, click{" "}
+              <strong>Incoming Webhooks</strong> → toggle <em>Activate Incoming Webhooks</em> → click{" "}
+              <strong>Add New Webhook to Workspace</strong> and pick a channel
+            </li>
+            <li>
+              Copy the <code>Webhook URL</code> (starts with{" "}
+              <code>https://hooks.slack.com/services/…</code>) and paste it below
+            </li>
+          </ol>
+          <a
+            href="https://api.slack.com/messaging/webhooks"
+            target="_blank"
+            rel="noreferrer"
+            style={{ fontSize: "0.72rem", color: "var(--accent)", display: "inline-block", marginTop: "0.5rem" }}
+          >
+            Slack Incoming Webhooks docs →
+          </a>
+        </div>
+
+        <NotificationsClient
+          orgSlug={org.slug}
+          token={token}
+          initialChannels={safeChannels}
+        />
+
+        {/* Navigation links */}
+        <div
+          style={{
+            marginTop: "2rem",
+            display: "flex",
+            gap: "1.5rem",
+            justifyContent: "center",
+            fontSize: "0.82rem",
+          }}
+        >
+          <a
+            href={`/dashboard/${org.slug}?token=${token}`}
+            style={{ color: "var(--muted)" }}
+          >
+            ← Back to dashboard
+          </a>
+          <a
+            href={`/dashboard/${org.slug}/settings?token=${token}`}
+            style={{ color: "var(--muted)" }}
+          >
+            ⚙ All settings
+          </a>
+        </div>
       </div>
     </div>
   );
