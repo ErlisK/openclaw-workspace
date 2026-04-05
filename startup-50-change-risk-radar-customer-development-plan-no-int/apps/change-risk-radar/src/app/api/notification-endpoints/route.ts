@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const { data: endpoints, error } = await supabaseAdmin
     .from("crr_notification_channels")
     .select(
-      "id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, created_at"
+      "id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, last_test_at, last_test_status, created_at"
     )
     .eq("org_id", org.id)
     .eq("type", "slack_webhook")
@@ -74,9 +74,9 @@ export async function POST(req: NextRequest) {
   const { name, url, channel, min_severity = "high" } = body;
 
   if (!url) return NextResponse.json({ error: "url required" }, { status: 400 });
-  if (!url.startsWith("https://hooks.slack.com/services/")) {
+  if (!url.startsWith("https://")) {
     return NextResponse.json(
-      { error: "URL must start with https://hooks.slack.com/services/" },
+      { error: "URL must start with https://" },
       { status: 400 }
     );
   }

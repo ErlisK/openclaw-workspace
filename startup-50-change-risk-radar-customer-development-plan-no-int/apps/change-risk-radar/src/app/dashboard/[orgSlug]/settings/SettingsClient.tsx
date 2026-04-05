@@ -134,13 +134,28 @@ export default function SettingsClient({
         <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginBottom: "1.5rem" }}>{orgName} · {orgEmail}</p>
 
         {/* Tabs */}
-        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border)", marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", gap: 0, borderBottom: "1px solid var(--border)", marginBottom: "1.5rem", flexWrap: "wrap", alignItems: "center" }}>
           {(["team", "security", "sso"] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               style={{ padding: "0.5rem 1.1rem", background: "none", border: "none", borderBottom: `2px solid ${tab === t ? "var(--accent)" : "transparent"}`, color: tab === t ? "var(--accent)" : "var(--muted)", fontWeight: tab === t ? 700 : 400, fontSize: "0.82rem", cursor: "pointer", textTransform: "capitalize" }}>
               {t === "team" ? "👥 Team" : t === "security" ? "🔒 Security" : "🔐 SSO"}
             </button>
           ))}
+          {/* Notifications link — opens /settings/notifications */}
+          <a
+            href={`/settings/notifications?token=${token}`}
+            style={{
+              padding: "0.5rem 1.1rem",
+              borderBottom: "2px solid transparent",
+              color: "var(--muted)",
+              fontWeight: 400,
+              fontSize: "0.82rem",
+              textDecoration: "none",
+              cursor: "pointer",
+            }}
+          >
+            🔔 Notifications
+          </a>
         </div>
 
         {/* ── Team Tab ─────────────────────────────────── */}

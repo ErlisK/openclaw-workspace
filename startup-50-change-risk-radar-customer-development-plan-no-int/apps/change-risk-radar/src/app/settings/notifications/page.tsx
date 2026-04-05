@@ -35,7 +35,7 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
   // Fetch notification channels for this org
   const { data: channels } = await supabaseAdmin
     .from("crr_notification_channels")
-    .select("id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, created_at")
+    .select("id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, last_test_at, last_test_status, created_at")
     .eq("org_id", org.id)
     .order("created_at");
 
@@ -78,6 +78,9 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
     dispatch_sent: dispatchStats[c.id]?.sent ?? 0,
     dispatch_failed: dispatchStats[c.id]?.failed ?? 0,
     last_dispatched_at: dispatchStats[c.id]?.last_sent_at ?? null,
+    // Pass test tracking fields (not sensitive)
+    last_test_at: (c as Record<string, unknown>).last_test_at ?? null,
+    last_test_status: (c as Record<string, unknown>).last_test_status ?? null,
   }));
 
   const hasNoActiveEndpoints = safeChannels.filter((c) => c.is_active).length === 0;
