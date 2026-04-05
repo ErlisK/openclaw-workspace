@@ -14,6 +14,21 @@ export interface MetricsOverview {
   reaction_rate: number;
   avg_ttv_alert_ms: number | null;
   avg_ttv_reaction_ms: number | null;
+  // Extended fields used by MetricsDashboardClient
+  latency_p50_ms: number;
+  latency_p95_ms: number;
+  latency_sample_count: number;
+  engagement_critical_pct: number;
+  engagement_overall_pct: number;
+  total_reactions: number;
+  rule_hit_rate_pct: number;
+  rules_with_triggers: number;
+  rules_zero_triggers: number;
+  active_rules: number;
+  top_rule_count: number;
+  unresolved_errors: number;
+  errors_1h: number;
+  errors_24h: number;
 }
 
 export interface LatencyStats {
@@ -120,11 +135,30 @@ export async function getMetricsOverview(): Promise<MetricsOverview> {
       reaction_rate: 0,
       avg_ttv_alert_ms: ttv_alert.length ? ttv_alert.reduce((a, b) => a + b, 0) / ttv_alert.length : null,
       avg_ttv_reaction_ms: ttv_reaction.length ? ttv_reaction.reduce((a, b) => a + b, 0) / ttv_reaction.length : null,
+      latency_p50_ms: 0,
+      latency_p95_ms: 0,
+      latency_sample_count: 0,
+      engagement_critical_pct: 0,
+      engagement_overall_pct: 0,
+      total_reactions: 0,
+      rule_hit_rate_pct: 0,
+      rules_with_triggers: 0,
+      rules_zero_triggers: 0,
+      active_rules: 0,
+      top_rule_count: 0,
+      unresolved_errors: 0,
+      errors_1h: 0,
+      errors_24h: 0,
     };
   } catch {
     return {
       total_orgs: 0, active_orgs_7d: 0, total_alerts: 0, alerts_7d: 0,
       reaction_rate: 0, avg_ttv_alert_ms: null, avg_ttv_reaction_ms: null,
+      latency_p50_ms: 0, latency_p95_ms: 0, latency_sample_count: 0,
+      engagement_critical_pct: 0, engagement_overall_pct: 0, total_reactions: 0,
+      rule_hit_rate_pct: 0, rules_with_triggers: 0, rules_zero_triggers: 0,
+      active_rules: 0, top_rule_count: 0, unresolved_errors: 0,
+      errors_1h: 0, errors_24h: 0,
     };
   }
 }
