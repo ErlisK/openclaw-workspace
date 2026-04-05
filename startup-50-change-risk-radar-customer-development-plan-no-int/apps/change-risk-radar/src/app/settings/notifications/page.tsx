@@ -1,7 +1,10 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
+import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import NotificationsClient from "@/components/NotificationsClient";
 import SlackWebhookSettings from "@/components/SlackWebhookSettings";
+import SlackNotificationsForm from "@/components/SlackNotificationsForm";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -20,27 +23,81 @@ export default async function SettingsNotificationsPage({
 }: Props) {
   const { token } = await searchParams;
 
-  if (!token) {
-    redirect("/auth/login?redirect=/settings/notifications");
+  // ── Auth: try magic token first, then Supabase session ────────────────
+  type OrgRow = { id: string; name: string; slug: string } | null;
+  let org: OrgRow = null;
+  let authMode: "token" | "session" = "token";
+
+  if (token) {
+    const { data } = await supabaseAdmin
+      .from("crr_orgs")
+      .select("id, name, slug")
+      .eq("magic_token", token)
+      .eq("status", "active")
+      .single();
+    org = data ?? null;
+    authMode = "token";
   }
 
-  // Look up org by magic token (no orgSlug needed — token is unique per org)
-  const { data: org } = await supabaseAdmin
-    .from("crr_orgs")
-    .select("id, name, slug")
-    .eq("magic_token", token)
-    .eq("status", "active")
-    .single();
+  if (!org) {
+    // Try Supabase session
+    try {
+      const cookieStore = await cookies();
+      const sessionClient = createSupabaseServerClient(cookieStore);
+      const {
+        data: { user },
+      } = await sessionClient.auth.getUser();
+
+      if (user) {
+        const { data: sessionOrg } = await supabaseAdmin
+          .from("crr_orgs")
+          .select("id, name, slug")
+          .eq("user_id", user.id)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+
+        if (sessionOrg) {
+          org = sessionOrg;
+          authMode = "session";
+        } else {
+          // Check org_members
+          const { data: member } = await supabaseAdmin
+            .from("crr_org_members")
+            .select("org_id")
+            .eq("user_id", user.id)
+            .eq("status", "active")
+            .limit(1)
+            .maybeSingle();
+
+          if (member) {
+            const { data: memberOrg } = await supabaseAdmin
+              .from("crr_orgs")
+              .select("id, name, slug")
+              .eq("id", member.org_id)
+              .eq("status", "active")
+              .single();
+            if (memberOrg) {
+              org = memberOrg;
+              authMode = "session";
+            }
+          }
+        }
+      }
+    } catch {
+      // Session lookup failed
+    }
+  }
 
   if (!org) {
-    redirect("/auth/login?error=invalid_token");
+    redirect("/auth/login?redirect=/settings/notifications");
   }
 
   // ── Slack webhook endpoint (notification_endpoints) ────────────────────
   const { data: slackEndpointRaw } = await supabaseAdmin
     .from("notification_endpoints")
     .select(
-      "id, type, config, is_active, last_test_at, last_test_status, last_error, created_at, updated_at"
+      "id, type, url, config, is_active, last_test_at, last_test_status, last_error, created_at, updated_at"
     )
     .eq("org_id", org.id)
     .eq("type", "slack_webhook")
@@ -48,20 +105,19 @@ export default async function SettingsNotificationsPage({
     .limit(1)
     .maybeSingle();
 
-  // Mask webhook_url before passing to client
+  // Mask webhook URL before passing to client
+  const rawUrl =
+    (slackEndpointRaw?.url as string | null) ||
+    ((slackEndpointRaw?.config as Record<string, unknown> | null)
+      ?.webhook_url as string | undefined);
+
   const slackEndpoint = slackEndpointRaw
     ? {
         ...slackEndpointRaw,
+        url: rawUrl ? `...${rawUrl.slice(-8)}` : null,
         config: {
-          ...(slackEndpointRaw.config as Record<string, unknown>),
-          webhook_url: slackEndpointRaw.config
-            ? (() => {
-                const raw = (
-                  slackEndpointRaw.config as Record<string, unknown>
-                ).webhook_url as string | undefined;
-                return raw ? `...${raw.slice(-8)}` : undefined;
-              })()
-            : undefined,
+          ...(slackEndpointRaw.config as Record<string, unknown> | null),
+          webhook_url: rawUrl ? `...${rawUrl.slice(-8)}` : undefined,
         },
       }
     : null;
@@ -75,7 +131,6 @@ export default async function SettingsNotificationsPage({
     .eq("org_id", org.id)
     .order("created_at");
 
-  // Get dispatch stats from crr_alert_dispatches
   const channelIds = (channels ?? []).map((c) => c.id);
   let dispatchStats: Record<
     string,
@@ -90,11 +145,7 @@ export default async function SettingsNotificationsPage({
 
     for (const d of dispatches ?? []) {
       if (!dispatchStats[d.channel_id]) {
-        dispatchStats[d.channel_id] = {
-          sent: 0,
-          failed: 0,
-          last_sent_at: null,
-        };
+        dispatchStats[d.channel_id] = { sent: 0, failed: 0, last_sent_at: null };
       }
       if (d.status === "sent") {
         dispatchStats[d.channel_id].sent++;
@@ -110,7 +161,6 @@ export default async function SettingsNotificationsPage({
     }
   }
 
-  // Mask sensitive webhook URLs in server-rendered data
   const safeChannels = (channels ?? []).map((c) => ({
     ...c,
     config: {
@@ -118,22 +168,23 @@ export default async function SettingsNotificationsPage({
       webhook_url: c.config?.webhook_url
         ? `...${String(c.config.webhook_url).slice(-8)}`
         : undefined,
-      url: c.config?.url
-        ? `...${String(c.config.url).slice(-8)}`
-        : undefined,
+      url: c.config?.url ? `...${String(c.config.url).slice(-8)}` : undefined,
       secret: c.config?.secret ? "***" : undefined,
     },
     dispatch_sent: dispatchStats[c.id]?.sent ?? 0,
     dispatch_failed: dispatchStats[c.id]?.failed ?? 0,
     last_dispatched_at: dispatchStats[c.id]?.last_sent_at ?? null,
     last_test_at: (c as Record<string, unknown>).last_test_at ?? null,
-    last_test_status:
-      (c as Record<string, unknown>).last_test_status ?? null,
+    last_test_status: (c as Record<string, unknown>).last_test_status ?? null,
   }));
 
   const hasNoActiveEndpoints =
     safeChannels.filter((c) => c.is_active).length === 0 &&
     !slackEndpoint?.is_active;
+
+  const backLink = token
+    ? `/dashboard/${org.slug}?token=${token}`
+    : `/dashboard/${org.slug}`;
 
   return (
     <div style={{ padding: "2.5rem 0" }}>
@@ -149,10 +200,7 @@ export default async function SettingsNotificationsPage({
             color: "var(--muted)",
           }}
         >
-          <a
-            href={`/dashboard/${org.slug}?token=${token}`}
-            style={{ color: "var(--accent)" }}
-          >
+          <a href={backLink} style={{ color: "var(--accent)" }}>
             {org.name}
           </a>
           <span>›</span>
@@ -161,7 +209,7 @@ export default async function SettingsNotificationsPage({
           <span>Notifications</span>
         </div>
 
-        {/* Setup banner for orgs with zero active endpoints */}
+        {/* Setup banner */}
         {hasNoActiveEndpoints && (
           <div
             style={{
@@ -187,43 +235,52 @@ export default async function SettingsNotificationsPage({
               >
                 Set up notifications to get alerted instantly
               </div>
-              <p
-                style={{
-                  fontSize: "0.78rem",
-                  color: "var(--muted)",
-                  margin: 0,
-                }}
-              >
-                Add a Slack webhook or email/webhook channel below to receive
-                real-time alerts when vendor changes are detected.
+              <p style={{ fontSize: "0.78rem", color: "var(--muted)", margin: 0 }}>
+                Add a Slack webhook below to receive real-time alerts when vendor
+                changes are detected.
               </p>
             </div>
           </div>
         )}
 
-        {/* ── Slack Incoming Webhook section ─────────────────────────── */}
-        <SlackWebhookSettings
+        {/* ── New session-based Slack settings (works with or without token) ── */}
+        <SlackNotificationsForm
           token={token}
           orgName={org.name}
-          initialEndpoint={
-            slackEndpoint as {
-              id: string;
-              config: { webhook_url?: string };
-              is_active: boolean;
-              last_test_at: string | null;
-              last_test_status: string | null;
-              last_error: string | null;
-            } | null
-          }
+          initialUrl={slackEndpoint?.url ?? null}
+          initialIsActive={slackEndpoint?.is_active ?? false}
+          initialLastTestAt={slackEndpoint?.last_test_at ?? null}
+          initialLastTestStatus={slackEndpoint?.last_test_status ?? null}
+          initialLastError={slackEndpoint?.last_error ?? null}
         />
 
+        {/* ── Legacy Slack Webhook Settings (token-based, shown when token present) ── */}
+        {token && (
+          <SlackWebhookSettings
+            token={token}
+            orgName={org.name}
+            initialEndpoint={
+              slackEndpoint as {
+                id: string;
+                config: { webhook_url?: string };
+                is_active: boolean;
+                last_test_at: string | null;
+                last_test_status: string | null;
+                last_error: string | null;
+              } | null
+            }
+          />
+        )}
+
         {/* ── Legacy channel list ─────────────────────────────────────── */}
-        <NotificationsClient
-          orgSlug={org.slug}
-          token={token}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialChannels={safeChannels as any}
-        />
+        {token && (
+          <NotificationsClient
+            orgSlug={org.slug}
+            token={token}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            initialChannels={safeChannels as any}
+          />
+        )}
 
         {/* Navigation links */}
         <div
@@ -235,18 +292,17 @@ export default async function SettingsNotificationsPage({
             fontSize: "0.82rem",
           }}
         >
-          <a
-            href={`/dashboard/${org.slug}?token=${token}`}
-            style={{ color: "var(--muted)" }}
-          >
+          <a href={backLink} style={{ color: "var(--muted)" }}>
             ← Back to dashboard
           </a>
-          <a
-            href={`/dashboard/${org.slug}/settings?token=${token}`}
-            style={{ color: "var(--muted)" }}
-          >
-            ⚙ All settings
-          </a>
+          {token && (
+            <a
+              href={`/dashboard/${org.slug}/settings?token=${token}`}
+              style={{ color: "var(--muted)" }}
+            >
+              ⚙ All settings
+            </a>
+          )}
         </div>
       </div>
     </div>
