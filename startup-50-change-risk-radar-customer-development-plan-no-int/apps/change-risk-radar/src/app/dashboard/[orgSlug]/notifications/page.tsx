@@ -31,6 +31,31 @@ export default async function NotificationsPage({ params, searchParams }: Props)
     .eq("org_id", org.id)
     .order("created_at");
 
+  // Get dispatch stats per channel from crr_alert_dispatches
+  const channelIds = (channels ?? []).map(c => c.id);
+  let dispatchStats: Record<string, { sent: number; failed: number; last_sent_at: string | null }> = {};
+
+  if (channelIds.length > 0) {
+    const { data: dispatches } = await supabaseAdmin
+      .from("crr_alert_dispatches")
+      .select("channel_id, status, sent_at")
+      .in("channel_id", channelIds);
+
+    for (const d of dispatches ?? []) {
+      if (!dispatchStats[d.channel_id]) {
+        dispatchStats[d.channel_id] = { sent: 0, failed: 0, last_sent_at: null };
+      }
+      if (d.status === "sent") {
+        dispatchStats[d.channel_id].sent++;
+        if (!dispatchStats[d.channel_id].last_sent_at || d.sent_at > dispatchStats[d.channel_id].last_sent_at!) {
+          dispatchStats[d.channel_id].last_sent_at = d.sent_at;
+        }
+      } else if (d.status === "failed") {
+        dispatchStats[d.channel_id].failed++;
+      }
+    }
+  }
+
   // Mask secrets in server-rendered data
   const safeChannels = (channels ?? []).map(c => ({
     ...c,
@@ -40,6 +65,9 @@ export default async function NotificationsPage({ params, searchParams }: Props)
       url: c.config?.url ? `...${String(c.config.url).slice(-8)}` : undefined,
       secret: c.config?.secret ? "***" : undefined,
     },
+    dispatch_sent: dispatchStats[c.id]?.sent ?? 0,
+    dispatch_failed: dispatchStats[c.id]?.failed ?? 0,
+    last_dispatched_at: dispatchStats[c.id]?.last_sent_at ?? null,
   }));
 
   return (

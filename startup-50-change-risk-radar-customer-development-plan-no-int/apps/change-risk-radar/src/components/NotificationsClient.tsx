@@ -11,6 +11,10 @@ interface Channel {
   error_count: number;
   last_triggered_at: string | null;
   last_error: string | null;
+  // Dispatch stats from crr_alert_dispatches
+  dispatch_sent?: number;
+  dispatch_failed?: number;
+  last_dispatched_at?: string | null;
 }
 
 const CHANNEL_ICONS: Record<string, string> = {
@@ -250,6 +254,15 @@ export default function NotificationsClient({
                     <div style={{ fontSize: "0.7rem", color: "var(--muted)" }}>
                       {ch.type.replace("_", " ")} · {ch.trigger_count} sent · {ch.error_count} errors
                       {ch.last_triggered_at && ` · Last: ${new Date(ch.last_triggered_at).toLocaleString()}`}
+                      {(ch.dispatch_sent !== undefined && ch.dispatch_sent > 0) && (
+                        <span style={{ color: "#10b981" }}> · ✓ {ch.dispatch_sent} dispatched via cron</span>
+                      )}
+                      {(ch.dispatch_failed !== undefined && ch.dispatch_failed > 0) && (
+                        <span style={{ color: "#ef4444" }}> · {ch.dispatch_failed} failed</span>
+                      )}
+                      {ch.last_dispatched_at && (
+                        <span> · Last dispatch: {new Date(ch.last_dispatched_at).toLocaleString()}</span>
+                      )}
                     </div>
                     {ch.last_error && (
                       <div style={{ fontSize: "0.68rem", color: "#ef4444", marginTop: "0.15rem" }}>⚠ {ch.last_error.slice(0, 60)}</div>
