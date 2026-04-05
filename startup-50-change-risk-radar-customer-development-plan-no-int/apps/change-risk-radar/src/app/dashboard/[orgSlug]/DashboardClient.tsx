@@ -279,9 +279,10 @@ interface Props {
   briefs: Brief[]; connectors: Connector[];
   notifChannelCount?: number;
   privacyMode?: boolean;
+  trialDaysLeft?: number | null;
 }
 
-export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0, privacyMode: initialPrivacyMode = true }: Props) {
+export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0, privacyMode: initialPrivacyMode = true, trialDaysLeft = null }: Props) {
   const [alerts, setAlerts] = useState(initialAlerts);
   const [privacyMode, setPrivacyMode] = useState(initialPrivacyMode);
   const [filter, setFilter] = useState("all");
@@ -355,6 +356,14 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
               title={privacyMode ? "PII redacted — click to show full details" : "Full details shown — click to enable privacy mode"}>
               {privacyMode ? "🔒 Privacy" : "👁 Full"}
             </button>
+            <a href={`/dashboard/${orgSlug}/setup?token=${token}`}
+              className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none" }}>
+              ✅ Setup
+            </a>
+            <a href={`/dashboard/${orgSlug}/billing?token=${token}`}
+              className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none" }}>
+              💳 Billing
+            </a>
             <a href={`/dashboard/${orgSlug}/notifications?token=${token}`}
               className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               🔔 Notifications
@@ -379,6 +388,27 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
             </div>
           ))}
         </div>
+
+        {/* Trial expiry banner */}
+        {trialDaysLeft !== null && trialDaysLeft !== undefined && (
+          <div style={{
+            marginBottom: "1rem", padding: "0.7rem 1rem",
+            background: trialDaysLeft <= 3 ? "rgba(239,68,68,0.08)" : "rgba(99,102,241,0.08)",
+            border: `1px solid ${trialDaysLeft <= 3 ? "rgba(239,68,68,0.25)" : "rgba(99,102,241,0.25)"}`,
+            borderRadius: 8, display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.5rem",
+          }}>
+            <span style={{ fontSize: "0.78rem" }}>
+              {trialDaysLeft <= 0
+                ? "⏸ Trial expired — upgrade to continue receiving alerts"
+                : `⏳ Trial ends in ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} — upgrade to keep your connectors`}
+            </span>
+            <a href={`/dashboard/${orgSlug}/billing?token=${token}`}
+              className="btn-primary"
+              style={{ textDecoration: "none", fontSize: "0.72rem", padding: "0.3rem 0.85rem", whiteSpace: "nowrap" }}>
+              Upgrade →
+            </a>
+          </div>
+        )}
 
         {/* Stats strip */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(100px,1fr))", gap: "0.65rem", marginBottom: "1.5rem" }}>
