@@ -1,5 +1,6 @@
 import { supabaseAdmin } from "@/lib/supabase";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Metrics — Change Risk Radar" };
@@ -42,7 +43,58 @@ function MetricCard({ label, value, target, subtext, color = "var(--accent-light
   );
 }
 
-export default async function StatsPage() {
+// ── Admin gate ──────────────────────────────────────────────────────────────
+
+interface SearchParams { secret?: string }
+
+export default async function StatsPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
+  const sp = await searchParams;
+  const portalSecret = process.env.PORTAL_SECRET ?? "crr-portal-2025";
+
+  // If secret is wrong / missing, show the login form
+  if (sp.secret !== portalSecret) {
+    return (
+      <div style={{ padding: "3rem 0", display: "flex", justifyContent: "center" }}>
+        <div className="card" style={{ maxWidth: 420, padding: "2.5rem", textAlign: "center" }}>
+          <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>📊</div>
+          <h2 style={{ fontWeight: 800, fontSize: "1.25rem", marginBottom: "0.5rem" }}>Stats Dashboard</h2>
+          <p style={{ color: "var(--muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+            This page is restricted to administrators.
+          </p>
+          <form method="get" action="/stats">
+            <input
+              name="secret"
+              type="password"
+              placeholder="Admin password"
+              autoComplete="current-password"
+              style={{
+                width: "100%",
+                padding: "0.65rem 0.9rem",
+                background: "rgba(0,0,0,0.3)",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                color: "var(--foreground)",
+                fontSize: "0.875rem",
+                marginBottom: "0.75rem",
+                boxSizing: "border-box",
+              }}
+            />
+            <button type="submit" className="btn-primary" style={{ width: "100%" }}>
+              Unlock →
+            </button>
+          </form>
+          {sp.secret !== undefined && sp.secret !== "" && (
+            <p style={{ marginTop: "0.75rem", fontSize: "0.78rem", color: "#ef4444" }}>
+              Incorrect password. Please try again.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── Authorized — load all stats ──────────────────────────────────────────
+
   const now = new Date();
   const day7 = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
   const day14 = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
@@ -176,6 +228,7 @@ export default async function StatsPage() {
           <div style={{ display: "flex", gap: "0.5rem" }}>
             <a href="/api/metrics" target="_blank" className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.8rem" }}>JSON API</a>
             <Link href="/observatory" className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.8rem" }}>Observatory</Link>
+            <a href={`/admin/rules?secret=${portalSecret}`} className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.8rem" }}>Admin →</a>
           </div>
         </div>
 
