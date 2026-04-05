@@ -365,7 +365,7 @@ export default function MetricsDashboardClient({
                   { stage: "2. Diff Detection", desc: "Compare against previous snapshot → identify changed fields", target: "<2s" },
                   { stage: "3. Rule Evaluation", desc: "Apply 77 rules against diff → score matches", target: "<200ms" },
                   { stage: "4. Alert Creation", desc: "Insert into crr_org_alerts with impact/action text", target: "<100ms" },
-                  { stage: "5. Notification", desc: "Send to Slack/email/webhook channels", target: "<3s" },
+                  { stage: "5. Notification", desc: "Send to email/webhook channels", target: "<3s" },
                   { stage: "6. Dashboard Display", desc: "Available in realtime via Supabase subscription", target: "<1s" },
                 ].map(s => (
                   <div key={s.stage} style={{ display: "flex", gap: "0.75rem", alignItems: "baseline", borderBottom: "1px solid rgba(255,255,255,0.04)", padding: "0.3rem 0" }}>

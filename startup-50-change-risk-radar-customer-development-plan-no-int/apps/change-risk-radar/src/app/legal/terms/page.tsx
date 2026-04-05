@@ -33,7 +33,7 @@ export default function TermsPage() {
               <li>Connects to your third-party vendor APIs (Stripe, AWS, Google Workspace, others) via read-only credentials</li>
               <li>Monitors for changes to pricing, terms of service, security posture, and operational configuration</li>
               <li>Generates plain-English risk alerts classified by severity and category</li>
-              <li>Delivers alerts via in-app dashboard, email, Slack, and webhook integrations</li>
+              <li>Delivers alerts via in-app dashboard, email, and webhook integrations</li>
             </ul>
           </Section>
 

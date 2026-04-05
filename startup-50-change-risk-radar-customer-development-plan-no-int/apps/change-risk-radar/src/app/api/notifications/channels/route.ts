@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { testSlackWebhook, sendAlertNotifications, type NotificationChannel } from "@/lib/notifier";
+import { sendAlertNotifications, type NotificationChannel } from "@/lib/notifier";
 
 export const dynamic = "force-dynamic";
 
@@ -74,14 +74,6 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const { type, label, config } = body;
   if (!type) return NextResponse.json({ error: "type required" }, { status: 400 });
-
-  // Validate + test Slack webhook on creation
-  if (type === "slack_webhook" && config?.webhook_url) {
-    const test = await testSlackWebhook(config.webhook_url);
-    if (!test.ok) {
-      return NextResponse.json({ error: `Slack webhook invalid: ${test.error}` }, { status: 400 });
-    }
-  }
 
   const { data: channel, error } = await supabaseAdmin
     .from("crr_notification_channels")

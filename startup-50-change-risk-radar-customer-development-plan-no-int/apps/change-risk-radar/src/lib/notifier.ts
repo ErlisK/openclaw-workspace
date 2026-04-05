@@ -1,13 +1,13 @@
 /**
  * notifier.ts — Notification Dispatcher
  *
- * Sends alerts to configured channels: Slack webhook, email, generic webhook.
+ * Sends alerts to configured channels: email, generic webhook, PagerDuty.
  * Called by alert generation pipeline after inserting crr_org_alerts rows.
  *
  * Features:
- *   - Slack rich Block Kit messages with risk color-coding
  *   - Instant email for critical/high alerts (via agentmail)
  *   - Generic webhook (HMAC-signed payloads)
+ *   - PagerDuty integration
  *   - Per-channel severity filtering
  *   - Rate-limiting (1 per channel per 5 min for same alert title)
  *   - Delivery logging to crr_notification_log
@@ -17,7 +17,7 @@ import { supabaseAdmin } from "./supabase";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
-export type ChannelType = "slack_webhook" | "email" | "webhook" | "pagerduty";
+export type ChannelType = "email" | "webhook" | "pagerduty";
 
 export interface NotificationChannel {
   id: string;
@@ -25,11 +25,6 @@ export interface NotificationChannel {
   type: ChannelType;
   label: string;
   config: {
-    // slack_webhook
-    webhook_url?: string;
-    channel?: string;
-    username?: string;
-    icon_emoji?: string;
     // email
     to?: string;
     digest_mode?: boolean;
@@ -123,10 +118,6 @@ export async function sendAlertNotifications(
     if (!dryRun) {
       try {
         switch (channel.type) {
-          case "slack_webhook":
-            await sendSlack(channel, alert);
-            status = "sent";
-            break;
           case "email":
             await sendEmail(channel, alert);
             status = "sent";
@@ -181,6 +172,8 @@ export async function sendAlertNotifications(
 // ─── Rate-limit check ────────────────────────────────────────────────────────
 
 async function checkRateLimit(channelId: string, alertTitle: string): Promise<boolean> {
+  // alertTitle is kept as a parameter for future per-title dedup; currently deduplicates per channel per 5 min
+  void alertTitle;
   const cutoff = new Date(Date.now() - 5 * 60 * 1000).toISOString();
   const { data } = await supabaseAdmin
     .from("crr_notification_log")
@@ -192,99 +185,15 @@ async function checkRateLimit(channelId: string, alertTitle: string): Promise<bo
   return (data?.length ?? 0) > 0;
 }
 
-// ─── Slack Block Kit ─────────────────────────────────────────────────────────
+// ─── Category emoji (shared across notification formats) ─────────────────────
 
-const SLACK_SEVERITY_COLORS: Record<string, string> = {
-  critical: "#ef4444",  // red
-  high: "#f59e0b",      // amber
-  medium: "#6366f1",    // indigo
-  low: "#10b981",       // green
-};
-
-const SLACK_CATEGORY_EMOJI: Record<string, string> = {
+const CATEGORY_EMOJI: Record<string, string> = {
   pricing: "💰",
   legal: "⚖️",
   operational: "🔧",
   security: "🔒",
   vendor_risk: "🏢",
 };
-
-function buildSlackMessage(channel: NotificationChannel, alert: AlertPayload) {
-  const severity = alert.severity ?? alert.risk_level ?? "high";
-  const color = SLACK_SEVERITY_COLORS[severity] ?? "#6366f1";
-  const catEmoji = SLACK_CATEGORY_EMOJI[alert.risk_category] ?? "⚡";
-  const vendorName = alert.vendor_slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-  const dashboardUrl = `https://change-risk-radar.vercel.app`;
-
-  return {
-    username: channel.config.username ?? "Change Risk Radar",
-    icon_emoji: channel.config.icon_emoji ?? ":radar:",
-    ...(channel.config.channel ? { channel: channel.config.channel } : {}),
-    attachments: [
-      {
-        color,
-        fallback: `[${severity.toUpperCase()}] ${alert.title}`,
-        blocks: [
-          {
-            type: "section",
-            text: {
-              type: "mrkdwn",
-              text: `${catEmoji} *${alert.title}*\n${alert.summary?.slice(0, 200) ?? ""}`,
-            },
-          },
-          {
-            type: "section",
-            fields: [
-              { type: "mrkdwn", text: `*Severity*\n${severity.toUpperCase()}` },
-              { type: "mrkdwn", text: `*Category*\n${alert.risk_category}` },
-              { type: "mrkdwn", text: `*Vendor*\n${vendorName}` },
-              { type: "mrkdwn", text: `*Detected*\n<!date^${Math.floor(new Date(alert.created_at).getTime() / 1000)}^{date_short_pretty} {time}|${alert.created_at}>` },
-            ],
-          },
-          {
-            type: "actions",
-            elements: [
-              {
-                type: "button",
-                text: { type: "plain_text", text: "View Alert →" },
-                url: dashboardUrl,
-                style: "primary",
-              },
-              ...(alert.source_url ? [{
-                type: "button",
-                text: { type: "plain_text", text: "Source" },
-                url: alert.source_url,
-              }] : []),
-            ],
-          },
-          {
-            type: "context",
-            elements: [
-              { type: "mrkdwn", text: `🔍 Change Risk Radar • <${dashboardUrl}|Manage alerts>` },
-            ],
-          },
-        ],
-      },
-    ],
-  };
-}
-
-async function sendSlack(channel: NotificationChannel, alert: AlertPayload): Promise<void> {
-  const webhookUrl = channel.config.webhook_url;
-  if (!webhookUrl) throw new Error("Slack webhook URL not configured");
-
-  const body = buildSlackMessage(channel, alert);
-  const res = await fetch(webhookUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`Slack API error ${res.status}: ${text}`);
-  }
-}
 
 // ─── Email (via agentmail) ────────────────────────────────────────────────────
 
@@ -298,7 +207,7 @@ const SEVERITY_BORDER: Record<string, string> = {
 function buildAlertEmailHtml(alert: AlertPayload): string {
   const severity = alert.severity ?? alert.risk_level ?? "high";
   const border = SEVERITY_BORDER[severity] ?? "#6366f1";
-  const catEmoji = SLACK_CATEGORY_EMOJI[alert.risk_category] ?? "⚡";
+  const catEmoji = CATEGORY_EMOJI[alert.risk_category] ?? "⚡";
   const vendorName = alert.vendor_slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
   const dashboardUrl = `https://change-risk-radar.vercel.app`;
   const timeStr = new Date(alert.created_at).toLocaleString("en-US", { timeZone: "UTC", dateStyle: "medium", timeStyle: "short" });
@@ -344,7 +253,7 @@ function buildAlertEmailHtml(alert: AlertPayload): string {
 
       <!-- CTAs -->
       <div style="display:flex;gap:12px;">
-        <a href="${dashboardUrl}" style="background:#4f46e5;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">View & React →</a>
+        <a href="${dashboardUrl}" style="background:#4f46e5;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">View &amp; React →</a>
         ${alert.source_url ? `<a href="${escapeHtml(alert.source_url)}" style="background:#f3f4f6;color:#374151;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">View Source</a>` : ""}
       </div>
     </div>
@@ -484,22 +393,22 @@ async function sendPagerDuty(channel: NotificationChannel, alert: AlertPayload):
   }
 }
 
-// ─── Slack webhook validation ─────────────────────────────────────────────────
+// ─── Webhook URL validation ───────────────────────────────────────────────────
 
-/** Verify a Slack webhook URL by sending a test message */
-export async function testSlackWebhook(webhookUrl: string): Promise<{ ok: boolean; error?: string }> {
+/** Verify a webhook URL by sending a test payload */
+export async function testWebhookUrl(webhookUrl: string): Promise<{ ok: boolean; error?: string }> {
   try {
     const res = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: "✅ *Change Risk Radar* — Webhook connected successfully! You'll receive alerts here when risk changes are detected.",
+        event: "test",
+        message: "✅ Change Risk Radar — Webhook connected successfully! You'll receive alerts here when risk changes are detected.",
+        timestamp: new Date().toISOString(),
       }),
     });
 
-    if (res.ok || await res.text().then(t => t === "ok")) {
-      return { ok: true };
-    }
+    if (res.ok) return { ok: true };
     const text = await res.text().catch(() => res.statusText);
     return { ok: false, error: `${res.status}: ${text}` };
   } catch (e) {

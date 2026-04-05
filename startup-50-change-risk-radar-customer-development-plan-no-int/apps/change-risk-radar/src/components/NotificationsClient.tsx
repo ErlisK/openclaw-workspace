@@ -20,7 +20,6 @@ interface Channel {
 }
 
 const CHANNEL_ICONS: Record<string, string> = {
-  slack_webhook: "🔔",
   email: "📧",
   webhook: "🔗",
   pagerduty: "🚨",
@@ -37,14 +36,9 @@ export default function NotificationsClient({
 }) {
   const [channels, setChannels] = useState<Channel[]>(initialChannels);
   const [showAdd, setShowAdd] = useState(false);
-  const [addType, setAddType] = useState("slack_webhook");
+  const [addType, setAddType] = useState("email");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");
-
-  // Slack fields
-  const [slackUrl, setSlackUrl] = useState("");
-  const [slackChannel, setSlackChannel] = useState("");
-  const [slackSeverity, setSlackSeverity] = useState("high");
 
   // Email fields
   const [emailTo, setEmailTo] = useState("");
@@ -60,39 +54,23 @@ export default function NotificationsClient({
     setLoading(true);
     setMsg("");
 
-    if (addType === "slack_webhook") {
-      // Route through /api/notification-endpoints (supports any https URL, not just hooks.slack.com)
-      const res = await fetch(`/api/notification-endpoints?token=${token}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: slackChannel ? `Slack ${slackChannel}` : "Slack",
-          url: slackUrl,
-          channel: slackChannel,
-          min_severity: slackSeverity,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setMsg(`✗ ${data.error}`); setLoading(false); return; }
-      setMsg(`✓ Slack webhook added!`);
-    } else {
-      let config: Record<string, unknown> = {};
-      if (addType === "email") config = { to: emailTo, min_severity: emailSeverity, digest_mode: emailDigest };
-      else if (addType === "webhook") config = { url: webhookUrl, secret: webhookSecret, min_severity: webhookSeverity };
-      const res = await fetch(`/api/notifications/channels?token=${token}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: addType, config }),
-      });
-      const data = await res.json();
-      if (!res.ok) { setMsg(`✗ ${data.error}`); setLoading(false); return; }
-      setMsg(`✓ ${addType} channel added.`);
-    }
+    let config: Record<string, unknown> = {};
+    if (addType === "email") config = { to: emailTo, min_severity: emailSeverity, digest_mode: emailDigest };
+    else if (addType === "webhook") config = { url: webhookUrl, secret: webhookSecret, min_severity: webhookSeverity };
 
-    // Refresh channels list from the notification-endpoints API
-    const res = await fetch(`/api/notification-endpoints?token=${token}`);
+    const res = await fetch(`/api/notifications/channels?token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: addType, config }),
+    });
     const data = await res.json();
-    setChannels(data.endpoints ?? []);
+    if (!res.ok) { setMsg(`✗ ${data.error}`); setLoading(false); return; }
+    setMsg(`✓ ${addType} channel added.`);
+
+    // Refresh channels list
+    const listRes = await fetch(`/api/notification-endpoints?token=${token}`);
+    const listData = await listRes.json();
+    setChannels(listData.endpoints ?? []);
     setShowAdd(false);
     setLoading(false);
   }
@@ -116,7 +94,6 @@ export default function NotificationsClient({
     const data = await res.json();
     if (data.ok) {
       setMsg(`✓ Test sent successfully${data.latency_ms ? ` (${data.latency_ms}ms)` : ""}`);
-      // Update local state to reflect last_test_at and last_test_status
       setChannels(prev => prev.map(c => c.id === id
         ? { ...c, last_test_at: new Date().toISOString(), last_test_status: "ok" }
         : c
@@ -143,7 +120,7 @@ export default function NotificationsClient({
         <div>
           <h2 style={{ fontWeight: 800, margin: 0, fontSize: "1.1rem" }}>🔔 Notification Channels</h2>
           <p style={{ color: "var(--muted)", fontSize: "0.78rem", margin: "0.2rem 0 0" }}>
-            Deliver alerts to Slack, email, or your own webhook endpoint.
+            Deliver alerts to email or your own webhook endpoint.
           </p>
         </div>
         <button onClick={() => setShowAdd(!showAdd)} className="btn-primary" style={{ fontSize: "0.8rem", padding: "0.4rem 0.9rem" }}>
@@ -165,42 +142,14 @@ export default function NotificationsClient({
           <div style={{ marginBottom: "0.75rem" }}>
             <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.4rem" }}>Channel type</label>
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-              {["slack_webhook", "email", "webhook"].map(t => (
+              {["email", "webhook"].map(t => (
                 <button key={t} onClick={() => setAddType(t)}
                   style={{ padding: "0.4rem 0.9rem", borderRadius: 6, border: `1px solid ${addType === t ? "var(--accent)" : "var(--border)"}`, background: addType === t ? "rgba(99,102,241,0.12)" : "var(--card-bg)", cursor: "pointer", color: "var(--foreground)", fontSize: "0.78rem", fontWeight: addType === t ? 700 : 400 }}>
-                  {CHANNEL_ICONS[t]} {t === "slack_webhook" ? "Slack" : t === "email" ? "Email" : "Webhook"}
+                  {CHANNEL_ICONS[t]} {t === "email" ? "Email" : "Webhook"}
                 </button>
               ))}
             </div>
           </div>
-
-          {addType === "slack_webhook" && (
-            <>
-              <div style={{ marginBottom: "0.75rem" }}>
-                <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Slack Webhook URL <span style={{ color: "#ef4444" }}>*</span></label>
-                <input value={slackUrl} onChange={e => setSlackUrl(e.target.value)}
-                  placeholder="https://hooks.slack.com/services/..."
-                  style={{ width: "100%", padding: "0.6rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box", fontFamily: "monospace" }} />
-                <p style={{ fontSize: "0.68rem", color: "var(--muted)", marginTop: "0.25rem" }}>
-                  Create at <a href="https://api.slack.com/apps" target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>api.slack.com/apps</a> → Incoming Webhooks → Add New Webhook
-                </p>
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                <div>
-                  <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Channel name (optional)</label>
-                  <input value={slackChannel} onChange={e => setSlackChannel(e.target.value)} placeholder="#alerts"
-                    style={{ width: "100%", padding: "0.6rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }} />
-                </div>
-                <div>
-                  <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Min severity to notify</label>
-                  <select value={slackSeverity} onChange={e => setSlackSeverity(e.target.value)}
-                    style={{ width: "100%", padding: "0.6rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }}>
-                    {["critical","high","medium","low"].map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-              </div>
-            </>
-          )}
 
           {addType === "email" && (
             <>
@@ -261,7 +210,7 @@ export default function NotificationsClient({
       {channels.length === 0 ? (
         <div className="card" style={{ padding: "2rem", textAlign: "center" }}>
           <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔕</div>
-          <p style={{ color: "var(--muted)", fontSize: "0.875rem" }}>No notification channels yet. Add Slack, email, or a webhook to get alerted instantly.</p>
+          <p style={{ color: "var(--muted)", fontSize: "0.875rem" }}>No notification channels yet. Add email or a webhook to get alerted instantly.</p>
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
@@ -312,7 +261,6 @@ export default function NotificationsClient({
 
       <div style={{ marginTop: "1.25rem", padding: "0.75rem 1rem", background: "rgba(99,102,241,0.05)", borderRadius: 6, border: "1px solid rgba(99,102,241,0.15)", fontSize: "0.72rem", color: "var(--muted)" }}>
         <strong style={{ color: "var(--foreground)" }}>How it works:</strong> When a new alert is detected, Change Risk Radar sends it to all active channels above that meet the severity threshold.
-        Slack messages include Block Kit formatting with severity indicators and one-click buttons.
         Webhooks are signed with HMAC-SHA256 (<code>X-CRR-Signature</code> header).
         Email uses HTML with color-coded severity banners.
       </div>

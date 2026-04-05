@@ -249,7 +249,7 @@ export default function PilotSecurityPage() {
   └───────────────────────────────────────────────────────────┘
           │                                   │
           │ (3) Alert dispatch               (4) Dashboard
-          │ (Slack/email/webhook)             (browser, JWT auth)
+          │ (email/webhook)             (browser, JWT auth)
           ▼                                   ▼
   ┌────────────────┐              ┌──────────────────────────┐
   │  Notification  │              │  Customer Browser         │

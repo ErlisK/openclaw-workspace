@@ -71,9 +71,10 @@ export async function POST(
 
   // Send the test payload
   const testPayload = {
-    text: `✅ Change Risk Radar test: Slack notifications are set up for ${org.name}.`,
-    username: "Change Risk Radar",
-    icon_emoji: ":radar:",
+    event: "test",
+    message: `✅ Change Risk Radar test: notifications are set up for ${org.name}.`,
+    organization: org.name,
+    timestamp: new Date().toISOString(),
   };
 
   let responseStatus: number | undefined;
@@ -93,8 +94,8 @@ export async function POST(
     responseStatus = res.status;
     responseBody = await res.text().catch(() => "");
 
-    // Treat any 2xx as success; also Slack returns "ok" as plain text
-    ok = res.ok || responseBody.trim() === "ok";
+    // Treat any 2xx as success
+    ok = res.ok;
 
     if (!ok) {
       errorMsg = `HTTP ${res.status}: ${responseBody.slice(0, 200)}`;

@@ -6,7 +6,7 @@
  *   2. connect_connector Add Stripe, AWS, Workspace, Shopify, or Salesforce
  *   3. get_first_alert   Wait for the first risk alert to appear
  *   4. react_to_alert    Mark an alert useful/acknowledged/snooze/FP
- *   5. set_notifications Add Slack webhook or email for alerts
+ *   5. set_notifications Add email or webhook for alerts
  *   6. invite_team       Optional — more team members = stickier
  *   7. upgrade           Convert from trial to paid
  *
@@ -82,8 +82,8 @@ export const CHECKLIST_STEPS: OnboardingStep[] = [
   {
     id: "set_notifications",
     order: 5,
-    title: "Set up Slack or email alerts",
-    description: "Get notified the moment we detect a change. Works with Slack, email, PagerDuty, and webhooks.",
+    title: "Set up email or webhook alerts",
+    description: "Get notified the moment we detect a change. Works with email, PagerDuty, and webhooks.",
     action_label: "Add notifications →",
     action_url_key: "notifications",
     optional: true,

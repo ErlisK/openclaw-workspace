@@ -282,10 +282,10 @@ interface Props {
   trialDaysLeft?: number | null;
 }
 
-// ─── Slack setup banner ──────────────────────────────────────────────────────
-const SLACK_BANNER_DISMISS_KEY = "crr_slack_banner_dismissed_until";
+// ─── Notification setup banner ───────────────────────────────────────────────
+const NOTIF_BANNER_DISMISS_KEY = "crr_notif_banner_dismissed_until";
 
-function SlackSetupBanner({
+function NotifSetupBanner({
   orgSlug,
   token,
   notifChannelCount,
@@ -298,7 +298,7 @@ function SlackSetupBanner({
 
   useEffect(() => {
     try {
-      const dismissedUntil = localStorage.getItem(SLACK_BANNER_DISMISS_KEY);
+      const dismissedUntil = localStorage.getItem(NOTIF_BANNER_DISMISS_KEY);
       if (dismissedUntil && Date.now() < parseInt(dismissedUntil, 10)) {
         setDismissed(true);
       } else {
@@ -312,7 +312,7 @@ function SlackSetupBanner({
   const dismiss = useCallback(() => {
     try {
       const sevenDays = Date.now() + 7 * 24 * 60 * 60 * 1000;
-      localStorage.setItem(SLACK_BANNER_DISMISS_KEY, String(sevenDays));
+      localStorage.setItem(NOTIF_BANNER_DISMISS_KEY, String(sevenDays));
     } catch {
       // ignore
     }
@@ -337,12 +337,12 @@ function SlackSetupBanner({
       }}
     >
       <span style={{ fontSize: "0.78rem" }}>
-        🔔 <strong>Enable Slack alerts in 2 minutes</strong> — get notified when vendors change pricing, terms, or APIs.{" "}
+        🔔 <strong>Enable notifications in 2 minutes</strong> — get alerted when vendors change pricing, terms, or APIs.{" "}
         <a
           href={`/settings/notifications?token=${token}`}
           style={{ color: "var(--accent)", textDecoration: "underline" }}
         >
-          Add your webhook →
+          Set up notifications →
         </a>
       </span>
       <button
@@ -476,8 +476,8 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
           ))}
         </div>
 
-        {/* Slack setup prompt banner */}
-        <SlackSetupBanner orgSlug={orgSlug} token={token} notifChannelCount={notifChannelCount} />
+        {/* Notification setup prompt banner */}
+        <NotifSetupBanner orgSlug={orgSlug} token={token} notifChannelCount={notifChannelCount} />
 
         {/* Trial expiry banner */}
         {trialDaysLeft !== null && trialDaysLeft !== undefined && (

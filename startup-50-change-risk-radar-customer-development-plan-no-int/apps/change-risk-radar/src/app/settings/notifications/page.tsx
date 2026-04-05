@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Notification Settings — Change Risk Radar",
-  description: "Configure Slack, email, and webhook notifications for Change Risk Radar alerts.",
+  description: "Configure email and webhook notifications for Change Risk Radar alerts.",
 };
 
 interface Props {
@@ -128,61 +128,15 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
             <span style={{ fontSize: "1.25rem" }}>⚡</span>
             <div>
               <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#f59e0b", marginBottom: "0.2rem" }}>
-                Set up Slack notifications to get alerted instantly
+                Set up notifications to get alerted instantly
               </div>
               <p style={{ fontSize: "0.78rem", color: "var(--muted)", margin: 0 }}>
-                You have no active notification channels. Add a Slack webhook below to receive
+                You have no active notification channels. Add an email address or webhook below to receive
                 real-time alerts when vendor changes are detected.
               </p>
             </div>
           </div>
         )}
-
-        {/* How to create a Slack webhook — 3-step guide */}
-        <div
-          className="card"
-          style={{
-            padding: "1.1rem 1.25rem",
-            marginBottom: "1.5rem",
-            background: "rgba(99,102,241,0.04)",
-            borderColor: "rgba(99,102,241,0.15)",
-          }}
-        >
-          <div style={{ fontWeight: 700, fontSize: "0.82rem", marginBottom: "0.6rem" }}>
-            📋 How to create a Slack Incoming Webhook
-          </div>
-          <ol style={{ margin: 0, paddingLeft: "1.25rem", fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.8 }}>
-            <li>
-              Go to{" "}
-              <a
-                href="https://api.slack.com/apps"
-                target="_blank"
-                rel="noreferrer"
-                style={{ color: "var(--accent)" }}
-              >
-                api.slack.com/apps
-              </a>{" "}
-              → <strong>Create New App</strong> → <em>From scratch</em>
-            </li>
-            <li>
-              Under <strong>Add features and functionality</strong>, click{" "}
-              <strong>Incoming Webhooks</strong> → toggle <em>Activate Incoming Webhooks</em> → click{" "}
-              <strong>Add New Webhook to Workspace</strong> and pick a channel
-            </li>
-            <li>
-              Copy the <code>Webhook URL</code> (starts with{" "}
-              <code>https://hooks.slack.com/services/…</code>) and paste it below
-            </li>
-          </ol>
-          <a
-            href="https://api.slack.com/messaging/webhooks"
-            target="_blank"
-            rel="noreferrer"
-            style={{ fontSize: "0.72rem", color: "var(--accent)", display: "inline-block", marginTop: "0.5rem" }}
-          >
-            Slack Incoming Webhooks docs →
-          </a>
-        </div>
 
         <NotificationsClient
           orgSlug={org.slug}

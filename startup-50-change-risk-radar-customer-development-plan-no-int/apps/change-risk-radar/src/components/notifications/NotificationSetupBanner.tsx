@@ -74,7 +74,7 @@ export default function NotificationSetupBanner({
     >
       <span style={{ fontSize: "0.78rem" }}>
         🔔{" "}
-        <strong>Enable Slack alerts in 2 minutes</strong> — get notified when
+        <strong>Enable notifications in 2 minutes</strong> — get alerted when
         vendors change pricing, terms, or APIs.{" "}
         <a
           href={`/settings/notifications?token=${token}`}

@@ -1,7 +1,7 @@
 /**
  * GET /api/diagnostics/notifications
  *
- * Protected diagnostics endpoint reporting Slack notifications adoption
+ * Protected diagnostics endpoint reporting notification channel adoption
  * and schema presence.
  *
  * Auth:

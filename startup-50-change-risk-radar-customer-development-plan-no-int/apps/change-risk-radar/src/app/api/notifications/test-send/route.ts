@@ -1,18 +1,17 @@
 /**
  * POST /api/notifications/test-send
  *
- * Alias for /api/notifications/test with enhanced direct-URL support.
+ * Test a webhook URL or saved channel.
  * Accepts:
- *   - { webhook_url: string }  → quick test without saving (direct URL)
+ *   - { webhook_url: string }  → quick test without saving
  *   - { channel_id: string }   → test a saved channel by ID
- *   - { type: "slack_webhook", config: { webhook_url: string } }  → legacy format
  *
  * Auth: magic token via ?token= query param or x-org-token header.
  * Returns: { ok: boolean, status_code?: number, error?: string, latency_ms?: number }
  */
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { testSlackWebhook } from "@/lib/notifier";
+import { testWebhookUrl } from "@/lib/notifier";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -33,28 +32,25 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
 
-  // 1. Direct URL test (most common for the Settings page "Test Send" before saving)
-  const directUrl: string | undefined =
-    body.webhook_url ||
-    body.url ||
-    (body.type === "slack_webhook" ? body.config?.webhook_url : undefined);
+  // 1. Direct URL test (quick test before saving)
+  const directUrl: string | undefined = body.webhook_url || body.url;
 
   if (directUrl) {
     if (!directUrl.startsWith("https://")) {
       return NextResponse.json({ error: "webhook_url must start with https://" }, { status: 400 });
     }
     const start = Date.now();
-    const result = await testSlackWebhook(directUrl);
+    const result = await testWebhookUrl(directUrl);
     const latency_ms = Date.now() - start;
 
-    // Log to crr_notification_log if available (best-effort; skip if table missing/constrained)
-    await supabaseAdmin.from("crr_notification_log").insert({
+    // Log to crr_notification_log (best-effort)
+    supabaseAdmin.from("crr_notification_log").insert({
       org_id: org.id,
-      channel_type: "slack_webhook",
+      channel_type: "webhook",
       status: result.ok ? "sent" : "failed",
       latency_ms: latency_ms,
       error_message: result.ok ? null : result.error,
-    }).throwOnError().catch(() => {
+    }).then(() => {}).catch(() => {
       // Ignore logging errors — delivery is primary
     });
 
@@ -84,7 +80,7 @@ export async function POST(req: NextRequest) {
     }
 
     const start = Date.now();
-    const result = await testSlackWebhook(webhookUrl);
+    const result = await testWebhookUrl(webhookUrl);
     const latency_ms = Date.now() - start;
 
     // Update channel stats

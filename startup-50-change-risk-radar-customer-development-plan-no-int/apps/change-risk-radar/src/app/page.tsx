@@ -9,15 +9,15 @@ export const dynamic = "force-dynamic";
 const PRICING_VARIANTS = {
   A: {
     label: "Control",
-    starter: { price: "$99", monthly: "/mo", features: ["10 tools monitored", "Email + Slack alerts", "Weekly digest", "Basic risk taxonomy", "30-day history"] },
-    growth: { price: "$299", monthly: "/mo", badge: "Most Popular", features: ["30 tools monitored", "Real-time alerts", "Priority classification", "API access", "90-day history", "Slack + webhook + email"] },
+    starter: { price: "$99", monthly: "/mo", features: ["10 tools monitored", "Email alerts", "Weekly digest", "Basic risk taxonomy", "30-day history"] },
+    growth: { price: "$299", monthly: "/mo", badge: "Most Popular", features: ["30 tools monitored", "Real-time alerts", "Priority classification", "API access", "90-day history", "Webhook + email"] },
     enterprise: { price: "Custom", monthly: "", features: ["Unlimited tools", "Custom vendors", "Dedicated analyst", "SLA guarantee", "SSO + RBAC"] },
     deposit: { amount: "$100", cents: 10000, label: "Reserve with $100 refundable deposit" },
   },
   B: {
     label: "Premium",
-    starter: { price: "$149", monthly: "/mo", features: ["10 tools monitored", "Email + Slack alerts", "Daily digest", "Full risk taxonomy", "90-day history"] },
-    growth: { price: "$399", monthly: "/mo", badge: "Most Popular", features: ["Unlimited tools", "Real-time alerts + Slack", "Priority + API access", "1-year history", "Webhook + email", "Risk scoring"] },
+    starter: { price: "$149", monthly: "/mo", features: ["10 tools monitored", "Email alerts", "Daily digest", "Full risk taxonomy", "90-day history"] },
+    growth: { price: "$399", monthly: "/mo", badge: "Most Popular", features: ["Unlimited tools", "Real-time alerts", "Priority + API access", "1-year history", "Webhook + email", "Risk scoring"] },
     enterprise: { price: "Custom", monthly: "", features: ["White-label reports", "Custom vendors", "Dedicated analyst", "SLA + Uptime guarantee", "SSO + RBAC"] },
     deposit: { amount: "$100", cents: 10000, label: "Reserve with $100 refundable deposit" },
   },

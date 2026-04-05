@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
-import { testSlackWebhook, sendAlertNotifications } from "@/lib/notifier";
+import { sendAlertNotifications } from "@/lib/notifier";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -8,7 +8,7 @@ export const maxDuration = 30;
 /**
  * POST /api/notifications/test
  * Test a notification channel by sending a sample alert.
- * Body: { channel_id: string } or { type: "slack_webhook", config: { webhook_url: ... } }
+ * Body: { channel_id: string }
  */
 export async function POST(req: NextRequest) {
   const token = req.headers.get("x-org-token") || req.nextUrl.searchParams.get("token");
@@ -23,12 +23,6 @@ export async function POST(req: NextRequest) {
   if (!org) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-
-  // Quick URL-only test (no channel required)
-  if (body.type === "slack_webhook" && body.config?.webhook_url) {
-    const result = await testSlackWebhook(body.config.webhook_url);
-    return NextResponse.json({ ok: result.ok, error: result.error });
-  }
 
   // Full channel test
   if (body.channel_id) {
@@ -67,7 +61,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ error: "channel_id or type+config required" }, { status: 400 });
+  return NextResponse.json({ error: "channel_id required" }, { status: 400 });
 }
 
 /**

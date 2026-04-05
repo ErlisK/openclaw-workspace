@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
     CREATE TABLE IF NOT EXISTS notification_endpoints (
       id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
       org_id uuid NOT NULL,
-      type text NOT NULL CHECK (type IN ('slack_webhook')) DEFAULT 'slack_webhook',
+      type text NOT NULL CHECK (type IN ('email', 'webhook', 'pagerduty')) DEFAULT 'webhook',
       name text,
       webhook_url text NOT NULL,
       is_active boolean NOT NULL DEFAULT true,
