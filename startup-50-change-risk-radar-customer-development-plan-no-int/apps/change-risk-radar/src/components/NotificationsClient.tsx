@@ -11,6 +11,8 @@ interface Channel {
   error_count: number;
   last_triggered_at: string | null;
   last_error: string | null;
+  last_test_at?: string | null;
+  last_test_status?: string | null;
   // Dispatch stats from crr_alert_dispatches
   dispatch_sent?: number;
   dispatch_failed?: number;
@@ -57,18 +59,24 @@ export default function NotificationsClient({
   async function addChannel() {
     setLoading(true);
     setMsg("");
-    let config: Record<string, unknown> = {};
-    let body: Record<string, unknown> = {};
 
     if (addType === "slack_webhook") {
-      body = { webhook_url: slackUrl, channel: slackChannel, min_severity: slackSeverity, send_test: true };
-      const res = await fetch(`/api/connectors/slack/setup?token=${token}`, {
-        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body),
+      // Route through /api/notification-endpoints (supports any https URL, not just hooks.slack.com)
+      const res = await fetch(`/api/notification-endpoints?token=${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: slackChannel ? `Slack ${slackChannel}` : "Slack",
+          url: slackUrl,
+          channel: slackChannel,
+          min_severity: slackSeverity,
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setMsg(`✗ ${data.error}`); setLoading(false); return; }
-      setMsg(`✓ Slack connected! Test message sent.`);
+      setMsg(`✓ Slack webhook added!`);
     } else {
+      let config: Record<string, unknown> = {};
       if (addType === "email") config = { to: emailTo, min_severity: emailSeverity, digest_mode: emailDigest };
       else if (addType === "webhook") config = { url: webhookUrl, secret: webhookSecret, min_severity: webhookSeverity };
       const res = await fetch(`/api/notifications/channels?token=${token}`, {
@@ -81,38 +89,51 @@ export default function NotificationsClient({
       setMsg(`✓ ${addType} channel added.`);
     }
 
-    // Refresh channels
-    const res = await fetch(`/api/notifications/channels?token=${token}`);
+    // Refresh channels list from the notification-endpoints API
+    const res = await fetch(`/api/notification-endpoints?token=${token}`);
     const data = await res.json();
-    setChannels(data.channels ?? []);
+    setChannels(data.endpoints ?? []);
     setShowAdd(false);
     setLoading(false);
   }
 
   async function toggleChannel(id: string, isActive: boolean) {
-    await fetch(`/api/notifications/channels?token=${token}`, {
+    await fetch(`/api/notification-endpoints/${id}?token=${token}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, is_active: !isActive }),
+      body: JSON.stringify({ is_enabled: !isActive }),
     });
     setChannels(prev => prev.map(c => c.id === id ? { ...c, is_active: !c.is_active } : c));
   }
 
   async function testChannel(id: string) {
     setMsg("Sending test...");
-    const res = await fetch(`/api/notifications/test?token=${token}`, {
+    const res = await fetch(`/api/notification-endpoints/${id}/test-send?token=${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ channel_id: id }),
+      body: JSON.stringify({}),
     });
     const data = await res.json();
-    setMsg(data.ok ? `✓ Test sent (${data.latency_ms}ms)` : `✗ Test failed: ${data.error}`);
-    setTimeout(() => setMsg(""), 4000);
+    if (data.ok) {
+      setMsg(`✓ Test sent successfully${data.latency_ms ? ` (${data.latency_ms}ms)` : ""}`);
+      // Update local state to reflect last_test_at and last_test_status
+      setChannels(prev => prev.map(c => c.id === id
+        ? { ...c, last_test_at: new Date().toISOString(), last_test_status: "ok" }
+        : c
+      ));
+    } else {
+      setMsg(`✗ Test failed: ${data.error || "unknown error"}`);
+      setChannels(prev => prev.map(c => c.id === id
+        ? { ...c, last_test_at: new Date().toISOString(), last_test_status: "error" }
+        : c
+      ));
+    }
+    setTimeout(() => setMsg(""), 6000);
   }
 
   async function deleteChannel(id: string) {
     if (!confirm("Remove this notification channel?")) return;
-    await fetch(`/api/notifications/channels?token=${token}&id=${id}`, { method: "DELETE" });
+    await fetch(`/api/notification-endpoints/${id}?token=${token}`, { method: "DELETE" });
     setChannels(prev => prev.filter(c => c.id !== id));
   }
 
@@ -254,6 +275,11 @@ export default function NotificationsClient({
                     <div style={{ fontSize: "0.7rem", color: "var(--muted)" }}>
                       {ch.type.replace("_", " ")} · {ch.trigger_count} sent · {ch.error_count} errors
                       {ch.last_triggered_at && ` · Last: ${new Date(ch.last_triggered_at).toLocaleString()}`}
+                      {ch.last_test_at && (
+                        <span style={{ color: ch.last_test_status === "ok" ? "#10b981" : ch.last_test_status === "error" ? "#ef4444" : "var(--muted)" }}>
+                          {" "}· Test: {ch.last_test_status === "ok" ? "✓ ok" : ch.last_test_status === "error" ? "✗ error" : ch.last_test_status} ({new Date(ch.last_test_at).toLocaleString()})
+                        </span>
+                      )}
                       {(ch.dispatch_sent !== undefined && ch.dispatch_sent > 0) && (
                         <span style={{ color: "#10b981" }}> · ✓ {ch.dispatch_sent} dispatched via cron</span>
                       )}

@@ -339,7 +339,7 @@ function SlackSetupBanner({
       <span style={{ fontSize: "0.78rem" }}>
         🔔 <strong>Enable Slack alerts in 2 minutes</strong> — get notified when vendors change pricing, terms, or APIs.{" "}
         <a
-          href={`/dashboard/${orgSlug}/notifications?token=${token}`}
+          href={`/settings/notifications?token=${token}`}
           style={{ color: "var(--accent)", textDecoration: "underline" }}
         >
           Add your webhook →
