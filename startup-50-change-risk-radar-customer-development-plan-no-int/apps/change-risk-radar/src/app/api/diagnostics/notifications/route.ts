@@ -75,6 +75,10 @@ interface DiagnosticsResponse {
       distinct_active_orgs: number | null;
       by_kind: Record<string, number>;
     };
+    notification_endpoints: {
+      total: number | null;
+      slack_webhook_orgs: number | null;
+    };
     last_24h: {
       total_dispatches: number | null;
       sent: number | null;
@@ -304,7 +308,41 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 6. Assemble response ───────────────────────────────────────────────
+  // ── 6. notification_endpoints adoption counts ─────────────────────────
+  let ne_total: number | null = null;
+  let ne_slack_webhook_orgs: number | null = null;
+
+  try {
+    // Total rows
+    const { count: neCount, error: neErr } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from("notification_endpoints" as any)
+      .select("*", { count: "exact", head: true });
+    if (neErr) errors.push(`notification_endpoints total: ${neErr.message}`);
+    else ne_total = neCount ?? 0;
+
+    // Distinct orgs with slack_webhook type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: neOrgRows, error: neOrgErr } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from("notification_endpoints" as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .select("org_id" as any)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq("type" as any, "slack_webhook");
+    if (neOrgErr) errors.push(`notification_endpoints org count: ${neOrgErr.message}`);
+    else {
+      const orgSet = new Set(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (neOrgRows as any[]).map((r) => r.org_id as string),
+      );
+      ne_slack_webhook_orgs = orgSet.size;
+    }
+  } catch (e) {
+    errors.push(`notification_endpoints exception: ${String(e)}`);
+  }
+
+  // ── 7. Assemble response ───────────────────────────────────────────────
   const response: DiagnosticsResponse = {
     ok: true,
     now,
@@ -315,6 +353,10 @@ export async function GET(req: NextRequest) {
         total_active,
         distinct_active_orgs,
         by_kind,
+      },
+      notification_endpoints: {
+        total: ne_total,
+        slack_webhook_orgs: ne_slack_webhook_orgs,
       },
       last_24h: {
         total_dispatches,

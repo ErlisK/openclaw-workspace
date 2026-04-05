@@ -1,19 +1,23 @@
 import { redirect } from "next/navigation";
 import { supabaseAdmin } from "@/lib/supabase";
 import NotificationsClient from "@/components/NotificationsClient";
+import SlackWebhookSettings from "@/components/SlackWebhookSettings";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Notification Settings — Change Risk Radar",
-  description: "Configure email and webhook notifications for Change Risk Radar alerts.",
+  description:
+    "Configure Slack, email, and webhook notifications for Change Risk Radar alerts.",
 };
 
 interface Props {
   searchParams: Promise<{ token?: string }>;
 }
 
-export default async function SettingsNotificationsPage({ searchParams }: Props) {
+export default async function SettingsNotificationsPage({
+  searchParams,
+}: Props) {
   const { token } = await searchParams;
 
   if (!token) {
@@ -32,16 +36,51 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
     redirect("/auth/login?error=invalid_token");
   }
 
-  // Fetch notification channels for this org
+  // ── Slack webhook endpoint (notification_endpoints) ────────────────────
+  const { data: slackEndpointRaw } = await supabaseAdmin
+    .from("notification_endpoints")
+    .select(
+      "id, type, config, is_active, last_test_at, last_test_status, last_error, created_at, updated_at"
+    )
+    .eq("org_id", org.id)
+    .eq("type", "slack_webhook")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  // Mask webhook_url before passing to client
+  const slackEndpoint = slackEndpointRaw
+    ? {
+        ...slackEndpointRaw,
+        config: {
+          ...(slackEndpointRaw.config as Record<string, unknown>),
+          webhook_url: slackEndpointRaw.config
+            ? (() => {
+                const raw = (
+                  slackEndpointRaw.config as Record<string, unknown>
+                ).webhook_url as string | undefined;
+                return raw ? `...${raw.slice(-8)}` : undefined;
+              })()
+            : undefined,
+        },
+      }
+    : null;
+
+  // ── Legacy notification channels (crr_notification_channels) ───────────
   const { data: channels } = await supabaseAdmin
     .from("crr_notification_channels")
-    .select("id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, last_test_at, last_test_status, created_at")
+    .select(
+      "id, type, label, config, is_active, trigger_count, error_count, last_triggered_at, last_error, last_test_at, last_test_status, created_at"
+    )
     .eq("org_id", org.id)
     .order("created_at");
 
   // Get dispatch stats from crr_alert_dispatches
   const channelIds = (channels ?? []).map((c) => c.id);
-  let dispatchStats: Record<string, { sent: number; failed: number; last_sent_at: string | null }> = {};
+  let dispatchStats: Record<
+    string,
+    { sent: number; failed: number; last_sent_at: string | null }
+  > = {};
 
   if (channelIds.length > 0) {
     const { data: dispatches } = await supabaseAdmin
@@ -51,11 +90,18 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
 
     for (const d of dispatches ?? []) {
       if (!dispatchStats[d.channel_id]) {
-        dispatchStats[d.channel_id] = { sent: 0, failed: 0, last_sent_at: null };
+        dispatchStats[d.channel_id] = {
+          sent: 0,
+          failed: 0,
+          last_sent_at: null,
+        };
       }
       if (d.status === "sent") {
         dispatchStats[d.channel_id].sent++;
-        if (!dispatchStats[d.channel_id].last_sent_at || d.sent_at > dispatchStats[d.channel_id].last_sent_at!) {
+        if (
+          !dispatchStats[d.channel_id].last_sent_at ||
+          d.sent_at > dispatchStats[d.channel_id].last_sent_at!
+        ) {
           dispatchStats[d.channel_id].last_sent_at = d.sent_at;
         }
       } else if (d.status === "failed") {
@@ -72,18 +118,22 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
       webhook_url: c.config?.webhook_url
         ? `...${String(c.config.webhook_url).slice(-8)}`
         : undefined,
-      url: c.config?.url ? `...${String(c.config.url).slice(-8)}` : undefined,
+      url: c.config?.url
+        ? `...${String(c.config.url).slice(-8)}`
+        : undefined,
       secret: c.config?.secret ? "***" : undefined,
     },
     dispatch_sent: dispatchStats[c.id]?.sent ?? 0,
     dispatch_failed: dispatchStats[c.id]?.failed ?? 0,
     last_dispatched_at: dispatchStats[c.id]?.last_sent_at ?? null,
-    // Pass test tracking fields (not sensitive)
     last_test_at: (c as Record<string, unknown>).last_test_at ?? null,
-    last_test_status: (c as Record<string, unknown>).last_test_status ?? null,
+    last_test_status:
+      (c as Record<string, unknown>).last_test_status ?? null,
   }));
 
-  const hasNoActiveEndpoints = safeChannels.filter((c) => c.is_active).length === 0;
+  const hasNoActiveEndpoints =
+    safeChannels.filter((c) => c.is_active).length === 0 &&
+    !slackEndpoint?.is_active;
 
   return (
     <div style={{ padding: "2.5rem 0" }}>
@@ -127,21 +177,52 @@ export default async function SettingsNotificationsPage({ searchParams }: Props)
           >
             <span style={{ fontSize: "1.25rem" }}>⚡</span>
             <div>
-              <div style={{ fontWeight: 700, fontSize: "0.85rem", color: "#f59e0b", marginBottom: "0.2rem" }}>
+              <div
+                style={{
+                  fontWeight: 700,
+                  fontSize: "0.85rem",
+                  color: "#f59e0b",
+                  marginBottom: "0.2rem",
+                }}
+              >
                 Set up notifications to get alerted instantly
               </div>
-              <p style={{ fontSize: "0.78rem", color: "var(--muted)", margin: 0 }}>
-                You have no active notification channels. Add an email address or webhook below to receive
+              <p
+                style={{
+                  fontSize: "0.78rem",
+                  color: "var(--muted)",
+                  margin: 0,
+                }}
+              >
+                Add a Slack webhook or email/webhook channel below to receive
                 real-time alerts when vendor changes are detected.
               </p>
             </div>
           </div>
         )}
 
+        {/* ── Slack Incoming Webhook section ─────────────────────────── */}
+        <SlackWebhookSettings
+          token={token}
+          orgName={org.name}
+          initialEndpoint={
+            slackEndpoint as {
+              id: string;
+              config: { webhook_url?: string };
+              is_active: boolean;
+              last_test_at: string | null;
+              last_test_status: string | null;
+              last_error: string | null;
+            } | null
+          }
+        />
+
+        {/* ── Legacy channel list ─────────────────────────────────────── */}
         <NotificationsClient
           orgSlug={org.slug}
           token={token}
-          initialChannels={safeChannels}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          initialChannels={safeChannels as any}
         />
 
         {/* Navigation links */}
