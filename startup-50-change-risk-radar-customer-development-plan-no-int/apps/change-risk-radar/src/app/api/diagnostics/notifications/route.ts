@@ -308,9 +308,11 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 6. notification_endpoints adoption counts ─────────────────────────
+  // ── 6. notification_endpoints adoption counts (enhanced) ─────────────
   let ne_total: number | null = null;
   let ne_slack_webhook_orgs: number | null = null;
+  let ne_by_type: Record<string, number> = {};
+  let ne_last_updated_at: string | null = null;
 
   try {
     // Total rows
@@ -321,22 +323,43 @@ export async function GET(req: NextRequest) {
     if (neErr) errors.push(`notification_endpoints total: ${neErr.message}`);
     else ne_total = neCount ?? 0;
 
-    // Distinct orgs with slack_webhook type
+    // All rows: type, org_id, updated_at for aggregation
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: neOrgRows, error: neOrgErr } = await supabase
+    const { data: neAllRows, error: neAllErr } = await supabase
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .from("notification_endpoints" as any)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .select("org_id" as any)
+      .select("type, org_id, is_active, updated_at" as any);
+
+    if (neAllErr) {
+      errors.push(`notification_endpoints rows: ${neAllErr.message}`);
+    } else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .eq("type" as any, "slack_webhook");
-    if (neOrgErr) errors.push(`notification_endpoints org count: ${neOrgErr.message}`);
-    else {
-      const orgSet = new Set(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (neOrgRows as any[]).map((r) => r.org_id as string),
+      const rows = (neAllRows ?? []) as any[];
+
+      // by_type breakdown (active endpoints only)
+      for (const row of rows) {
+        if (row.is_active) {
+          const t = String(row.type ?? "unknown");
+          ne_by_type[t] = (ne_by_type[t] ?? 0) + 1;
+        }
+      }
+
+      // Distinct orgs with active slack_webhook
+      const slackOrgSet = new Set(
+        rows
+          .filter((r) => r.type === "slack_webhook")
+          .map((r) => r.org_id as string),
       );
-      ne_slack_webhook_orgs = orgSet.size;
+      ne_slack_webhook_orgs = slackOrgSet.size;
+
+      // max(updated_at)
+      const updatedAts = rows
+        .map((r) => r.updated_at as string | null)
+        .filter(Boolean) as string[];
+      if (updatedAts.length > 0) {
+        ne_last_updated_at = updatedAts.sort().reverse()[0];
+      }
     }
   } catch (e) {
     errors.push(`notification_endpoints exception: ${String(e)}`);
@@ -373,6 +396,15 @@ export async function GET(req: NextRequest) {
       },
     },
     errors,
+  };
+
+  // ── 8. Top-level summary (non-breaking addition) ───────────────────────
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).summary = {
+    total_endpoints: ne_total,
+    by_type: ne_by_type,
+    orgs_with_slack: ne_slack_webhook_orgs,
+    last_updated_at: ne_last_updated_at,
   };
 
   return NextResponse.json(response, { status: 200 });
