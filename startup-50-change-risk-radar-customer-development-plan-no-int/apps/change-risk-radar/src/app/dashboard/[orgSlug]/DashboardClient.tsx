@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 
 const RISK_COLORS: Record<string, string> = { high: "#ef4444", medium: "#f59e0b", low: "#10b981" };
 const RISK_BG: Record<string, string> = { high: "rgba(239,68,68,0.1)", medium: "rgba(245,158,11,0.1)", low: "rgba(16,185,129,0.1)" };
@@ -282,6 +282,89 @@ interface Props {
   trialDaysLeft?: number | null;
 }
 
+// ─── Slack setup banner ──────────────────────────────────────────────────────
+const SLACK_BANNER_DISMISS_KEY = "crr_slack_banner_dismissed_until";
+
+function SlackSetupBanner({
+  orgSlug,
+  token,
+  notifChannelCount,
+}: {
+  orgSlug: string;
+  token: string;
+  notifChannelCount: number;
+}) {
+  const [dismissed, setDismissed] = useState(true); // start hidden, check localStorage
+
+  useEffect(() => {
+    try {
+      const dismissedUntil = localStorage.getItem(SLACK_BANNER_DISMISS_KEY);
+      if (dismissedUntil && Date.now() < parseInt(dismissedUntil, 10)) {
+        setDismissed(true);
+      } else {
+        setDismissed(false);
+      }
+    } catch {
+      setDismissed(false);
+    }
+  }, []);
+
+  const dismiss = useCallback(() => {
+    try {
+      const sevenDays = Date.now() + 7 * 24 * 60 * 60 * 1000;
+      localStorage.setItem(SLACK_BANNER_DISMISS_KEY, String(sevenDays));
+    } catch {
+      // ignore
+    }
+    setDismissed(true);
+  }, []);
+
+  if (dismissed || notifChannelCount > 0) return null;
+
+  return (
+    <div
+      style={{
+        marginBottom: "1rem",
+        padding: "0.7rem 1rem",
+        background: "rgba(99,102,241,0.07)",
+        border: "1px solid rgba(99,102,241,0.25)",
+        borderRadius: 8,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "0.5rem",
+        flexWrap: "wrap",
+      }}
+    >
+      <span style={{ fontSize: "0.78rem" }}>
+        🔔 <strong>Enable Slack alerts in 2 minutes</strong> — get notified when vendors change pricing, terms, or APIs.{" "}
+        <a
+          href={`/dashboard/${orgSlug}/notifications?token=${token}`}
+          style={{ color: "var(--accent)", textDecoration: "underline" }}
+        >
+          Add your webhook →
+        </a>
+      </span>
+      <button
+        onClick={dismiss}
+        style={{
+          background: "transparent",
+          border: "none",
+          cursor: "pointer",
+          color: "var(--muted)",
+          fontSize: "0.78rem",
+          padding: "0.2rem 0.4rem",
+          lineHeight: 1,
+        }}
+        title="Dismiss for 7 days"
+        aria-label="Dismiss banner"
+      >
+        ✕
+      </button>
+    </div>
+  );
+}
+
 export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, orgPlan, orgCreatedAt, orgTosAt, token, alerts: initialAlerts, stats, briefs, connectors, notifChannelCount = 0, privacyMode: initialPrivacyMode = true, trialDaysLeft = null }: Props) {
   const [alerts, setAlerts] = useState(initialAlerts);
   const [privacyMode, setPrivacyMode] = useState(initialPrivacyMode);
@@ -392,6 +475,9 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
             </div>
           ))}
         </div>
+
+        {/* Slack setup prompt banner */}
+        <SlackSetupBanner orgSlug={orgSlug} token={token} notifChannelCount={notifChannelCount} />
 
         {/* Trial expiry banner */}
         {trialDaysLeft !== null && trialDaysLeft !== undefined && (
