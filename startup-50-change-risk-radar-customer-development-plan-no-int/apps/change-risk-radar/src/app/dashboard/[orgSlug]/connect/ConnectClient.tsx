@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 
-type ConnectorType = "stripe" | "workspace" | "aws" | "tos_url";
+type ConnectorType = "stripe" | "workspace" | "aws" | "tos_url" | "shopify" | "salesforce";
 type StepStatus = "idle" | "loading" | "success" | "error";
 
 interface ConnectorState {
@@ -32,6 +32,16 @@ export default function ConnectClient({
   const [awsRegion, setAwsRegion] = useState("us-east-1");
   const [awsDelivery, setAwsDelivery] = useState<"sns" | "eventbridge">("sns");
   const [awsSns, setAwsSns] = useState("");
+
+  // Shopify fields
+  const [shopifyMode, setShopifyMode] = useState<"observatory" | "store">("observatory");
+  const [shopDomain, setShopDomain] = useState("");
+  const [shopToken, setShopToken] = useState("");
+
+  // Salesforce fields
+  const [sfMode, setSfMode] = useState<"observatory" | "audit_trail">("observatory");
+  const [sfInstanceUrl, setSfInstanceUrl] = useState("");
+  const [sfAccessToken, setSfAccessToken] = useState("");
 
   // ToS URL fields
   const [tosUrls, setTosUrls] = useState("");
@@ -83,6 +93,62 @@ export default function ConnectClient({
       });
     } else {
       setConnectorState("aws", { status: "error", message: data.error ?? "Setup failed" });
+    }
+  }
+
+  async function connectShopify() {
+    if (shopifyMode === "store" && (!shopDomain || !shopToken)) {
+      setConnectorState("shopify", { status: "error", message: "Shop domain and access token are required for store mode" });
+      return;
+    }
+    setConnectorState("shopify", { status: "loading", message: shopifyMode === "observatory" ? "Activating Shopify observatory…" : "Connecting Shopify store…" });
+    const res = await fetch(`/api/connectors/shopify/setup?token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: shopifyMode,
+        shop_domain: shopDomain || undefined,
+        access_token: shopToken || undefined,
+      }),
+    });
+    const data = await res.json() as { message?: string; error?: string; connector_id?: string };
+    if (res.ok) {
+      setConnectorState("shopify", {
+        status: "success",
+        message: data.message ?? (shopifyMode === "observatory" ? "Shopify platform monitoring active. First scan within 6 hours." : `Store ${shopDomain} connected.`),
+        detail: data as Record<string, unknown>,
+      });
+      setShopDomain(""); setShopToken("");
+    } else {
+      setConnectorState("shopify", { status: "error", message: data.error ?? "Connection failed" });
+    }
+  }
+
+  async function connectSalesforce() {
+    if (sfMode === "audit_trail" && (!sfInstanceUrl || !sfAccessToken)) {
+      setConnectorState("salesforce", { status: "error", message: "Instance URL and access token are required for audit trail mode" });
+      return;
+    }
+    setConnectorState("salesforce", { status: "loading", message: sfMode === "observatory" ? "Activating Salesforce observatory…" : "Connecting Salesforce org…" });
+    const res = await fetch(`/api/connectors/salesforce/setup?token=${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mode: sfMode,
+        instance_url: sfInstanceUrl || undefined,
+        access_token: sfAccessToken || undefined,
+      }),
+    });
+    const data = await res.json() as { message?: string; error?: string };
+    if (res.ok) {
+      setConnectorState("salesforce", {
+        status: "success",
+        message: data.message ?? (sfMode === "observatory" ? "Salesforce release note monitoring active." : `Org ${sfInstanceUrl} connected.`),
+        detail: data as Record<string, unknown>,
+      });
+      setSfInstanceUrl(""); setSfAccessToken("");
+    } else {
+      setConnectorState("salesforce", { status: "error", message: data.error ?? "Connection failed" });
     }
   }
 
@@ -147,6 +213,24 @@ export default function ConnectClient({
       badge: "Flexible",
       badgeColor: "#6b7280",
       risk_types: ["legal", "pricing"],
+    },
+    {
+      type: "shopify" as ConnectorType,
+      icon: "🛍️",
+      name: "Shopify",
+      desc: "Platform fee changes, app billing policy updates, partner program terms, API deprecations",
+      badge: "New",
+      badgeColor: "#10b981",
+      risk_types: ["pricing", "operational", "legal"],
+    },
+    {
+      type: "salesforce" as ConnectorType,
+      icon: "☁️",
+      name: "Salesforce",
+      desc: "Critical updates, release notes, permission changes, sharing model updates, API version deprecations",
+      badge: "New",
+      badgeColor: "#00a1e0",
+      risk_types: ["operational", "security", "legal"],
     },
   ];
 
@@ -404,6 +488,124 @@ export default function ConnectClient({
             <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(239,68,68,0.08)", borderRadius: 6, fontSize: "0.8rem", color: "#ef4444" }}>
               ✗ {states.tos_url.message}
             </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Shopify Panel ─────────────────────────────── */}
+      {selected === "shopify" && (
+        <div className="card" style={{ padding: "1.5rem", borderColor: "rgba(16,185,129,0.2)" }}>
+          <h3 style={{ fontWeight: 800, marginBottom: "0.3rem" }}>🛍️ Shopify</h3>
+          <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginBottom: "1.25rem" }}>
+            Monitor Shopify platform changes (no store credentials needed) or connect your store to receive real-time webhook alerts.
+          </p>
+
+          {/* Mode toggle */}
+          <div style={{ display: "flex", gap: "0.4rem", marginBottom: "1.25rem" }}>
+            {(["observatory", "store"] as const).map(m => (
+              <button key={m} onClick={() => setShopifyMode(m)}
+                style={{ padding: "0.4rem 0.9rem", borderRadius: 6, border: `1px solid ${shopifyMode === m ? "var(--accent)" : "var(--border)"}`, background: shopifyMode === m ? "rgba(99,102,241,0.1)" : "transparent", color: shopifyMode === m ? "var(--accent)" : "var(--muted)", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}>
+                {m === "observatory" ? "🔭 Platform Observatory" : "🏪 My Store"}
+              </button>
+            ))}
+          </div>
+
+          {shopifyMode === "observatory" ? (
+            <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "1rem", marginBottom: "1rem", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.7 }}>
+              <strong style={{ color: "var(--foreground)" }}>No credentials needed.</strong> We monitor:{" "}
+              Shopify Payments terms · App Store policies · Partner Program updates · Billing API changes · Platform release notes.
+              First scan within 6 hours.
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Shop domain</label>
+                <input value={shopDomain} onChange={e => setShopDomain(e.target.value)} placeholder="yourstore.myshopify.com"
+                  style={{ width: "100%", padding: "0.6rem 0.75rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ marginBottom: "1rem" }}>
+                <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Admin API access token</label>
+                <input type="password" value={shopToken} onChange={e => setShopToken(e.target.value)} placeholder="shpat_..."
+                  style={{ width: "100%", padding: "0.6rem 0.75rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }} />
+                <div style={{ fontSize: "0.68rem", color: "var(--muted)", marginTop: "0.25rem" }}>
+                  Shopify Admin → Apps → Develop apps → Create app → API credentials. Needs <code>read_orders</code>, <code>read_products</code> scopes.
+                </div>
+              </div>
+            </>
+          )}
+
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button onClick={connectShopify} disabled={states.shopify?.status === "loading"}
+              className="btn-primary" style={{ flex: 1 }}>
+              {states.shopify?.status === "loading" ? "Connecting…" : shopifyMode === "observatory" ? "Activate Shopify monitor →" : "Connect store →"}
+            </button>
+            <button onClick={() => setSelected(null)} className="btn-ghost">Cancel</button>
+          </div>
+          {states.shopify?.status === "success" && (
+            <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(16,185,129,0.08)", borderRadius: 6, fontSize: "0.8rem", color: "#10b981" }}>✓ {states.shopify.message}</div>
+          )}
+          {states.shopify?.status === "error" && (
+            <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(239,68,68,0.08)", borderRadius: 6, fontSize: "0.8rem", color: "#ef4444" }}>✗ {states.shopify.message}</div>
+          )}
+        </div>
+      )}
+
+      {/* ── Salesforce Panel ──────────────────────────── */}
+      {selected === "salesforce" && (
+        <div className="card" style={{ padding: "1.5rem", borderColor: "rgba(0,161,224,0.2)" }}>
+          <h3 style={{ fontWeight: 800, marginBottom: "0.3rem" }}>☁️ Salesforce</h3>
+          <p style={{ color: "var(--muted)", fontSize: "0.82rem", marginBottom: "1.25rem" }}>
+            Monitor Salesforce critical updates and release notes, or connect your org to receive Setup Audit Trail alerts in real-time.
+          </p>
+
+          <div style={{ display: "flex", gap: "0.4rem", marginBottom: "1.25rem" }}>
+            {(["observatory", "audit_trail"] as const).map(m => (
+              <button key={m} onClick={() => setSfMode(m)}
+                style={{ padding: "0.4rem 0.9rem", borderRadius: 6, border: `1px solid ${sfMode === m ? "var(--accent)" : "var(--border)"}`, background: sfMode === m ? "rgba(99,102,241,0.1)" : "transparent", color: sfMode === m ? "var(--accent)" : "var(--muted)", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}>
+                {m === "observatory" ? "🔭 Release Notes" : "🔍 Setup Audit Trail"}
+              </button>
+            ))}
+          </div>
+
+          {sfMode === "observatory" ? (
+            <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "1rem", marginBottom: "1rem", fontSize: "0.8rem", color: "var(--muted)", lineHeight: 1.7 }}>
+              <strong style={{ color: "var(--foreground)" }}>No credentials needed.</strong> We monitor:{" "}
+              Salesforce Trust · Critical Updates · Release Notes · Developer Blog API changes · AppExchange policy updates.
+            </div>
+          ) : (
+            <>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>Instance URL</label>
+                <input value={sfInstanceUrl} onChange={e => setSfInstanceUrl(e.target.value)} placeholder="https://yourorg.my.salesforce.com"
+                  style={{ width: "100%", padding: "0.6rem 0.75rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ marginBottom: "0.75rem" }}>
+                <label style={{ fontSize: "0.78rem", color: "var(--muted)", display: "block", marginBottom: "0.3rem" }}>OAuth Access Token</label>
+                <input type="password" value={sfAccessToken} onChange={e => setSfAccessToken(e.target.value)} placeholder="00D..."
+                  style={{ width: "100%", padding: "0.6rem 0.75rem", background: "rgba(0,0,0,0.3)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--foreground)", fontSize: "0.82rem", boxSizing: "border-box" }} />
+              </div>
+              <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 8, padding: "0.85rem", marginBottom: "1rem", fontSize: "0.75rem", color: "var(--muted)", lineHeight: 1.8 }}>
+                <strong style={{ color: "var(--foreground)" }}>Setup guide:</strong><br />
+                1. Setup → Apps → App Manager → New Connected App<br />
+                2. Enable OAuth · Scopes: <code>api</code>, <code>refresh_token</code><br />
+                3. Required permission: <strong>View Setup and Configuration</strong><br />
+                4. Run OAuth flow, paste the access token above
+              </div>
+            </>
+          )}
+
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button onClick={connectSalesforce} disabled={states.salesforce?.status === "loading"}
+              className="btn-primary" style={{ flex: 1 }}>
+              {states.salesforce?.status === "loading" ? "Connecting…" : sfMode === "observatory" ? "Activate Salesforce monitor →" : "Connect org →"}
+            </button>
+            <button onClick={() => setSelected(null)} className="btn-ghost">Cancel</button>
+          </div>
+          {states.salesforce?.status === "success" && (
+            <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(16,185,129,0.08)", borderRadius: 6, fontSize: "0.8rem", color: "#10b981" }}>✓ {states.salesforce.message}</div>
+          )}
+          {states.salesforce?.status === "error" && (
+            <div style={{ marginTop: "0.75rem", padding: "0.6rem", background: "rgba(239,68,68,0.08)", borderRadius: 6, fontSize: "0.8rem", color: "#ef4444" }}>✗ {states.salesforce.message}</div>
           )}
         </div>
       )}

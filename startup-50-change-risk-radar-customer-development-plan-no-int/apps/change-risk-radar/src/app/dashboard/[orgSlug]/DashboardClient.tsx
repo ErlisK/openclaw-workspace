@@ -364,6 +364,10 @@ export default function DashboardClient({ orgId, orgName, orgSlug, orgEmail, org
               className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none" }}>
               💳 Billing
             </a>
+            <a href={`/dashboard/${orgSlug}/settings?token=${token}`}
+              className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none" }}>
+              ⚙️ Settings
+            </a>
             <a href={`/dashboard/${orgSlug}/notifications?token=${token}`}
               className="btn-ghost" style={{ padding: "0.5rem 0.9rem", fontSize: "0.78rem", textDecoration: "none", display: "flex", alignItems: "center", gap: "0.3rem" }}>
               🔔 Notifications

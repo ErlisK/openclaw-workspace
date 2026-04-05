@@ -291,6 +291,23 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* FOOTER */}
+      <footer style={{ borderTop: "1px solid var(--border)", padding: "2rem 1.5rem", textAlign: "center" }}>
+        <div style={{ display: "flex", gap: "1.5rem", justifyContent: "center", flexWrap: "wrap", fontSize: "0.78rem", color: "var(--muted)", marginBottom: "0.75rem" }}>
+          <a href="/demo" style={{ color: "var(--muted)", textDecoration: "none" }}>Interactive Demo</a>
+          <a href="/sales" style={{ color: "var(--muted)", textDecoration: "none" }}>Sales Hub</a>
+          <a href="/pricing" style={{ color: "var(--muted)", textDecoration: "none" }}>Pricing</a>
+          <a href="/pilot/sow" style={{ color: "var(--muted)", textDecoration: "none" }}>Pilot SOW</a>
+          <a href="/pilot/security" style={{ color: "var(--muted)", textDecoration: "none" }}>Security Pack</a>
+          <a href="/legal/privacy" style={{ color: "var(--muted)", textDecoration: "none" }}>Privacy Policy</a>
+          <a href="/legal/terms" style={{ color: "var(--muted)", textDecoration: "none" }}>Terms of Service</a>
+          <a href="/legal/dpa" style={{ color: "var(--muted)", textDecoration: "none" }}>DPA</a>
+        </div>
+        <div style={{ fontSize: "0.72rem", color: "var(--muted)" }}>
+          © 2025 Change Risk Radar. Questions? <a href="mailto:scide-founder@agentmail.to" style={{ color: "var(--accent)", textDecoration: "none" }}>scide-founder@agentmail.to</a>
+        </div>
+      </footer>
     </div>
   );
 }
