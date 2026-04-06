@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { track } from '@/lib/analytics'
 
 interface FormData {
   email: string
@@ -11,10 +12,11 @@ interface FormData {
   referral_source: string
 }
 
-export default function WaitlistForm() {
+export default function WaitlistForm({ source = 'waitlist_section' }: { source?: string }) {
   const [step, setStep] = useState<'form' | 'success' | 'duplicate'>('form')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [emailFocused, setEmailFocused] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     email: '',
     org_name: '',
@@ -29,11 +31,36 @@ export default function WaitlistForm() {
     setError('')
   }
 
+  const handleEmailFocus = () => {
+    if (!emailFocused) {
+      setEmailFocused(true)
+      track({
+        event_type: 'waitlist_start',
+        source,
+        section: 'waitlist',
+        cta_label: 'email_field_focus',
+      })
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.email) { setError('Email is required'); return }
     setLoading(true)
     setError('')
+
+    track({
+      event_type: 'waitlist_submit',
+      source,
+      section: 'waitlist',
+      properties: {
+        org_type: formData.org_type,
+        region: formData.region,
+        grants_per_year: formData.grants_per_year,
+        referral_source: formData.referral_source,
+        has_org_name: Boolean(formData.org_name),
+      },
+    })
 
     try {
       const res = await fetch('/api/waitlist', {
@@ -45,10 +72,22 @@ export default function WaitlistForm() {
 
       if (res.status === 409) {
         setStep('duplicate')
+        track({ event_type: 'waitlist_duplicate', source, section: 'waitlist' })
       } else if (!res.ok) {
         setError(data.error || 'Something went wrong. Please try again.')
       } else {
         setStep('success')
+        track({
+          event_type: 'waitlist_success',
+          source,
+          section: 'waitlist',
+          properties: {
+            org_type: formData.org_type,
+            region: formData.region,
+            grants_per_year: formData.grants_per_year,
+            referral_source: formData.referral_source,
+          },
+        })
       }
     } catch {
       setError('Network error. Please try again.')
@@ -97,6 +136,7 @@ export default function WaitlistForm() {
           required
           value={formData.email}
           onChange={handleChange}
+          onFocus={handleEmailFocus}
           placeholder="you@yourorg.org"
           className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
         />

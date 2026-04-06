@@ -1,5 +1,6 @@
 import WaitlistForm from '@/components/WaitlistForm'
 import { MockGrantDashboard, MockBlockLibrary, MockProposalBuilder } from '@/components/UIMocks'
+import { TrackedLink } from '@/components/TrackedLink'
 
 const STEPS = [
   {
@@ -94,16 +95,19 @@ export default function Home() {
             <span className="text-lg font-bold text-gray-900">Grant<span className="text-green-600">Snap</span></span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-gray-500">
-            <a href="#how-it-works" className="hover:text-gray-900 transition-colors">How it works</a>
-            <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
-            <a href="#pricing" className="hover:text-gray-900 transition-colors">Pricing</a>
+            <TrackedLink href="#how-it-works" source="nav" ctaLabel="How it works" section="nav" className="hover:text-gray-900 transition-colors">How it works</TrackedLink>
+            <TrackedLink href="#features" source="nav" ctaLabel="Features" section="nav" className="hover:text-gray-900 transition-colors">Features</TrackedLink>
+            <TrackedLink href="#pricing" source="nav" ctaLabel="Pricing" section="nav" className="hover:text-gray-900 transition-colors">Pricing</TrackedLink>
           </div>
-          <a
+          <TrackedLink
             href="#waitlist"
+            source="nav"
+            ctaLabel="Join Waitlist"
+            section="nav"
             className="bg-green-600 hover:bg-green-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
           >
             Join Waitlist
-          </a>
+          </TrackedLink>
         </div>
       </nav>
 
@@ -123,12 +127,24 @@ export default function Home() {
             a reusable block library — in days, not weeks. Built for teams with no dedicated development staff.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3 mb-10">
-            <a href="#waitlist" className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+            <TrackedLink
+              href="#waitlist"
+              source="hero"
+              ctaLabel="Join the Waitlist"
+              section="hero"
+              className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
               Join the Waitlist →
-            </a>
-            <a href="#how-it-works" className="border border-gray-200 hover:border-gray-300 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors">
+            </TrackedLink>
+            <TrackedLink
+              href="#how-it-works"
+              source="hero"
+              ctaLabel="See how it works"
+              section="hero"
+              className="border border-gray-200 hover:border-gray-300 text-gray-700 font-medium px-6 py-3 rounded-lg transition-colors"
+            >
               See how it works
-            </a>
+            </TrackedLink>
           </div>
           <div className="flex flex-wrap justify-center gap-5 text-sm text-gray-400">
             <span className="flex items-center gap-1.5"><span className="text-green-500">✓</span> Free during beta</span>
@@ -137,7 +153,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* ── MOCK SCREENSHOT 1 — Grant Dashboard ── */}
         <div className="max-w-4xl mx-auto">
           <MockGrantDashboard />
           <p className="text-center text-xs text-gray-400 mt-3">Grant Matching Dashboard — curated opportunities matched to your org profile</p>
@@ -168,8 +183,6 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-gray-900 mb-3">From scattered docs to fundable proposal in 3 days</h2>
             <p className="text-gray-500">Not weeks. Not months. Days.</p>
           </div>
-
-          {/* Steps */}
           <div className="grid md:grid-cols-3 gap-8 mb-16">
             {STEPS.map((s) => (
               <div key={s.step} className="text-center">
@@ -184,8 +197,17 @@ export default function Home() {
               </div>
             ))}
           </div>
-
-          {/* ── MOCK SCREENSHOT 2 — Block Library ── */}
+          <div className="text-center mb-6">
+            <TrackedLink
+              href="#waitlist"
+              source="how_it_works"
+              ctaLabel="Join the Waitlist"
+              section="how_it_works"
+              className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Get Early Access →
+            </TrackedLink>
+          </div>
           <MockBlockLibrary />
           <p className="text-center text-xs text-gray-400 mt-3">Block Library — your org&apos;s reusable proposal language, version-controlled and always current</p>
         </div>
@@ -209,10 +231,21 @@ export default function Home() {
               </div>
             ))}
           </div>
+          <div className="text-center mt-10">
+            <TrackedLink
+              href="#waitlist"
+              source="features"
+              ctaLabel="Join Waitlist"
+              section="features"
+              className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Join the Waitlist →
+            </TrackedLink>
+          </div>
         </div>
       </section>
 
-      {/* ── MOCK SCREENSHOT 3 — Proposal Builder ── */}
+      {/* ── PROPOSAL BUILDER MOCK ── */}
       <section className="px-6 py-20">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-10">
@@ -233,7 +266,7 @@ export default function Home() {
             <h2 className="text-3xl font-bold text-gray-900 mb-3">Real words from real EDs</h2>
             <p className="text-gray-500">From 15 discovery interviews with Bay Area nonprofit teams. Not made up.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-3 gap-5 mb-10">
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="bg-white border border-gray-200 rounded-xl p-6 flex flex-col">
                 <p className="text-gray-700 text-sm leading-relaxed mb-4 italic flex-1">
@@ -246,6 +279,17 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="text-center">
+            <TrackedLink
+              href="#waitlist"
+              source="testimonials"
+              ctaLabel="Join Waitlist"
+              section="testimonials"
+              className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors"
+            >
+              Join the Waitlist →
+            </TrackedLink>
           </div>
         </div>
       </section>
@@ -263,7 +307,6 @@ export default function Home() {
                 period: '/mo',
                 desc: '1–10 grants/year',
                 features: ['10 matched grants/mo', '10 proposal blocks', '2 team members', 'PDF export', 'Deadline tracking'],
-                cta: 'Join waitlist',
                 highlight: false,
               },
               {
@@ -272,7 +315,6 @@ export default function Home() {
                 period: '/mo',
                 desc: '10–30 grants/year',
                 features: ['Unlimited matched grants', '50 blocks', '5 team members', 'PDF + templates', 'Pipeline board', 'Priority support'],
-                cta: 'Join waitlist',
                 highlight: true,
               },
               {
@@ -281,7 +323,6 @@ export default function Home() {
                 period: '/mo',
                 desc: 'Consultants & multi-program orgs',
                 features: ['Everything in Growth', 'Unlimited blocks', 'Unlimited members', 'Multi-org workspace', 'Grant report blocks'],
-                cta: 'Join waitlist',
                 highlight: false,
               },
             ].map((plan) => (
@@ -307,12 +348,15 @@ export default function Home() {
                     </li>
                   ))}
                 </ul>
-                <a
+                <TrackedLink
                   href="#waitlist"
+                  source="pricing"
+                  ctaLabel={`Join Waitlist - ${plan.name}`}
+                  section="pricing"
                   className={`block text-center text-sm font-semibold py-2.5 rounded-lg transition-colors ${plan.highlight ? 'bg-white text-green-700 hover:bg-green-50' : 'bg-green-600 text-white hover:bg-green-700'}`}
                 >
-                  {plan.cta}
-                </a>
+                  Join waitlist
+                </TrackedLink>
               </div>
             ))}
           </div>
@@ -332,7 +376,7 @@ export default function Home() {
             </p>
           </div>
           <div className="bg-white border border-gray-200 rounded-2xl shadow-lg p-8">
-            <WaitlistForm />
+            <WaitlistForm source="waitlist_section" />
           </div>
         </div>
       </section>
@@ -348,8 +392,8 @@ export default function Home() {
             © 2025 GrantSnap · Built for the nonprofits doing the hard work.
           </p>
           <div className="flex gap-5 text-sm text-gray-400">
-            <a href="mailto:hello@grantsnap.io" className="hover:text-gray-700">Contact</a>
-            <a href="#waitlist" className="hover:text-gray-700">Join Waitlist</a>
+            <TrackedLink href="mailto:hello@grantsnap.io" source="footer" ctaLabel="Contact" className="hover:text-gray-700">Contact</TrackedLink>
+            <TrackedLink href="#waitlist" source="footer" ctaLabel="Join Waitlist" section="footer" className="hover:text-gray-700">Join Waitlist</TrackedLink>
           </div>
         </div>
       </footer>
