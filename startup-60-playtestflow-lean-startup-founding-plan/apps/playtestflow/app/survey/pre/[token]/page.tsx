@@ -1,6 +1,7 @@
-import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-server'
 import { notFound, redirect } from 'next/navigation'
 import PreSurveyForm from './PreSurveyForm'
+import RuleVersionDiff from '@/components/RuleVersionDiff'
 
 export default async function PreSurveyPage({
   params,
@@ -15,7 +16,7 @@ export default async function PreSurveyPage({
     .select(`
       id, tester_name, tester_id, consent_given, pre_survey_completed,
       playtest_sessions (
-        id, title, platform, scheduled_at,
+        id, title, platform, scheduled_at, rule_version_id,
         projects ( name, game_type )
       )
     `)
@@ -24,7 +25,6 @@ export default async function PreSurveyPage({
 
   if (!signup) notFound()
 
-  // Must consent before survey
   if (!signup.consent_given) {
     redirect(`/consent/${token}`)
   }
@@ -32,9 +32,23 @@ export default async function PreSurveyPage({
   const session = signup.playtest_sessions as any
   const project = session?.projects as any
 
+  // Fetch rule version diff for this session
+  let diff = null
+  if (session?.id) {
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://playtestflow.vercel.app'
+      const res = await fetch(`${siteUrl}/api/rule-versions/diff?session_id=${session.id}`, {
+        next: { revalidate: 300 },
+      })
+      const data = await res.json()
+      diff = data.diff ?? null
+    } catch { /* non-critical */ }
+  }
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
       <div className="max-w-lg mx-auto px-6 py-12">
+        {/* Header */}
         <div className="text-center mb-8">
           <span className="text-2xl">🎲</span>
           <span className="font-bold text-lg text-orange-400 ml-2">PlaytestFlow</span>
@@ -58,6 +72,7 @@ export default async function PreSurveyPage({
           </div>
         </div>
 
+        {/* Session card */}
         <div className="bg-white/5 border border-white/10 rounded-xl px-5 py-3 mb-6 flex items-center gap-3">
           <span className="text-xl">{project?.game_type === 'ttrpg' ? '🐉' : '🎲'}</span>
           <div>
@@ -85,6 +100,28 @@ export default async function PreSurveyPage({
           </div>
         ) : (
           <>
+            {/* Rule version diff card — shown before survey questions */}
+            {diff && diff.hasChanges && (
+              <div className="mb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-sm font-semibold">📄 Rule version for this session</span>
+                  {diff.isBreakingChange && (
+                    <span className="text-[10px] bg-red-500/20 border border-red-500/30 text-red-300 px-2 py-0.5 rounded-full font-semibold">
+                      ⚠ Breaking changes
+                    </span>
+                  )}
+                </div>
+                <div className="bg-white/4 border border-white/10 rounded-xl p-4">
+                  <RuleVersionDiff diff={diff} />
+                </div>
+                {diff.isBreakingChange && (
+                  <p className="text-xs text-yellow-400/80 mt-2">
+                    ⚠ Please re-read the full rulebook — core mechanics have changed significantly.
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="mb-6">
               <h1 className="text-xl font-bold">Pre-Session Survey</h1>
               <p className="text-gray-400 text-sm mt-1">

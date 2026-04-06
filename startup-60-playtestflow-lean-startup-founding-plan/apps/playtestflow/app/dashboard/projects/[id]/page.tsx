@@ -3,6 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import RuleUploader from '@/components/RuleUploader'
 import SessionCreator from '@/components/SessionCreator'
 import RecruitWidgetEmbed from '@/components/RecruitWidgetEmbed'
+import RuleVersionDiff from '@/components/RuleVersionDiff'
 import Link from 'next/link'
 
 export default async function ProjectDetailPage({
@@ -27,9 +28,11 @@ export default async function ProjectDetailPage({
 
   const { data: ruleVersions } = await supabase
     .from('rule_versions')
-    .select('*')
+    .select('id, version_label, semver, diff_summary, changelog, is_breaking_change, parent_version_id, notes, file_name, file_size_bytes, created_at')
     .eq('project_id', project.id)
-    .order('created_at', { ascending: false })
+    .order('semver_major', { ascending: false })
+    .order('semver_minor', { ascending: false })
+    .order('semver_patch', { ascending: false })
 
   const { data: sessions } = await supabase
     .from('playtest_sessions')
@@ -92,30 +95,51 @@ export default async function ProjectDetailPage({
           <RuleUploader projectId={project.id} />
 
           {ruleVersions && ruleVersions.length > 0 ? (
-            <div className="mt-4 space-y-3">
-              {ruleVersions.map((v: any) => (
-                <div
-                  key={v.id}
-                  className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between"
-                >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm font-bold text-orange-400">{v.version_label}</span>
-                      {v.id === latestVersion?.id && (
-                        <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">
-                          latest
-                        </span>
-                      )}
+            <div className="mt-4 space-y-4">
+              {ruleVersions.map((v: any, i: number) => {
+                // Build diff for display (from parent version in the already-sorted list)
+                const parentVersion = ruleVersions.find((pv: any) => pv.id === v.parent_version_id)
+                const changelog = Array.isArray(v.changelog) ? v.changelog : []
+                const diff = {
+                  fromVersion: parentVersion ? { id: parentVersion.id, label: parentVersion.version_label, semver: parentVersion.semver, summary: parentVersion.diff_summary } : null,
+                  toVersion: { id: v.id, label: v.version_label, semver: v.semver, summary: v.diff_summary, isBreakingChange: v.is_breaking_change, createdAt: v.created_at },
+                  changelog,
+                  categorized: {
+                    added: changelog.filter((c: any) => c.type === 'added'),
+                    changed: changelog.filter((c: any) => c.type === 'changed'),
+                    fixed: changelog.filter((c: any) => c.type === 'fixed'),
+                    removed: changelog.filter((c: any) => c.type === 'removed'),
+                    balance: changelog.filter((c: any) => c.type === 'balance'),
+                  },
+                  totalChanges: changelog.length,
+                  hasChanges: changelog.length > 0 || !!v.diff_summary,
+                  isFirstVersion: !parentVersion,
+                  isBreakingChange: v.is_breaking_change,
+                }
+                return (
+                  <div key={v.id} className={`bg-white/5 border rounded-xl p-4 ${v.is_breaking_change ? 'border-red-500/20' : i === 0 ? 'border-orange-500/20' : 'border-white/10'}`}>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-sm font-bold text-orange-400">{v.version_label}</span>
+                        {i === 0 && (
+                          <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded-full border border-blue-500/30">latest</span>
+                        )}
+                        {v.is_breaking_change && (
+                          <span className="text-[10px] bg-red-500/20 border border-red-500/30 text-red-300 px-2 py-0.5 rounded-full">⚠ breaking</span>
+                        )}
+                      </div>
+                      <div className="text-right text-xs text-gray-500 shrink-0">
+                        <div>{v.file_size_bytes ? `${(v.file_size_bytes / 1024).toFixed(0)} KB` : ''}</div>
+                        <div>{new Date(v.created_at).toLocaleDateString()}</div>
+                      </div>
                     </div>
-                    <p className="text-gray-400 text-xs mt-0.5">{v.file_name}</p>
-                    {v.notes && <p className="text-gray-500 text-xs mt-1">{v.notes}</p>}
+                    <RuleVersionDiff diff={diff} compact />
+                    {v.notes && (
+                      <p className="text-gray-600 text-xs mt-2 italic">🔒 {v.notes}</p>
+                    )}
                   </div>
-                  <div className="text-right text-xs text-gray-500">
-                    <div>{v.file_size_bytes ? `${(v.file_size_bytes / 1024).toFixed(0)} KB` : ''}</div>
-                    <div>{new Date(v.created_at).toLocaleDateString()}</div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
             <div className="mt-4 text-center py-8 bg-white/[0.02] border border-dashed border-white/10 rounded-xl">

@@ -1,6 +1,7 @@
-import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { createServiceClient } from '@/lib/supabase-server'
 import { notFound, redirect } from 'next/navigation'
 import PostSurveyForm from './PostSurveyForm'
+import RuleVersionDiff from '@/components/RuleVersionDiff'
 
 export default async function PostSurveyPage({
   params,
@@ -37,6 +38,19 @@ export default async function PostSurveyPage({
   const session = signup.playtest_sessions as any
   const project = session?.projects as any
 
+  // Fetch rule version diff
+  let diff = null
+  if (session?.id) {
+    try {
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://playtestflow.vercel.app'
+      const res = await fetch(`${siteUrl}/api/rule-versions/diff?session_id=${session.id}`, {
+        next: { revalidate: 300 },
+      })
+      const data = await res.json()
+      diff = data.diff ?? null
+    } catch { /* non-critical */ }
+  }
+
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
       <div className="max-w-lg mx-auto px-6 py-12">
@@ -66,6 +80,17 @@ export default async function PostSurveyPage({
           </div>
         ) : (
           <>
+            {/* Rule version diff — remind testers what changed */}
+            {diff && diff.hasChanges && (
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-semibold">📄 Rules you tested</span>
+                </div>
+                <div className="bg-white/4 border border-white/10 rounded-xl p-4">
+                  <RuleVersionDiff diff={diff} compact />
+                </div>
+              </div>
+            )}
             <div className="mb-6">
               <h1 className="text-xl font-bold">Post-Session Feedback</h1>
               <p className="text-gray-400 text-sm mt-1">~5 minutes · Your honest feedback helps make better games.</p>
