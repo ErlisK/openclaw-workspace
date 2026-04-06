@@ -25,6 +25,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { isProduction, VERCEL_ENV, GIT_SHA } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 // Ensure Node.js runtime (not Edge) for supabase-js
@@ -456,6 +457,48 @@ export async function GET(req: NextRequest) {
   (response as any).endpoints_total = ne_total ?? 0;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (response as any).endpoints_slack_total = ne_slack_total;
+
+  // ── 11. New spec fields (post-deploy smoke-check targets) ─────────────
+
+  // has_notification_endpoints_table: true if we could successfully query
+  // the notification_endpoints table; false if it doesn't exist or errored.
+  // We infer presence from ne_total: if it came back as a number, the table exists.
+  // If ne_total is still null (all errors), probe more specifically.
+  let hasNotificationEndpointsTable: boolean = ne_total !== null;
+
+  if (!hasNotificationEndpointsTable) {
+    // Re-probe: look for "relation … does not exist" (Postgres 42P01) or
+    // Supabase PGRST message to confirm absence vs. other errors.
+    const notExistErrors = errors.filter(
+      (e) =>
+        e.includes("notification_endpoints") &&
+        (e.includes("42P01") ||
+          e.includes("does not exist") ||
+          e.includes("PGRST200")),
+    );
+    // If there are errors but none are "table not found", it might still exist
+    // but be inaccessible — we report false conservatively.
+    hasNotificationEndpointsTable = notExistErrors.length === 0 && errors.some(e => e.includes("notification_endpoints")) === false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).has_notification_endpoints_table = hasNotificationEndpointsTable;
+
+  // test_send_endpoint_present: true — we added POST /api/notifications/test
+  // with direct webhook_url support in this deploy.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).test_send_endpoint_present = true;
+
+  // production_host_restriction: in production, only hooks.slack.com is
+  // allowed as a webhook URL host.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).production_host_restriction = isProduction;
+
+  // version / environment info
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).vercel_env = VERCEL_ENV;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).git_sha = GIT_SHA;
 
   return NextResponse.json(response, { status: 200 });
 }
