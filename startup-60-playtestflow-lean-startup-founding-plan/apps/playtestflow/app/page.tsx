@@ -72,8 +72,9 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <a href="#pricing" className="text-gray-400 hover:text-white text-sm transition-colors hidden sm:block">Pricing</a>
-            <a href="#waitlist" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-              Join Waitlist
+            <a href="/onboarding" className="text-gray-400 hover:text-white text-sm transition-colors hidden sm:block">For Designers</a>
+            <a href="/auth/login" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              Start Free →
             </a>
           </div>
         </div>
