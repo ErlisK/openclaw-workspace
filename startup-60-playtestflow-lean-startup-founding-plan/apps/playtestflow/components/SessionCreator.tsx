@@ -22,6 +22,8 @@ export default function SessionCreator({
   const [scheduledAt, setScheduledAt] = useState('')
   const [maxTesters, setMaxTesters] = useState(6)
   const [platform, setPlatform] = useState('Tabletop Simulator')
+  const [meetingUrl, setMeetingUrl] = useState('')
+  const [durationMinutes, setDurationMinutes] = useState(90)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
@@ -43,6 +45,8 @@ export default function SessionCreator({
       scheduled_at: scheduledAt || null,
       max_testers: maxTesters,
       platform: platform || null,
+      meeting_url: meetingUrl || null,
+      duration_minutes: durationMinutes,
       status: 'recruiting',
     })
 
@@ -114,6 +118,17 @@ export default function SessionCreator({
             className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500 transition-colors"
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-gray-400 mb-1.5">Meeting URL (Zoom, Google Meet, Discord…)</label>
+        <input
+          type="url"
+          value={meetingUrl}
+          onChange={(e) => setMeetingUrl(e.target.value)}
+          placeholder="https://zoom.us/j/..."
+          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 transition-colors"
+        />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
