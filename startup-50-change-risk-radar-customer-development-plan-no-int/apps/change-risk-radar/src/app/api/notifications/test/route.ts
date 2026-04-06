@@ -242,10 +242,33 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Basic HTTPS + format validation
     const validation = validateWebhookUrl(endpointUrl);
     if (!validation.ok) {
       return NextResponse.json(
         { ok: false, error: validation.error },
+        { status: 400 },
+      );
+    }
+
+    // Slack-specific host validation: endpoint mode is always Slack, so
+    // always enforce hooks.slack.com regardless of VERCEL_ENV.
+    let parsedEndpointUrl: URL;
+    try {
+      parsedEndpointUrl = new URL(endpointUrl);
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: "Invalid endpoint.url format" },
+        { status: 400 },
+      );
+    }
+    if (parsedEndpointUrl.hostname !== "hooks.slack.com") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "endpoint.url must be a valid Slack webhook URL (host must be hooks.slack.com)",
+        },
         { status: 400 },
       );
     }
