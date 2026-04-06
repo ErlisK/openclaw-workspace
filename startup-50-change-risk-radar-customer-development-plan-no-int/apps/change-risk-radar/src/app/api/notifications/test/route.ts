@@ -1,21 +1,26 @@
 /**
  * POST /api/notifications/test
  *
- * Three modes:
+ * Four modes:
  *
- * 1. Legacy: { channel_id: string }
- *    Tests a crr_notification_channels entry via the full notifier pipeline.
+ * 1. Direct webhook test (new, spec-compliant, no auth required):
+ *    { webhook_url: string, text?: string, dry_run?: boolean }
+ *    - Validates webhook_url (https; in production only hooks.slack.com)
+ *    - Supports dry_run: returns echoed payload without making outbound request
+ *    - Per-IP rate limit: 10 requests per 5 minutes
+ *    - No webhook_url logged server-side
+ *
+ * 2. Legacy channel_id test:
+ *    { channel_id: string }
  *    Auth: magic token (?token= or x-org-token).
  *
- * 2. Slack Incoming Webhook via notification_endpoints (legacy flag):
+ * 3. Slack notification_endpoints test (legacy flag):
  *    { use_notification_endpoints: true }
  *    Auth: magic token (?token= or x-org-token).
  *
- * 3. Session-based test send (new, spec-compliant):
- *    { type: 'slack_webhook' } OR empty body with no channel_id / use_notification_endpoints.
+ * 4. Session-based test send:
+ *    { type: 'slack_webhook' } or empty body
  *    Auth: Supabase session cookie OR magic token.
- *    Sends: `Change Risk Radar — Test notification successful. If you can see this, Slack alerts are configured. (env: ..., ts: ...)`
- *    Updates last_test_at on success/failure.
  *
  * GET /api/notifications/test?channel_id=...
  *   Returns recent delivery log for a channel.
@@ -25,12 +30,78 @@ import { cookies } from "next/headers";
 import { supabaseAdmin } from "@/lib/supabase";
 import { createSupabaseServerClient } from "@/lib/supabase-auth";
 import { sendAlertNotifications } from "@/lib/notifier";
+import { validateWebhookUrl, VERCEL_ENV } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 export const runtime = "nodejs";
 
-// ─── Auth: resolve org from magic token OR Supabase session ───────────────
+// ─── In-memory per-IP rate limiter ─────────────────────────────────────────
+
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+
+interface RateLimitEntry {
+  count: number;
+  resetAt: number;
+}
+
+const rateLimitMap = new Map<string, RateLimitEntry>();
+
+/** Returns true if the request is allowed; false if rate-limited */
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now >= entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+
+  entry.count += 1;
+  return true;
+}
+
+/** Extract client IP from Vercel / standard proxy headers */
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown"
+  );
+}
+
+// ─── Default Slack payload ──────────────────────────────────────────────────
+
+function buildDefaultSlackPayload(customText?: string) {
+  const text =
+    customText?.trim() || "Change Risk Radar: Test notification";
+  return {
+    text,
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: "*Change Risk Radar* test notification is working. ✅",
+        },
+      },
+      {
+        type: "context",
+        elements: [
+          {
+            type: "mrkdwn",
+            text: `You can adjust settings at /settings/notifications · env: ${VERCEL_ENV} · ts: ${new Date().toISOString()}`,
+          },
+        ],
+      },
+    ],
+  };
+}
+
+// ─── Auth: resolve org from magic token OR Supabase session ────────────────
 
 interface OrgContext {
   id: string;
@@ -59,7 +130,9 @@ async function resolveOrgContext(req: NextRequest): Promise<OrgContext | null> {
   try {
     const cookieStore = await cookies();
     const sessionClient = createSupabaseServerClient(cookieStore);
-    const { data: { user } } = await sessionClient.auth.getUser();
+    const {
+      data: { user },
+    } = await sessionClient.auth.getUser();
 
     if (user) {
       const { data: org } = await supabaseAdmin
@@ -108,14 +181,122 @@ async function resolveOrgContext(req: NextRequest): Promise<OrgContext | null> {
 // ─── POST ─────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  // ── Require application/json ──────────────────────────────────────────
+  const contentType = req.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    return NextResponse.json(
+      { ok: false, error: "Content-Type must be application/json" },
+      { status: 415 },
+    );
+  }
+
+  // ── Parse body (max ~16 KB to avoid abuse) ────────────────────────────
+  let body: Record<string, unknown>;
+  try {
+    const rawText = await req.text();
+    if (rawText.length > 16_384) {
+      return NextResponse.json(
+        { ok: false, error: "Request body too large" },
+        { status: 413 },
+      );
+    }
+    body = JSON.parse(rawText) as Record<string, unknown>;
+  } catch {
+    return NextResponse.json(
+      { ok: false, error: "Invalid JSON body" },
+      { status: 400 },
+    );
+  }
+
+  // ── Mode 1: Direct webhook_url test (new spec-compliant, no auth) ──────
+  if (body.webhook_url !== undefined) {
+    const webhookUrl = typeof body.webhook_url === "string" ? body.webhook_url.trim() : "";
+
+    if (!webhookUrl) {
+      return NextResponse.json(
+        { ok: false, error: "webhook_url is required" },
+        { status: 400 },
+      );
+    }
+
+    // Validate URL (host restriction in production)
+    const validation = validateWebhookUrl(webhookUrl);
+    if (!validation.ok) {
+      return NextResponse.json(
+        { ok: false, error: validation.error },
+        { status: 400 },
+      );
+    }
+
+    // Per-IP rate limiting
+    const clientIp = getClientIp(req);
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Rate limit exceeded — maximum 10 requests per 5 minutes",
+        },
+        { status: 429 },
+      );
+    }
+
+    const customText = typeof body.text === "string" ? body.text : undefined;
+    const dryRun = body.dry_run === true;
+    const payload = buildDefaultSlackPayload(customText);
+
+    // Dry run: return without sending
+    if (dryRun) {
+      return NextResponse.json({
+        ok: true,
+        dry_run: true,
+        would_post_to: `[REDACTED — ${new URL(webhookUrl).hostname}]`,
+        payload,
+      });
+    }
+
+    // Live send — do NOT log webhook_url
+    const start = Date.now();
+    let slackRes: Response;
+    try {
+      slackRes = await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Redact URL from error messages
+      return NextResponse.json(
+        { ok: false, error: "Outbound request failed", detail: msg },
+        { status: 502 },
+      );
+    }
+
+    const latency_ms = Date.now() - start;
+    const responseText = await slackRes.text().catch(() => "");
+
+    if (!slackRes.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Upstream non-2xx",
+          status: slackRes.status,
+          body: responseText.slice(0, 200),
+        },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, latency_ms });
+  }
+
+  // ── Modes 2-4: Auth-required paths (existing behavior) ────────────────
   const org = await resolveOrgContext(req);
   if (!org) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await req.json().catch(() => ({})) as Record<string, unknown>;
-
-  // ── Mode 1: legacy channel_id test ────────────────────────────────────
+  // ── Mode 2: legacy channel_id test ────────────────────────────────────
   if (body.channel_id) {
     const { data: channel } = await supabaseAdmin
       .from("crr_notification_channels")
@@ -152,9 +333,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // ── Modes 2 & 3: notification_endpoints Slack test ────────────────────
-  // Triggered by use_notification_endpoints:true (legacy) OR type:'slack_webhook' (new spec)
-  // or just a plain POST with no channel_id (default to slack_webhook test)
+  // ── Modes 3 & 4: notification_endpoints Slack test ────────────────────
   const orgField = org.via === "user_id" ? "created_by" : "org_id";
 
   const { data: endpoint } = await supabaseAdmin
@@ -167,47 +346,35 @@ export async function POST(req: NextRequest) {
     .maybeSingle();
 
   if (!endpoint) {
-    console.info("[notifications/test POST] No endpoint found", {
-      org_id: org.id,
-      via: org.via,
-    });
     return NextResponse.json(
       {
         ok: false,
         error:
           "No active Slack webhook configured. Save a webhook URL in Notification Settings first.",
       },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  // Resolve webhook URL from url column (new) or config.webhook_url (legacy)
   const webhookUrl: string | undefined =
     (endpoint.url as string | null) ||
-    ((endpoint.config as Record<string, unknown>)?.webhook_url as string | undefined);
+    ((endpoint.config as Record<string, unknown>)?.webhook_url as
+      | string
+      | undefined);
 
   if (!webhookUrl) {
     return NextResponse.json(
       { ok: false, error: "No webhook URL found in endpoint config." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
-  // Build test message — spec-compliant format for session-based calls;
-  // friendlier message for legacy use_notification_endpoints flag
   const isLegacyMode = !!body.use_notification_endpoints;
   const testText = isLegacyMode
     ? `✅ Change Risk Radar test — your Slack notifications are set up for *${org.name}*.`
-    : `Change Risk Radar — Test notification successful. If you can see this, Slack alerts are configured. (env: ${process.env.VERCEL_ENV || process.env.NODE_ENV || "development"}, ts: ${new Date().toISOString()})`;
+    : `Change Risk Radar — Test notification successful. If you can see this, Slack alerts are configured. (env: ${VERCEL_ENV}, ts: ${new Date().toISOString()})`;
 
   const payload = { text: testText };
-
-  console.info("[notifications/test POST] Sending test to Slack", {
-    org_id: org.id,
-    via: org.via,
-    endpoint_id: endpoint.id,
-    mode: isLegacyMode ? "legacy" : "session",
-  });
 
   const start = Date.now();
   let slackRes: Response;
@@ -220,10 +387,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    console.error("[notifications/test POST] Slack fetch failed", {
-      org_id: org.id,
-      error: msg,
-    });
     await supabaseAdmin
       .from("notification_endpoints")
       .update({
@@ -241,10 +404,6 @@ export async function POST(req: NextRequest) {
 
   if (!slackRes.ok) {
     const errMsg = `HTTP ${slackRes.status}: ${responseText.slice(0, 200)}`;
-    console.error("[notifications/test POST] Slack non-2xx", {
-      org_id: org.id,
-      status: slackRes.status,
-    });
     await supabaseAdmin
       .from("notification_endpoints")
       .update({
@@ -257,12 +416,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: errMsg }, { status: 502 });
   }
 
-  // Success
-  console.info("[notifications/test POST] Test sent successfully", {
-    org_id: org.id,
-    via: org.via,
-    latency_ms,
-  });
   await supabaseAdmin
     .from("notification_endpoints")
     .update({
@@ -278,10 +431,6 @@ export async function POST(req: NextRequest) {
 
 // ─── GET ──────────────────────────────────────────────────────────────────
 
-/**
- * GET /api/notifications/test?channel_id=...
- * Returns recent delivery log for a channel.
- */
 export async function GET(req: NextRequest) {
   const org = await resolveOrgContext(req);
   if (!org) {
@@ -307,15 +456,19 @@ export async function GET(req: NextRequest) {
     summary: {
       total: logs?.length ?? 0,
       sent:
-        logs?.filter((l: { status: string }) => l.status === "sent").length ?? 0,
+        logs?.filter((l: { status: string }) => l.status === "sent").length ??
+        0,
       failed:
-        logs?.filter((l: { status: string }) => l.status === "failed").length ?? 0,
+        logs?.filter((l: { status: string }) => l.status === "failed")
+          .length ?? 0,
       avg_latency_ms: logs?.length
         ? Math.round(
             logs
               .filter((l: { latency_ms: number | null }) => l.latency_ms)
-              .reduce((s: number, l: { latency_ms: number }) => s + l.latency_ms, 0) /
-              logs.length
+              .reduce(
+                (s: number, l: { latency_ms: number }) => s + l.latency_ms,
+                0,
+              ) / logs.length,
           )
         : 0,
     },
