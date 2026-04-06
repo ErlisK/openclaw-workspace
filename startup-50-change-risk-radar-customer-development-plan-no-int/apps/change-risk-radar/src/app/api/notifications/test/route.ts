@@ -208,6 +208,108 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── Mode 0: dryRun/endpoint format (spec-compliant, no auth) ──────────
+  // Handles: { dryRun: true, endpoint: { type, url }, message?: string }
+  if (body.dryRun !== undefined || body.endpoint !== undefined) {
+    const endpointObj =
+      body.endpoint && typeof body.endpoint === "object"
+        ? (body.endpoint as Record<string, unknown>)
+        : null;
+
+    const endpointType = endpointObj?.type;
+    const endpointUrl =
+      typeof endpointObj?.url === "string" ? endpointObj.url.trim() : "";
+    const messageText =
+      typeof body.message === "string" ? body.message : undefined;
+
+    // Validate endpoint.type
+    if (endpointType !== "slack_webhook") {
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "endpoint.type must be 'slack_webhook'. Other channel types are not supported for test send.",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Validate URL
+    if (!endpointUrl) {
+      return NextResponse.json(
+        { ok: false, error: "endpoint.url is required" },
+        { status: 400 },
+      );
+    }
+
+    const validation = validateWebhookUrl(endpointUrl);
+    if (!validation.ok) {
+      return NextResponse.json(
+        { ok: false, error: validation.error },
+        { status: 400 },
+      );
+    }
+
+    // Per-IP rate limiting
+    const clientIp = getClientIp(req);
+    if (!checkRateLimit(clientIp)) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Rate limit exceeded — maximum 10 requests per 5 minutes",
+        },
+        { status: 429 },
+      );
+    }
+
+    const isDryRun = body.dryRun === true;
+
+    // Dry run: validate and return without sending
+    if (isDryRun) {
+      return NextResponse.json({
+        ok: true,
+        dryRun: true,
+        validated: true,
+        would_post_to: `[REDACTED — ${new URL(endpointUrl).hostname}]`,
+      });
+    }
+
+    // Live send
+    const payload = buildDefaultSlackPayload(messageText);
+    const start = Date.now();
+    let slackRes: Response;
+    try {
+      slackRes = await fetch(endpointUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      return NextResponse.json(
+        { ok: false, error: "Outbound request failed", detail: msg },
+        { status: 502 },
+      );
+    }
+
+    const latency_ms = Date.now() - start;
+    const responseText = await slackRes.text().catch(() => "");
+
+    if (!slackRes.ok) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Upstream non-2xx",
+          status: slackRes.status,
+          body: responseText.slice(0, 200),
+        },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({ ok: true, latency_ms });
+  }
+
   // ── Mode 1: Direct webhook_url test (new spec-compliant, no auth) ──────
   if (body.webhook_url !== undefined) {
     const webhookUrl = typeof body.webhook_url === "string" ? body.webhook_url.trim() : "";
