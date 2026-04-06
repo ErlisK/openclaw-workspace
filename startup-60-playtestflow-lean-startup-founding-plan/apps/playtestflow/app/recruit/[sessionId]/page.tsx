@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase-server'
+import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { notFound } from 'next/navigation'
 import RecruitForm from '@/components/RecruitForm'
 
@@ -9,7 +9,7 @@ export default async function RecruitPage({
   params: Promise<{ sessionId: string }>
   searchParams: { embed?: string }
 }) {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
   const { sessionId } = await params
   const isEmbed = searchParams.embed === '1'
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase-server'
+import { createClient, createServiceClient } from '@/lib/supabase-server'
 
 // GET /api/widget/[sessionId] — returns the widget JS bundle
 // This is the script tag URL designers embed on their site
@@ -11,7 +11,7 @@ export async function GET(
   const origin = process.env.NEXT_PUBLIC_SITE_URL || 'https://playtestflow.vercel.app'
 
   // Fetch session data to embed in the script
-  const supabase = await createClient()
+  const supabase = createServiceClient()
   const { data: session } = await supabase
     .from('playtest_sessions')
     .select('id, title, max_testers, scheduled_at, platform, status, projects(name, game_type)')
