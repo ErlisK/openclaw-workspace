@@ -1,0 +1,12 @@
+{
+  "name": "playtestflow-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/playtestflow",
+    "build": "npm run build --workspace=apps/playtestflow",
+    "lint": "npm run lint --workspace=apps/playtestflow"
+  }
+}

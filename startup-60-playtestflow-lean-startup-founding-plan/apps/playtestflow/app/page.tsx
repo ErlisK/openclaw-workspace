@@ -8,6 +8,20 @@ export default function Home() {
   const [consent, setConsent] = useState(false)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  const [pricingClicked, setPricingClicked] = useState<string | null>(null)
+
+  async function handlePricingClick(tier: string) {
+    setPricingClicked(tier)
+    try {
+      await fetch('/api/pricing-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tier, action: 'cta_click', referrer: document.referrer }),
+      })
+    } catch { /* silent */ }
+    // Scroll to waitlist after fake-door click
+    document.getElementById('waitlist')?.scrollIntoView({ behavior: 'smooth' })
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -42,9 +56,12 @@ export default function Home() {
             <span className="text-2xl">🎲</span>
             <span className="font-bold text-xl text-orange-400">PlaytestFlow</span>
           </div>
-          <a href="#waitlist" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Join Waitlist
-          </a>
+          <div className="flex items-center gap-3">
+            <a href="#pricing" className="text-gray-400 hover:text-white text-sm transition-colors hidden sm:block">Pricing</a>
+            <a href="#waitlist" className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+              Join Waitlist
+            </a>
+          </div>
         </div>
       </nav>
 
@@ -238,6 +255,144 @@ export default function Home() {
             ))}
           </div>
           <p className="text-gray-500 text-sm italic">* Projected based on designer interviews. We&apos;re building in the open — join us to validate.</p>
+        </div>
+      </section>
+
+      {/* Fake-Door Pricing */}
+      <section id="pricing" className="px-6 py-20">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-4">
+            <div className="inline-block bg-orange-500/20 text-orange-400 text-sm font-medium px-4 py-1.5 rounded-full mb-4 border border-orange-500/30">
+              Simple, Transparent Pricing
+            </div>
+            <h2 className="text-3xl font-bold mb-4">Pay for Time Saved, Not for Features</h2>
+            <p className="text-gray-400 max-w-xl mx-auto mb-2">Save 5+ hours per test cycle. At $25/hour designer rate, PlaytestFlow pays for itself in the first session.</p>
+            <p className="text-orange-400 text-sm font-medium">🚧 Launching soon — join the waitlist to lock in founding member pricing</p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 mt-12">
+            {/* Starter */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+              <div className="mb-6">
+                <div className="text-sm text-gray-400 font-medium mb-1">STARTER</div>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold">$19</span>
+                  <span className="text-gray-400">/month</span>
+                </div>
+                <p className="text-gray-500 text-sm">For solo designers running occasional tests</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  '3 active playtest projects',
+                  'Up to 10 testers per session',
+                  'Session templates (roles, tasks, timing)',
+                  'Structured feedback forms',
+                  'Version-tagged rule uploads',
+                  'Invite link + recruit page',
+                  'Basic analytics dashboard',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handlePricingClick('starter')}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors border ${
+                  pricingClicked === 'starter'
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'border-white/20 hover:border-orange-500 hover:text-orange-400 text-white'
+                }`}
+              >
+                {pricingClicked === 'starter' ? 'Join waitlist ↓' : 'Get Early Access'}
+              </button>
+            </div>
+
+            {/* Pro — highlighted */}
+            <div className="bg-gradient-to-b from-orange-500/15 to-orange-500/5 border border-orange-500/40 rounded-2xl p-6 flex flex-col relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="bg-orange-500 text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</span>
+              </div>
+              <div className="mb-6">
+                <div className="text-sm text-orange-400 font-medium mb-1">PRO</div>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold">$49</span>
+                  <span className="text-gray-400">/month</span>
+                </div>
+                <p className="text-gray-400 text-sm">For active designers shipping games</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'Unlimited playtest projects',
+                  'Up to 50 testers per session',
+                  'Everything in Starter',
+                  'Reward code distribution',
+                  'Rule diff viewer (v1.2 → v1.3)',
+                  'Time-on-task & failure point metrics',
+                  'Embeddable recruit widget',
+                  'Consent & NDA automation',
+                  'CSV/JSON export',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-orange-400 mt-0.5">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handlePricingClick('pro')}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors ${
+                  pricingClicked === 'pro'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-orange-500 hover:bg-orange-600 text-white'
+                }`}
+              >
+                {pricingClicked === 'pro' ? 'Join waitlist ↓' : 'Get Early Access'}
+              </button>
+            </div>
+
+            {/* Studio */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col">
+              <div className="mb-6">
+                <div className="text-sm text-gray-400 font-medium mb-1">STUDIO</div>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-4xl font-bold">$79</span>
+                  <span className="text-gray-400">/month</span>
+                </div>
+                <p className="text-gray-500 text-sm">For small studios and prolific publishers</p>
+              </div>
+              <ul className="space-y-3 mb-8 flex-1">
+                {[
+                  'Everything in Pro',
+                  'Up to 5 team seats',
+                  'Unlimited testers per session',
+                  'Custom branding on recruit pages',
+                  'Tester reputation scoring',
+                  'Zapier / webhook integrations',
+                  'Priority support',
+                  'Early access to new features',
+                ].map(f => (
+                  <li key={f} className="flex items-start gap-2 text-sm text-gray-300">
+                    <span className="text-green-400 mt-0.5">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+              <button
+                onClick={() => handlePricingClick('studio')}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-colors border ${
+                  pricingClicked === 'studio'
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'border-white/20 hover:border-orange-500 hover:text-orange-400 text-white'
+                }`}
+              >
+                {pricingClicked === 'studio' ? 'Join waitlist ↓' : 'Get Early Access'}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-gray-500 text-sm">All plans include a 14-day free trial. No credit card required to join the waitlist.</p>
+            <p className="text-gray-600 text-xs mt-2">Founding member pricing locked in for life — prices may increase at launch.</p>
+          </div>
         </div>
       </section>
 
