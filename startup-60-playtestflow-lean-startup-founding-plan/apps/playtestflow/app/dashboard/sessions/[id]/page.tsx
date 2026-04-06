@@ -5,6 +5,8 @@ import SessionStatusUpdater from '@/components/SessionStatusUpdater'
 import RewardAssigner from '@/components/RewardAssigner'
 import SessionActions from '@/components/SessionActions'
 import FeedbackSummary from '@/components/FeedbackSummary'
+import TestRunManager from '@/components/TestRunManager'
+import EventsTimeline from '@/components/EventsTimeline'
 
 export default async function SessionDetailPage({
   params,
@@ -48,6 +50,24 @@ export default async function SessionDetailPage({
     .select('*')
     .not('assigned_to_signup', 'is', null)
     .in('assigned_to_signup', (signups ?? []).map((s: any) => s.id))
+
+  // Phase 3: test runs + templates
+  const { data: testRuns } = await supabase
+    .from('test_runs')
+    .select('*, session_templates(name), rule_versions(version_label)')
+    .eq('session_id', id)
+    .order('created_at', { ascending: false })
+
+  const { data: templates } = await supabase
+    .from('session_templates')
+    .select('id, name')
+    .eq('designer_id', user.id)
+
+  const { data: ruleVersions } = await supabase
+    .from('rule_versions')
+    .select('id, version_label')
+    .eq('project_id', session.project_id)
+    .order('created_at', { ascending: false })
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://playtestflow.vercel.app'
 
@@ -265,6 +285,23 @@ export default async function SessionDetailPage({
             </table>
           </div>
         )}
+      </div>
+
+      {/* Test Runs */}
+      <div>
+        <TestRunManager
+          sessionId={id}
+          designerId={user.id}
+          existingRuns={testRuns ?? []}
+          templates={templates ?? []}
+          ruleVersions={ruleVersions ?? []}
+        />
+      </div>
+
+      {/* Events Timeline */}
+      <div>
+        <h2 className="text-lg font-bold mb-4">Session Events &amp; Time-on-Task</h2>
+        <EventsTimeline sessionId={id} />
       </div>
     </div>
   )

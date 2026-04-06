@@ -17,6 +17,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
   const links = [
     { href: '/dashboard', label: 'Projects' },
     { href: '/dashboard/sessions', label: 'Sessions' },
+    { href: '/dashboard/templates', label: 'Templates' },
     { href: '/dashboard/rewards', label: 'Rewards' },
     { href: '/dashboard/embed', label: 'Widget' },
     { href: '/dashboard/analytics', label: 'Analytics' },
