@@ -410,6 +410,53 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Interview Scheduling CTA */}
+      <section id="interview" className="px-6 py-16">
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-2xl p-8">
+            <div className="flex flex-col md:flex-row items-center gap-6">
+              <div className="text-5xl">🎤</div>
+              <div className="flex-1">
+                <div className="inline-block bg-blue-500/20 text-blue-400 text-xs font-medium px-3 py-1 rounded-full mb-3 border border-blue-500/30">
+                  20-Min Research Interview
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Help Shape This Product</h2>
+                <p className="text-gray-400 text-sm leading-relaxed mb-4">
+                  We&apos;re doing 20 discovery interviews with indie tabletop and RPG designers. No pitch — just 20 minutes to talk through your current remote playtest workflow. In return, you get 3 months free when we launch.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <a
+                    href="#waitlist"
+                    onClick={() => setInterviewInterested(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold text-sm transition-colors"
+                  >
+                    I&apos;d love to chat →
+                  </a>
+                  <a
+                    href="mailto:scide-founder@agentmail.to?subject=PlaytestFlow%20Interview&body=Hi%2C%20I%27d%20like%20to%20do%20a%2020-min%20interview%20about%20my%20remote%20playtest%20workflow."
+                    className="border border-white/20 hover:border-blue-500 text-white hover:text-blue-400 px-6 py-3 rounded-xl font-semibold text-sm transition-colors"
+                  >
+                    Email us directly
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-3 gap-4 text-center">
+              {[
+                { n: '20', l: 'Interviews planned' },
+                { n: '0', l: 'Completed so far' },
+                { n: '3 mo', l: 'Free for interviewees' },
+              ].map(s => (
+                <div key={s.l}>
+                  <div className="text-xl font-bold text-blue-400">{s.n}</div>
+                  <div className="text-xs text-gray-500">{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Waitlist Form */}
       <section id="waitlist" className="px-6 py-20 bg-gradient-to-b from-orange-500/5 to-transparent">
         <div className="max-w-xl mx-auto">
