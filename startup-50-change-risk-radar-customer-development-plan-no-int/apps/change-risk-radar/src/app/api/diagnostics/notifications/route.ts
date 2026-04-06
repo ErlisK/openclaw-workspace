@@ -365,7 +365,48 @@ export async function GET(req: NextRequest) {
     errors.push(`notification_endpoints exception: ${String(e)}`);
   }
 
-  // ── 7. Assemble response ───────────────────────────────────────────────
+  // ── 7. Count by kind (slack_webhook) using kind column ───────────────
+  let ne_slack_total_by_kind: number | null = null;
+
+  try {
+    const { count: slackKindCount, error: slackKindErr } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from("notification_endpoints" as any)
+      .select("*", { count: "exact", head: true })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq("kind" as any, "slack_webhook");
+    if (slackKindErr) {
+      errors.push(`notification_endpoints kind count: ${slackKindErr.message}`);
+    } else {
+      ne_slack_total_by_kind = slackKindCount ?? 0;
+    }
+  } catch (e) {
+    errors.push(`notification_endpoints kind exception: ${String(e)}`);
+  }
+
+  // Also count by type column for backwards compatibility
+  let ne_slack_total_by_type: number | null = null;
+
+  try {
+    const { count: slackTypeCount, error: slackTypeErr } = await supabase
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .from("notification_endpoints" as any)
+      .select("*", { count: "exact", head: true })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq("type" as any, "slack_webhook");
+    if (slackTypeErr) {
+      errors.push(`notification_endpoints type count: ${slackTypeErr.message}`);
+    } else {
+      ne_slack_total_by_type = slackTypeCount ?? 0;
+    }
+  } catch (e) {
+    errors.push(`notification_endpoints type exception: ${String(e)}`);
+  }
+
+  // Combined slack total: prefer kind count, fall back to type count
+  const ne_slack_total = ne_slack_total_by_kind ?? ne_slack_total_by_type ?? 0;
+
+  // ── 8. Assemble response ───────────────────────────────────────────────
   const response: DiagnosticsResponse = {
     ok: true,
     now,
@@ -398,7 +439,7 @@ export async function GET(req: NextRequest) {
     errors,
   };
 
-  // ── 8. Top-level summary (non-breaking addition) ───────────────────────
+  // ── 9. Top-level summary (non-breaking addition) ───────────────────────
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (response as any).summary = {
     total_endpoints: ne_total,
@@ -406,6 +447,15 @@ export async function GET(req: NextRequest) {
     orgs_with_slack: ne_slack_webhook_orgs,
     last_updated_at: ne_last_updated_at,
   };
+
+  // ── 10. Adoption counts at top level (spec requirement) ───────────────
+  // These are the canonical fields checked by post-deploy verification:
+  //   endpoints_total        — total rows in notification_endpoints
+  //   endpoints_slack_total  — rows with kind = 'slack_webhook'
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).endpoints_total = ne_total ?? 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (response as any).endpoints_slack_total = ne_slack_total;
 
   return NextResponse.json(response, { status: 200 });
 }
