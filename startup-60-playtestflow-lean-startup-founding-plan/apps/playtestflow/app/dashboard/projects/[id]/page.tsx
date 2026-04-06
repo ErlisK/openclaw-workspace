@@ -8,16 +8,18 @@ import Link from 'next/link'
 export default async function ProjectDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
+  const { id } = await params
+
   const { data: project } = await supabase
     .from('projects')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('designer_id', user.id)
     .single()
 

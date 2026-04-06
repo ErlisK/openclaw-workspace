@@ -7,16 +7,18 @@ import RewardAssigner from '@/components/RewardAssigner'
 export default async function SessionDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
+  const { id } = await params
+
   const { data: session } = await supabase
     .from('playtest_sessions')
     .select('*, projects(name, id), rule_versions(version_label, storage_path)')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('designer_id', user.id)
     .single()
 
@@ -25,13 +27,13 @@ export default async function SessionDetailPage({
   const { data: signups } = await supabase
     .from('session_signups')
     .select('*, session_feedback(overall_rating, clarity_rating, fun_rating, submitted_at)')
-    .eq('session_id', params.id)
+    .eq('session_id', id)
     .order('created_at', { ascending: true })
 
   const { data: rewards } = await supabase
     .from('reward_codes')
     .select('*')
-    .eq('session_id', params.id)
+    .eq('session_id', id)
     .order('created_at', { ascending: true })
 
   const { data: allRewards } = await supabase
@@ -82,7 +84,7 @@ export default async function SessionDetailPage({
               )}
             </div>
           </div>
-          <SessionStatusUpdater sessionId={params.id} currentStatus={session.status} />
+          <SessionStatusUpdater sessionId={id} currentStatus={session.status} />
         </div>
       </div>
 
@@ -106,11 +108,11 @@ export default async function SessionDetailPage({
         <div>
           <p className="text-sm font-medium text-blue-300">Recruit link</p>
           <p className="text-xs text-gray-400 font-mono mt-0.5">
-            /recruit/{params.id}
+            /recruit/{id}
           </p>
         </div>
         <a
-          href={`/recruit/${params.id}`}
+          href={`/recruit/${id}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-xs text-blue-400 hover:text-blue-300 underline"

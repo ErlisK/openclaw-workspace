@@ -6,16 +6,17 @@ export default async function RecruitPage({
   params,
   searchParams,
 }: {
-  params: { sessionId: string }
+  params: Promise<{ sessionId: string }>
   searchParams: { embed?: string }
 }) {
   const supabase = await createClient()
+  const { sessionId } = await params
   const isEmbed = searchParams.embed === '1'
 
   const { data: session } = await supabase
     .from('playtest_sessions')
     .select('*, projects(name, game_type, description), rule_versions(version_label)')
-    .eq('id', params.sessionId)
+    .eq('id', sessionId)
     .in('status', ['recruiting', 'scheduled'])
     .single()
 
@@ -24,7 +25,7 @@ export default async function RecruitPage({
   const { count: signupCount } = await supabase
     .from('session_signups')
     .select('*', { count: 'exact', head: true })
-    .eq('session_id', params.sessionId)
+    .eq('session_id', sessionId)
     .in('status', ['registered', 'confirmed'])
 
   const spotsLeft = session.max_testers - (signupCount ?? 0)
@@ -78,7 +79,7 @@ export default async function RecruitPage({
           </div>
 
           {spotsLeft > 0 ? (
-            <RecruitForm sessionId={params.sessionId} />
+            <RecruitForm sessionId={sessionId} />
           ) : (
             <div className="text-center py-6 bg-white/5 rounded-xl">
               <p className="text-gray-400">This session is full.</p>
