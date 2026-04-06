@@ -4,11 +4,13 @@ import { createClient } from '@supabase/supabase-js'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { tier, action, referrer } = body
+    const {
+      tier, action,
+      utm_source, utm_medium, utm_campaign,
+      referrer, session_id,
+    } = body
 
-    if (!tier) {
-      return NextResponse.json({ error: 'Tier required' }, { status: 400 })
-    }
+    if (!tier) return NextResponse.json({ error: 'Tier required' }, { status: 400 })
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -18,10 +20,13 @@ export async function POST(request: NextRequest) {
     await supabase.from('pricing_clicks').insert([{
       tier,
       action: action || 'cta_click',
-      referrer: referrer || null,
+      referrer: referrer ?? null,
+      utm_source: utm_source ?? null,
+      utm_medium: utm_medium ?? null,
+      utm_campaign: utm_campaign ?? null,
+      session_id: session_id ?? null,
     }])
 
-    // Return success regardless (don't block UX on analytics failure)
     return NextResponse.json({ success: true })
   } catch (err) {
     console.error('Pricing click error:', err)

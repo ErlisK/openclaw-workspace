@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getAnalyticsContext, trackPageView, persistUtms } from '@/lib/analytics'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -9,6 +10,14 @@ export default function Home() {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
   const [pricingClicked, setPricingClicked] = useState<string | null>(null)
+  const [interviewInterested, setInterviewInterested] = useState(false)
+  const [analyticsCtx, setAnalyticsCtx] = useState<Record<string, string | null>>({})
+
+  useEffect(() => {
+    persistUtms()
+    setAnalyticsCtx(getAnalyticsContext())
+    trackPageView()
+  }, [])
 
   async function handlePricingClick(tier: string) {
     setPricingClicked(tier)
@@ -16,7 +25,7 @@ export default function Home() {
       await fetch('/api/pricing-click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier, action: 'cta_click', referrer: document.referrer }),
+        body: JSON.stringify({ tier, action: 'cta_click', ...getAnalyticsContext() }),
       })
     } catch { /* silent */ }
     // Scroll to waitlist after fake-door click
@@ -31,7 +40,12 @@ export default function Home() {
       const res = await fetch('/api/waitlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, role, consent }),
+        body: JSON.stringify({
+          email, role, consent,
+          interview_interested: interviewInterested,
+          pricing_tier_interest: pricingClicked,
+          ...analyticsCtx,
+        }),
       })
       const data = await res.json()
       if (data.success) {
@@ -449,7 +463,7 @@ export default function Home() {
                   <a href="mailto:research@playtestflow.com" className="text-orange-400 ml-1">research@playtestflow.com</a>.
                   Your feedback will be anonymized before any publication or sharing.
                 </p>
-                <label className="flex items-start gap-3 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer mb-3">
                   <input
                     type="checkbox"
                     checked={consent}
@@ -458,6 +472,17 @@ export default function Home() {
                   />
                   <span className="text-sm text-gray-300">
                     I understand and agree to participate in product research. I can withdraw at any time.
+                  </span>
+                </label>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={interviewInterested}
+                    onChange={(e) => setInterviewInterested(e.target.checked)}
+                    className="mt-0.5 accent-orange-500"
+                  />
+                  <span className="text-sm text-gray-300">
+                    <span className="text-orange-400 font-medium">Yes, I&apos;d love a 20-min interview</span> — I&apos;ll get 3 months free for my time.
                   </span>
                 </label>
               </div>
