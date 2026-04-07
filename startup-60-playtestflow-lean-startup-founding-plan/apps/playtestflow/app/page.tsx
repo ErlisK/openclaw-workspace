@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAnalyticsContext, trackPageView, persistUtms } from '@/lib/analytics'
+import { getAnalyticsContext, trackPageView, persistUtms, trackWaitlistSubmit, trackPricingClick, trackConsentChecked } from '@/lib/analytics'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -21,6 +21,7 @@ export default function Home() {
 
   async function handlePricingClick(tier: string) {
     setPricingClicked(tier)
+    trackPricingClick(tier)
     try {
       await fetch('/api/pricing-click', {
         method: 'POST',
@@ -51,6 +52,7 @@ export default function Home() {
       if (data.success) {
         setStatus('success')
         setMessage(data.message || "You're on the list!")
+        trackWaitlistSubmit(email)
       } else {
         setStatus('error')
         setMessage(data.error || 'Something went wrong.')
@@ -515,7 +517,7 @@ export default function Home() {
                   <input
                     type="checkbox"
                     checked={consent}
-                    onChange={(e) => setConsent(e.target.checked)}
+                    onChange={(e) => { setConsent(e.target.checked); trackConsentChecked(e.target.checked) }}
                     className="mt-0.5 accent-orange-500"
                   />
                   <span className="text-sm text-gray-300">

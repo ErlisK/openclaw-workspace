@@ -1,6 +1,7 @@
 /**
- * Client-side UTM & session tracking utilities
+ * Client-side UTM & session tracking utilities + PostHog analytics
  */
+import posthog from 'posthog-js'
 
 const SESSION_KEY = 'ptf_sid'
 
@@ -74,4 +75,51 @@ export async function trackPageView(): Promise<void> {
       }),
     })
   } catch { /* silent */ }
+}
+
+// ─── PostHog helpers ────────────────────────────────────────────────────────
+
+function isPostHogEnabled() {
+  return typeof window !== 'undefined' && !!process.env.NEXT_PUBLIC_POSTHOG_KEY
+}
+
+/**
+ * Track waitlist form submission.
+ * Also identifies the user by email.
+ */
+export function trackWaitlistSubmit(email: string, sourcePath?: string) {
+  if (!isPostHogEnabled()) return
+  const emailDomain = email.includes('@') ? email.split('@')[1] : 'unknown'
+  const utmProps: Record<string, string> = {}
+  for (const [key, val] of Object.entries(getUtms())) {
+    if (val) utmProps[key] = val
+  }
+  posthog.capture('waitlist_submit', {
+    email_domain: emailDomain,
+    source_path: sourcePath || window.location.pathname,
+    ...utmProps,
+  })
+  posthog.identify(email, { email })
+}
+
+/**
+ * Track pricing CTA click (PostHog event, separate from DB log).
+ */
+export function trackPricingClick(plan: string, sourcePath?: string) {
+  if (!isPostHogEnabled()) return
+  posthog.capture('pricing_click', {
+    plan,
+    source_path: sourcePath || window.location.pathname,
+  })
+}
+
+/**
+ * Track consent checkbox interaction.
+ */
+export function trackConsentChecked(checked: boolean, sourcePath?: string) {
+  if (!isPostHogEnabled()) return
+  posthog.capture('consent_checked', {
+    checked,
+    source_path: sourcePath || window.location.pathname,
+  })
 }
