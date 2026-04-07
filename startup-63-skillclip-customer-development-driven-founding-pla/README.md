@@ -1,6 +1,6 @@
 # CertClip — Verified Credentials for Tradespeople
 
-> Phase 1: Customer Discovery A — SkillClip / CertClip Startup
+> Phase 1: Customer Discovery A — SkillClip / CertClip Startup 
 
 ## What is CertClip?
 
