@@ -7,7 +7,8 @@ export async function GET() {
   let supabaseStatus: 'ok' | 'fail' = 'fail'
   try {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    // Prefer service role for healthz (no RLS issues); fall back to anon
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (url && key) {
       const supabase = createClient(url, key)
       const { error } = await supabase.from('waitlist').select('id').limit(1)
