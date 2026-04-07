@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createServiceClient } from '@/lib/supabase-server'
 import { addCredits } from '@/lib/credits'
+import { trackConversionEvent, getDaysSince } from '@/lib/instrumentation'
 import Stripe from 'stripe'
 
 // Stripe v5 moved period fields under `billing_cycle_anchor_config`.
@@ -85,19 +86,34 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id' })
 
-        // Log upgrade event
+        // ── Instrumentation: trial_start + paid_conversion ─────────────────
+        if (event.type === 'customer.subscription.created' && status === 'trialing') {
+          await trackConversionEvent({
+            userId, planId, stripeEvent: event.id, eventType: 'trial_start',
+            metadata: { stripe_subscription_id: sub.id },
+          })
+        }
+
         if (event.type === 'customer.subscription.updated' && status === 'active') {
           const prevAttr = (event.data.previous_attributes as { status?: string } | undefined)
           if (prevAttr?.status === 'trialing') {
-            await svc.from('subscription_events').insert({
-              user_id: userId,
-              plan_id: planId,
-              event_type: 'upgraded',
-              from_plan: 'free',
-              to_plan: planId,
-              amount_cents: planId === 'studio' ? 9900 : 3900,
-              stripe_event_id: event.id,
-            })
+            // Trial → paid conversion
+            const daysInTrial = await getDaysSince(userId, 'trial_start')
+            const mrr = planId === 'studio' ? 7900 : 3900
+            await Promise.all([
+              svc.from('subscription_events').insert({
+                user_id: userId, plan_id: planId, event_type: 'upgraded',
+                from_plan: 'free', to_plan: planId,
+                amount_cents: mrr, stripe_event_id: event.id,
+              }),
+              trackConversionEvent({
+                userId, planId, stripeEvent: event.id,
+                eventType: 'paid_conversion',
+                amountCents: mrr,
+                daysInTrial: daysInTrial ?? undefined,
+                metadata: { stripe_subscription_id: sub.id },
+              }),
+            ])
           }
         }
         break
@@ -116,14 +132,16 @@ export async function POST(request: NextRequest) {
           updated_at: new Date().toISOString(),
         }).eq('user_id', userId)
 
-        await svc.from('subscription_events').insert({
-          user_id: userId,
-          plan_id: 'free',
-          event_type: 'churned',
-          from_plan: planId,
-          to_plan: 'free',
-          stripe_event_id: event.id,
-        })
+        await Promise.all([
+          svc.from('subscription_events').insert({
+            user_id: userId, plan_id: 'free', event_type: 'churned',
+            from_plan: planId, to_plan: 'free', stripe_event_id: event.id,
+          }),
+          trackConversionEvent({
+            userId, planId, stripeEvent: event.id, eventType: 'downgrade',
+            metadata: { reason: 'canceled', stripe_subscription_id: sub.id },
+          }),
+        ])
         break
       }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { trackActivation } from '@/lib/activation'
 import { canCreateSession } from '@/lib/billing'
+import { trackFirstValue, maybeTrackTrialActivation, getDaysSince } from '@/lib/instrumentation'
 
 /**
  * POST /api/test-runs 
@@ -123,7 +124,7 @@ export async function PATCH(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Track A5 / A6 when a session run completes
+  // Track A5 / A6 + instrumentation when a session run completes
   if (status === 'completed' && data?.session_id) {
     const svc2 = createServiceClient()
     const { count: completedCount } = await svc2
@@ -146,6 +147,36 @@ export async function PATCH(request: NextRequest) {
         step: 'A6',
         sessionId: data.session_id,
         metadata: { run_id: data.id, attended_count: computedMetrics.attended_count ?? 0 },
+      })
+    }
+
+    // Instrumentation: first_session_completed + trial activation check
+    const daysSinceTrial = await getDaysSince(user.id, 'trial_start')
+    await Promise.all([
+      trackFirstValue({
+        userId: user.id,
+        milestone: 'first_session_completed',
+        context: { run_id: data.id, session_id: data.session_id, session_count: sessionCount },
+        daysSinceTrialStart: daysSinceTrial ?? undefined,
+      }),
+      maybeTrackTrialActivation(user.id),
+    ])
+
+    // Paid first value: first completed session after becoming paid
+    const { data: paidConv } = await svc2
+      .from('conversion_events')
+      .select('created_at')
+      .eq('user_id', user.id)
+      .eq('event_type', 'paid_conversion')
+      .single()
+    if (paidConv) {
+      const daysSincePaid = Math.floor((Date.now() - new Date(paidConv.created_at).getTime()) / 86400000)
+      await trackFirstValue({
+        userId: user.id,
+        milestone: 'first_post_pay_session',
+        context: { run_id: data.id, days_since_paid: daysSincePaid },
+        daysSinceTrialStart: daysSinceTrial ?? undefined,
+        daysSincePaidStart: daysSincePaid,
       })
     }
   }

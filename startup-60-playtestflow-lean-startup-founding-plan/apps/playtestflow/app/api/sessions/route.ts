@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { trackActivation } from '@/lib/activation'
 import { canCreateSession, getUserPlan } from '@/lib/billing'
+import { trackFirstValue, getDaysSince } from '@/lib/instrumentation'
 
 /**
  * POST /api/sessions
@@ -84,9 +85,16 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Track A3 (session published) + A4 (scheduled) — non-throwing
+  // Track A3 (session published) + A4 (scheduled) + first_session_created — non-throwing
+  const daysSinceTrial = await getDaysSince(user.id, 'trial_start')
   const activationSteps: Promise<unknown>[] = [
     trackActivation({ designerId: user.id, step: 'A3', sessionId: data.id, metadata: { project_id } }).catch(() => {}),
+    trackFirstValue({
+      userId: user.id,
+      milestone: 'first_session_created',
+      context: { session_id: data.id, project_id },
+      daysSinceTrialStart: daysSinceTrial ?? undefined,
+    }).catch(() => {}),
   ]
   if (scheduled_at) {
     activationSteps.push(

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getCreditBalance, getCreditTransactions, getTopupPackages } from '@/lib/credits'
 import { getUserPlan, getUserUsage } from '@/lib/billing'
 import BillingActions from './BillingActions'
+import CancelButton from './CancelButton'
 
 function PlanBadge({ plan, status }: { plan: string; status: string }) {
   const colors: Record<string, string> = {
@@ -111,9 +112,12 @@ export default async function BillingPage({ searchParams }: { searchParams: Prom
 
           <div className="flex gap-2 pt-2">
             {userPlan.isFree ? (
-              <BillingActions action="upgrade" label="Upgrade to Pro →" variant="primary" />
+              <BillingActions action="upgrade" label="Upgrade to Pro \u2192" variant="primary" />
             ) : (
-              <BillingActions action="portal" label="Manage subscription" variant="outline" />
+              <>
+                <BillingActions action="portal" label="Manage subscription" variant="outline" />
+                <CancelButton planId={userPlan.planId} />
+              </>
             )}
           </div>
         </div>
