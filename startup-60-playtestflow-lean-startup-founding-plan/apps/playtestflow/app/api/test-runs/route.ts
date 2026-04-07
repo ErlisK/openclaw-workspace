@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { trackActivation } from '@/lib/activation'
+import { canCreateSession } from '@/lib/billing'
 
 /**
  * POST /api/test-runs 
@@ -14,6 +15,15 @@ export async function POST(request: NextRequest) {
   const { session_id, template_id, rule_version_id, facilitator_notes } = await request.json()
 
   if (!session_id) return NextResponse.json({ error: 'session_id required' }, { status: 400 })
+
+  // ── Paywall check ────────────────────────────────────────────────────────────
+  const paywall = await canCreateSession(user.id)
+  if (!paywall.allowed) {
+    return NextResponse.json(
+      { error: paywall.reason ?? 'Session limit reached. Upgrade your plan.', upgrade_required: true },
+      { status: 403 }
+    )
+  }
 
   // Verify session ownership
   const { data: session } = await supabase
@@ -137,6 +147,26 @@ export async function PATCH(request: NextRequest) {
         sessionId: data.session_id,
         metadata: { run_id: data.id, attended_count: computedMetrics.attended_count ?? 0 },
       })
+    }
+  }
+
+  // Non-throwing: spend reward credits automatically when run completes
+  if (status === 'completed' && data?.session_id) {
+    try {
+      const { spendCredit, canRewardTester } = await import('@/lib/credits')
+      const attended = computedMetrics.attended_count ?? 0
+      if (attended > 0) {
+        const { canReward } = await canRewardTester(user.id)
+        if (canReward) {
+          await spendCredit({
+            userId: user.id,
+            sessionId: data.id,
+            description: `Auto-reward for ${attended} tester(s) — session complete`,
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[test-runs PATCH] credit spend non-critical:', err)
     }
   }
 
