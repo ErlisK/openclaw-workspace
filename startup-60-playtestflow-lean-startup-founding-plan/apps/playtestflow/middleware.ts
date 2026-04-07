@@ -24,25 +24,43 @@ export async function middleware(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  const { pathname } = request.nextUrl
 
-  // Protect /dashboard routes
-  if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+  // ── Unauthenticated: protect /dashboard routes ────────────────────────────
+  if (!user && pathname.startsWith('/dashboard')) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
-    url.searchParams.set('redirect', request.nextUrl.pathname)
+    url.searchParams.set('redirect', pathname)
     return NextResponse.redirect(url)
   }
 
-  // Redirect logged-in users away from /auth/login
-  if (user && request.nextUrl.pathname === '/auth/login') {
+  // ── Redirect logged-in users away from login page ────────────────────────
+  if (user && pathname === '/auth/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  // ── Consent gate: check TOS acceptance for dashboard access ──────────────
+  // Skip the consent page itself to avoid infinite redirect
+  if (user && pathname.startsWith('/dashboard') && pathname !== '/auth/consent') {
+    const { data: profile } = await supabase
+      .from('designer_profiles')
+      .select('tos_accepted_at')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile?.tos_accepted_at) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/consent'
+      url.searchParams.set('redirect', pathname)
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth/login'],
+  matcher: ['/dashboard/:path*', '/auth/login', '/auth/consent'],
 }
