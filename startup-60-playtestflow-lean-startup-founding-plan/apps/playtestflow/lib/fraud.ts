@@ -84,19 +84,14 @@ export async function runFraudScoring(): Promise<{
   const svc = createServiceClient()
 
   try {
-    // 1. Build fraud IP set (≥2 distinct emails from same IP)
-    const { data: ipRows } = await svc.rpc('exec_sql', {}).throwOnError() // fallback to direct query
-      .catch(() => ({ data: null }))
-
-    // Use raw queries via direct DB access since we need aggregates
-    // We'll do this via individual queries
+    // 1. Build fraud signal sets from signups
     const { data: ipData } = await svc
       .from('session_signups')
       .select('ip_address, tester_email')
       .not('ip_address', 'is', null)
 
     const ipEmailMap: Record<string, Set<string>> = {}
-    for (const row of ipData ?? []) {
+    for (const row of (ipData ?? [])) {
       const ip = row.ip_address as string
       if (!ip) continue
       if (!ipEmailMap[ip]) ipEmailMap[ip] = new Set()
@@ -108,9 +103,8 @@ export async function runFraudScoring(): Promise<{
         .map(([ip]) => ip)
     )
 
-    // 2. Build fraud email set (same email signed up >1 time)
     const emailCounts: Record<string, number> = {}
-    for (const row of ipData ?? []) {
+    for (const row of (ipData ?? [])) {
       if (row.tester_email) emailCounts[row.tester_email] = (emailCounts[row.tester_email] ?? 0) + 1
     }
     const fraudEmails = new Set(
