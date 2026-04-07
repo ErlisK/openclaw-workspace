@@ -1,5 +1,7 @@
-import { createServiceClient } from '@/lib/supabase-server'
+import { createServiceClient, createClient } from '@/lib/supabase-server'
+import { redirect } from 'next/navigation'
 import ConversionCharts from './ConversionCharts'
+import { isAdmin } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,6 +77,11 @@ function computeFirstValueStats(fve: Array<{ milestone: string; days_since_trial
 }
 
 export default async function ConversionPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
+
   const { events, cancelReasons, firstValueEvents, cohortEvents } = await getData()
 
   const funnel = computeFunnel(events)

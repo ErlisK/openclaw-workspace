@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isAdmin } from '@/lib/admin'
 
 const FLAG_LABELS: Record<string, { label: string; color: string }> = {
   duplicate_email: { label: 'Duplicate Email', color: 'text-red-400' },
@@ -25,6 +26,7 @@ export default async function FraudPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const svc = createServiceClient()
 

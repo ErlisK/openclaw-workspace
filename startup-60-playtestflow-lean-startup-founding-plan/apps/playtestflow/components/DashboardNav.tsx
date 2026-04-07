@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase-browser'
 
-export default function DashboardNav({ userEmail }: { userEmail: string }) {
+export default function DashboardNav({ userEmail, isAdmin = false }: { userEmail: string; isAdmin?: boolean }) {
   const pathname = usePathname()
   const router = useRouter()
 
@@ -14,28 +14,33 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     router.refresh()
   }
 
-  const links = [
+  const publicLinks = [
     { href: '/dashboard', label: 'Projects' },
     { href: '/dashboard/sessions', label: 'Sessions' },
     { href: '/dashboard/templates', label: 'Templates' },
     { href: '/dashboard/rewards', label: 'Rewards' },
     { href: '/dashboard/embed', label: 'Widget' },
-    { href: '/dashboard/analytics', label: 'Analytics' },
     { href: '/dashboard/schedule', label: 'Schedule' },
+    { href: '/dashboard/billing', label: 'Billing' },
+    { href: '/dashboard/monetization', label: 'Monetization' },
+    { href: '/dashboard/discord', label: 'Discord' },
+    { href: '/dashboard/referral', label: 'Referral' },
+    { href: '/dashboard/partners', label: 'Partners' },
+    { href: '/dashboard/privacy', label: 'Privacy' },
+  ]
+
+  const adminLinks = [
+    { href: '/dashboard/analytics', label: 'Analytics' },
     { href: '/dashboard/activation', label: 'Activation' },
     { href: '/dashboard/ab', label: 'A/B Tests' },
     { href: '/dashboard/fraud', label: 'Fraud & Quality' },
     { href: '/dashboard/nps-pmf', label: 'NPS & PMF' },
-    { href: '/dashboard/billing', label: 'Billing' },
-    { href: '/dashboard/monetization', label: 'Monetization' },
     { href: '/dashboard/price-research', label: 'Price Research' },
     { href: '/dashboard/conversion', label: 'Conversion' },
-    { href: '/dashboard/discord', label: 'Discord' },
-    { href: '/dashboard/referral', label: 'Referral' },
     { href: '/dashboard/status', label: 'Status' },
-    { href: '/dashboard/partners', label: 'Partners' },
-    { href: '/dashboard/privacy', label: 'Privacy' },
   ]
+
+  const links = isAdmin ? [...publicLinks, ...adminLinks] : publicLinks
 
   return (
     <nav className="border-b border-white/10 px-6 py-4">

@@ -1,5 +1,7 @@
-import { createServiceClient } from '@/lib/supabase-server'
+import { createServiceClient, createClient } from '@/lib/supabase-server'
+import { redirect } from 'next/navigation'
 import PriceResearchCharts from './PriceResearchCharts'
+import { isAdmin } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -70,6 +72,11 @@ function computeVWPoints(responses: Array<{ too_cheap: number; cheap: number; ex
 }
 
 export default async function PriceResearchPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
+
   const { responses, annualBreakdown, abResults } = await getVWData()
 
   const vw = computeVWPoints(responses.map(r => ({

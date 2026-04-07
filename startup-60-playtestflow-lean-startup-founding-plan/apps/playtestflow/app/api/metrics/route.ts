@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { isAdmin } from '@/lib/admin'
 
 /**
  * GET /api/metrics?format=json|csv&scope=all|session&session_id=...
@@ -14,7 +15,8 @@ import { createClient, createServiceClient } from '@/lib/supabase-server'
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!isAdmin(user.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { searchParams } = new URL(request.url)
   const format = searchParams.get('format') ?? 'json'

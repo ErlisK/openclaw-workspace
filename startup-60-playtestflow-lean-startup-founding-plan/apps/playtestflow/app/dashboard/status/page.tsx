@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase-server'
+import { isAdmin } from '@/lib/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,6 +9,7 @@ export default async function StatusPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const svc = createServiceClient()
 

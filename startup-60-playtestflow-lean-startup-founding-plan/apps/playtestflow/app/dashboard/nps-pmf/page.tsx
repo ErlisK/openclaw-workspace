@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { isAdmin } from '@/lib/admin'
 
 interface NPSRow {
   id: string
@@ -72,6 +73,7 @@ export default async function NPSPMFPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const svc = createServiceClient()
 

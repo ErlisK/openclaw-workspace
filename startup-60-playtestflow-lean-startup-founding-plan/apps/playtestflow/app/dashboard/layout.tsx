@@ -4,6 +4,7 @@ import DashboardNav from '@/components/DashboardNav'
 import VWSurveyTrigger from '@/components/VWSurveyTrigger'
 import { Suspense } from 'react'
 import ReferralConverter from '@/components/ReferralConverter'
+import { isAdmin } from '@/lib/admin'
 
 export default async function DashboardLayout({
   children,
@@ -31,7 +32,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
-      <DashboardNav userEmail={user.email ?? ''} />
+      <DashboardNav userEmail={user.email ?? ''} isAdmin={isAdmin(user.id)} />
       <main className="max-w-6xl mx-auto px-6 py-8">
         {children}
       </main>

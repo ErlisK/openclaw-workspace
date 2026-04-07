@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getABTestResults, type ABTestResult } from '@/lib/ab'
+import { isAdmin } from '@/lib/admin'
 
 function SignificanceBadge({ result }: { result: ABTestResult }) {
   if (result.significant) {
@@ -153,7 +154,7 @@ export default async function ABTestsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
-
+  if (!isAdmin(user.id)) redirect('/dashboard')
   const results = await getABTestResults()
 
   const significantTests = results.filter(r => r.significant)

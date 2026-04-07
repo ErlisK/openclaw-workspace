@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase-server'
+import { createServiceClient, createClient } from '@/lib/supabase-server'
+import { isAdmin } from '@/lib/admin'
 
 /**
  * POST /api/observability
@@ -55,12 +56,17 @@ export async function OPTIONS() {
  * Authenticated endpoint.
  */
 export async function GET(request: NextRequest) {
-  // Light auth check — any authenticated user can see platform metrics
+  // Admin-only: require either a valid CRON_SECRET bearer or an admin user session
   const authHeader = request.headers.get('authorization')
-  // In production this is behind the dashboard which requires auth;
-  // for the cron summary we allow a bearer secret too
   const cronSecret = process.env.CRON_SECRET ?? 'ptf-cron-dev'
   const isInternal = authHeader === `Bearer ${cronSecret}`
+
+  if (!isInternal) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!isAdmin(user.id)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const svc = createServiceClient()
 

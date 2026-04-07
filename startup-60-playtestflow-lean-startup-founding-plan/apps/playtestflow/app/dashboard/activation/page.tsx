@@ -1,6 +1,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import { getActivationStatus } from '@/lib/activation'
+import { isAdmin } from '@/lib/admin'
 
 const STEPS = [
   { key: 'A1', label: 'Create Project',         col: 'a1_signed_up_at',        desc: 'First project created' },
@@ -25,6 +26,7 @@ export default async function ActivationPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const status = await getActivationStatus(user.id)
   const completed = Object.values(status).filter(Boolean).length
