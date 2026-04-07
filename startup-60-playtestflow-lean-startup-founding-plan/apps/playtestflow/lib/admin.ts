@@ -32,6 +32,8 @@ export const ADMIN_ROUTES = [
   '/dashboard/conversion',
   '/dashboard/price-research',
   '/dashboard/nps-pmf',
+  '/dashboard/monetization',
+  '/dashboard/partners',
 ] as const
 
 /** Returns true if the given pathname is an admin-only dashboard route. */

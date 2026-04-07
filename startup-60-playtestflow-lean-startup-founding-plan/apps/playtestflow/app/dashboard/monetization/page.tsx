@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isAdmin } from '@/lib/admin'
 
 interface StatRow { label: string; value: string | number; sub?: string; color?: string }
 
@@ -31,6 +32,7 @@ export default async function MonetizationPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const svc = createServiceClient()
 

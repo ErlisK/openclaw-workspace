@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
+import { isAdmin } from '@/lib/admin'
 import { getAllPartners, getPartnerStats } from '@/lib/partners'
 import Link from 'next/link'
 
@@ -9,6 +10,7 @@ export default async function PartnersAdminPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
+  if (!isAdmin(user.id)) redirect('/dashboard')
 
   const partners = await getAllPartners()
   const statsMap: Record<string, Awaited<ReturnType<typeof getPartnerStats>>> = {}

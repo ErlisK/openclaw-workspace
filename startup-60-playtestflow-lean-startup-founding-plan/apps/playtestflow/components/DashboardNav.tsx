@@ -22,14 +22,14 @@ export default function DashboardNav({ userEmail, isAdmin = false }: { userEmail
     { href: '/dashboard/embed', label: 'Widget' },
     { href: '/dashboard/schedule', label: 'Schedule' },
     { href: '/dashboard/billing', label: 'Billing' },
-    { href: '/dashboard/monetization', label: 'Monetization' },
     { href: '/dashboard/discord', label: 'Discord' },
     { href: '/dashboard/referral', label: 'Referral' },
-    { href: '/dashboard/partners', label: 'Partners' },
     { href: '/dashboard/privacy', label: 'Privacy' },
   ]
 
   const adminLinks = [
+    { href: '/dashboard/monetization', label: 'Monetization' },
+    { href: '/dashboard/partners', label: 'Partners' },
     { href: '/dashboard/analytics', label: 'Analytics' },
     { href: '/dashboard/activation', label: 'Activation' },
     { href: '/dashboard/ab', label: 'A/B Tests' },
