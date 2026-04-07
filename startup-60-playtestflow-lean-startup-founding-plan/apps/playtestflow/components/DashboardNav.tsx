@@ -32,6 +32,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/conversion', label: 'Conversion' },
     { href: '/dashboard/discord', label: 'Discord' },
     { href: '/dashboard/referral', label: 'Referral' },
+    { href: '/dashboard/status', label: 'Status' },
   ]
 
   return (
