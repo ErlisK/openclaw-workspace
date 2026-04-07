@@ -1,0 +1,140 @@
+name: PlaytestFlow DB Migrations
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'startup-60-playtestflow-lean-startup-founding-plan/apps/playtestflow/supabase/migrations/**'
+      - '.github/workflows/playtestflow-migrations.yml'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (print SQL, do not execute)'
+        required: false
+        default: 'false'
+
+jobs:
+  migrate:
+    name: Apply DB Migrations
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: List pending migrations
+        id: list
+        run: |
+          MIGRATION_DIR="startup-60-playtestflow-lean-startup-founding-plan/apps/playtestflow/supabase/migrations"
+          echo "Migration files found:"
+          ls -la "$MIGRATION_DIR"/*.sql 2>/dev/null || echo "  (none)"
+          COUNT=$(ls "$MIGRATION_DIR"/*.sql 2>/dev/null | wc -l | tr -d ' ')
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Apply migrations (dry run)
+        if: github.event.inputs.dry_run == 'true'
+        run: |
+          MIGRATION_DIR="startup-60-playtestflow-lean-startup-founding-plan/apps/playtestflow/supabase/migrations"
+          for f in $(ls "$MIGRATION_DIR"/*.sql 2>/dev/null | sort); do
+            echo "=== DRY RUN: $f ==="
+            cat "$f"
+            echo ""
+          done
+
+      - name: Apply migrations via Supabase Management API
+        if: github.event.inputs.dry_run != 'true'
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          PROJECT_REF: lwvonpjjhpkuzuptlxlx
+        run: |
+          MIGRATION_DIR="startup-60-playtestflow-lean-startup-founding-plan/apps/playtestflow/supabase/migrations"
+          
+          python3 << 'PYEOF'
+          import os, json, subprocess, sys
+          from pathlib import Path
+          
+          PROJECT_REF = os.environ['PROJECT_REF']
+          TOKEN = os.environ['SUPABASE_ACCESS_TOKEN']
+          MIGRATION_DIR = Path('startup-60-playtestflow-lean-startup-founding-plan/apps/playtestflow/supabase/migrations')
+          
+          def run_sql(sql, label):
+              result = subprocess.run(
+                  ['curl', '-s', '-X', 'POST',
+                   f'https://api.supabase.com/v1/projects/{PROJECT_REF}/database/query',
+                   '-H', f'Authorization: Bearer {TOKEN}',
+                   '-H', 'Content-Type: application/json',
+                   '-d', json.dumps({'query': sql})],
+                  capture_output=True, text=True
+              )
+              data = json.loads(result.stdout)
+              if isinstance(data, dict) and 'message' in data:
+                  print(f'❌ {label}: {data["message"]}')
+                  return False
+              print(f'✅ {label}')
+              return True
+          
+          # Ensure migration tracking table exists
+          run_sql('''
+          CREATE TABLE IF NOT EXISTS _schema_migrations (
+            id serial PRIMARY KEY,
+            filename text UNIQUE NOT NULL,
+            applied_at timestamptz DEFAULT now(),
+            checksum text
+          )
+          ''', 'Ensure _schema_migrations table')
+          
+          migration_files = sorted(MIGRATION_DIR.glob('*.sql'))
+          if not migration_files:
+              print('No migration files found.')
+              sys.exit(0)
+          
+          for migration_file in migration_files:
+              filename = migration_file.name
+              sql_content = migration_file.read_text()
+              checksum = __import__('hashlib').md5(sql_content.encode()).hexdigest()
+              
+              # Check if already applied
+              check_result = subprocess.run(
+                  ['curl', '-s', '-X', 'POST',
+                   f'https://api.supabase.com/v1/projects/{PROJECT_REF}/database/query',
+                   '-H', f'Authorization: Bearer {TOKEN}',
+                   '-H', 'Content-Type: application/json',
+                   '-d', json.dumps({'query': f"SELECT id FROM _schema_migrations WHERE filename = '{filename}' LIMIT 1"})],
+                  capture_output=True, text=True
+              )
+              existing = json.loads(check_result.stdout)
+              if isinstance(existing, list) and len(existing) > 0:
+                  print(f'⏭  {filename}: already applied, skipping')
+                  continue
+              
+              print(f'\n📄 Applying: {filename}')
+              print(f'   Checksum: {checksum}')
+              
+              if run_sql(sql_content, f'Run {filename}'):
+                  record_sql = f"INSERT INTO _schema_migrations (filename, checksum) VALUES ('{filename}', '{checksum}') ON CONFLICT (filename) DO NOTHING"
+                  run_sql(record_sql, f'Record {filename}')
+              else:
+                  print(f'Migration failed: {filename}')
+                  sys.exit(1)
+          
+          print('\n✅ All migrations applied successfully')
+          PYEOF
+
+      - name: Summary
+        run: |
+          echo "## Migration Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Project:** lwvonpjjhpkuzuptlxlx (playtestflow)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Migration files:** ${{ steps.list.outputs.count }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.dry_run }}" == "true" ]; then
+            echo "- **Mode:** Dry run (no changes applied)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Mode:** Applied" >> $GITHUB_STEP_SUMMARY
+          fi
