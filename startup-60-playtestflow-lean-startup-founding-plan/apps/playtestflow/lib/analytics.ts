@@ -123,3 +123,8 @@ export function trackConsentChecked(checked: boolean, sourcePath?: string) {
     source_path: sourcePath || window.location.pathname,
   })
 }
+
+// ─── Re-export privacy-safe abstractions from the analytics module ────────────
+// Note: trackServer lives in lib/analytics/server.ts (Node-only) and must be
+// imported directly in API routes — do NOT re-export it here (client bundle).
+export { track, hashEmail, hasConsent, setConsent } from '@/lib/analytics/index'

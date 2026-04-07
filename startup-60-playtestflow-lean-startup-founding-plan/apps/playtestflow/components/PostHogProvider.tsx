@@ -17,8 +17,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     posthog.init(key, {
       api_host: host,
       person_profiles: 'identified_only',
-      capture_pageview: true,
-      capture_pageleave: true,
+      // Privacy-safe defaults — no autocapture, no session recording
+      autocapture: false,
+      disable_session_recording: true,
+      capture_pageview: false, // We emit explicit landing_view instead
+      capture_pageleave: false,
       loaded: (ph) => {
         if (process.env.NODE_ENV === 'development') {
           // Uncomment to debug in dev:

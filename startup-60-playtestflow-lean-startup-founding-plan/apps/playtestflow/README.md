@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PlaytestFlow
+
+A lightweight web app for indie tabletop and RPG designers to run repeatable remote playtests. Built with Next.js (App Router), Supabase, and Vercel.
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost.3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Create a `.env.local` file with at minimum:
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key   # server-side only
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Optional: Enable PostHog Analytics
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+PostHog integration is entirely optional. The app runs fine without these keys. When you add them, events start flowing automatically — no code changes needed.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```env
+# Client-side (prefix NEXT_PUBLIC_)
+NEXT_PUBLIC_POSTHOG_KEY=phc_xxxxxxxxxxxx
+NEXT_PUBLIC_POSTHOG_HOST=https://app.posthog.com   # default
 
-## Deploy on Vercel
+# Server-side (no NEXT_PUBLIC_ prefix)
+POSTHOG_KEY=phc_xxxxxxxxxxxx
+POSTHOG_HOST=https://app.posthog.com               # default
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Ops
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Health Check
+
+**`GET /api/health`** — Checks server and database connectivity.
+
+```bash
+curl https://playtestflow.vercel.app/api/health
+```
+
+Expected response (200 OK):
+
+```json
+{
+  "ok": true,
+  "db_ok": true,
+  "timestamp": "2025-01-01T00:00:00.000Z",
+  "version": "abc12345",
+  "region": "iad1"
+}
+```
+
+| Field | Description |
+|---|---|
+| `ok` | Overall health — currently mirrors `db_ok` |
+| `db_ok` | Whether Supabase is reachable and queryable |
+| `timestamp` | ISO-8601 time of the check |
+| `version` | Git commit SHA (8 chars) or `package.json` version |
+| `region` | Vercel edge region (`VERCEL_REGION`), or `null` locally |
+
+Response is always **200**; check `ok` and `db_ok` for actual status. `Cache-Control: no-store` is set.
+
+### Analytics Abstraction
+
+Analytics live in `lib/analytics/index.ts`. Two layers:
+
+**Client (`track(event, props)`):**
+- No-op until the user accepts IRB consent (stored in `localStorage['irb_consent']`)
+- No-op when `NEXT_PUBLIC_POSTHOG_KEY` is absent
+- `autocapture` and `disable_session_recording` are `true` — only explicit events fire
+
+**Server (`trackServer(event, props, distinctId?)`):**
+- Safe to call from API routes; never includes raw PII
+- No-op when `POSTHOG_KEY` is absent
+- Uses `posthog-node` with immediate flush
+
+### Instrumented Events
+
+| Event | Layer | Notes |
+|---|---|---|
+| `waitlist_submitted` | Server | `email_hash` (SHA-256), `role`, UTM fields |
+| `cta_click` | Client | `id`, `location`, `path`; consent-gated |
+| `consent_accepted` | Client | fires once on checkbox check |
+
+### Privacy Stance
+
+- **Explicit events only** — autocapture disabled
+- **Hashed identifiers** — raw emails never leave the API route; SHA-256 hash used as `distinct_id`
+- **Consent-gated client events** — client events require `localStorage['irb_consent'] === 'true'`
+- **No session recording** by default
+- **Free-text excluded** — user-provided text fields never sent to analytics
+
+## Deploy
+
+Push to `main` → Vercel auto-deploys via GitHub integration.
+
+To trigger manually:
+```bash
+vercel --prod
+```

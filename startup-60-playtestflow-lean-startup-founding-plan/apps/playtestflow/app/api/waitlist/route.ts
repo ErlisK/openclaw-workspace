@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { hashEmail, trackServer } from '@/lib/analytics/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -64,6 +65,22 @@ export async function POST(request: NextRequest) {
         referrer: referrer ?? null,
       }])
     }
+
+    // Fire analytics event — hashed email only, no raw PII
+    const emailHash = await hashEmail(email)
+    await trackServer(
+      'waitlist_submitted',
+      {
+        email_hash: emailHash,
+        role: role || 'designer',
+        source: 'waitlist_api',
+        utm_source: utm_source ?? null,
+        utm_medium: utm_medium ?? null,
+        utm_campaign: utm_campaign ?? null,
+        interview_interested: interview_interested ?? false,
+      },
+      emailHash // use hash as distinct_id
+    )
 
     return NextResponse.json({
       success: true,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getAnalyticsContext, trackPageView, persistUtms, trackWaitlistSubmit, trackPricingClick, trackConsentChecked } from '@/lib/analytics'
+import { getAnalyticsContext, trackPageView, persistUtms, trackWaitlistSubmit, trackPricingClick, trackConsentChecked, track, setConsent as persistConsent } from '@/lib/analytics'
 
 export default function Home() {
   const [email, setEmail] = useState('')
@@ -22,6 +22,7 @@ export default function Home() {
   async function handlePricingClick(tier: string) {
     setPricingClicked(tier)
     trackPricingClick(tier)
+    track('cta_click', { id: 'see_pricing', label: tier, location: 'pricing', path: typeof window !== 'undefined' ? window.location.pathname : '/' })
     try {
       await fetch('/api/pricing-click', {
         method: 'POST',
@@ -97,7 +98,7 @@ export default function Home() {
             PlaytestFlow replaces messy Discord threads and scattered Google Forms with a structured, trackable remote playtest pipeline. Save 5+ hours per test cycle. Iterate faster.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#waitlist" className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors">
+            <a href="#waitlist" onClick={() => track('cta_click', { id: 'join_waitlist', location: 'hero', path: typeof window !== 'undefined' ? window.location.pathname : '/' })} className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors">
               Join the Waitlist
             </a>
             <a href="#how-it-works" className="border border-white/20 hover:border-white/40 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors">
@@ -517,7 +518,12 @@ export default function Home() {
                   <input
                     type="checkbox"
                     checked={consent}
-                    onChange={(e) => { setConsent(e.target.checked); trackConsentChecked(e.target.checked) }}
+                    onChange={(e) => {
+                      setConsent(e.target.checked)
+                      trackConsentChecked(e.target.checked)
+                      persistConsent(e.target.checked)
+                      if (e.target.checked) track('consent_accepted', { path: typeof window !== 'undefined' ? window.location.pathname : '/' })
+                    }}
                     className="mt-0.5 accent-orange-500"
                   />
                   <span className="text-sm text-gray-300">
