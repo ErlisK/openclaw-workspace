@@ -8,14 +8,27 @@ export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const [message, setMessage] = useState('')
+  const [refBanner, setRefBanner] = useState<{ code: string; reward: string } | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const errorParam = searchParams.get('error')
+  const refCode = searchParams.get('ref')
 
   useEffect(() => {
     if (errorParam) setMessage(errorParam === 'auth_failed' ? 'Authentication failed. Please try again.' : errorParam)
   }, [errorParam])
+
+  // Validate referral code and show banner
+  useEffect(() => {
+    if (!refCode) return
+    // Store in sessionStorage for post-login conversion
+    sessionStorage.setItem('ptf_ref', refCode)
+    fetch(`/api/referral/validate?code=${encodeURIComponent(refCode)}`)
+      .then(r => r.json())
+      .then(d => { if (d.valid) setRefBanner({ code: d.code, reward: d.rewardDescription }) })
+      .catch(() => {})
+  }, [refCode])
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault()
@@ -45,6 +58,13 @@ export default function LoginForm() {
         <h1 className="text-2xl font-bold text-white mb-2">Designer Portal</h1>
         <p className="text-gray-400 text-sm">Sign in with a magic link — no password needed.</p>
       </div>
+
+      {refBanner && (
+        <div className="mb-4 bg-[#ff6600]/10 border border-[#ff6600]/25 rounded-xl px-4 py-3 text-sm text-center">
+          <span className="text-[#ff6600] font-semibold">🎁 Referral bonus:</span>{' '}
+          <span className="text-gray-300">{refBanner.reward} will be added to your account on signup.</span>
+        </div>
+      )}
 
       <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
         {status === 'sent' ? (

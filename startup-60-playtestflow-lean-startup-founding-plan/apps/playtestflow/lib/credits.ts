@@ -182,7 +182,7 @@ export async function addCredits({
 }: {
   userId: string
   amount: number
-  type: 'topup_stripe' | 'plan_grant' | 'refund' | 'adjustment'
+  type: 'topup_stripe' | 'plan_grant' | 'refund' | 'adjustment' | 'referral_bonus' | 'referral_payout'
   description: string
   referenceId?: string
   stripePaymentIntentId?: string

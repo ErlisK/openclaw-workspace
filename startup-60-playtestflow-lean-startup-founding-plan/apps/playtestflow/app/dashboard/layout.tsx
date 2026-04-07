@@ -2,6 +2,8 @@ import { createClient, createServiceClient } from '@/lib/supabase-server'
 import { redirect } from 'next/navigation'
 import DashboardNav from '@/components/DashboardNav'
 import VWSurveyTrigger from '@/components/VWSurveyTrigger'
+import { Suspense } from 'react'
+import ReferralConverter from '@/components/ReferralConverter'
 
 export default async function DashboardLayout({
   children,
@@ -33,8 +35,8 @@ export default async function DashboardLayout({
       <main className="max-w-6xl mx-auto px-6 py-8">
         {children}
       </main>
-      {/* VW price sensitivity survey — shown to trialing users after 30s */}
       <VWSurveyTrigger isTrialing={isTrialing} />
+      <Suspense fallback={null}><ReferralConverter /></Suspense>
     </div>
   )
 }
