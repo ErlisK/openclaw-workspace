@@ -25,6 +25,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/activation', label: 'Activation' },
     { href: '/dashboard/ab', label: 'A/B Tests' },
     { href: '/dashboard/fraud', label: 'Fraud & Quality' },
+    { href: '/dashboard/nps-pmf', label: 'NPS & PMF' },
   ]
 
   return (
