@@ -11,7 +11,7 @@ export async function GET() {
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     if (url && key) {
       const supabase = createClient(url, key)
-      const { error } = await supabase.from('waitlist').select('id').limit(1)
+      const { error } = await supabase.from('waitlist_signups').select('id').limit(1)
       if (!error) supabaseStatus = 'ok'
     }
   } catch {
