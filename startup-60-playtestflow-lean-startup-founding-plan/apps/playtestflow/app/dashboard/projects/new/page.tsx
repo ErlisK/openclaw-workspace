@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 export default function NewProjectPage() {
   const [name, setName] = useState('')
@@ -9,47 +9,31 @@ export default function NewProjectPage() {
   const [gameType, setGameType] = useState('board_game')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [upgradeRequired, setUpgradeRequired] = useState(false)
   const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setUpgradeRequired(false)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, description: description || null, game_type: gameType }),
+    })
 
-    if (!user) {
-      router.push('/auth/login')
-      return
-    }
+    const data = await res.json()
 
-    const { data, error: err } = await supabase
-      .from('projects')
-      .insert({
-        name,
-        description: description || null,
-        game_type: gameType,
-        designer_id: user.id,
-        status: 'active',
-      })
-      .select()
-      .single()
-
-    if (err) {
-      setError(err.message)
+    if (!res.ok) {
+      setError(data.error ?? 'Failed to create project')
+      if (data.upgrade_required) setUpgradeRequired(true)
       setLoading(false)
       return
     }
 
-    // Track A1 — project created
-    await fetch('/api/activation', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ step: 'A1', project_id: data.id, metadata: { game_type: gameType } }),
-    }).catch(() => {}) // non-blocking
-
-    router.push(`/dashboard/projects/${data.id}`)
+    router.push(`/dashboard/projects/${data.project.id}`)
   }
 
   return (
@@ -106,8 +90,13 @@ export default function NewProjectPage() {
           </div>
 
           {error && (
-            <div className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-              {error}
+            <div className={`text-sm rounded-lg px-4 py-3 ${upgradeRequired ? 'text-orange-300 bg-orange-500/10 border border-orange-500/20' : 'text-red-400 bg-red-500/10 border border-red-500/20'}`}>
+              <div>{error}</div>
+              {upgradeRequired && (
+                <Link href="/pricing" className="inline-block mt-2 text-orange-400 font-semibold underline underline-offset-2">
+                  View upgrade options →
+                </Link>
+              )}
             </div>
           )}
 

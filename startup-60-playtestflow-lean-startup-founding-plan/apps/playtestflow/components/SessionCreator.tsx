@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase-browser'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 
 interface RuleVersion {
   id: string
@@ -26,46 +26,40 @@ export default function SessionCreator({
   const [durationMinutes, setDurationMinutes] = useState(90)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [upgradeRequired, setUpgradeRequired] = useState(false)
   const router = useRouter()
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setUpgradeRequired(false)
 
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { setError('Not authenticated'); setLoading(false); return }
-
-    const { error: err } = await supabase.from('playtest_sessions').insert({
-      project_id: projectId,
-      designer_id: user.id,
-      title,
-      rule_version_id: ruleVersionId || null,
-      scheduled_at: scheduledAt || null,
-      max_testers: maxTesters,
-      platform: platform || null,
-      meeting_url: meetingUrl || null,
-      duration_minutes: durationMinutes,
-      status: 'recruiting',
+    // ── Route through API — server-side paywall check ─────────────────────────
+    const res = await fetch('/api/sessions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        project_id: projectId,
+        title,
+        rule_version_id: ruleVersionId || null,
+        scheduled_at: scheduledAt || null,
+        max_testers: maxTesters,
+        platform: platform || null,
+        meeting_url: meetingUrl || null,
+        duration_minutes: durationMinutes,
+        status: 'recruiting',
+      }),
     })
 
-    if (err) {
-      setError(err.message)
+    const data = await res.json()
+
+    if (!res.ok) {
+      setError(data.error ?? 'Failed to create session')
+      if (data.upgrade_required) setUpgradeRequired(true)
       setLoading(false)
       return
     }
-
-    // Track A3 — recruit link published + A4 — session scheduled (if scheduled_at set)
-    const steps: string[] = ['A3']
-    if (scheduledAt) steps.push('A4')
-    await Promise.all(steps.map(step =>
-      fetch('/api/activation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ step, project_id: projectId, metadata: { platform, scheduled_at: scheduledAt || null } }),
-      }).catch(() => {})
-    ))
 
     setOpen(false)
     setTitle('')
@@ -171,7 +165,16 @@ export default function SessionCreator({
         </div>
       </div>
 
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && (
+        <div className={`text-xs rounded-lg px-3 py-2 ${upgradeRequired ? 'text-orange-300 bg-orange-500/10 border border-orange-500/20' : 'text-red-400 bg-red-500/10 border border-red-500/20'}`}>
+          <div>{error}</div>
+          {upgradeRequired && (
+            <Link href="/pricing" className="inline-block mt-1 font-semibold underline underline-offset-2">
+              Upgrade plan →
+            </Link>
+          )}
+        </div>
+      )}
 
       <button
         type="submit"
