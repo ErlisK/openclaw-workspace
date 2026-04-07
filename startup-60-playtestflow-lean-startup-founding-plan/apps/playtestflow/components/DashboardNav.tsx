@@ -33,6 +33,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/discord', label: 'Discord' },
     { href: '/dashboard/referral', label: 'Referral' },
     { href: '/dashboard/status', label: 'Status' },
+    { href: '/dashboard/partners', label: 'Partners' },
   ]
 
   return (
