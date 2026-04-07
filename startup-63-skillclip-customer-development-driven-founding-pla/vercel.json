@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://qifxwrixwjgnitjsncxs.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpZnh3cml4d2pnbml0anNuY3hzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1ODQwNDksImV4cCI6MjA5MTE2MDA0OX0.ZXv4U29PdANJM5lVvDI0BnQwoFqmd4HKXtSkfE0CSO8",
+    "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFpZnh3cml4d2pnbml0anNuY3hzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTU4NDA0OSwiZXhwIjoyMDkxMTYwMDQ5fQ.Cgdz1b-HJbkxyQ8PZNnKVULGVjiIrAQF3vPZq_J7gKI",
+    "NEXT_PUBLIC_SITE_URL": "https://certclip.com"
+  }
+}
