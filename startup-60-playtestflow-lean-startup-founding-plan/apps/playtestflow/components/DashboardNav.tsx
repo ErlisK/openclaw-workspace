@@ -28,6 +28,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/nps-pmf', label: 'NPS & PMF' },
     { href: '/dashboard/billing', label: 'Billing' },
     { href: '/dashboard/monetization', label: 'Monetization' },
+    { href: '/dashboard/price-research', label: 'Price Research' },
   ]
 
   return (
