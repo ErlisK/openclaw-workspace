@@ -1,378 +1,534 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback, Suspense } from "react";
 import { createClient } from "@/lib/supabase-browser";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-interface ClipWithReview {
-  review_id: string;
-  review_status: string;
-  clip_id: string;
-  clip_title: string;
-  clip_description: string | null;
-  clip_duration: number | null;
-  clip_challenge: string | null;
-  uploader_name: string | null;
-  trade_name: string | null;
-  created_at: string;
+// ── Types ─────────────────────────────────────────────────────────────────────
+interface TimestampedNote { time: string; note: string; code_ref_id?: string }
+interface CodeRef { id: string; code_standard: string; section: string; title: string; description: string; severity: "violation" | "warning" | "informational"; skill_tags: string[] }
+interface ClipData {
+  id: string; title: string; description: string; challenge_prompt: string;
+  duration_seconds: number; storage_path: string; storage_bucket: string;
+  skill_tags: string[]; created_at: string; status: string;
+  uploader: { id: string; full_name: string; email: string; years_experience: number; bio: string }
+  trade: { id: string; slug: string; name: string }
+  region: { id: string; region_code: string; name: string; code_standard: string }
+}
+interface PendingReview { id: string; status: string; assigned_at: string; clip: ClipData & { uploader: { full_name: string } } }
+
+const SEVERITY_STYLE: Record<string, string> = {
+  violation:     "bg-red-50 border-red-300 text-red-800",
+  warning:       "bg-amber-50 border-amber-300 text-amber-800",
+  informational: "bg-blue-50 border-blue-200 text-blue-800",
+}
+const SEVERITY_BADGE: Record<string, string> = {
+  violation:     "bg-red-100 text-red-700",
+  warning:       "bg-amber-100 text-amber-700",
+  informational: "bg-blue-100 text-blue-700",
 }
 
-interface ReviewForm {
-  overall_rating: number;
-  skill_level: "apprentice" | "journeyman" | "master";
-  feedback_text: string;
-  code_compliance_pass: boolean;
-  jurisdiction_notes: string;
-  timestamped_notes: { time: string; note: string }[];
+function fmtTime(s: number) {
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60)
+  return `${m}:${sec.toString().padStart(2, "0")}`
 }
 
-export default function ReviewPage() {
-  const supabase = createClient();
-  const router = useRouter();
-  const [profileId, setProfileId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [clips, setClips] = useState<ClipWithReview[]>([]);
-  const [selected, setSelected] = useState<ClipWithReview | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [form, setForm] = useState<ReviewForm>({
-    overall_rating: 3,
-    skill_level: "journeyman",
-    feedback_text: "",
-    code_compliance_pass: true,
-    jurisdiction_notes: "",
-    timestamped_notes: [],
-  });
-  const [saving, setSaving] = useState(false);
-  const [savedCount, setSavedCount] = useState(0);
-  const [newNote, setNewNote] = useState("");
-  const [newNoteTime, setNewNoteTime] = useState("");
+// ── Main component ────────────────────────────────────────────────────────────
+function ReviewPageInner() {
+  const supabase = createClient()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const initialClipId = searchParams.get("clip_id")
 
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const reviewStartRef = useRef<number>(Date.now())
+
+  const [profileId, setProfileId] = useState<string | null>(null)
+  const [profileName, setProfileName] = useState("")
+  const [view, setView] = useState<"queue" | "review">(initialClipId ? "review" : "queue")
+
+  // Queue view
+  const [queue, setQueue] = useState<PendingReview[]>([])
+  const [queueLoading, setQueueLoading] = useState(false)
+
+  // Review view
+  const [clip, setClip] = useState<ClipData | null>(null)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [codeRefs, setCodeRefs] = useState<CodeRef[]>([])
+  const [existingReviewId, setExistingReviewId] = useState<string | null>(null)
+  const [clipLoading, setClipLoading] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Review form
+  const [rating, setRating] = useState(4)
+  const [skillLevel, setSkillLevel] = useState<"apprentice" | "journeyman" | "master">("journeyman")
+  const [feedbackText, setFeedbackText] = useState("")
+  const [compliancePass, setCompliancePass] = useState(true)
+  const [jurisdictionNotes, setJurisdictionNotes] = useState("")
+  const [promptAddressed, setPromptAddressed] = useState<boolean | null>(null)
+  const [selectedCodeRefs, setSelectedCodeRefs] = useState<string[]>([])
+  const [timestampedNotes, setTimestampedNotes] = useState<TimestampedNote[]>([])
+  const [draftNote, setDraftNote] = useState("")
+  const [draftNoteRef, setDraftNoteRef] = useState<string>("")
+  const [issueBadge, setIssueBadge] = useState(false)
+  const [badgeTitle, setBadgeTitle] = useState("")
+
+  // Submit state
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState("")
+
+  // ── Auth ─────────────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) { router.push("/auth/login"); return; }
-      const { data: prof } = await supabase.from("profiles").select("id,role").eq("user_id", user.id).single();
-      if (!prof || prof.role !== "mentor") { router.push("/dashboard"); return; }
-      setProfileId(prof.id);
+      if (!user) { router.push("/auth/login"); return }
+      const { data: prof } = await supabase.from("profiles").select("id,role,full_name").eq("user_id", user.id).single()
+      if (!prof || prof.role !== "mentor") { router.push("/dashboard"); return }
+      setProfileId(prof.id)
+      setProfileName(prof.full_name || "Mentor")
+    })
+  }, [])
 
-      // Load pending reviews with clip info
-      const { data: reviews } = await supabase
-        .from("reviews")
-        .select(`
-          id,
-          status,
-          clips (
-            id,
-            title,
-            description,
-            duration_seconds,
-            challenge_prompt,
-            storage_path,
-            storage_bucket,
-            profiles ( full_name ),
-            trades ( name )
-          )
-        `)
-        .in("status", ["pending", "in_progress"])
-        .order("created_at", { ascending: true })
-        .limit(20);
+  // ── Load queue ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!profileId || view !== "queue") return
+    setQueueLoading(true)
+    fetch(`/api/review?mentor_id=${profileId}`)
+      .then(r => r.json())
+      .then(d => { setQueue(Array.isArray(d) ? d : []); setQueueLoading(false) })
+      .catch(() => setQueueLoading(false))
+  }, [profileId, view])
 
-      if (reviews) {
-        const mapped: ClipWithReview[] = reviews
-          .filter(r => r.clips)
-          .map((r: any) => ({
-            review_id: r.id,
-            review_status: r.status,
-            clip_id: r.clips.id,
-            clip_title: r.clips.title,
-            clip_description: r.clips.description,
-            clip_duration: r.clips.duration_seconds,
-            clip_challenge: r.clips.challenge_prompt,
-            uploader_name: r.clips.profiles?.full_name || null,
-            trade_name: r.clips.trades?.name || null,
-            created_at: r.created_at,
-          }));
-        setClips(mapped);
+  // ── Load clip for review ──────────────────────────────────────────────────
+  const loadClip = useCallback(async (clipId: string) => {
+    if (!profileId) return
+    setClipLoading(true)
+    reviewStartRef.current = Date.now()
+    const res = await fetch(`/api/review?clip_id=${clipId}&mentor_id=${profileId}`)
+    const data = await res.json()
+    if (data.clip) {
+      setClip(data.clip)
+      setVideoUrl(data.video_url)
+      setCodeRefs(data.code_refs || [])
+      if (data.review) {
+        setExistingReviewId(data.review.id)
+        setRating(data.review.overall_rating || 4)
+        setSkillLevel(data.review.skill_level || "journeyman")
+        setFeedbackText(data.review.feedback_text || "")
+        setCompliancePass(data.review.code_compliance_pass !== false)
+        setJurisdictionNotes(data.review.jurisdiction_notes || "")
+        setTimestampedNotes(data.review.timestamped_notes || [])
+        setSelectedCodeRefs(data.review.code_reference_ids || [])
+        setPromptAddressed(data.review.challenge_prompt_addressed ?? null)
       }
-      setLoading(false);
-    });
-  }, [savedCount]);
-
-  const loadVideo = async (clip: ClipWithReview) => {
-    setSelected(clip);
-    setVideoUrl(null);
-
-    // Claim the review
-    await supabase.from("reviews").update({
-      status: "in_progress",
-      reviewer_id: profileId,
-      assigned_at: new Date().toISOString(),
-    }).eq("id", clip.review_id);
-
-    // Get signed URL for video
-    const { data } = await supabase.storage
-      .from("clips")
-      .createSignedUrl(clip.clip_id + "/" + clip.clip_title, 3600); // fallback
-    
-    // Actually use storage_path from clip
-    const { data: signedData } = await supabase.storage
-      .from("clips")
-      .createSignedUrl(clip.clip_id, 3600);
-    
-    // Get the actual path from the clips table
-    const { data: clipData } = await supabase.from("clips").select("storage_path").eq("id", clip.clip_id).single();
-    if (clipData?.storage_path) {
-      const { data: urlData } = await supabase.storage.from("clips").createSignedUrl(clipData.storage_path, 3600);
-      if (urlData?.signedUrl) setVideoUrl(urlData.signedUrl);
+      // Pre-set jurisdiction notes from region code standard
+      if (!data.review && data.clip.region?.code_standard) {
+        setJurisdictionNotes(`Reviewed against ${data.clip.region.code_standard} for ${data.clip.region.name}.`)
+      }
     }
-  };
+    setView("review")
+    setClipLoading(false)
+  }, [profileId])
 
-  const addNote = () => {
-    if (!newNote) return;
-    setForm(f => ({
-      ...f,
-      timestamped_notes: [...f.timestamped_notes, { time: newNoteTime || "0:00", note: newNote }],
-    }));
-    setNewNote("");
-    setNewNoteTime("");
-  };
+  useEffect(() => {
+    if (profileId && initialClipId) loadClip(initialClipId)
+  }, [profileId, initialClipId])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selected || !profileId) return;
-    if (!form.feedback_text) { return; }
-    setSaving(true);
+  // ── Capture timestamp ─────────────────────────────────────────────────────
+  const captureTimestamp = useCallback(() => {
+    if (!videoRef.current || !draftNote.trim()) return
+    const t = fmtTime(videoRef.current.currentTime)
+    setTimestampedNotes(prev => [...prev, { time: t, note: draftNote.trim(), code_ref_id: draftNoteRef || undefined }])
+    setDraftNote("")
+    setDraftNoteRef("")
+  }, [draftNote, draftNoteRef])
 
-    const { error } = await supabase.from("reviews").update({
-      reviewer_id: profileId,
-      status: "completed",
-      overall_rating: form.overall_rating,
-      skill_level: form.skill_level,
-      feedback_text: form.feedback_text,
-      code_compliance_pass: form.code_compliance_pass,
-      jurisdiction_notes: form.jurisdiction_notes || null,
-      timestamped_notes: form.timestamped_notes,
-      is_public: true,
-      completed_at: new Date().toISOString(),
-    }).eq("id", selected.review_id);
+  const removeNote = (i: number) => setTimestampedNotes(prev => prev.filter((_, j) => j !== i))
 
-    if (!error) {
-      // Update clip status
-      await supabase.from("clips").update({ status: "reviewed" }).eq("id", selected.clip_id);
+  // ── Code ref toggle ───────────────────────────────────────────────────────
+  const toggleCodeRef = (id: string) =>
+    setSelectedCodeRefs(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
-      // Issue a badge
-      await supabase.from("badges").insert({
-        profile_id: (await supabase.from("clips").select("uploader_id").eq("id", selected.clip_id).single()).data?.uploader_id,
-        clip_id: selected.clip_id,
-        review_id: selected.review_id,
-        badge_type: "skill",
-        title: `Verified: ${selected.clip_title}`,
-        description: `Reviewed by a vetted journeyman. Skill level: ${form.skill_level}.`,
-        issued_by: profileId,
-        issued_at: new Date().toISOString(),
-      });
+  // ── Submit ────────────────────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    if (!clip || !profileId || !feedbackText.trim()) return
+    setSaving(true); setSaveError("")
+    const durationSec = Math.round((Date.now() - reviewStartRef.current) / 1000)
+    const res = await fetch("/api/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        review_id: existingReviewId,
+        clip_id: clip.id,
+        reviewer_id: profileId,
+        overall_rating: rating,
+        skill_level: skillLevel,
+        feedback_text: feedbackText,
+        code_compliance_pass: compliancePass,
+        jurisdiction_notes: jurisdictionNotes,
+        timestamped_notes: timestampedNotes,
+        code_reference_ids: selectedCodeRefs,
+        recommended_skill_level: skillLevel,
+        challenge_prompt_addressed: promptAddressed,
+        review_duration_seconds: durationSec,
+        is_public: true,
+        issue_badge: issueBadge,
+        badge_title: badgeTitle || undefined,
+        badge_type: "skill_verification",
+        skill_tags: clip.skill_tags || [],
+      }),
+    })
+    const data = await res.json()
+    if (!res.ok) { setSaveError(data.error || "Save failed"); setSaving(false); return }
+    setSaved(true)
+    setSaving(false)
+    setTimeout(() => { setSaved(false); setView("queue"); setClip(null); setVideoUrl(null); setTimestampedNotes([]); setFeedbackText(""); setSelectedCodeRefs([]); setIssueBadge(false); setBadgeTitle(""); setExistingReviewId(null); }, 2000)
+  }
 
-      setSelected(null);
-      setVideoUrl(null);
-      setForm({ overall_rating: 3, skill_level: "journeyman", feedback_text: "", code_compliance_pass: true, jurisdiction_notes: "", timestamped_notes: [] });
-      setSavedCount(c => c + 1);
-    }
-    setSaving(false);
-  };
+  // ── QUEUE VIEW ────────────────────────────────────────────────────────────
+  if (view === "queue") {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
+        <div className="max-w-3xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Mentor Review Queue</h1>
+              <p className="text-gray-500 text-sm mt-0.5">Welcome back, {profileName}</p>
+            </div>
+            <div className="bg-blue-600 text-white text-sm px-4 py-2 rounded-full font-medium">
+              {queue.length} pending
+            </div>
+          </div>
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#0f1117] flex items-center justify-center">
-      <p className="text-gray-400">Loading review queue...</p>
-    </div>
-  );
+          {queueLoading ? (
+            <div className="text-center text-gray-400 py-12 animate-pulse">Loading queue…</div>
+          ) : queue.length === 0 ? (
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+              <div className="text-4xl mb-3">✅</div>
+              <p className="text-gray-600 font-medium">Queue is clear — all clips reviewed!</p>
+              <p className="text-gray-400 text-sm mt-1">New assignments will appear here automatically.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {queue.map(item => (
+                <div key={item.id} onClick={() => loadClip(item.clip.id)}
+                  className="bg-white rounded-xl border border-gray-200 hover:shadow-md hover:border-blue-300 cursor-pointer transition-all p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-semibold text-gray-900 truncate">{item.clip.title}</div>
+                      <div className="text-sm text-gray-500 mt-0.5">
+                        {item.clip.trade?.name} · {item.clip.region?.region_code} · {item.clip.duration_seconds}s
+                      </div>
+                      {item.clip.challenge_prompt && (
+                        <div className="text-xs text-amber-700 bg-amber-50 rounded px-2 py-1 mt-2 line-clamp-1">
+                          🎯 {item.clip.challenge_prompt.slice(0, 100)}…
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-shrink-0 ml-4 text-right">
+                      <div className="text-xs text-gray-400">{item.clip.uploader?.full_name}</div>
+                      <div className="text-xs text-gray-400">{new Date(item.assigned_at).toLocaleDateString()}</div>
+                      <div className="mt-2 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Review →</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // ── REVIEW VIEW ───────────────────────────────────────────────────────────
+  if (clipLoading) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center animate-pulse text-gray-400">Loading clip…</div>
+  }
+
+  if (!clip) {
+    return <div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400">Clip not found</div>
+  }
+
+  const selectedRefs = codeRefs.filter(r => selectedCodeRefs.includes(r.id))
 
   return (
-    <div className="min-h-screen bg-[#0f1117] text-white">
-      <nav className="border-b border-white/10 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
-        <Link href="/" className="text-xl font-black">Cert<span className="text-yellow-400">Clip</span></Link>
-        <Link href="/dashboard" className="text-sm text-gray-400 hover:text-white">← Dashboard</Link>
-      </nav>
+    <div className="min-h-screen bg-gray-100" suppressHydrationWarning>
+      {/* Top bar */}
+      <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+        <button onClick={() => setView("queue")} className="text-sm text-gray-500 hover:text-gray-800 flex items-center gap-1.5">
+          ← Queue
+        </button>
+        <div className="text-center">
+          <div className="font-semibold text-gray-900 text-sm truncate max-w-xs">{clip.title}</div>
+          <div className="text-xs text-gray-400">{clip.trade?.name} · {clip.region?.region_code} · {clip.region?.code_standard}</div>
+        </div>
+        <button onClick={handleSubmit} disabled={!feedbackText.trim() || saving || saved}
+          className={`text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${saved ? "bg-green-500 text-white" : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40"}`}>
+          {saved ? "✓ Saved" : saving ? "Saving…" : "Submit Review"}
+        </button>
+      </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-10">
-        <h1 className="text-3xl font-black mb-2">Mentor Review Queue</h1>
-        <p className="text-gray-400 mb-8">{clips.length} clip{clips.length !== 1 ? "s" : ""} awaiting review</p>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Queue */}
-          <div>
-            <h2 className="font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">Pending Clips</h2>
-            {clips.length === 0 ? (
-              <div className="bg-white/5 border border-dashed border-white/20 rounded-xl p-8 text-center text-gray-400">
-                <p className="text-3xl mb-3">✅</p>
-                <p>Queue is empty — all caught up!</p>
-              </div>
+      <div className="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+        {/* ── Left: Video + Uploader ── */}
+        <div className="xl:col-span-2 space-y-4">
+          {/* Video player */}
+          <div className="bg-black rounded-xl overflow-hidden">
+            {videoUrl ? (
+              <video ref={videoRef} src={videoUrl} controls className="w-full max-h-[400px]"
+                onTimeUpdate={e => setCurrentTime(e.currentTarget.currentTime)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+              />
             ) : (
-              <div className="space-y-3">
-                {clips.map((clip) => (
-                  <div key={clip.review_id}
-                    onClick={() => loadVideo(clip)}
-                    className={`bg-white/5 border rounded-xl p-4 cursor-pointer transition-all ${
-                      selected?.review_id === clip.review_id ? "border-yellow-400/60 bg-yellow-400/5" : "border-white/10 hover:border-white/30"
-                    }`}>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-sm">{clip.clip_title}</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          {clip.uploader_name || "Unknown"} · {clip.trade_name || "Unknown trade"}
-                          {clip.clip_duration ? ` · ${clip.clip_duration}s` : ""}
-                        </p>
-                      </div>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        clip.review_status === "in_progress" ? "bg-blue-400/10 text-blue-400" : "bg-yellow-400/10 text-yellow-400"
-                      }`}>
-                        {clip.review_status === "in_progress" ? "In progress" : "Pending"}
-                      </span>
-                    </div>
-                    {clip.clip_challenge && (
-                      <p className="text-xs text-gray-500 mt-2 italic truncate">Prompt: {clip.clip_challenge}</p>
-                    )}
-                  </div>
-                ))}
+              <div className="w-full h-64 flex items-center justify-center text-gray-500">
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🎬</div>
+                  <div className="text-sm">Video preview (requires auth URL)</div>
+                  <div className="text-xs text-gray-400 mt-1">Path: {clip.storage_path}</div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Review panel */}
-          <div>
-            {!selected ? (
-              <div className="bg-white/5 border border-dashed border-white/20 rounded-xl p-10 text-center text-gray-400">
-                <p className="text-3xl mb-3">👆</p>
-                <p className="text-sm">Select a clip from the queue to review it</p>
-              </div>
-            ) : (
-              <div>
-                <h2 className="font-bold text-sm uppercase tracking-widest text-gray-400 mb-4">Review: {selected.clip_title}</h2>
-
-                {/* Video player */}
-                <div className="bg-black rounded-xl overflow-hidden mb-5 aspect-video flex items-center justify-center">
-                  {videoUrl ? (
-                    <video src={videoUrl} controls className="w-full h-full object-contain" />
-                  ) : (
-                    <p className="text-gray-500 text-sm">Loading video...</p>
-                  )}
+          {/* Challenge prompt */}
+          {clip.challenge_prompt && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">🎯</span>
+                <div>
+                  <div className="font-semibold text-amber-900 text-sm mb-1">Challenge Prompt</div>
+                  <p className="text-amber-800 text-sm leading-relaxed">{clip.challenge_prompt}</p>
+                  <div className="flex gap-3 mt-3">
+                    <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                      <input type="radio" name="prompt_addressed" checked={promptAddressed === true}
+                        onChange={() => setPromptAddressed(true)}
+                        className="text-green-600" />
+                      <span className="text-green-800 font-medium">✓ Addressed</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                      <input type="radio" name="prompt_addressed" checked={promptAddressed === false}
+                        onChange={() => setPromptAddressed(false)}
+                        className="text-red-600" />
+                      <span className="text-red-800 font-medium">✗ Not addressed</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 text-sm cursor-pointer">
+                      <input type="radio" name="prompt_addressed" checked={promptAddressed === null}
+                        onChange={() => setPromptAddressed(null)}
+                        className="text-gray-600" />
+                      <span className="text-gray-600">Partial</span>
+                    </label>
+                  </div>
                 </div>
+              </div>
+            </div>
+          )}
 
-                {/* Challenge prompt reminder */}
-                {selected.clip_challenge && (
-                  <div className="bg-yellow-400/10 border border-yellow-400/20 rounded-lg p-3 mb-5 text-sm">
-                    <span className="text-yellow-400 font-medium">Challenge prompt: </span>
-                    <span className="text-gray-300">{selected.clip_challenge}</span>
+          {/* Uploader info */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-semibold text-gray-900">{clip.uploader?.full_name}</div>
+                <div className="text-sm text-gray-500">{clip.uploader?.years_experience} years experience</div>
+                {clip.uploader?.bio && <div className="text-xs text-gray-400 mt-1">{clip.uploader.bio}</div>}
+              </div>
+              <div className="text-right text-xs text-gray-400">
+                <div>Uploaded {new Date(clip.created_at).toLocaleDateString()}</div>
+                <div>{clip.duration_seconds}s · {Math.round((clip as any).file_size_bytes / 1024 / 1024)}MB</div>
+                {clip.skill_tags?.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1 justify-end">
+                    {clip.skill_tags.map(t => <span key={t} className="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded text-xs">{t}</span>)}
                   </div>
                 )}
+              </div>
+            </div>
+          </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  {/* Rating */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Overall rating</label>
-                    <div className="flex gap-2">
-                      {[1,2,3,4,5].map(n => (
-                        <button key={n} type="button"
-                          onClick={() => setForm(f => ({ ...f, overall_rating: n }))}
-                          className={`w-10 h-10 rounded-lg border font-bold transition-all ${
-                            form.overall_rating >= n ? "bg-yellow-400 border-yellow-400 text-black" : "border-white/20 text-gray-500"
-                          }`}>
-                          {n}
-                        </button>
+          {/* Timestamped notes panel */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+              ⏱️ Timestamped Notes
+              <span className="text-xs text-gray-400 font-normal">Current: {fmtTime(currentTime)}</span>
+            </h3>
+
+            {/* Existing notes */}
+            {timestampedNotes.length > 0 && (
+              <div className="space-y-2 mb-3">
+                {timestampedNotes.map((note, i) => {
+                  const ref = note.code_ref_id ? codeRefs.find(r => r.id === note.code_ref_id) : null
+                  return (
+                    <div key={i} className="flex items-start gap-2 bg-gray-50 rounded-lg p-2.5">
+                      <button onClick={() => { if (videoRef.current) { const [m, s] = note.time.split(":").map(Number); videoRef.current.currentTime = m * 60 + s; videoRef.current.play() } }}
+                        className="bg-blue-100 text-blue-700 text-xs font-mono px-2 py-0.5 rounded font-bold hover:bg-blue-200 flex-shrink-0">
+                        {note.time}
+                      </button>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm text-gray-700">{note.note}</p>
+                        {ref && <div className="text-xs text-purple-600 mt-0.5">📋 {ref.code_standard} §{ref.section}</div>}
+                      </div>
+                      <button onClick={() => removeNote(i)} className="text-gray-300 hover:text-red-400 flex-shrink-0">✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Add note */}
+            <div className="flex gap-2">
+              <div className="flex-shrink-0 text-xs font-mono bg-gray-100 text-gray-600 px-2 py-2.5 rounded-lg">
+                {fmtTime(currentTime)}
+              </div>
+              <input value={draftNote} onChange={e => setDraftNote(e.target.value)}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); captureTimestamp() } }}
+                placeholder="Type observation, then Enter or ▶ to capture at current timestamp…"
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500" />
+              <select value={draftNoteRef} onChange={e => setDraftNoteRef(e.target.value)}
+                className="border border-gray-300 rounded-lg px-2 py-2 text-xs focus:ring-2 focus:ring-blue-500 max-w-[120px]">
+                <option value="">+ Code ref</option>
+                {codeRefs.map(r => <option key={r.id} value={r.id}>{r.section}</option>)}
+              </select>
+              <button onClick={captureTimestamp} disabled={!draftNote.trim()}
+                className="bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-40">
+                ▶
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Right: Review Form + Code Refs ── */}
+        <div className="space-y-4">
+          {/* Rating */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Overall Rating</h3>
+            <div className="flex gap-1 mb-3">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button key={star} onClick={() => setRating(star)}
+                  className={`text-2xl transition-transform hover:scale-110 ${star <= rating ? "text-yellow-400" : "text-gray-200"}`}>★</button>
+              ))}
+              <span className="text-sm text-gray-500 ml-2 self-center">{rating}/5</span>
+            </div>
+
+            <label className="block text-sm font-medium text-gray-700 mb-1">Skill Level Assessment</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["apprentice", "journeyman", "master"] as const).map(lvl => (
+                <button key={lvl} onClick={() => setSkillLevel(lvl)}
+                  className={`py-2 text-xs font-semibold rounded-lg border-2 capitalize transition-colors ${skillLevel === lvl ? "border-blue-500 bg-blue-50 text-blue-700" : "border-gray-200 text-gray-600 hover:border-gray-300"}`}>
+                  {lvl}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Code compliance */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-3">Code Compliance</h3>
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <button onClick={() => setCompliancePass(true)}
+                className={`py-2.5 text-sm font-semibold rounded-lg border-2 transition-colors ${compliancePass ? "border-green-500 bg-green-50 text-green-700" : "border-gray-200 text-gray-500"}`}>
+                ✓ Pass
+              </button>
+              <button onClick={() => setCompliancePass(false)}
+                className={`py-2.5 text-sm font-semibold rounded-lg border-2 transition-colors ${!compliancePass ? "border-red-400 bg-red-50 text-red-700" : "border-gray-200 text-gray-500"}`}>
+                ✗ Fail
+              </button>
+            </div>
+            <textarea value={jurisdictionNotes} onChange={e => setJurisdictionNotes(e.target.value)} rows={2}
+              placeholder="Jurisdiction-specific notes (code standard, local amendments)…"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 resize-none" />
+          </div>
+
+          {/* Code references */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+              📋 Code References
+              <span className="text-xs text-gray-400 font-normal">{codeRefs.length} available</span>
+            </h3>
+            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
+              {codeRefs.map(ref => (
+                <div key={ref.id} onClick={() => toggleCodeRef(ref.id)}
+                  className={`rounded-lg border p-2.5 cursor-pointer transition-all text-xs ${selectedCodeRefs.includes(ref.id) ? "border-purple-400 bg-purple-50" : `border ${SEVERITY_STYLE[ref.severity] || "border-gray-200"} hover:opacity-80`}`}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold">{ref.code_standard} §{ref.section}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${SEVERITY_BADGE[ref.severity]}`}>
+                      {ref.severity}
+                    </span>
+                  </div>
+                  <div className="text-gray-700 leading-tight font-medium">{ref.title}</div>
+                  {selectedCodeRefs.includes(ref.id) && (
+                    <div className="text-gray-500 mt-1 text-xs leading-tight">{ref.description.slice(0, 100)}…</div>
+                  )}
+                </div>
+              ))}
+            </div>
+            {selectedCodeRefs.length > 0 && (
+              <div className="mt-2 text-xs text-purple-700 font-medium">{selectedCodeRefs.length} reference{selectedCodeRefs.length > 1 ? "s" : ""} selected</div>
+            )}
+          </div>
+
+          {/* Feedback text */}
+          <div className="bg-white rounded-xl border border-gray-200 p-4">
+            <h3 className="font-semibold text-gray-900 mb-2">Mentor Feedback *</h3>
+            <textarea value={feedbackText} onChange={e => setFeedbackText(e.target.value)} rows={5}
+              placeholder="Write your detailed feedback here. Address technique, code compliance, safety, and areas for improvement…"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 resize-none" />
+            <div className="text-xs text-gray-400 text-right">{feedbackText.length} chars</div>
+          </div>
+
+          {/* Badge issuance */}
+          <div className={`rounded-xl border-2 p-4 transition-colors ${issueBadge ? "border-yellow-400 bg-yellow-50" : "border-gray-200 bg-white"}`}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-semibold text-gray-900 flex items-center gap-2">🏅 Issue Badge</h3>
+              <button onClick={() => setIssueBadge(!issueBadge)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${issueBadge ? "bg-yellow-400" : "bg-gray-300"}`}>
+                <div className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${issueBadge ? "translate-x-5" : ""}`} />
+              </button>
+            </div>
+            {issueBadge && (
+              <div className="space-y-2">
+                {!compliancePass && (
+                  <div className="bg-red-50 text-red-700 text-xs p-2 rounded-lg">
+                    ⚠️ Badge cannot be issued when code compliance is Fail.
+                  </div>
+                )}
+                {compliancePass && rating < 3 && (
+                  <div className="bg-amber-50 text-amber-700 text-xs p-2 rounded-lg">
+                    ⚠️ Badge requires rating ≥ 3/5.
+                  </div>
+                )}
+                {compliancePass && rating >= 3 && (
+                  <>
+                    <div className="text-xs text-yellow-800">
+                      Badge will be issued to {clip.uploader?.full_name}'s wallet and recorded in the append-only ledger.
+                    </div>
+                    <input value={badgeTitle} onChange={e => setBadgeTitle(e.target.value)}
+                      placeholder={`e.g., ${clip.trade?.name} — ${skillLevel.charAt(0).toUpperCase() + skillLevel.slice(1)} · ${clip.region?.region_code}`}
+                      className="w-full border border-yellow-300 rounded-lg px-3 py-2 text-xs focus:ring-2 focus:ring-yellow-400 bg-white" />
+                    <div className="flex flex-wrap gap-1">
+                      {selectedRefs.slice(0, 3).map(r => (
+                        <span key={r.id} className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">{r.section}</span>
                       ))}
                     </div>
-                  </div>
-
-                  {/* Skill level */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Assessed skill level</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {(["apprentice","journeyman","master"] as const).map(level => (
-                        <button key={level} type="button"
-                          onClick={() => setForm(f => ({ ...f, skill_level: level }))}
-                          className={`py-2 rounded-lg border text-sm font-medium capitalize transition-all ${
-                            form.skill_level === level ? "bg-blue-500 border-blue-500 text-white" : "border-white/20 text-gray-400 hover:border-white/40"
-                          }`}>
-                          {level}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Code compliance */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Code compliance</label>
-                    <div className="flex gap-3">
-                      <button type="button"
-                        onClick={() => setForm(f => ({ ...f, code_compliance_pass: true }))}
-                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
-                          form.code_compliance_pass ? "bg-green-500/20 border-green-500/50 text-green-400" : "border-white/20 text-gray-400"
-                        }`}>
-                        ✓ Pass
-                      </button>
-                      <button type="button"
-                        onClick={() => setForm(f => ({ ...f, code_compliance_pass: false }))}
-                        className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-all ${
-                          !form.code_compliance_pass ? "bg-red-500/20 border-red-500/50 text-red-400" : "border-white/20 text-gray-400"
-                        }`}>
-                        ✗ Fail
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Timestamped notes */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Timestamped notes</label>
-                    <div className="space-y-2 mb-2">
-                      {form.timestamped_notes.map((n, i) => (
-                        <div key={i} className="flex gap-2 text-xs bg-white/5 rounded-lg px-3 py-2">
-                          <span className="text-yellow-400 font-mono">{n.time}</span>
-                          <span className="text-gray-300">{n.note}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="flex gap-2">
-                      <input value={newNoteTime} onChange={(e) => setNewNoteTime(e.target.value)}
-                        placeholder="0:30" className="w-16 bg-white/10 border border-white/20 rounded-lg px-2 py-2 text-white text-xs font-mono text-center focus:outline-none focus:border-yellow-400" />
-                      <input value={newNote} onChange={(e) => setNewNote(e.target.value)}
-                        placeholder="Note at this timestamp..."
-                        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-white text-xs placeholder-gray-500 focus:outline-none focus:border-yellow-400" />
-                      <button type="button" onClick={addNote}
-                        className="bg-white/10 hover:bg-white/20 border border-white/20 px-3 rounded-lg text-sm transition-colors">
-                        +
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Feedback */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Overall feedback <span className="text-red-400">*</span></label>
-                    <textarea required value={form.feedback_text}
-                      onChange={(e) => setForm(f => ({ ...f, feedback_text: e.target.value }))}
-                      placeholder="Provide constructive feedback on technique, safety, code compliance, and skill level demonstrated..."
-                      rows={4}
-                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 resize-none text-sm" />
-                  </div>
-
-                  {/* Jurisdiction notes */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Jurisdiction/code notes <span className="text-gray-500 font-normal">(optional)</span>
-                    </label>
-                    <input value={form.jurisdiction_notes}
-                      onChange={(e) => setForm(f => ({ ...f, jurisdiction_notes: e.target.value }))}
-                      placeholder="e.g. Technique matches NEC 2020 §358.24 requirements"
-                      className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-yellow-400 text-sm" />
-                  </div>
-
-                  <button type="submit" disabled={saving || !form.feedback_text}
-                    className="w-full bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 text-black font-bold py-3 rounded-xl transition-colors">
-                    {saving ? "Submitting..." : "Submit Review & Issue Badge →"}
-                  </button>
-                </form>
+                  </>
+                )}
               </div>
             )}
           </div>
+
+          {saveError && <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg">{saveError}</div>}
+
+          <button onClick={handleSubmit} disabled={!feedbackText.trim() || saving || saved}
+            className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-colors ${saved ? "bg-green-500 text-white" : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40"}`}>
+            {saved ? "✓ Review Submitted!" : saving ? "Submitting…" : issueBadge && compliancePass && rating >= 3 ? "Submit Review + Issue Badge 🏅" : "Submit Review"}
+          </button>
         </div>
       </div>
     </div>
-  );
+  )
+}
+
+export default function ReviewPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center text-gray-400 animate-pulse">Loading…</div>}>
+      <ReviewPageInner />
+    </Suspense>
+  )
 }
