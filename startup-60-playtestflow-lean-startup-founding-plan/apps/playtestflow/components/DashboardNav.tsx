@@ -23,6 +23,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/analytics', label: 'Analytics' },
     { href: '/dashboard/schedule', label: 'Schedule' },
     { href: '/dashboard/activation', label: 'Activation' },
+    { href: '/dashboard/ab', label: 'A/B Tests' },
   ]
 
   return (
