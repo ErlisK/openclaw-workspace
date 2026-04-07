@@ -30,6 +30,7 @@ export default function DashboardNav({ userEmail }: { userEmail: string }) {
     { href: '/dashboard/monetization', label: 'Monetization' },
     { href: '/dashboard/price-research', label: 'Price Research' },
     { href: '/dashboard/conversion', label: 'Conversion' },
+    { href: '/dashboard/discord', label: 'Discord' },
   ]
 
   return (
