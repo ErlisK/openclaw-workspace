@@ -35,6 +35,7 @@ export default function RecruitForm({
   // Client-side A/B variant state
   const [activeCta, setActiveCta] = useState<'a' | 'b'>(ctaVariant ?? 'a')
   const [activeIncentive, setActiveIncentive] = useState<'a' | 'b'>(incentiveVariant ?? 'a')
+  const signupStartRef = useRef<number>(Date.now())
   const visitorIdRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -76,7 +77,7 @@ export default function RecruitForm({
     const res = await fetch('/api/sessions/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId, name, email, role, consent }),
+      body: JSON.stringify({ sessionId, name, email, role, consent, signupTimeMs: Date.now() - signupStartRef.current }),
     })
     const data = await res.json()
 

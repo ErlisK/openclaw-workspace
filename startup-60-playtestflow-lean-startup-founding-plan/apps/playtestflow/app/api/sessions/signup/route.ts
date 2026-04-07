@@ -73,6 +73,13 @@ export async function POST(request: NextRequest) {
   // Generate anonymized tester ID + unique consent token
   const { testerId, salt, consentToken } = await generateTesterCredentials(email, sessionId)
 
+  // Capture fraud signals at signup time
+  const ipAddress = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+    ?? request.headers.get('x-real-ip')
+    ?? null
+  const userAgent = request.headers.get('user-agent') ?? null
+  const signupTimeMs = typeof body.signupTimeMs === 'number' ? body.signupTimeMs : null
+
   const { data: signup, error } = await supabase
     .from('session_signups')
     .insert({
@@ -88,6 +95,9 @@ export async function POST(request: NextRequest) {
       consent_token: consentToken,
       consent_version: 'v1',
       utm_source: body.utm_source || null,
+      ip_address: ipAddress,
+      user_agent: userAgent,
+      signup_time_ms: signupTimeMs,
     })
     .select('id, tester_id, consent_token')
     .single()

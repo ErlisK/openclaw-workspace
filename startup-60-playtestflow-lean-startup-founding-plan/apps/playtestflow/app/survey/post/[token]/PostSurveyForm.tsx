@@ -64,6 +64,13 @@ export default function PostSurveyForm({
   const [mostEnjoyed, setMostEnjoyed] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
+  const [startTime] = useState(() => Date.now())
+
+  // Attention check — inline quality signal
+  const ATTENTION_QUESTION = "For quality assurance, please type the word 'playtest' below."
+  const ATTENTION_ANSWER = 'playtest'
+  const [attentionAnswer, setAttentionAnswer] = useState('')
+  const attentionPassed = attentionAnswer.trim().toLowerCase() === ATTENTION_ANSWER
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -80,6 +87,10 @@ export default function PostSurveyForm({
         signupId,
         sessionId,
         testerId,
+        completionTimeSeconds: Math.round((Date.now() - startTime) / 1000),
+        attentionCheckQuestion: ATTENTION_QUESTION,
+        attentionCheckAnswer: attentionAnswer.trim(),
+        attentionCheckPassed: attentionPassed,
         answers: {
           overall_rating: overallRating,
           clarity_rating: clarityRating || null,
@@ -225,6 +236,26 @@ export default function PostSurveyForm({
           rows={2}
           className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-orange-500 transition-colors resize-none text-sm"
         />
+      </div>
+
+      {/* Attention check */}
+      <div className="bg-blue-500/5 border border-blue-500/15 rounded-xl p-4">
+        <label className="block text-sm font-semibold mb-1 text-blue-300">
+          🔍 Quick verification
+        </label>
+        <p className="text-xs text-gray-500 mb-2">{ATTENTION_QUESTION}</p>
+        <input
+          type="text"
+          value={attentionAnswer}
+          onChange={(e) => setAttentionAnswer(e.target.value)}
+          placeholder="Type your answer here"
+          className="w-full bg-white/5 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-blue-400 transition-colors"
+        />
+        {attentionAnswer.length > 0 && (
+          <p className={`text-xs mt-1.5 ${attentionPassed ? 'text-green-400' : 'text-red-400'}`}>
+            {attentionPassed ? '✓ Correct!' : 'Hint: type the word exactly as written above'}
+          </p>
+        )}
       </div>
 
       {/* Most enjoyed */}

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
-  const { type, token, signupId, sessionId, testerId, answers } = body
+  const { type, token, signupId, sessionId, testerId, answers, completionTimeSeconds, attentionCheckQuestion, attentionCheckAnswer, attentionCheckPassed } = body
 
   if (!type || !token || !signupId || !sessionId) {
     return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 })
@@ -79,6 +79,10 @@ export async function POST(request: NextRequest) {
       suggested_changes: suggested_changes || null,
       most_enjoyed: most_enjoyed || null,
       time_played_minutes: time_played_minutes || null,
+      completion_time_seconds: completionTimeSeconds ?? null,
+      attention_check_question: attentionCheckQuestion ?? null,
+      attention_check_answer: attentionCheckAnswer ?? null,
+      attention_check_passed: attentionCheckPassed ?? null,
       would_play_again: would_play_again ?? null,
       feedback_type: 'post',
       raw_feedback: answers,
