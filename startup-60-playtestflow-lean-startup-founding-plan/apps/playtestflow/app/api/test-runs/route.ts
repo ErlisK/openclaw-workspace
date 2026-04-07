@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { trackActivation } from '@/lib/activation'
 
 /**
- * POST /api/test-runs
- * Create a test run for a session (links session + template + rule version).
- * 
+ * POST /api/test-runs 
  * PATCH /api/test-runs — update status and computed metrics.
  */
 export async function POST(request: NextRequest) {
@@ -113,6 +112,33 @@ export async function PATCH(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Track A5 / A6 when a session run completes
+  if (status === 'completed' && data?.session_id) {
+    const svc2 = createServiceClient()
+    const { count: completedCount } = await svc2
+      .from('test_runs')
+      .select('id', { count: 'exact', head: true })
+      .eq('designer_id', user.id)
+      .eq('status', 'completed')
+
+    const sessionCount = completedCount ?? 0
+    if (sessionCount === 1) {
+      await trackActivation({
+        designerId: user.id,
+        step: 'A5',
+        sessionId: data.session_id,
+        metadata: { run_id: data.id, attended_count: computedMetrics.attended_count ?? 0 },
+      })
+    } else if (sessionCount === 2) {
+      await trackActivation({
+        designerId: user.id,
+        step: 'A6',
+        sessionId: data.session_id,
+        metadata: { run_id: data.id, attended_count: computedMetrics.attended_count ?? 0 },
+      })
+    }
+  }
 
   return NextResponse.json({ success: true, test_run: data })
 }

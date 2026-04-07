@@ -56,6 +56,17 @@ export default function SessionCreator({
       return
     }
 
+    // Track A3 — recruit link published + A4 — session scheduled (if scheduled_at set)
+    const steps: string[] = ['A3']
+    if (scheduledAt) steps.push('A4')
+    await Promise.all(steps.map(step =>
+      fetch('/api/activation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ step, project_id: projectId, metadata: { platform, scheduled_at: scheduledAt || null } }),
+      }).catch(() => {})
+    ))
+
     setOpen(false)
     setTitle('')
     router.refresh()

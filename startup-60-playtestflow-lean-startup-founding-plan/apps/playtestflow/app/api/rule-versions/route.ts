@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase-server'
+import { trackActivation } from '@/lib/activation'
 
 /**
  * GET /api/rule-versions?project_id=... — list all versions for a project (designer auth)
@@ -141,6 +142,14 @@ export async function POST(request: NextRequest) {
   }).select().single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Track A2 — rule version uploaded (first-win; trackActivation is idempotent)
+  await trackActivation({
+    designerId: user.id,
+    step: 'A2',
+    projectId: project_id,
+    metadata: { version_label, semver: semver ?? `${major}.${minor}.${patch}` },
+  })
 
   return NextResponse.json({ success: true, version: data })
 }

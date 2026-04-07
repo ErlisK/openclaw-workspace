@@ -42,6 +42,13 @@ export default function NewProjectPage() {
       return
     }
 
+    // Track A1 — project created
+    await fetch('/api/activation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ step: 'A1', project_id: data.id, metadata: { game_type: gameType } }),
+    }).catch(() => {}) // non-blocking
+
     router.push(`/dashboard/projects/${data.id}`)
   }
 
