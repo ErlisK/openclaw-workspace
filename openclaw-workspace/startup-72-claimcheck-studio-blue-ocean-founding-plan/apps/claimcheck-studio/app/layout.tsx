@@ -30,6 +30,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <a href="/review" className="hover:text-gray-300">Review</a>
               <a href="/compliance" className="hover:text-gray-300">Compliance</a>
+              <a href="/outputs" className="hover:text-gray-300">Outputs</a>
+              <a href="/access" className="hover:text-gray-300">Access</a>
               <a href="/eval" className="hover:text-gray-300">Eval</a>
               <a href="/admin" className="hover:text-gray-300">Ops</a>
               <a href="https://citebundle.com" className="hover:text-gray-300">citebundle.com</a>

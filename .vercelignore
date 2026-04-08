@@ -1,0 +1,7 @@
+node_modules
+.next
+.git
+*.log
+.env*.local
+openclaw-workspace/*/apps/*/node_modules
+openclaw-workspace/*/apps/*/.next
