@@ -3,6 +3,7 @@
     "project": "ClaimCheck Studio",
     "phase": "Phase 1 - Strategy Canvas and Market Mapping",
     "compiled": "2025-01-15",
+    "evidence_verified": "2025-01-15 — live web fetches from 20+ pricing pages; see evidence-collection.md",
     "total_competitors": 38,
     "categories": [
       "ai_copywriting",
@@ -39,7 +40,8 @@
       "category": "ai_copywriting",
       "website": "https://www.copy.ai",
       "pricing_model": "freemium + subscription",
-      "pricing_tiers": ["Free (2,000 words/mo)", "Pro $49/mo", "Team $249/mo", "Enterprise custom"],
+      "pricing_tiers": ["Chat: 5 seats (entry)", "Growth: 75 seats + 20K workflow credits/mo = $1,000/mo ($12,000/yr)", "Expansion: 150 seats + 45K credits/mo = $2,000/mo ($24,000/yr)", "Scale: 200 seats + 75K credits/mo = $3,000/mo ($36,000/yr)"],
+      "pricing_note": "MAJOR CORRECTION: Copy.ai has fully pivoted to enterprise-only pricing. No individual/SMB plan remains. Previously $49/mo Pro is gone.",
       "target_customer": "Marketers, sales teams, SMBs",
       "key_features": ["AI workflows", "GTM automation", "templates", "brand voice", "CRM integrations"],
       "evidence_support": false,
@@ -48,8 +50,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "17M users globally. Pivoted to GTM/sales automation. No scientific evidence or fact-checking layer.",
-      "source_url": "https://www.copy.ai/prices"
+      "notes": "17M users globally. CONFIRMED PIVOT: enterprise-only starting $1,000/mo. Pivoted to GTM/sales automation. No scientific evidence or fact-checking. Leaves affordable SMB AI writing market open.",
+      "source_url": "https://www.copy.ai/prices",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "writesonic",
@@ -93,7 +97,7 @@
       "category": "ai_copywriting",
       "website": "https://rytr.me",
       "pricing_model": "freemium",
-      "pricing_tiers": ["Free (10k chars/mo)", "Saver $9/mo", "Unlimited $29/mo"],
+      "pricing_tiers": ["Free: $0/mo, 10k chars/mo, 40+ use-cases, 20+ tones", "Unlimited: $7.50/mo, unlimited generation, 1 custom tone, 50 plagiarism checks/mo", "Premium: $24.16/mo, 5 tones, 100 plagiarism checks/mo, 40+ languages"],
       "target_customer": "Individual creators, bloggers, freelancers",
       "key_features": ["40+ use cases", "25+ languages", "plagiarism check", "templates"],
       "evidence_support": false,
@@ -102,8 +106,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Budget-focused AI writer. No evidence grounding or scientific content workflows.",
-      "source_url": "https://rytr.me/#pricing"
+      "notes": "8,000,000+ users. Budget-focused at $7.50/mo. 4.9/5 on TrustPilot/G2 (1000+ reviews). No evidence grounding or scientific content workflows.",
+      "source_url": "https://rytr.me/#pricing",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "wordtune",
@@ -165,7 +171,8 @@
       "category": "research_assistant",
       "website": "https://elicit.com",
       "pricing_model": "freemium",
-      "pricing_tiers": ["Basic free", "Plus $10/mo", "Enterprise custom"],
+      "pricing_tiers": ["Basic: Free — unlimited search 138M papers, 2 reports/mo, Zotero import", "Pro: $49/mo (annual $588/yr) — 5K paper screening, 144 reports/yr, API access, custom extractions", "Scale: $169/mo (annual $2,028/yr) — real-time collaboration, 240 reports/yr, 200 data sources", "Enterprise: custom — 40K paper screening, SSO/SAML, 2FA, single-tenancy, unlimited API"],
+      "pricing_note": "MAJOR CORRECTION: Pro is $49/mo not $10/mo (older sources outdated). Elicit has pharma industry page.",
       "target_customer": "Researchers, systematic reviewers, policy analysts",
       "key_features": ["125M+ papers", "data extraction tables", "systematic review automation", "PDF chat", "column builder"],
       "evidence_support": true,
@@ -174,8 +181,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "2M+ researchers. Best-in-class for systematic review automation. No content publishing or compliance layer.",
-      "source_url": "https://elicit.com/pricing"
+      "notes": "2M+ researchers. Best-in-class systematic review automation. Pro $49/mo (scale: $169/mo). Enterprise tier with SSO/SAML/2FA, dedicated CS, custom integrations. Has pharma industry landing page. No content publishing or compliance layer.",
+      "source_url": "https://elicit.com/pricing",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "perplexity",
@@ -246,8 +255,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Closest competitor in claim-evidence mapping space. Focused on academic use only; no content generation, no compliance, no content distribution.",
-      "source_url": "https://scite.ai/pricing"
+      "notes": "Closest competitor in claim-evidence mapping space. 1.5 BILLION citation statements indexed (confirmed). Smart Citations classify supporting/contrasting/mentioning. Chrome extension + Zotero plugin. Weakness confirmed: no conversational memory, no interactive PDF chat, no multi-doc synthesis, no content generation pipeline.",
+      "source_url": "https://scite.ai/pricing",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "connected_papers",
@@ -327,7 +338,7 @@
       "category": "citation_manager",
       "website": "https://www.zotero.org",
       "pricing_model": "freemium",
-      "pricing_tiers": ["Free (300 MB storage)", "2 GB $20/yr", "6 GB $60/yr", "Unlimited $120/yr"],
+      "pricing_tiers": ["300 MB: Free", "2 GB: $20/yr ($1.67/mo)", "6 GB: $60/yr ($5/mo)", "Unlimited: $120/yr ($10/mo)", "Lab/institutional plans available"],
       "target_customer": "Academic researchers, students, writers",
       "key_features": ["Browser clipper", "PDF annotation", "cite while you write", "group libraries", "auto-bibliography", "plugin ecosystem"],
       "evidence_support": false,
@@ -336,8 +347,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Open-source citation management gold standard. No AI claim analysis, no content generation, no compliance.",
-      "source_url": "https://www.zotero.org/storage"
+      "notes": "Open-source, nonprofit (Corporation for Digital Scholarship). Software always free; funded by storage subscriptions. Group libraries draw from owner's storage. Plugin ecosystem rich (Zotero Connector, ZotFile, etc.). No AI claim analysis, no content generation, no compliance.",
+      "source_url": "https://www.zotero.org/storage",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "mendeley",
@@ -381,7 +394,8 @@
       "category": "citation_manager",
       "website": "https://paperpile.com",
       "pricing_model": "subscription",
-      "pricing_tiers": ["Student $2.99/mo", "Individual $9.99/mo", "Group from $6.99/mo/user", "Institutional custom"],
+      "pricing_tiers": ["Regular: $4.15/mo (annual, 50% academic promo)", "Expert: $5.75/mo (annual) — full-text PDF search, annotations, shared libraries", "Teams/Institutional: custom — SSO/SAML, HIPAA, custom SLA"],
+      "pricing_note": "CORRECTION: Much cheaper than previously documented ($4.15/mo not $9.99/mo). HIPAA institutional tier. Academic discount 50% off.",
       "target_customer": "Google Workspace-centric researchers",
       "key_features": ["Google Docs integration", "PDF sync", "BibTeX export", "browser extension", "PubMed/Scholar import"],
       "evidence_support": false,
@@ -390,8 +404,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Best-in-class Google Docs integration. No AI analysis, no compliance, no claim extraction.",
-      "source_url": "https://paperpile.com/pricing/"
+      "notes": "Best-in-class Google Docs + Microsoft Word integration. Proxy-based off-campus PDF access (better paywall handling). HIPAA-compliant institutional tier. No AI analysis, no compliance workflow, no claim extraction.",
+      "source_url": "https://paperpile.com/pricing/",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "readcube_papers",
@@ -435,7 +451,8 @@
       "category": "social_content_distribution",
       "website": "https://buffer.com",
       "pricing_model": "freemium",
-      "pricing_tiers": ["Free (3 channels)", "Essentials $6/channel/mo", "Team $12/channel/mo", "Agency $120/mo"],
+      "pricing_tiers": ["Free: 3 channels, 10 posts/channel, 100 ideas, 1 user, AI Assistant", "Essentials: $5/mo/channel ($60/yr) — unlimited posts/ideas, hashtag manager, first comment scheduling", "Team: $10/mo/channel ($120/yr) — unlimited team members, content approval workflows, access levels"],
+      "pricing_note": "CORRECTION: $5/channel/mo (not $6). No 'Agency' tier in current pricing. Per-channel model.",
       "target_customer": "Marketers, creators, small businesses",
       "key_features": ["Post scheduling", "analytics", "AI assistant", "landing pages", "start page"],
       "evidence_support": false,
@@ -444,8 +461,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Social scheduling leader. No evidence or citation features. AI only for scheduling/drafting.",
-      "source_url": "https://buffer.com/pricing"
+      "notes": "Social scheduling leader. Team plan ($10/mo/channel) has content approval workflows. AI Assistant included free. No evidence or citation features.",
+      "source_url": "https://buffer.com/pricing",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "hootsuite",
@@ -462,8 +481,10 @@
       "compliance_tools": false,
       "peer_review": false,
       "science_comm_output": false,
-      "notes": "Enterprise social management. Expensive but no evidence or compliance layer. OwlyWriter AI for drafting only.",
-      "source_url": "https://www.hootsuite.com/plans/"
+      "notes": "Enterprise social management. OwlyGPT + OwlyWriter AI for drafting. Enterprise: Proofpoint compliance integration (financial/SEC/FINRA archiving only — NOT biomedical MLR). No evidence or citation features.",
+      "source_url": "https://www.hootsuite.com/plans",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "sprout_social",
@@ -534,8 +555,10 @@
       "compliance_tools": true,
       "peer_review": true,
       "science_comm_output": false,
-      "notes": "The market-dominant MLR platform in pharma. Very expensive, complex implementation, IT-heavy. Closest in compliance + citation tracking but zero content generation for public-facing science comm.",
-      "source_url": "https://www.veeva.com/products/veeva-promomats/"
+      "notes": "VERIFIED: 450+ biopharma customers, 47/50 top biopharma, 300+ fast-growing biopharmas. +50% speed to market, +40% content reuse, +20% cost reduction. Dec 2025: AI Agents launched (automated quality checks). Generates eCTD packages for FDA. 9+ months implementation, $400k+ cost (Capterra). No content generation for public-facing sci-comm.",
+      "source_url": "https://www.veeva.com/products/veeva-promomats/",
+      "evidence_fetched": true,
+      "evidence_date": "2025-01-15"
     },
     {
       "id": "iqvia_oce",
