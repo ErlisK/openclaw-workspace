@@ -86,11 +86,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
+    defaults:
+      run:
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
         with:
           sparse-checkout: |
-            openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/scripts
+            .github
 
       - name: Run smoke tests against staging
         env:
