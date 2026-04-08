@@ -1,0 +1,142 @@
+[
+  {
+    "id": "eval-001",
+    "title": "Aspirin cardiovascular prevention",
+    "text": "Low-dose aspirin reduces the risk of myocardial infarction by approximately 23% in high-risk patients. Daily aspirin use is associated with a 1.6-fold increased risk of major gastrointestinal bleeding. The absolute benefit of aspirin depends on the baseline cardiovascular risk of the patient.",
+    "expected_claims": ["quantitative risk reduction for MI", "GI bleeding risk increase", "benefit depends on baseline risk"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-002",
+    "title": "COVID-19 mRNA vaccine efficacy",
+    "text": "The BNT162b2 mRNA vaccine demonstrated 95% efficacy against COVID-19 in the pivotal Phase 3 trial with 43,548 participants. Vaccine efficacy was consistent across age groups, sexes, and diverse ethnic groups. Two doses separated by 21 days are required to achieve maximum protection.",
+    "expected_claims": ["95% efficacy", "trial size 43548", "two-dose schedule"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-003",
+    "title": "Type 2 diabetes metformin first-line",
+    "text": "Metformin is recommended as first-line pharmacotherapy for type 2 diabetes by major guidelines worldwide. The UKPDS demonstrated that intensive blood glucose control with metformin reduced diabetes-related endpoints by 32% compared to conventional treatment. Metformin reduces HbA1c by approximately 1-2% when used as monotherapy.",
+    "expected_claims": ["first-line recommendation", "UKPDS 32% reduction", "HbA1c reduction 1-2%"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-004",
+    "title": "Statin LDL lowering efficacy",
+    "text": "High-intensity statin therapy lowers LDL cholesterol by 50% or more. Rosuvastatin 20-40mg reduces LDL by approximately 55% on average. Meta-analysis shows each 1 mmol/L reduction in LDL reduces major cardiovascular events by 22%.",
+    "expected_claims": ["high-intensity 50% LDL reduction", "rosuvastatin 55% reduction", "22% CV event reduction per mmol/L"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-005",
+    "title": "Hypertension treatment targets",
+    "text": "Treating hypertension to a systolic blood pressure target below 130 mmHg reduces stroke risk by 27% compared to less intensive targets. The SPRINT trial found that intensive blood pressure lowering reduced cardiovascular events by 25% and all-cause mortality by 27%. Approximately 30% of adults worldwide have hypertension.",
+    "expected_claims": ["27% stroke risk reduction", "SPRINT 25% CV reduction", "30% global prevalence"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-006",
+    "title": "Smoking cessation health benefits",
+    "text": "Smokers who quit before age 40 reduce their excess risk of death associated with continued smoking by approximately 90%. Varenicline increases smoking cessation rates by approximately 2.3-fold compared with placebo at 12 months. Within 1 year of quitting, cardiovascular risk falls to half that of a continuing smoker.",
+    "expected_claims": ["90% excess death risk reduction", "2.3-fold varenicline improvement", "50% CV risk reduction within 1 year"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-007",
+    "title": "Physical activity guidelines",
+    "text": "Adults should perform at least 150-300 minutes of moderate-intensity aerobic physical activity per week according to WHO guidelines. Regular physical activity reduces the risk of all-cause mortality by 35% compared to inactivity. Walking 8,000 steps per day is associated with a 51% lower risk of all-cause mortality.",
+    "expected_claims": ["150-300 min/week recommendation", "35% mortality reduction", "8000 steps 51% lower mortality"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-008",
+    "title": "Colorectal cancer screening",
+    "text": "Colonoscopy reduces colorectal cancer mortality by approximately 68%. Annual fecal immunochemical testing (FIT) has a sensitivity of 79% for colorectal cancer. Population-based colorectal cancer screening programs can reduce incidence by 33-40%.",
+    "expected_claims": ["colonoscopy 68% mortality reduction", "FIT 79% sensitivity", "33-40% incidence reduction"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-009",
+    "title": "Antibiotic resistance global burden",
+    "text": "Antimicrobial resistance caused 1.27 million deaths directly attributable worldwide in 2019. MRSA alone was responsible for 100,000 deaths annually. By 2050, antibiotic resistance could kill 10 million people per year if no action is taken.",
+    "expected_claims": ["1.27M deaths 2019", "MRSA 100K annual deaths", "10M deaths by 2050 projection"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-010",
+    "title": "Depression treatment response rates",
+    "text": "Approximately 50-60% of patients respond to initial antidepressant therapy. The STAR*D trial found that only 33% of patients achieved remission with the first antidepressant. Cognitive behavioral therapy combined with medication achieves response rates of approximately 60-80%.",
+    "expected_claims": ["50-60% response rate initial treatment", "STAR*D 33% remission", "CBT + medication 60-80% response"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-011",
+    "title": "Childhood vaccination impact",
+    "text": "Measles vaccination has reduced global measles deaths by 99% since the pre-vaccine era. The pneumococcal conjugate vaccine reduces invasive pneumococcal disease by approximately 70% in children under 5. Universal childhood vaccination programs are estimated to save 3-4 million lives per year globally.",
+    "expected_claims": ["measles 99% death reduction", "PCV 70% disease reduction", "3-4M lives saved annually"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-012",
+    "title": "Obesity prevalence and metabolic risk",
+    "text": "The global prevalence of obesity has tripled since 1975, affecting 13% of the world's adult population. Each 5 kg/m2 increase in BMI is associated with a 30% increase in overall mortality. Bariatric surgery achieves sustained weight loss of 25-30% and reduces type 2 diabetes incidence by 80%.",
+    "expected_claims": ["obesity tripled since 1975 13% prevalence", "5 BMI unit 30% mortality increase", "bariatric surgery 25-30% weight loss 80% T2DM reduction"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-013",
+    "title": "Breast cancer screening mammography",
+    "text": "Mammography screening reduces breast cancer mortality by 20-40% in women aged 40-74. False positive rates for mammography are approximately 10% per screening round. Two-yearly mammography is recommended for average-risk women aged 50-74 by most guidelines.",
+    "expected_claims": ["20-40% mortality reduction", "10% false positive rate", "biennial screening recommendation"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-014",
+    "title": "Dementia prevention lifestyle factors",
+    "text": "Up to 40% of dementia cases worldwide are potentially preventable through modification of 12 risk factors. Physical activity reduces dementia risk by approximately 30%. Hearing loss treatment in midlife could prevent approximately 8% of dementia cases.",
+    "expected_claims": ["40% dementia preventable", "30% risk reduction with physical activity", "8% reduction from hearing loss treatment"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-015",
+    "title": "HIV treatment outcomes",
+    "text": "Antiretroviral therapy has reduced AIDS-related mortality by 80% since the late 1990s. People living with HIV who achieve viral suppression have life expectancy approaching that of HIV-negative individuals. Pre-exposure prophylaxis (PrEP) reduces HIV acquisition risk by up to 99% when taken consistently.",
+    "expected_claims": ["80% AIDS mortality reduction", "normal life expectancy with viral suppression", "PrEP 99% risk reduction"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-016",
+    "title": "Lung cancer and smoking",
+    "text": "Smoking causes approximately 85% of lung cancer cases. Low-dose CT screening reduces lung cancer mortality by 20% in high-risk current and former smokers aged 50-80. Lung cancer 5-year survival rate is only 19% overall but 60% when detected at localized stage.",
+    "expected_claims": ["85% of lung cancers from smoking", "LDCT 20% mortality reduction", "19% overall vs 60% localized survival"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-017",
+    "title": "Mental health global burden",
+    "text": "Depression affects 280 million people globally, making it the leading cause of disability worldwide. Mental health conditions account for 13% of the global burden of disease. Less than 25% of people with mental health conditions in low-income countries have access to treatment.",
+    "expected_claims": ["280M people with depression", "13% global disease burden", "25% treatment access in low-income countries"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-018",
+    "title": "Hand hygiene infection prevention",
+    "text": "Handwashing with soap reduces respiratory infections by 21% and gastrointestinal infections by 30%. Healthcare-associated infections affect 7% of patients in high-income countries and 15% in low-income countries. Alcohol-based hand rubs are more effective than soap and water against most healthcare pathogens.",
+    "expected_claims": ["21% respiratory reduction", "30% GI reduction", "7% and 15% HAI prevalence"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-019",
+    "title": "Preterm birth global statistics",
+    "text": "Preterm birth affects 11% of all live births globally, approximately 15 million babies per year. Preterm birth complications are the leading cause of death in children under 5, accounting for approximately 1 million deaths annually. Antenatal corticosteroids for preterm labor reduce neonatal mortality by 30-40%.",
+    "expected_claims": ["11% of births 15M babies", "1M annual deaths under 5", "30-40% mortality reduction from corticosteroids"],
+    "expected_count": 3
+  },
+  {
+    "id": "eval-020",
+    "title": "Oral health disease burden",
+    "text": "Dental caries affects approximately 2.3 billion people with untreated decay in permanent teeth worldwide. Community water fluoridation reduces dental caries by 25% across all ages. Severe periodontitis affects approximately 11% of the global population and is a risk factor for cardiovascular disease and diabetes.",
+    "expected_claims": ["2.3B dental caries", "25% caries reduction from fluoride", "11% severe periodontitis prevalence"],
+    "expected_count": 3
+  }
+]

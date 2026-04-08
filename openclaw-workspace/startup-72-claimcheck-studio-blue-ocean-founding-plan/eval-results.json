@@ -1,0 +1,212 @@
+{
+  "results": [
+    {
+      "id": "eval-001",
+      "title": "Aspirin cardiovascular prevention",
+      "extracted_claims": 2,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8,
+      "elapsed_s": 0.89
+    },
+    {
+      "id": "eval-002",
+      "title": "COVID-19 mRNA vaccine efficacy",
+      "extracted_claims": 2,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8,
+      "elapsed_s": 0.38
+    },
+    {
+      "id": "eval-003",
+      "title": "Type 2 diabetes metformin first-line",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.4
+    },
+    {
+      "id": "eval-004",
+      "title": "Statin LDL lowering efficacy",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.27
+    },
+    {
+      "id": "eval-005",
+      "title": "Hypertension treatment targets",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.27
+    },
+    {
+      "id": "eval-006",
+      "title": "Smoking cessation health benefits",
+      "extracted_claims": 2,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8,
+      "elapsed_s": 0.26
+    },
+    {
+      "id": "eval-007",
+      "title": "Physical activity guidelines",
+      "extracted_claims": 2,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 0.667,
+      "f1": 0.8,
+      "elapsed_s": 0.31
+    },
+    {
+      "id": "eval-008",
+      "title": "Colorectal cancer screening",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.25
+    },
+    {
+      "id": "eval-009",
+      "title": "Antibiotic resistance global burden",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.24
+    },
+    {
+      "id": "eval-010",
+      "title": "Depression treatment response rates",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.24
+    },
+    {
+      "id": "eval-011",
+      "title": "Childhood vaccination impact",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 1.04
+    },
+    {
+      "id": "eval-012",
+      "title": "Obesity prevalence and metabolic risk",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.3
+    },
+    {
+      "id": "eval-013",
+      "title": "Breast cancer screening mammography",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.32
+    },
+    {
+      "id": "eval-014",
+      "title": "Dementia prevention lifestyle factors",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.29
+    },
+    {
+      "id": "eval-015",
+      "title": "HIV treatment outcomes",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.27
+    },
+    {
+      "id": "eval-016",
+      "title": "Lung cancer and smoking",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.27
+    },
+    {
+      "id": "eval-017",
+      "title": "Mental health global burden",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.26
+    },
+    {
+      "id": "eval-018",
+      "title": "Hand hygiene infection prevention",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.23
+    },
+    {
+      "id": "eval-019",
+      "title": "Preterm birth global statistics",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.26
+    },
+    {
+      "id": "eval-020",
+      "title": "Oral health disease burden",
+      "extracted_claims": 3,
+      "expected_claims": 3,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "elapsed_s": 0.28
+    }
+  ],
+  "aggregate": {
+    "docs_processed": 20,
+    "avg_precision": 1.0,
+    "avg_recall": 0.933,
+    "avg_f1": 0.96,
+    "avg_latency_s": 0.352,
+    "pct_under_3min": 100.0
+  }
+}
