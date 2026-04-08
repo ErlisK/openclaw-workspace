@@ -94,7 +94,8 @@ jobs:
 
       - name: Run smoke tests against staging
         env:
-          APP_URL: https://app.citebundle.com
+          APP_URL: https://claimcheck-studio.vercel.app
+          CANONICAL_URL: https://app.citebundle.com
         run: |
           set -e
 
@@ -237,7 +238,7 @@ jobs:
       - name: Post-deploy smoke test
         run: |
           sleep 10  # wait for edge propagation
-          APP_URL="https://app.citebundle.com"
+          APP_URL="https://claimcheck-studio.vercel.app"
           for path in "/" "/eval" "/admin" "/api/jobs/worker"; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$APP_URL$path")
             [ "$STATUS" = "200" ] && echo "✅ $path → 200" || { echo "❌ $path → $STATUS"; exit 1; }
