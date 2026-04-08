@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="60" y="60" width="1080" height="510" rx="16" fill="#1e293b"/>
+  <text x="600" y="220" font-family="Arial,sans-serif" font-size="56" font-weight="900" fill="#2563eb" text-anchor="middle">⬡ ClaimCheck Studio</text>
+  <text x="600" y="310" font-family="Arial,sans-serif" font-size="28" fill="#94a3b8" text-anchor="middle">Evidence-backed, channel-ready content</text>
+  <text x="600" y="360" font-family="Arial,sans-serif" font-size="28" fill="#94a3b8" text-anchor="middle">from your manuscripts and transcripts</text>
+  <text x="600" y="460" font-family="Arial,sans-serif" font-size="22" fill="#475569" text-anchor="middle">PubMed · CrossRef · Scite · Unpaywall</text>
+  <text x="600" y="510" font-family="Arial,sans-serif" font-size="20" fill="#334155" text-anchor="middle">citebundle.com</text>
+</svg>
