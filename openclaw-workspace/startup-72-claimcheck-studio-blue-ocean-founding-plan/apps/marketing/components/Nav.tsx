@@ -18,8 +18,8 @@ export default function Nav() {
           <Link href="/#who" className="hover:text-white transition-colors">Who it's for</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link href="/webinar" className="hover:text-white transition-colors">Webinar</Link>
-          <Link href="/about" className="hover:text-white transition-colors">About</Link>
-          <Link href="/survey" className="hover:text-white transition-colors">Pricing survey</Link>
+          <Link href="/case-studies" className="hover:text-white transition-colors">Case studies</Link>
+          <Link href="/resources" className="hover:text-white transition-colors">Resources</Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
@@ -47,10 +47,10 @@ export default function Nav() {
         <div className="md:hidden border-t border-gray-800 bg-gray-950 px-4 py-4 space-y-3 text-sm">
           {[
             ['/#how-it-works', 'How it works'],
-            ['/#who', 'Who it\'s for'],
-            ['/pricing', 'Pricing'],
-            ['/webinar', 'Webinar'],
+            ['/case-studies', 'Case studies'],
+            ['/resources', 'Resources'],
             ['/about', 'About'],
+            ['/survey', 'Pricing survey'],
           ].map(([href, label]) => (
             <Link key={href} href={href} onClick={() => setOpen(false)}
               className="block text-gray-400 hover:text-white transition-colors py-1">{label}</Link>
