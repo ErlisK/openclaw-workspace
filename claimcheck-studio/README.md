@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClaimCheck Studio — Landing Page
 
-## Getting Started
+Evidence-backed, channel-ready content from your manuscripts and transcripts.
 
-First, run the development server:
+## Live URLs
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+| | URL |
+|---|---|
+| **Production** | https://citebundle.com |
+| **Vercel deployment** | https://claimcheck-studio-37sk3b1c4-limalabs.vercel.app |
+| **Health endpoint** | https://citebundle.com/api/health |
+| **Lead API** | https://citebundle.com/api/lead |
+
+## Architecture
+
+- **Stack:** Next.js 16 (App Router, TypeScript), deployed on Vercel
+- **Lead capture:** GitHub Issues in `ErlisK/openclaw-workspace` (labels: `lead`, `claimcheck-studio`)
+- **Repo:** https://github.com/ErlisK/openclaw-workspace
+- **Branch:** `feature/landing-claimcheck`
+
+## Pages
+
+| Route | Description |
+|---|---|
+| `/` | Marketing landing page |
+| `/privacy` | Privacy policy (placeholder) |
+| `/terms` | Terms of service (placeholder) |
+| `/api/health` | Health check — `{ status: "ok" }` |
+| `/api/lead` | Lead capture — POST JSON, creates GitHub Issue |
+
+## Lead Capture API
+
+**POST** `/api/lead`
+
+```json
+{
+  "name": "Jane Smith",           // required
+  "email": "jane@company.com",    // required
+  "company": "Acme Pharma",       // optional
+  "role": "Medical Writer",       // optional
+  "use_case": "...",              // optional
+  "utm_source": "...",            // optional
+  "utm_medium": "...",            // optional
+  "utm_campaign": "...",          // optional
+  "referrer": "..."               // optional
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Returns `{ "ok": true }` on success.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables (Vercel)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+|---|---|
+| `GITHUB_PERSONAL_ACCESS_TOKEN` | Creates GitHub Issues for leads |
+| `GITHUB_REPO_FULL_NAME` | `ErlisK/openclaw-workspace` |
+| `NODE_ENV` | `production` |
 
-## Learn More
+## Verification Test Results
 
-To learn more about Next.js, take a look at the following resources:
+Run on 2026-04-08:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Health check
+curl https://claimcheck-studio-37sk3b1c4-limalabs.vercel.app/api/health
+# → {"status":"ok"}
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Lead submission
+curl -X POST https://claimcheck-studio-37sk3b1c4-limalabs.vercel.app/api/lead \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Test User","email":"test@example.com","company":"Test Co","role":"Medical Writer","use_case":"Evidence-backed LinkedIn threads","utm_source":"manual","utm_medium":"curl","utm_campaign":"smoke"}'
+# → {"ok":true}
 
-## Deploy on Vercel
+# GitHub Issue created: https://github.com/ErlisK/openclaw-workspace/issues/18
+# Title: "Lead: test@example.com — ClaimCheck Studio"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Local Development
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+cd claimcheck-studio
+npm install
+# Add .env.local:
+# GITHUB_PERSONAL_ACCESS_TOKEN=your_token
+# GITHUB_REPO_FULL_NAME=ErlisK/openclaw-workspace
+npm run dev
+```
+
+## Future: Email Notifications
+
+The `/api/lead/route.ts` is structured for easy AgentMail addition. After issue creation, add:
+```ts
+// TODO: send notification via AgentMail to hello@citebundle.com
+```
