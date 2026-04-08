@@ -1,11 +1,12 @@
 /**
- * Provenance Confidence Scorer
- * Formula v1: weighted composite of 4 signals
- *   0.25 × source_count_score
- * + 0.25 × recency_score
- * + 0.30 × study_type_score
- * + 0.20 × scite_sentiment (approximated from citation count at alpha stage)
- * - retraction_penalty
+ * Provenance Confidence Scorer v2
+ * Multi-signal weighted composite:
+ *   0.20 × source_count_score       (saturates at 5+ sources)
+ *   0.25 × recency_score            (decay over 20 years; meta-analyses weighted more)
+ *   0.30 × study_type_score         (meta > RCT > cohort > review > other > preprint)
+ *   0.15 × journal_credibility      (high-impact vs predatory)
+ *   0.10 × scite_support_ratio      (supporting / (supporting + contrasting))
+ * ─ penalties for retraction, preprint, animal-only
  */
 
 import type { EvidenceSource } from './evidence-search'
@@ -15,29 +16,45 @@ export type ConfidenceBand = 'high' | 'moderate' | 'low' | 'none'
 export interface ProvenanceScore {
   finalScore: number
   confidenceBand: ConfidenceBand
+  // Component scores
   sourceCountScore: number
   recencyScore: number
   studyTypeScore: number
+  journalCredibilityScore: number
   sciteSentimentScore: number
   retractionPenalty: number
+  preprinyPenalty: number
+  animalStudyPenalty: number
+  // Human-readable breakdown
   breakdown: string
+  topSource: { title: string; year?: number; studyType: string; journal?: string } | null
+  scoreV: 'v2'
 }
 
+// ── Weight tables ────────────────────────────────────────────
+
 const STUDY_TYPE_WEIGHTS: Record<EvidenceSource['studyType'], number> = {
-  meta_analysis: 1.0,
-  rct: 0.8,
-  cohort: 0.6,
-  review: 0.7,
-  case_study: 0.4,
-  other: 0.3,
+  meta_analysis: 1.00,
+  rct:           0.85,
+  cohort:        0.65,
+  review:        0.70,
+  case_study:    0.40,
+  preprint:      0.25,
+  other:         0.35,
+}
+
+const JOURNAL_CREDIBILITY_WEIGHTS: Record<EvidenceSource['journalCredibility'], number> = {
+  high:    1.00,
+  medium:  0.65,
+  low:     0.20,
+  unknown: 0.50,
 }
 
 const CURRENT_YEAR = new Date().getFullYear()
 
-export function computeProvenanceScore(
-  sources: EvidenceSource[],
-  orgWeights?: Partial<typeof STUDY_TYPE_WEIGHTS>
-): ProvenanceScore {
+// ── Score computation ────────────────────────────────────────
+
+export function computeProvenanceScore(sources: EvidenceSource[]): ProvenanceScore {
   if (sources.length === 0) {
     return {
       finalScore: 0,
@@ -45,59 +62,85 @@ export function computeProvenanceScore(
       sourceCountScore: 0,
       recencyScore: 0,
       studyTypeScore: 0,
+      journalCredibilityScore: 0,
       sciteSentimentScore: 0,
       retractionPenalty: 0,
-      breakdown: 'No evidence sources found',
+      preprinyPenalty: 0,
+      animalStudyPenalty: 0,
+      breakdown: 'No evidence sources found — claim is unsupported',
+      topSource: null,
+      scoreV: 'v2',
     }
   }
-
-  const weights = { ...STUDY_TYPE_WEIGHTS, ...orgWeights }
 
   // 1. Source count score (saturates at 5 sources)
   const sourceCountScore = Math.min(sources.length / 5, 1.0)
 
-  // 2. Recency score (decay over 20 years)
-  const sourcesWithYear = sources.filter(s => s.year && s.year > 1980)
-  const recencyScore = sourcesWithYear.length > 0
-    ? sourcesWithYear.reduce((sum, s) => {
-        const age = CURRENT_YEAR - (s.year!)
-        return sum + Math.max(0, 1 - age / 20)
-      }, 0) / sourcesWithYear.length
-    : 0.3 // default if no year data
+  // 2. Recency score — average across sources; meta-analyses from any year get full recency
+  const recencyScores = sources.map(s => {
+    if (s.studyType === 'meta_analysis') return 1.0  // meta-analyses are always relevant
+    if (!s.year || s.year < 1980) return 0.2
+    const age = CURRENT_YEAR - s.year
+    return Math.max(0, 1 - age / 20)
+  })
+  const recencyScore = recencyScores.reduce((a, b) => a + b, 0) / sources.length
 
-  // 3. Study type score
-  const studyTypeScore = sources.reduce((sum, s) =>
-    sum + (weights[s.studyType] || 0.3), 0
-  ) / sources.length
+  // 3. Study type score — best single study type (not average; one RCT is better than five case reports)
+  const studyTypeScore = Math.max(...sources.map(s => STUDY_TYPE_WEIGHTS[s.studyType] ?? 0.35))
 
-  // 4. Scite sentiment approximation
-  // At alpha: use citation count as proxy (highly cited = more supports)
-  // Real scite integration in Phase 3+
-  const sourcesWithCitations = sources.filter(s => s.citationCount != null)
-  let sciteSentimentScore = 0.5 // neutral default
-  if (sourcesWithCitations.length > 0) {
-    const avgCitations = sourcesWithCitations.reduce((s, e) => s + (e.citationCount || 0), 0) / sourcesWithCitations.length
-    // Normalize: >100 citations → high confidence
-    sciteSentimentScore = Math.min(avgCitations / 100, 1.0)
-  }
+  // 4. Journal credibility — best single journal credibility
+  const journalCredibilityScore = Math.max(
+    ...sources.map(s => JOURNAL_CREDIBILITY_WEIGHTS[s.journalCredibility] ?? 0.5)
+  )
 
-  // Retraction penalty (none at alpha without Retraction Watch API)
-  const retractionPenalty = 0
+  // 5. Scite sentiment ratio — supporting / (supporting + contrasting)
+  const totalSupport = sources.reduce((a, s) => a + (s.sciteSupport || 0), 0)
+  const totalContrast = sources.reduce((a, s) => a + (s.sciteContrast || 0), 0)
+  const sciteSentimentScore = (totalSupport + totalContrast) > 0
+    ? totalSupport / (totalSupport + totalContrast)
+    : 0.5  // neutral when no scite data
 
-  // Composite score
+  // 6. Penalties
+  const hasRetracted = sources.some(s => s.isRetracted)
+  const allPreprints = sources.every(s => s.isPreprint)
+  const allAnimalStudies = sources.every(s => s.isAnimalStudy)
+  const anyRetracted = sources.some(s => s.isRetracted)
+
+  const retractionPenalty = anyRetracted ? 0.40 : 0
+  const preprinyPenalty = allPreprints ? 0.20 : (sources.filter(s => s.isPreprint).length / sources.length) * 0.10
+  const animalStudyPenalty = allAnimalStudies ? 0.15 : 0
+
+  // Composite
   const rawScore =
-    0.25 * sourceCountScore +
+    0.20 * sourceCountScore +
     0.25 * recencyScore +
     0.30 * studyTypeScore +
-    0.20 * sciteSentimentScore -
-    retractionPenalty
+    0.15 * journalCredibilityScore +
+    0.10 * sciteSentimentScore -
+    retractionPenalty - preprinyPenalty - animalStudyPenalty
 
   const finalScore = Math.min(Math.max(rawScore, 0), 1)
 
   const confidenceBand: ConfidenceBand =
-    finalScore >= 0.8 ? 'high' :
-    finalScore >= 0.5 ? 'moderate' :
-    finalScore > 0 ? 'low' : 'none'
+    finalScore >= 0.72 ? 'high' :
+    finalScore >= 0.45 ? 'moderate' :
+    finalScore >  0.00 ? 'low' : 'none'
+
+  // Best source for display
+  const topSource = sources[0]
+    ? { title: sources[0].title, year: sources[0].year, studyType: sources[0].studyType, journal: sources[0].journal }
+    : null
+
+  const breakdown = [
+    `${sources.length} sources`,
+    `recency=${recencyScore.toFixed(2)}`,
+    `study_type=${studyTypeScore.toFixed(2)}(${sources.map(s => s.studyType.replace('_','')).join(',')})`,
+    `journal=${journalCredibilityScore.toFixed(2)}`,
+    `scite_ratio=${sciteSentimentScore.toFixed(2)}(${totalSupport}sup/${totalContrast}ctr)`,
+    hasRetracted ? '⚠️retracted' : null,
+    allPreprints ? '⚠️preprint_only' : null,
+    allAnimalStudies ? '⚠️animal_only' : null,
+  ].filter(Boolean).join(' | ')
 
   return {
     finalScore: Math.round(finalScore * 1000) / 1000,
@@ -105,8 +148,13 @@ export function computeProvenanceScore(
     sourceCountScore: Math.round(sourceCountScore * 1000) / 1000,
     recencyScore: Math.round(recencyScore * 1000) / 1000,
     studyTypeScore: Math.round(studyTypeScore * 1000) / 1000,
+    journalCredibilityScore: Math.round(journalCredibilityScore * 1000) / 1000,
     sciteSentimentScore: Math.round(sciteSentimentScore * 1000) / 1000,
     retractionPenalty,
-    breakdown: `${sources.length} sources | recency: ${recencyScore.toFixed(2)} | study types: ${sources.map(s => s.studyType).join(', ')}`,
+    preprinyPenalty: Math.round(preprinyPenalty * 1000) / 1000,
+    animalStudyPenalty,
+    breakdown,
+    topSource,
+    scoreV: 'v2',
   }
 }

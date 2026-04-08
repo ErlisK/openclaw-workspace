@@ -15,7 +15,7 @@ export interface ScoredClaim {
   text: string
   confidenceScore: number
   confidenceBand: string
-  sources: EvidenceSource[]
+  sources: Array<Partial<EvidenceSource> & { title: string; sourceDb: EvidenceSource['sourceDb'] }>
 }
 
 export interface GeneratedContent {
@@ -31,8 +31,8 @@ export interface GeneratedContent {
   }>
 }
 
-function formatCitation(source: EvidenceSource): string {
-  const authors = source.authors.length > 0
+function formatCitation(source: Partial<EvidenceSource> & { title: string }): string {
+  const authors = source.authors && source.authors.length > 0
     ? `${source.authors[0].split(',')[0]} et al.`
     : 'Authors'
   const year = source.year ? ` (${source.year})` : ''
@@ -83,7 +83,7 @@ export function generateContent(
         const shortClaim = adapted.length > 240 ? adapted.slice(0, 237) + '...' : adapted
         const emoji = confidenceEmoji(claim.confidenceBand)
         const sourceLine = claim.sources[0]
-          ? ` [${claim.sources[0].authors[0]?.split(',')[0] || 'Source'} ${claim.sources[0].year || ''}]`
+          ? ` [${claim.sources[0].authors?.[0]?.split(',')[0] || 'Source'} ${claim.sources[0].year || ''}]`
           : ''
         lines.push(`${i + 1}/ ${shortClaim}${sourceLine} ${emoji}`)
         attributions.push({ sentenceIndex: sentenceIdx + i, claimId: claim.id, sourceCount: claim.sources.length, confidenceBand: claim.confidenceBand })
@@ -133,7 +133,7 @@ export function generateContent(
         const bulletPoints = adapted.split(/[;,]/).filter(s => s.trim().length > 10).slice(0, 3)
         const headline = adapted.split('.')[0].slice(0, 60)
         const src = claim.sources[0]
-        const srcLine = src ? `Source: ${src.authors[0]?.split(',')[0] || 'Authors'} et al. ${src.year || ''}, ${src.journal || 'Journal'}` : ''
+        const srcLine = src ? `Source: ${src.authors?.[0]?.split(',')[0] || 'Authors'} et al. ${src.year || ''}, ${src.journal || 'Journal'}` : ''
         attributions.push({ sentenceIndex: sentenceIdx + i, claimId: claim.id, sourceCount: claim.sources.length, confidenceBand: claim.confidenceBand })
         return `SLIDE ${i + 1}\nHeadline: ${headline}\n${bulletPoints.map(b => `• ${b.trim()}`).join('\n')}\n${srcLine}`
       })
