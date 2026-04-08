@@ -32,6 +32,7 @@ const NAV_P2 = [
   { href: '/mvp', label: 'MVP Backlog' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/segments', label: 'Segments' },
+  { href: '/blueprint', label: 'Blueprint' },
 ]
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
