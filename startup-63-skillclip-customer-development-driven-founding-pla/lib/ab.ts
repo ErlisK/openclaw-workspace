@@ -64,9 +64,12 @@ export function assignVariant(sessionId: string): VariantKey {
   return VARIANT_KEYS[hash % VARIANT_KEYS.length];
 }
 
+const SESSION_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+
 export function generateSessionId(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-  return Array.from({ length: 16 }, () =>
-    chars[Math.floor(Math.random() * chars.length)]
-  ).join('');
+  let result = '';
+  for (let i = 0; i < 16; i++) {
+    result += SESSION_CHARS[Math.floor(Math.random() * SESSION_CHARS.length)];
+  }
+  return result;
 }
