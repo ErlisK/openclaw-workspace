@@ -19,6 +19,7 @@ export default function Nav() {
           <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link href="/webinar" className="hover:text-white transition-colors">Webinar</Link>
           <Link href="/about" className="hover:text-white transition-colors">About</Link>
+          <Link href="/survey" className="hover:text-white transition-colors">Pricing survey</Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
