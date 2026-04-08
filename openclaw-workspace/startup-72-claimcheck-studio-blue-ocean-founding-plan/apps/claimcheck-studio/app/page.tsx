@@ -71,7 +71,8 @@ interface GeneratedOutput {
 }
 
 interface ExportBundle {
-  summary: { totalClaims: number; totalSources: number; highConfidence: number; moderateConfidence: number }
+  session: { id: string; title: string }
+  summary: { totalClaims: number; totalSources: number; highConfidence: number; moderateConfidence: number; oaSources: number; criticalFlags: number }
   bundle: { csv: string; bibtex: string; vancouver: string; confidenceReport: string }
 }
 
@@ -160,6 +161,7 @@ export default function WorkbenchPage() {
 
   // Export
   const [exportData, setExportData] = useState<ExportBundle | null>(null)
+  const [downloadingZip, setDownloadingZip] = useState(false)
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -237,6 +239,24 @@ export default function WorkbenchPage() {
       setStep('export')
     } catch (e) { setError(e instanceof Error ? e.message : 'Export failed') }
     finally { setLoading(false) }
+  }
+
+  async function handleDownloadZip() {
+    if (!sessionId) return
+    setDownloadingZip(true)
+    try {
+      const res = await fetch(`/api/sessions/${sessionId}/export?format=zip`)
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error) }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      const title = exportData?.session?.title || 'citebundle'
+      a.href = url
+      a.download = `citebundle_${title.replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40)}.zip`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch (e) { setError(e instanceof Error ? e.message : 'ZIP download failed') }
+    finally { setDownloadingZip(false) }
   }
 
   const toggleClaimExcluded = useCallback((index: number) => {
@@ -600,37 +620,90 @@ Example: Statins reduce LDL cholesterol by 30–50% at standard doses. A meta-an
       {step === 'export' && exportData && (
         <div className="space-y-4">
           <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-            <h2 className="text-base font-semibold text-white mb-4">CiteBundle Ready</h2>
-            <div className="grid grid-cols-4 gap-3 mb-6">
+            <div className="flex items-start justify-between mb-5">
+              <div>
+                <h2 className="text-base font-semibold text-white">CiteBundle Ready</h2>
+                <p className="text-xs text-gray-500 mt-0.5">{exportData.session?.title}</p>
+              </div>
+              {/* Primary CTA: full ZIP */}
+              <button
+                onClick={handleDownloadZip}
+                disabled={downloadingZip}
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-700 text-white rounded-lg text-sm font-semibold transition-colors shadow-lg">
+                {downloadingZip ? (
+                  <><span className="animate-spin">⟳</span> Building ZIP…</>
+                ) : (
+                  <><span>⬇</span> Download CiteBundle.zip</>
+                )}
+              </button>
+            </div>
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-6 gap-2 mb-6">
               {[
                 { label: 'Claims', value: exportData.summary.totalClaims, color: 'text-white' },
                 { label: 'Sources', value: exportData.summary.totalSources, color: 'text-white' },
-                { label: 'High confidence', value: exportData.summary.highConfidence, color: 'text-emerald-400' },
+                { label: 'High conf.', value: exportData.summary.highConfidence, color: 'text-emerald-400' },
                 { label: 'Moderate', value: exportData.summary.moderateConfidence, color: 'text-amber-400' },
+                { label: 'OA PDFs', value: exportData.summary.oaSources, color: 'text-blue-400' },
+                { label: 'Critical flags', value: exportData.summary.criticalFlags, color: exportData.summary.criticalFlags > 0 ? 'text-red-400' : 'text-gray-600' },
               ].map(({ label, value, color }) => (
-                <div key={label} className="border border-gray-800 rounded-lg p-3 text-center">
-                  <div className={`text-2xl font-bold ${color}`}>{value}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{label}</div>
+                <div key={label} className="border border-gray-800 rounded-lg p-2.5 text-center">
+                  <div className={`text-xl font-bold ${color}`}>{value}</div>
+                  <div className="text-xs text-gray-600 mt-0.5">{label}</div>
                 </div>
               ))}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+
+            {/* ZIP contents explainer */}
+            <div className="rounded-lg border border-gray-800 bg-gray-800/30 p-4 mb-5">
+              <div className="text-xs font-semibold text-gray-400 mb-2.5">ZIP Contents (10 files)</div>
+              <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-gray-500">
+                {[
+                  ['README.md', 'Overview, methodology, license policy'],
+                  ['confidence_report.txt', 'Full provenance + risk flag report'],
+                  ['citations.csv', 'Tabular source list with OA URLs'],
+                  ['citations.bib', 'BibTeX for all sources'],
+                  ['citations_vancouver.txt', 'Vancouver numbered references'],
+                  ['citations_apa.txt', 'APA 7th edition references'],
+                  ['source_excerpts.md', 'Highlightable excerpts (OA full / abstract)'],
+                  ['oa_manifest.json', 'Open-access snapshot manifest'],
+                  ['plain_language_summaries.md', 'Plain-English per-source summaries'],
+                  ['audit_trail.json', 'Pipeline provenance & export record'],
+                ].map(([file, desc]) => (
+                  <div key={file} className="flex items-start gap-1.5">
+                    <span className="text-gray-600 font-mono shrink-0">{file}</span>
+                    <span className="text-gray-700">— {desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Individual file downloads */}
+            <div className="text-xs text-gray-600 mb-2">Or download individual files:</div>
+            <div className="grid grid-cols-2 gap-2">
               {[
                 { label: '📄 citations.csv', content: exportData.bundle.csv, fn: 'citations.csv', type: 'text/csv' },
-                { label: '📚 citations.bib (BibTeX)', content: exportData.bundle.bibtex, fn: 'citations.bib', type: 'text/plain' },
+                { label: '📚 citations.bib', content: exportData.bundle.bibtex, fn: 'citations.bib', type: 'text/plain' },
                 { label: '📋 citations_vancouver.txt', content: exportData.bundle.vancouver, fn: 'citations_vancouver.txt', type: 'text/plain' },
                 { label: '📊 confidence_report.txt', content: exportData.bundle.confidenceReport, fn: 'confidence_report.txt', type: 'text/plain' },
               ].map(({ label, content, fn, type }) => (
                 <button key={label} onClick={() => downloadText(content, fn, type)}
-                  className="flex items-center justify-between border border-gray-700 rounded-lg px-4 py-3 text-sm text-gray-300 hover:border-gray-500 hover:text-white transition-colors">
+                  className="flex items-center justify-between border border-gray-700/50 rounded-lg px-3 py-2 text-xs text-gray-400 hover:border-gray-600 hover:text-gray-300 transition-colors">
                   <span>{label}</span>
-                  <span className="text-blue-400 text-xs">↓ Download</span>
+                  <span className="text-blue-500">↓</span>
                 </button>
               ))}
             </div>
-            <button onClick={resetAll} className="mt-5 text-sm text-gray-500 hover:text-gray-300 transition-colors">
-              ← Process another document
-            </button>
+
+            <div className="mt-5 pt-4 border-t border-gray-800 flex items-center justify-between">
+              <p className="text-xs text-gray-600">
+                OA excerpts under CC-BY · Paywalled abstracts truncated ≤250 chars · No paywalled PDFs stored
+              </p>
+              <button onClick={resetAll} className="text-xs text-gray-500 hover:text-gray-300 transition-colors">
+                ← New document
+              </button>
+            </div>
           </div>
         </div>
       )}
