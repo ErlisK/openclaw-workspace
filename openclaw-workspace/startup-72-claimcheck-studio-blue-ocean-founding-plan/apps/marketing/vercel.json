@@ -1,6 +1,24 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": ".next",
-  "framework": "nextjs",
-  "regions": ["iad1"]
+  "crons": [
+    {
+      "path": "/api/cron/retraction-monitor",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/living-citations",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/uptime-check",
+      "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/cron/sla-monitor",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/reviewer-quality",
+      "schedule": "0 9 * * 1"
+    }
+  ]
 }
