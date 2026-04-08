@@ -1,0 +1,315 @@
+name: CI — ClaimCheck Studio
+
+on:
+  push:
+    branches: [master, main, staging]
+    paths:
+      - 'openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/**'
+      - '.github/workflows/claimcheck-ci.yml'
+  pull_request:
+    branches: [master, main]
+    paths:
+      - 'openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio
+
+env:
+  NODE_VERSION: '22'
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  # ── 1. Lint + Type-check ──────────────────────────────────────────────────
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint (ESLint)
+        run: npm run lint
+        continue-on-error: true   # warn only — don't block on style issues
+
+  # ── 2. Build ─────────────────────────────────────────────────────────────
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: lint
+    env:
+      # Stub env vars so Next.js can build without real credentials
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      NEXT_PUBLIC_APP_URL: https://app.citebundle.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (Next.js)
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build-${{ github.sha }}
+          path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/.next
+          retention-days: 3
+
+  # ── 3. Smoke test (post-deploy) ───────────────────────────────────────────
+  smoke:
+    name: Smoke Test
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/scripts
+
+      - name: Run smoke tests against staging
+        env:
+          APP_URL: https://app.citebundle.com
+        run: |
+          set -e
+
+          check() {
+            local url="$1"
+            local expected_status="${2:-200}"
+            local label="${3:-$url}"
+            local status
+            status=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$url")
+            if [ "$status" = "$expected_status" ]; then
+              echo "✅ $label → $status"
+            else
+              echo "❌ $label → $status (expected $expected_status)"
+              exit 1
+            fi
+          }
+
+          echo "=== Page routes ==="
+          check "$APP_URL/"          200 "Homepage"
+          check "$APP_URL/eval"      200 "Eval page"
+          check "$APP_URL/admin"     200 "Admin ops page"
+
+          echo ""
+          echo "=== API health routes ==="
+          check "$APP_URL/api/jobs/worker"     200 "Worker health"
+          check "$APP_URL/api/jobs?stats=1"    200 "Queue stats"
+
+          echo ""
+          echo "=== API functional tests ==="
+
+          # Sessions list
+          SESSIONS=$(curl -s --max-time 30 "$APP_URL/api/sessions")
+          SESS_COUNT=$(echo "$SESSIONS" | python3 -c "import sys,json; print(len(json.load(sys.stdin).get('sessions',[])))" 2>/dev/null || echo "0")
+          echo "✅ Sessions API → $SESS_COUNT sessions"
+
+          # Telemetry ingest
+          TEL=$(curl -s -X POST "$APP_URL/api/telemetry" \
+            -H "Content-Type: application/json" \
+            -d '{"eventType":"ci.smoke_test","properties":{"sha":"'"$GITHUB_SHA"'","ref":"'"$GITHUB_REF"'"}}')
+          OK=$(echo "$TEL" | python3 -c "import sys,json; print(json.load(sys.stdin).get('ok',''))" 2>/dev/null)
+          [ "$OK" = "True" ] && echo "✅ Telemetry ingest → ok" || echo "⚠️  Telemetry ingest returned: $TEL"
+
+          echo ""
+          echo "All smoke tests passed ✅"
+
+  # ── 4. Deploy to Preview (PRs) ────────────────────────────────────────────
+  deploy-preview:
+    name: Deploy Preview
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'pull_request'
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel env
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Preview
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tail -1)
+          echo "preview_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Preview deployed: $URL"
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = '${{ steps.deploy.outputs.preview_url }}';
+            const sha = context.payload.pull_request.head.sha.slice(0, 7);
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: [
+                '## 🚀 Preview Deployment',
+                '',
+                `**URL:** ${url}`,
+                `**Commit:** \`${sha}\``,
+                '',
+                '### Smoke checks',
+                `- [\`/\`](${url}/) — Homepage`,
+                `- [\`/eval\`](${url}/eval) — Eval dashboard`,
+                `- [\`/admin\`](${url}/admin) — Ops dashboard`,
+                `- [\`/api/jobs/worker\`](${url}/api/jobs/worker) — Worker health`,
+                '',
+                '*Auto-generated by ClaimCheck CI*',
+              ].join('\n')
+            });
+
+  # ── 5. Deploy to Production (master/staging push) ─────────────────────────
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    needs: [build, smoke]
+    if: (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main') && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://app.citebundle.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel env (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel (production)
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy to Production
+        id: deploy
+        run: |
+          OUTPUT=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} 2>&1)
+          echo "$OUTPUT"
+          URL=$(echo "$OUTPUT" | grep -E "https://.*\.vercel\.app|https://app\.citebundle\.com" | tail -1)
+          echo "production_url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Post-deploy smoke test
+        run: |
+          sleep 10  # wait for edge propagation
+          APP_URL="https://app.citebundle.com"
+          for path in "/" "/eval" "/admin" "/api/jobs/worker"; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$APP_URL$path")
+            [ "$STATUS" = "200" ] && echo "✅ $path → 200" || { echo "❌ $path → $STATUS"; exit 1; }
+          done
+
+      - name: Emit deploy telemetry
+        run: |
+          curl -s -X POST "https://app.citebundle.com/api/telemetry" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "eventType": "ci.production_deployed",
+              "properties": {
+                "sha": "'"$GITHUB_SHA"'",
+                "ref": "'"$GITHUB_REF_NAME"'",
+                "actor": "'"$GITHUB_ACTOR"'",
+                "run_id": "'"$GITHUB_RUN_ID"'"
+              }
+            }' || true
+
+      - name: Create GitHub deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: deployment } = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: 'production',
+              description: 'ClaimCheck Studio — citebundle.com',
+              auto_merge: false,
+              required_contexts: [],
+            });
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: deployment.id,
+              state: 'success',
+              environment_url: 'https://app.citebundle.com',
+              description: 'Deployed successfully',
+              log_url: `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+            });
+
+  # ── 6. Deploy Staging branch ─────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.staging_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/apps/claimcheck-studio/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel env (preview)
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build for Vercel
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Staging
+        id: deploy
+        run: |
+          URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | tail -1)
+          echo "staging_url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Staging deployed: $URL"

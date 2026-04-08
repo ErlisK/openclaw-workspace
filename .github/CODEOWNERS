@@ -1,0 +1,11 @@
+# CODEOWNERS — ClaimCheck Studio
+# Code owners are automatically requested for review on PRs
+
+# Root-level config
+/.github/                        @ErlisK
+
+# ClaimCheck Studio app
+/openclaw-workspace/startup-72-claimcheck-studio-blue-ocean-founding-plan/   @ErlisK
+
+# CI workflows require approval
+/.github/workflows/claimcheck-ci.yml   @ErlisK
