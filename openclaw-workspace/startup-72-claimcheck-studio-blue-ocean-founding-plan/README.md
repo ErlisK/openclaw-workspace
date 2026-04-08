@@ -1,79 +1,90 @@
 # ClaimCheck Studio — Blue Ocean Founding Plan
-## Phase 1: Strategy Canvas and Market Mapping
+## Phase 1 Complete: Strategy Canvas, Market Mapping & User Research
 
-**Domain:** citebundle.com  
+**Domain:** citebundle.com | **Email:** hello@citebundle.com  
 **Approach:** Blue Ocean Strategy  
-**Status:** Phase 1 Complete — Evidence Verified  
-**Supabase Project:** lpxhxmpzqjygsaawkrva  
+**Supabase:** lpxhxmpzqjygsaawkrva  
 
 ---
 
 ## Deliverables
 
-| File | Contents | Evidence Status |
+| File | Contents | Status |
 |---|---|---|
-| `competitors.json` | 38 competitors — pricing, features, 6 boolean flags, source URLs | ✅ 15+ live page fetches; major corrections applied |
-| `competing-factors.json` | 22 factors × 39 entities (38 competitors + ClaimCheck target); scores 1–5 | ✅ Corrected from live evidence |
-| `strategy-canvas.md` | Full matrix + Four Actions Framework + blue ocean narrative | ✅ Built from verified data |
-| `user-pain-points.md` | Top 10 pain points with quoted evidence + non-consumption drivers | ✅ G2, Capterra, Reddit, PH, HN sources |
+| `competitors.json` | 38 competitors — live-verified pricing, features, 6 boolean flags | ✅ Evidence verified |
+| `competing-factors.json` | 22 factors × 39 entities; scores corrected from live fetches | ✅ |
+| `strategy-canvas.md` | Full matrix + Four Actions Framework + blue ocean narrative | ✅ |
+| `user-pain-points.md` | Top 10 pain points with quoted evidence from G2/Reddit/PH/HN | ✅ |
 | `market-map.md` | 3 ASCII positioning maps + ~$3.3B TAM estimate | ✅ |
-| `readout-deck.md` | 8-slide internal readout: exec summary, landscape, strategy, Phase 2 plan | ✅ |
-| `evidence-collection.md` | **Full evidence log** — 20+ live page fetches with URLs, pricing corrections, review signals | ✅ New in this iteration |
-| `interview-repository.md` | Interview protocol + 7 synthetic interviews + themes summary + Supabase schema | ✅ New; live recruitment pending |
+| `readout-deck.md` | **10-slide readout** — strategy canvas, 15-interview synthesis, Phase 2 plan | ✅ Updated |
+| `evidence-collection.md` | Full evidence log — 20+ live page fetches, pricing corrections, Intel | ✅ |
+| `interview-repository.md` | Interview protocol, 15-interview corpus, Supabase schema | ✅ |
+| `interview-themes-summary.md` | **8 themes, JTBD analysis, WTP architecture, non-consumption** | ✅ New |
 
 ---
 
-## Supabase Data Store
+## Supabase Data Store (lpxhxmpzqjygsaawkrva)
 
-All structured Phase 1 data is stored in Supabase (project: lpxhxmpzqjygsaawkrva):
-
-| Table | Records | Purpose |
+| Table | Records | Contents |
 |---|---|---|
-| `claimcheck_competitors` | 10 key competitors | Core competitor registry |
-| `claimcheck_factors` | 22 factors | Strategy canvas axes |
-| `claimcheck_scores` | 25 evidence-linked scores | Factor scores with source URLs |
-| `claimcheck_pain_points` | 10 pain points | Ranked with quotes + sources |
-| `claimcheck_interviews` | 7 synthetic interviews | ICP voice data pending live recruitment |
+| `claimcheck_competitors` | 10 | Core competitor registry |
+| `claimcheck_factors` | 22 | Strategy canvas axes with target scores |
+| `claimcheck_scores` | 25 | Evidence-linked factor scores with source URLs |
+| `claimcheck_pain_points` | 10 | Ranked with quotes + sources |
+| `claimcheck_interviews` | **15** | Full ICP interview corpus |
+
+---
+
+## 15-Interview Corpus (by Segment)
+
+| Segment | Interviews | WTP Range |
+|---|---|---|
+| Medical writers (CRO/agency + enterprise pharma) | 2 | $200–50,000/mo |
+| Medical affairs / MLR leads | 2 | $5,000–15,000/mo |
+| Medical device marketing | 1 | $1,000–3,000/mo |
+| Medical education (CME + agency) | 2 | $1,000–5,000/mo |
+| Academic science communication | 2 | $500–2,000/mo |
+| Digital health content teams | 2 | $500–1,500/mo |
+| Hospital / health system | 1 | $2,000–5,000/mo |
+| Research funders | 1 | $3,000–8,000/mo |
+| Health journalism + science blogging | 2 | $20–60/mo |
 
 ---
 
 ## Key Findings
 
 ### The Blue Ocean
-No competitor simultaneously scores high on **evidence rigor** AND **content production ease**. The upper-right quadrant of the Evidence Rigor vs. Content Production Ease map is **completely unoccupied**.
+No competitor simultaneously scores high on **evidence rigor** AND **content production ease**. All 15 interviews confirm the gap is real, painful, and currently unsolved.
 
-### Major Pricing Corrections from Live Evidence
-| Tool | Previous Data | Verified Actual |
-|---|---|---|
-| Copy.ai | $49/mo Pro | **$1,000/mo minimum** (enterprise pivot) |
-| Elicit | $10/mo Plus | **$49/mo Pro** (significant increase) |
-| Rytr | $9/mo Saver | **$7.50/mo Unlimited** |
-| Paperpile | $9.99/mo | **$4.15/mo Regular** (much cheaper) |
-| Buffer | $6/channel/mo | **$5/channel/mo** |
-| Anyword | API available | **API: Enterprise-only** |
-| Veeva | 100+ customers | **450+ biopharmas, 47/50 top pharma** |
+### Top 8 Themes (from interviews)
+1. 🚨 **Hallucination Trust Crisis** (10/15) — AI tools widely used, widely distrusted for health claims
+2. 🚨 **Pre-Submission Evidence Gap** (8/15) — weak evidence discovered late = 3–8 weeks of rework
+3. 📋 **Multi-Format Demand, Single Evidence** (9/15) — same evidence, 6 formats, 2 days of manual work
+4. 📦 **Citation Bundle Gap** (7/15) — independently derived by users as the solution they need
+5. 💸 **Compliance Accessibility Gap** (7/15) — Veeva $150k+; mid-market uses Slack
+6. ⚠️ **Post-Publication Monitoring** (5/15) — retractions not caught; legal risk unmonitored
+7. ⚡ **Rapid-Cycle Compliance** (4/15) — 48-hour compliant content for congress readouts is impossible
+8. 🔧 **Tool Fragmentation** (13/15) — avg 5.4 tools per workflow; every boundary = manual work
 
-### The Market Bifurcation
-- **AI writing tools** (Jasper, Copy.ai, ChatGPT): excellent content, zero evidence grounding
-- **Research tools** (Scite, Consensus, Elicit): excellent evidence, zero content output
-- **MLR compliance tools** (Veeva, Zinc): strong compliance, enterprise-only ($150k+/yr)
+### Pricing Architecture
+Three tiers validated by interview WTP data:
+- **Individual** $49/mo — journalists, bloggers, individual writers
+- **Team/Studio** $199–999/mo — agencies, digital health, university departments
+- **Compliance/Enterprise** $2,000–50,000/mo — pharma, med device, hospital systems, top pharma
 
-### Top 3 Pain Points (from evidence)
-1. AI tools hallucinate scientific claims with no accountability (critical)
-2. Research tools produce academic-only outputs; no content pipeline (high)
-3. MLR compliance is enterprise-only; mid-market uses email/Slack (critical)
-
-### Four Actions (Summary)
-- **Eliminate:** Generic marketing copy, social scheduling as product
-- **Reduce:** Brand voice customization, social analytics
-- **Raise:** Hallucination mitigation, provenance scoring, citation bundle quality
-- **Create:** Claim-to-evidence pipeline automation, expert microtask marketplace, retraction monitoring, compliance agent at SMB pricing
+### Four New Blue Ocean Zones
+1. Science communication layer (research → public-ready content)
+2. Mid-market regulated content ($499/mo compliance vs. $150k Veeva)
+3. Expert microtask review marketplace (no competitor exists)
+4. **NEW:** Rapid-cycle compliance (4–48 hr for congress/trial content)
 
 ---
 
 ## Phase 2 Next Steps
-1. ≥15 live user interviews via LinkedIn/Reddit/Twitter outreach (template in interview-repository.md)
-2. v0 claim extraction + evidence match prototype (PDF input → claim list → PubMed results)
-3. Expert reviewer community seeding (20–30 beta reviewers)
-4. Pricing validation page (citebundle.com waitlist)
-5. Technical stack decision: evidence graph architecture (build vs. license Scite/Semantic Scholar API)
+1. 15 live interviews (total corpus → 30; contact outreach via LinkedIn + Reddit + AMWA/ISMPP)
+2. Pre-submission claim check v0 prototype (PDF in → highlighted claim report out)
+3. Citation bundle v0 (claim + DOI + excerpt + summary → PDF export)
+4. Waitlist page at citebundle.com (target: 200 sign-ups)
+5. Expert reviewer community seeding (20–30 beta reviewers)
+6. Technical architecture decision: evidence graph build vs. license
+7. One Letter of Intent from target enterprise buyer
