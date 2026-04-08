@@ -41,7 +41,7 @@ export default function Footer() {
           <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Legal</div>
           <div className="space-y-2 text-sm text-gray-400">
             <span className="block text-gray-600">Privacy Policy</span>
-            <span className="block text-gray-600">Terms of Service</span>
+            <Link href="/security" className="block hover:text-white transition-colors">Security</Link>
           </div>
         </div>
       </div>

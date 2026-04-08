@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import Nav from '@/components/Nav'
 import Footer from '@/components/Footer'
+import FunnelTracker from '@/components/FunnelTracker'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} bg-gray-950 text-gray-100 antialiased`}>
         <Nav />
+        <FunnelTracker />
         <main>{children}</main>
         <Footer />
       </body>

@@ -29,6 +29,12 @@ export default function WaitlistForm({ source = 'homepage', buttonLabel = 'Join 
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
+      // Track funnel event
+      const visitorId = localStorage.getItem('vid') || ''
+      fetch('/api/funnel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitorId, event: 'waitlist_submit', page: source, segment }),
+      }).catch(() => {})
       setDone(true)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
