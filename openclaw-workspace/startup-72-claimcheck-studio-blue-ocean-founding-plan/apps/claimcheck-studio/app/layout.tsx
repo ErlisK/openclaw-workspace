@@ -32,6 +32,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <a href="/compliance" className="hover:text-gray-300">Compliance</a>
               <a href="/outputs" className="hover:text-gray-300">Outputs</a>
               <a href="/access" className="hover:text-gray-300">Access</a>
+              <a href="/beta" className="hover:text-gray-300">Beta Ops</a>
               <a href="/eval" className="hover:text-gray-300">Eval</a>
               <a href="/admin" className="hover:text-gray-300">Ops</a>
               <a href="https://citebundle.com" className="hover:text-gray-300">citebundle.com</a>
