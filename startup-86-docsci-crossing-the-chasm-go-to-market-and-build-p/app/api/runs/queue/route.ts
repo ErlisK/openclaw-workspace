@@ -213,6 +213,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       run_id: result.runId,
+      sandbox_id: result.sandboxId,
       status: result.status,
       finding_count: result.findingCount,
       suggestion_count: result.suggestionCount,
