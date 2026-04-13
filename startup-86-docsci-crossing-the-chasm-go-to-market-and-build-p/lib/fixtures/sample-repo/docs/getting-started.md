@@ -78,3 +78,34 @@ def paginate(items, page_size=10):
 results = list(paginate(list(range(25)), 10))
 print(f"Pages: {len(results)}, items per page: {[len(p) for p in results]}")
 ```
+
+## Images and Accessibility
+
+The dashboard is shown below:
+
+![](https://example.com/dashboard.png)
+
+Click here to [learn more about authentication](#auth).
+
+## User Management
+
+This feature was added in v2.0. Users are created by submitting a POST request. The data is returned as JSON. All operations are performed by the SDK automatically.
+
+### Users Table
+
+| alice | admin |
+| bob   | user  |
+
+## Inclusive Language Notes
+
+The API uses a blacklist to block unauthorized tokens. The master branch contains the latest code. Make sure to sanity check your configuration before deploying.
+
+We think the SDK is very easy to use. You might want to basically just call the init method. It is possible that some configuration is required.
+
+## Headings
+
+### This is h3 right after h2 (fine)
+
+##### This jumps to h5 (skip!)
+
+Some text here.
