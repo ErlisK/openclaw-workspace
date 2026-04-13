@@ -221,7 +221,7 @@ test.describe("Runs UI page", () => {
   test("Runs page loads", async ({ page }) => {
     await page.goto(`${BASE}/runs`);
     await expect(page.getByRole("heading", { name: "CI Runs" })).toBeVisible();
-    await expect(page.getByText("Run on sample repo")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Run on sample repo/ })).toBeVisible();
   });
 
   test("Runs page has recent runs list", async ({ page }) => {
