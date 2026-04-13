@@ -1,0 +1,63 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🦸  Super Kid!</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Cape -->
+  <path d="M280,400 Q200,500 160,650 Q145,720 170,780 Q250,770 310,700 Q350,650 370,590" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M488,400 Q568,500 608,650 Q623,720 598,780 Q518,770 458,700 Q418,650 398,590" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Cape inner edge detail -->
+  <path d="M290,420 Q215,525 180,670 Q165,730 180,775" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M478,420 Q553,525 588,670 Q603,730 588,775" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Body/Suit -->
+  <path d="M280,400 Q270,480 275,560 Q280,640 384,650 Q488,640 493,560 Q498,480 488,400 Q460,370 384,365 Q308,370 280,400 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Chest logo -->
+  <path d="M340,480 L370,430 L400,480 L430,430 L460,480" fill="none" stroke="black" stroke-width="7"/>
+  <circle cx="384" cy="500" r="30" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Belt -->
+  <rect x="300" y="575" width="168" height="28" rx="8" fill="none" stroke="black" stroke-width="7"/>
+  <rect x="370" y="572" width="28" height="34" rx="5" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Legs -->
+  <path d="M300,648 Q285,730 275,820 Q273,848 300,850 Q325,850 330,822 Q340,745 350,658" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M468,648 Q483,730 493,820 Q495,848 468,850 Q443,850 438,822 Q428,745 418,658" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Boots -->
+  <path d="M260,820 Q248,858 255,880 Q278,900 312,885 Q330,868 328,840 Q325,825 305,820 Z" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M508,820 Q520,858 513,880 Q490,900 456,885 Q438,868 440,840 Q443,825 463,820 Z" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Head -->
+  <circle cx="384" cy="275" r="100" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Mask -->
+  <path d="M284,258 Q310,218 350,230 Q370,240 384,250 Q398,240 418,230 Q458,218 484,258 Q468,290 448,285 Q430,275 416,280 Q400,285 384,290 Q368,285 352,280 Q338,275 320,285 Q300,290 284,258 Z" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Eyes in mask -->
+  <ellipse cx="338" cy="255" rx="28" ry="20" fill="white" stroke="black" stroke-width="7"/>
+  <ellipse cx="430" cy="255" rx="28" ry="20" fill="white" stroke="black" stroke-width="7"/>
+  <circle cx="338" cy="255" r="12" fill="black"/>
+  <circle cx="430" cy="255" r="12" fill="black"/>
+  <!-- Smile -->
+  <path d="M353,310 Q384,332 415,310" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Hair poking out -->
+  <path d="M284,270 Q270,240 280,210" fill="none" stroke="black" stroke-width="7"/>
+  <path d="M484,270 Q498,240 488,210" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Action stars -->
+  <text x="100" y="240" font-size="32" fill="none" stroke="black" stroke-width="3">⚡</text>
+  <text x="590" y="260" font-size="32" fill="none" stroke="black" stroke-width="3">⚡</text>
+  <text x="120" y="380" font-size="22" fill="none" stroke="black" stroke-width="2.5">★</text>
+  <text x="600" y="380" font-size="22" fill="none" stroke="black" stroke-width="2.5">★</text>
+  <!-- Speed lines -->
+  <path d="M100,500 L160,500" stroke="black" stroke-width="5"/>
+  <path d="M90,520 L165,520" stroke="black" stroke-width="4"/>
+  <path d="M605,500 L665,500" stroke="black" stroke-width="5"/>
+  <path d="M603,520 L668,520" stroke="black" stroke-width="4"/>
+
+
+</svg>

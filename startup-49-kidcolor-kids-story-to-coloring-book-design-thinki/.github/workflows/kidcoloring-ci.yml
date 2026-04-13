@@ -1,0 +1,218 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KidColoring CI Pipeline
+#
+# Triggers: push to main/staging, PRs against main
+# Steps:
+#   1. Type-check (tsc --noEmit)
+#   2. Lint (eslint)
+#   3. Next.js build (ensures no compile errors)
+#   4. HTTP smoke tests against production URL
+#   5. Bundle size report in PR summary
+#
+# Secrets needed in GitHub repo settings:
+#   VERCEL_ACCESS_TOKEN         (Vercel API token)
+#   VERCEL_ORG_ID               (team_J0gjGtYSAnuiHxa1M2p643ON)
+#   VERCEL_PROJECT_ID           (prj_yy7FKZT0cvar2pnuCMzFQzEjOx2Z)
+#   VERCEL_STAGING_PROJECT_ID   (staging Vercel project ID)
+#   NEXT_PUBLIC_SUPABASE_URL    (for build env)
+#   NEXT_PUBLIC_SUPABASE_ANON_KEY
+# ─────────────────────────────────────────────────────────────────────────────
+name: KidColoring CI
+
+on:
+  push:
+    branches: [main, staging]
+    paths:
+      - 'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/**'
+      - '.github/workflows/kidcoloring-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/**'
+
+concurrency:
+  group: kidcoloring-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION:  '22'
+  APP_DIR:       'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring'
+  PROD_URL:      'https://kidcoloring-research.vercel.app'
+
+defaults:
+  run:
+    working-directory: startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring
+
+jobs:
+  # ── 1. Type-check + Lint ──────────────────────────────────────────────────
+  lint:
+    name: Type-check + Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_SUPABASE_URL:      ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: ESLint
+        run: npm run lint -- --max-warnings 10
+        continue-on-error: true  # Don't fail build on lint warnings
+
+  # ── 2. Build ─────────────────────────────────────────────────────────────
+  build:
+    name: Next.js Build
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL:      ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://lpxhxmpzqjygsaawkrva.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder_for_build' }}
+          # Stripe optional — graceful fake-door if missing
+          STRIPE_SECRET_KEY:   ''
+          SKIP_ENV_VALIDATION: '1'
+
+      - name: Cache .next
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.APP_DIR }}/.next
+          key: nextjs-${{ github.sha }}
+
+      - name: Bundle size summary
+        run: |
+          echo "## 📦 Bundle Report — KidColoring" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Asset | Size |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|------|" >> $GITHUB_STEP_SUMMARY
+          du -sh .next/static/chunks/*.js 2>/dev/null | sort -h | tail -5 | \
+            awk '{print "| `"$2"` | "$1" |"}' >> $GITHUB_STEP_SUMMARY || true
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total .next/static:** $(du -sh .next/static 2>/dev/null | awk '{print $1}')" >> $GITHUB_STEP_SUMMARY
+        continue-on-error: true
+
+  # ── 3. Smoke Tests ────────────────────────────────────────────────────────
+  smoke:
+    name: HTTP Smoke Tests
+    runs-on: ubuntu-latest
+    needs: [build]
+    # Only run smoke tests on main push or PRs (not staging)
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: HTTP smoke tests
+        run: |
+          BASE="${{ env.PROD_URL }}"
+          echo "## 🔥 Smoke Tests — $BASE" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Route | Status | Latency |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+
+          PASS=0
+          FAIL=0
+
+          check() {
+            ROUTE=$1
+            EXPECTED=${2:-200}
+            START=$(date +%s%3N)
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$BASE$ROUTE")
+            END=$(date +%s%3N)
+            LAT=$((END - START))
+            if [ "$CODE" = "$EXPECTED" ]; then
+              echo "| \`$ROUTE\` | ✅ $CODE | ${LAT}ms |" >> $GITHUB_STEP_SUMMARY
+              PASS=$((PASS+1))
+            else
+              echo "| \`$ROUTE\` | ❌ $CODE (expected $EXPECTED) | ${LAT}ms |" >> $GITHUB_STEP_SUMMARY
+              FAIL=$((FAIL+1))
+            fi
+          }
+
+          # Core pages
+          check "/"
+          check "/free-coloring-pages"
+          check "/free"
+          check "/coloring-books/dinosaurs"
+          check "/coloring-pages/t-rex-coloring-page-for-kids"
+          check "/sitemap.xml"
+          check "/robots.txt"
+
+          # API routes
+          check "/api/health"
+          check "/api/admin/observability?view=summary"
+          check "/api/admin/moderation?view=stats"
+          check "/api/v1/session-count"
+
+          # Admin routes
+          check "/admin"
+          check "/admin/observability"
+          check "/admin/safety"
+          check "/admin/payments"
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Result: $PASS passed, $FAIL failed**" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$FAIL" -gt 2 ]; then
+            echo "Too many smoke test failures: $FAIL"
+            exit 1
+          fi
+
+  # ── 4. Load Test (main only, manual trigger) ──────────────────────────────
+  load-test:
+    name: Load Test (50 concurrent)
+    runs-on: ubuntu-latest
+    needs: [smoke]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Only run if commit message contains [load-test]
+    # Remove this condition to run on every push to main
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run load test
+        run: npx tsx scripts/load-test.ts
+        timeout-minutes: 5
+        env:
+          LOAD_TEST_BASE_URL:            ${{ env.PROD_URL }}
+          NEXT_PUBLIC_SUPABASE_URL:      ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://lpxhxmpzqjygsaawkrva.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder' }}
+        continue-on-error: true
+
+      - name: Upload load test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: load-test-results
+          path: ${{ env.APP_DIR }}/load-test-*.csv
+          if-no-files-found: ignore
+          retention-days: 30

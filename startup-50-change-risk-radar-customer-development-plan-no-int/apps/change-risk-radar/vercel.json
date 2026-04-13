@@ -1,0 +1,21 @@
+{
+  "crons": [
+    { "path": "/api/observatory/collect",           "schedule": "0 */6 * * *"  },
+    { "path": "/api/alerts/generate",               "schedule": "30 */6 * * *" },
+    { "path": "/api/weekly-brief",                  "schedule": "0 9 * * 1"    },
+    { "path": "/api/detectors/tos-diff",            "schedule": "0 */12 * * *" },
+    { "path": "/api/admin/alpha-migrate",           "schedule": "0 6 * * *"    },
+    { "path": "/api/cron/nudges",                   "schedule": "0 9 * * *"    },
+    { "path": "/api/cron/dispatch-notifications",   "schedule": "*/2 * * * *"  }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PATCH,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type,Authorization,X-Org-Token,X-CloudTrail-Token,X-Cron-Secret,X-Portal-Secret" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+name: ClipSpark Scoring Worker
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {}
+
+jobs:
+  score:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: startup-78-clipspark-yc-pg-style-founding-plan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run scoring worker
+        run: python3 workers/scoring_worker.py --once
+        env:
+          SUPABASE_URL: https://twctmwwqxvenvieijmtn.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.CLIPSPARK_SERVICE_ROLE_KEY }}
+          SCORER_VERSION: v0.2

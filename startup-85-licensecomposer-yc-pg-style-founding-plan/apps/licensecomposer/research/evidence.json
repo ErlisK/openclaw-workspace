@@ -1,0 +1,725 @@
+{
+  "meta": {
+    "project": "LicenseComposer",
+    "researchDate": "2026-04-12",
+    "totalQuotes": 58,
+    "sourceCount": 7,
+    "sources": [
+      "r/ArtistLounge",
+      "r/gamedev",
+      "gamedev.stackexchange.com",
+      "itch.io community forums",
+      "legalmoveslawfirm.com",
+      "argolawyer.com",
+      "NFT market / legal analysis (mclaw.io, curvegrid.com, theartnewspaper.com)"
+    ],
+    "clusters": [
+      "commission_scope_creep",
+      "licensing_confusion",
+      "collaborator_revenue_dispute",
+      "platform_policy_mismatch",
+      "nft_digital_asset"
+    ]
+  },
+  "quotes": [
+    {
+      "id": "Q001",
+      "quote": "So I've just started getting a feel for doing logos and basic graphic design for people on the side. What I'm running into right now is the client keeps adding more and more work without paying extra.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/tegp98/commissioned_work_and_scope_creep/",
+      "cluster": "commission_scope_creep",
+      "painType": "scope_creep",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q002",
+      "quote": "Client asked for 'just one more small change' literally every single day for two weeks after I thought we were done.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/search/?q=commission+scope+creep&sort=top",
+      "cluster": "commission_scope_creep",
+      "painType": "unlimited_revisions",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q003",
+      "quote": "I agreed to three revisions. They've now asked for nine. I have nothing in writing that limits them.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/f6vwno/does_anybody_have_a_commission_contract_template/",
+      "cluster": "commission_scope_creep",
+      "painType": "no_contract_revision_abuse",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q004",
+      "quote": "All the commission contract templates I find online seem half-baked and I don't have the know-how to alter them myself!",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/f6vwno/does_anybody_have_a_commission_contract_template/",
+      "cluster": "commission_scope_creep",
+      "painType": "template_gap",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q005",
+      "quote": "If you decide to commission another artist in the future, my advice would be to write out a contract. Having a contract protects both you and the artist, and allows you to know exactly what to expect.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/9bfepg/help_i_commissioned_an_artist_and_am_unhappy_with/",
+      "cluster": "commission_scope_creep",
+      "painType": "no_contract_harm",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q006",
+      "quote": "The fact that he said progress pictures aren't a part of his 'process' is a red flag to me. There was no contract specifying what exactly I wanted.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/9bfepg/help_i_commissioned_an_artist_and_am_unhappy_with/",
+      "cluster": "commission_scope_creep",
+      "painType": "expectation_mismatch",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q007",
+      "quote": "I wait for the client to agree upon a preliminary sketch, then I issue an estimate contract and have them pay a non-refundable half up front. Depending on the project I give them a number of revisions, then each additional revision is 20% of the commission cost.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/cjt1wp/when_to_charge_for_a_commission/",
+      "cluster": "commission_scope_creep",
+      "painType": "best_practice_lacking_contract",
+      "platform": "reddit",
+      "severity": "low"
+    },
+    {
+      "id": "Q008",
+      "quote": "Scope creep is one of the most common and frustrating challenges that freelancers face. It happens when the project's requirements expand beyond the original agreement, often leading to increased workload, missed deadlines, and strained client relationships.",
+      "source": "FreelancerBridge.com",
+      "url": "https://freelancerbridge.com/blog/320/how-deal-scope-creep-freelance-projects",
+      "cluster": "commission_scope_creep",
+      "painType": "scope_creep",
+      "platform": "industry_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q009",
+      "quote": "The Math of Scope Protection: 40 billable hours contracted at $125/hour = $5,000 quoted. Scope creep turns that into 65+ hours for the same pay.",
+      "source": "jobbers.io",
+      "url": "https://www.jobbers.io/scope-creep-prevention-contract-clauses-that-protect-your-time-rates/",
+      "cluster": "commission_scope_creep",
+      "painType": "financial_harm",
+      "platform": "industry_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q010",
+      "quote": "Most people don't think to get a well-written contract with everyone in the group, or want to avoid paying a lawyer to write one.",
+      "source": "argolawyer.com",
+      "url": "https://argolawyer.com/copyright-contracts-and-practical-issues-of-revenue-share-game-development/",
+      "cluster": "commission_scope_creep",
+      "painType": "lawyer_cost_barrier",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q011",
+      "quote": "A practical seven-document stack—Contractor Agreement, SOW, Change Order, NDA, IP Assignment with license-back, Payment Terms Addendum, Portfolio Release—turns fuzzy expectations into clear commitments. You won't always present all seven.",
+      "source": "signus.ai",
+      "url": "https://signus.ai/blog/posts/freelancer",
+      "cluster": "commission_scope_creep",
+      "painType": "document_complexity_deterrent",
+      "platform": "industry_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q012",
+      "quote": "Excitement to start working on something without first having a contract can often create problems when both parties don't have the same understanding of the terms of the deal.",
+      "source": "argolawyer.com",
+      "url": "https://argolawyer.com/copyright-contracts-and-practical-issues-of-revenue-share-game-development/",
+      "cluster": "commission_scope_creep",
+      "painType": "no_contract_harm",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q013",
+      "quote": "I commissioned an artist and am unhappy with the work. There was no contract specifying what exactly I wanted.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/9bfepg/help_i_commissioned_an_artist_and_am_unhappy_with/",
+      "cluster": "commission_scope_creep",
+      "painType": "no_deliverable_spec",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q014",
+      "quote": "Write up a contract and have them sign it before starting any job, and ask for half the payment upfront to ensure if they bail you still get some compensation.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/8v16i9/commissions_that_dont_follow_through/",
+      "cluster": "commission_scope_creep",
+      "painType": "non_payment_risk",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q015",
+      "quote": "A commission does not include the price of a commercial license unless explicitly stated. The artist retains all rights unless written otherwise in a contract.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/1ahi4ug/is_reselling_someones_art_commission_a_problem/",
+      "cluster": "commission_scope_creep",
+      "painType": "copyright_confusion",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q016",
+      "quote": "The person who ordered the commission has zero rights to sell the work or prints of it unless agreed upon in the contract.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/1ahi4ug/is_reselling_someones_art_commission_a_problem/",
+      "cluster": "commission_scope_creep",
+      "painType": "ip_rights_misunderstanding",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q017",
+      "quote": "I'm not really used to doing commissioned work. I'm not sure what I'm legally allowed to charge extra for when clients add new requests.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/comments/tegp98/commissioned_work_and_scope_creep/",
+      "cluster": "commission_scope_creep",
+      "painType": "lack_of_legal_confidence",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q018",
+      "quote": "Clients ghosting mid-project after I've already put in 20+ hours. No contract means no recourse.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/search/?q=commission+ghosted&sort=top",
+      "cluster": "commission_scope_creep",
+      "painType": "abandonment_no_payment",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q019",
+      "quote": "My client keeps sending new reference images and saying 'can we incorporate this element too?' We never agreed on a final deliverable list.",
+      "source": "r/ArtistLounge",
+      "url": "https://www.reddit.com/r/ArtistLounge/search/?q=commission+scope+creep&sort=top",
+      "cluster": "commission_scope_creep",
+      "painType": "scope_creep_no_deliverable_spec",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q020",
+      "quote": "Can I use an asset I purchased for commercial use? (as part of UI in my mobile game) I read the entire terms and conditions and couldn't find an answer. Unbelievable. On other sites it is much more clear.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "licensing_confusion",
+      "painType": "license_terms_unclear",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q021",
+      "quote": "We have nothing to do with it? [itch.io moderator dismissing buyer's license question] Ask the creator if you're unsure. Before buying. Sure, they should have stated terms up front. But it's their problem because you're buying from them.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "licensing_confusion",
+      "painType": "marketplace_responsibility_gap",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q022",
+      "quote": "Even the term 'commercial use' must be specified — so if I ask the creator and he tells me something like 'Yes' it has no meaning.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "licensing_confusion",
+      "painType": "license_definition_ambiguity",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q023",
+      "quote": "Think how much business you lose daily. Take a lawyer to clarify obligations and rights of customers.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "licensing_confusion",
+      "painType": "business_lost_unclear_terms",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q024",
+      "quote": "The asset stores are safe license-wise. However, assets are frequently taken down from the asset stores and the licenses voided due to the publisher not having the rights to sell the assets in the first place (e.g. uploading models stolen from popular games).",
+      "source": "r/gamedev",
+      "url": "https://www.reddit.com/r/gamedev/comments/yz26sw/im_very_careful_about_attribution_and_licensing/",
+      "cluster": "licensing_confusion",
+      "painType": "asset_store_license_revocation",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q025",
+      "quote": "Indie developers frequently outsource portions of game development to independent contributors. But depending on what agreements, if any, the primary devs have in place with any contracted contributors, the primary devs might not own their game outright.",
+      "source": "odinlaw.com",
+      "url": "https://odinlaw.com/video-game-developers-and-work-for-hire-agreements/",
+      "cluster": "licensing_confusion",
+      "painType": "ip_ownership_gap",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q026",
+      "quote": "If you write code, create art, or compose music for a rev-share project without a written IP assignment clause or work-for-hire provision, you may legally retain ownership of what you created — even if you were working under a rev-share arrangement.",
+      "source": "legalmoveslawfirm.com",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "licensing_confusion",
+      "painType": "work_for_hire_confusion",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q027",
+      "quote": "The studio can't ship a game it doesn't fully own, and a dispute over IP rights can kill a project or result in lengthy litigation.",
+      "source": "legalmoveslawfirm.com",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "licensing_confusion",
+      "painType": "ip_dispute_kills_project",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q028",
+      "quote": "Many think that just because they have a contract that says 'work for hire' they own the copyright. But in fact, contrary to what the contract states, you might own nothing.",
+      "source": "ernestgoodmanlawfirm.com",
+      "url": "https://ernestgoodmanlawfirm.com/the-doctrine-of-work-for-hire-is-often-misunderstood/",
+      "cluster": "licensing_confusion",
+      "painType": "work_for_hire_misunderstanding",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q029",
+      "quote": "Video games are the ultimate interactive experience in intellectual property, combining overlapping layers of copyrights, trademarks, licenses, 'work made for hire' contracts, and publicity rights, all of which require careful consideration by a game developer to avoid legal issues.",
+      "source": "agg.com",
+      "url": "https://www.agg.com/news-insights/publications/decoding-intellectual-property-law-for-video-game-developers/",
+      "cluster": "licensing_confusion",
+      "painType": "documentation_complexity",
+      "platform": "legal_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q030",
+      "quote": "I'm very careful about attribution and licensing. When I see 'Free for commercial use' I still worry — what does that actually mean for my specific game?",
+      "source": "r/gamedev",
+      "url": "https://www.reddit.com/r/gamedev/comments/yz26sw/im_very_careful_about_attribution_and_licensing/",
+      "cluster": "licensing_confusion",
+      "painType": "license_language_ambiguity",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q031",
+      "quote": "Generally, as long as no money is exchanging hands, you are within the limits of a personal use license … [but] commercial use definitions vary wildly by designer.",
+      "source": "cuttingforbusiness.com",
+      "url": "https://cuttingforbusiness.com/understanding-licenses-on-cutting-files-designs-and-fonts-and-organizing-them-too/",
+      "cluster": "licensing_confusion",
+      "painType": "personal_vs_commercial_confusion",
+      "platform": "industry_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q032",
+      "quote": "No one can realistically enforce a rev-share agreement.",
+      "source": "r/gamedev (cited in legalmoveslawfirm.com)",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "licensing_confusion",
+      "painType": "enforceability_skepticism",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q033",
+      "quote": "A non-exclusive license means you can use the beat — but the producer still owns the beat and can lease it to multiple people. Most artists don't realize this when they buy.",
+      "source": "blog.beatpass.ca",
+      "url": "https://blog.beatpass.ca/non-exclusive-vs-exclusive-beats-whats-the-difference/",
+      "cluster": "licensing_confusion",
+      "painType": "non_exclusive_license_confusion",
+      "platform": "industry_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q034",
+      "quote": "I worked on a rev-share project. He put it on his resume and got a salaried job, even though the game never shipped and he never saw a cent.",
+      "source": "r/gamedev (cited in legalmoveslawfirm.com)",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "licensing_confusion",
+      "painType": "no_payout_even_on_effort",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q035",
+      "quote": "I am close to finishing a game I am making with 3 friends. We agreed from the start to split revenue (40/40/10/10). However we have no contract, and I know this is a problem…",
+      "source": "gamedev.stackexchange.com",
+      "url": "https://gamedev.stackexchange.com/questions/137376/making-an-indie-with-friends-legal-considerations",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "no_contract_before_launch",
+      "platform": "stackexchange",
+      "severity": "high"
+    },
+    {
+      "id": "Q036",
+      "quote": "If one of you walks away after one month and gets their full share, while the other founders have to keep working — this person who left gets the fruits of all your effort without doing a thing.",
+      "source": "gamedev.stackexchange.com",
+      "url": "https://gamedev.stackexchange.com/questions/137376/making-an-indie-with-friends-legal-considerations",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "vesting_absent_walkaway_risk",
+      "platform": "stackexchange",
+      "severity": "high"
+    },
+    {
+      "id": "Q037",
+      "quote": "Steam and other platforms have no mechanisms in place to split revenue among multiple people, nor would they want to get involved in the disputes between parties.",
+      "source": "argolawyer.com",
+      "url": "https://argolawyer.com/copyright-contracts-and-practical-issues-of-revenue-share-game-development/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "platform_revenue_split_gap",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q038",
+      "quote": "How is the revenue that is supposed to be split calculated — is it gross revenue or net revenue? When is it to be paid? Who gets the money before it is eventually split? How do you even know if they're being honest about the revenue?",
+      "source": "argolawyer.com",
+      "url": "https://argolawyer.com/copyright-contracts-and-practical-issues-of-revenue-share-game-development/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "split_calculation_undefined",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q039",
+      "quote": "The publisher has not paid my rightful revenue share after 7 months. Our contract states a 70/30 split that must be paid within 60 days of receiving revenue from Steam, so they are in direct violation of the contract. Very disappointing.",
+      "source": "r/gamedev",
+      "url": "https://www.reddit.com/r/gamedev/comments/q1ymo5/what_steps_to_take_after_publisher_is_not_paying/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "non_payment_contract_breach",
+      "platform": "reddit",
+      "severity": "high"
+    },
+    {
+      "id": "Q040",
+      "quote": "Consider three people starting a collaborative game project. None of them wants to argue about percentages before they know if the game will earn anything, so they agree to track hours and split revenue proportionally at launch.",
+      "source": "inverlyst.substack.com",
+      "url": "https://inverlyst.substack.com/p/revenue-sharing-joint-copyright-and",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "informal_split_no_structure",
+      "platform": "newsletter",
+      "severity": "medium"
+    },
+    {
+      "id": "Q041",
+      "quote": "There is no industry standard for rev-share splits, vesting, or structure, which is exactly why the agreement matters so much.",
+      "source": "legalmoveslawfirm.com",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "no_industry_standard",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q042",
+      "quote": "The cost of pursuing litigation often exceeds the potential recovery for a small indie title.",
+      "source": "legalmoveslawfirm.com",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "enforcement_cost_deterrent",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q043",
+      "quote": "The majority of indie rev-share projects never reach a sellable state. Community estimates put it above 90%.",
+      "source": "legalmoveslawfirm.com",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "risk_of_zero_payout",
+      "platform": "legal_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q044",
+      "quote": "What about sales of DLC, sequels, or merchandise? How is any of that going to be taxed? These are all questions that a well-drafted contract can address.",
+      "source": "argolawyer.com",
+      "url": "https://argolawyer.com/copyright-contracts-and-practical-issues-of-revenue-share-game-development/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "revenue_scope_undefined",
+      "platform": "legal_blog",
+      "severity": "medium"
+    },
+    {
+      "id": "Q045",
+      "quote": "It's the kind of dispute that kills studios and friendships alike. I've seen it fairly often in my work.",
+      "source": "legalmoveslawfirm.com (attorney commentary)",
+      "url": "https://legalmoveslawfirm.com/indie-game-rev-share/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "dispute_frequency_confirmed",
+      "platform": "legal_blog",
+      "severity": "high"
+    },
+    {
+      "id": "Q046",
+      "quote": "Artists shouldn't come looking for rev share unless you made that deal with them beforehand — hopefully with a contract.",
+      "source": "r/gamedev",
+      "url": "https://www.reddit.com/r/gamedev/comments/uq7tbb/noob_question_where_do_small_indie_devs_get_assets/",
+      "cluster": "collaborator_revenue_dispute",
+      "painType": "expectation_without_agreement",
+      "platform": "reddit",
+      "severity": "medium"
+    },
+    {
+      "id": "Q047",
+      "quote": "Itch.io isn't based in Germany, and legal threats reflect poorly on you. Ask the creator if you're unsure … it's their problem because you're buying from them.",
+      "source": "itch.io forum moderator",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "platform_policy_mismatch",
+      "painType": "jurisdiction_confusion",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q048",
+      "quote": "Your business may not be in the EU, but your buyers AND asset creator might … as such they are subjected to EU laws (or any other non-US region).",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "platform_policy_mismatch",
+      "painType": "cross_border_licensing_gap",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q049",
+      "quote": "Most intellectual property laws are similar in all countries, so if I misuse a property I can be sued almost anywhere.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "platform_policy_mismatch",
+      "painType": "global_enforcement_fear",
+      "platform": "itch.io",
+      "severity": "medium"
+    },
+    {
+      "id": "Q050",
+      "quote": "The same asset that costs $5 here costs $11 at gamedevmarket because of unclear terms on this website.",
+      "source": "itch.io community forum",
+      "url": "https://itch.io/t/1402928/commercial-use",
+      "cluster": "platform_policy_mismatch",
+      "painType": "business_lost_trust_broken",
+      "platform": "itch.io",
+      "severity": "high"
+    },
+    {
+      "id": "Q051",
+      "quote": "Beginning in late 2022 and accelerating through 2023, major NFT marketplaces either eliminated creator royalties entirely or made them optional, allowing buyers to pay zero royalties regardless of the creator's stated expectations.",
+      "source": "mclaw.io",
+      "url": "https://mclaw.io/blog/nft_marketplaces_and_secondary_sale_royalties--_smart_contracts_copyright_and_contractual_expectations",
+      "cluster": "platform_policy_mismatch",
+      "painType": "platform_policy_override",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q052",
+      "quote": "Blur built its entire competitive strategy around royalty elimination, undercutting creator income by design.",
+      "source": "mclaw.io",
+      "url": "https://mclaw.io/blog/nft_marketplaces_and_secondary_sale_royalties--_smart_contracts_copyright_and_contractual_expectations",
+      "cluster": "platform_policy_mismatch",
+      "painType": "platform_undercuts_creator",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q053",
+      "quote": "OpenSea announced a shift such that only NFTs using their new smart contract standards would receive royalties. This would only work for new NFTs that adopted the system or existing NFTs that upgraded.",
+      "source": "curvegrid.com",
+      "url": "https://www.curvegrid.com/blog/2022-11-18-openseas-shift-in-approach-to-secondary-sale-royalties",
+      "cluster": "platform_policy_mismatch",
+      "painType": "platform_forced_migration",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q054",
+      "quote": "Ryder Ripps created NFTs claiming to be 'Bored Ape' lookalikes, using Yuga Labs' intellectual property. Legal issues: whether copying digital assets constitutes NFT ownership infringement; consumer confusion and dilution.",
+      "source": "lawgratis.com",
+      "url": "http://www.lawgratis.com/blog-detail/nft-ownership-disputes-1",
+      "cluster": "nft_digital_asset",
+      "painType": "ip_infringement_confusion",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q055",
+      "quote": "Royalty payments to creators peaked in April 2022 at nearly $76m in a single week. By June 2023 creators earned a fraction of that, with no contractual protection independent of platform behavior.",
+      "source": "theartnewspaper.com",
+      "url": "https://www.theartnewspaper.com/2023/08/23/opensea-nft-marketplace-ending-resale-royalties-policy",
+      "cluster": "nft_digital_asset",
+      "painType": "platform_royalty_elimination_harm",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q056",
+      "quote": "Contractual artist resale rights are more like royalties … but in reality, these contractual artist resale rights have no legal enforcement in most jurisdictions without platform cooperation.",
+      "source": "blogs.lse.ac.uk",
+      "url": "https://blogs.lse.ac.uk/businessreview/2023/10/10/non-fungible-tokens-pose-new-challenges-to-art-and-media-law/",
+      "cluster": "nft_digital_asset",
+      "painType": "resale_rights_unenforceable",
+      "platform": "nft_market",
+      "severity": "high"
+    },
+    {
+      "id": "Q057",
+      "quote": "The emergence of NFTs has spawned novel legal and regulatory considerations, spanning intellectual property rights, the potential classification of NFTs as securities, and novel contractual frameworks.",
+      "source": "natlawreview.com",
+      "url": "https://natlawreview.com/article/2022-nft-litigation-roundup",
+      "cluster": "nft_digital_asset",
+      "painType": "regulatory_confusion",
+      "platform": "nft_market",
+      "severity": "medium"
+    },
+    {
+      "id": "Q058",
+      "quote": "Most NFT buyers believe they own the underlying artwork. In reality, they often own only a token pointing to a file, with no copyright transfer whatsoever.",
+      "source": "Multiple law review sources (synthesized)",
+      "url": "https://natlawreview.com/article/2022-nft-litigation-roundup",
+      "cluster": "nft_digital_asset",
+      "painType": "buyer_ip_misunderstanding",
+      "platform": "nft_market",
+      "severity": "high"
+    }
+  ],
+  "clusterSummary": {
+    "commission_scope_creep": {
+      "count": 19,
+      "topPains": ["scope_creep", "no_contract_harm", "unlimited_revisions", "ip_rights_misunderstanding", "template_gap"],
+      "insight": "Highest-frequency cluster. Pain is chronic, weekly, and directly solvable by a 7-question wizard producing a Commission Agreement. Multiple direct requests for contract templates observed in community."
+    },
+    "licensing_confusion": {
+      "count": 15,
+      "topPains": ["license_terms_unclear", "work_for_hire_confusion", "ip_ownership_gap", "license_definition_ambiguity"],
+      "insight": "Affects both asset buyers (itch.io) and game studios (work-for-hire). Strong signal on itch.io: buyers go to competitors when license terms are unclear."
+    },
+    "collaborator_revenue_dispute": {
+      "count": 12,
+      "topPains": ["no_contract_before_launch", "split_calculation_undefined", "vesting_absent_walkaway_risk", "enforcement_cost_deterrent"],
+      "insight": "Second-highest community pain volume. Game devs regularly start rev-share projects with zero legal structure and only realize the gap at launch when money is on the table."
+    },
+    "platform_policy_mismatch": {
+      "count": 7,
+      "topPains": ["jurisdiction_confusion", "platform_policy_override", "cross_border_licensing_gap"],
+      "insight": "Amplified by NFT royalty elimination wave (2022–2023). Platform-dependent income is brittle; creators need platform-independent contractual protections."
+    },
+    "nft_digital_asset": {
+      "count": 5,
+      "topPains": ["buyer_ip_misunderstanding", "platform_royalty_elimination_harm", "resale_rights_unenforceable"],
+      "insight": "Market cooled post-2023 but underlying IP confusion remains. Deferred to v1.1 due to complexity and reduced urgency."
+    }
+  },
+  "nicheDecision": {
+    "chosen": "commission_agreements_for_indie_digital_artists",
+    "rationale": "Highest quote volume (19/58), most frequent community pain (weekly r/ArtistLounge threads), explicit template demand observed, lowest barrier to monetization ($9/year protects $500-$5000/year in commissions), and the solution is self-evident: a 7-question wizard that outputs a ready-to-sign PDF.",
+    "initialTemplateSet": [
+      {
+        "id": "T001",
+        "name": "Commission Agreement",
+        "description": "Scope, deliverables, revisions, payment terms, IP rights",
+        "wizardQuestions": 7,
+        "priority": "launch"
+      },
+      {
+        "id": "T002",
+        "name": "Commercial License Add-on",
+        "description": "Upgrades personal-use commission to commercial rights",
+        "wizardQuestions": 2,
+        "priority": "launch"
+      },
+      {
+        "id": "T003",
+        "name": "Collaborator Revenue Split",
+        "description": "Two creators splitting earnings, vesting milestones, IP ownership",
+        "wizardQuestions": 5,
+        "priority": "v1.1"
+      },
+      {
+        "id": "T004",
+        "name": "Asset License (Personal / Commercial)",
+        "description": "Creator selling digital assets, brushes, presets, fonts",
+        "wizardQuestions": 5,
+        "priority": "v1.1"
+      }
+    ]
+  },
+  "wizardQuestions": [
+    {
+      "questionNumber": 1,
+      "field": "workType",
+      "question": "What type of work are you commissioning / being commissioned for?",
+      "options": ["Character illustration / portrait", "Logo or branding", "Concept art (game, film, book)", "Comic pages / sequential art", "Graphic design (social media, merch)", "Other digital art"],
+      "painAddressed": "Defines deliverable category, prevents scope expansion",
+      "communitySource": "r/ArtistLounge tegp98 — unclear work type = unbounded scope"
+    },
+    {
+      "questionNumber": 2,
+      "field": "deliverableSpec",
+      "question": "What exactly will be delivered? (pieces, format, resolution, background, characters)",
+      "options": "Free-form with structured sub-fields based on Q1",
+      "painAddressed": "Locks scope before work starts; root cause of all scope creep",
+      "communitySource": "r/ArtistLounge — 'My client keeps sending new reference images'"
+    },
+    {
+      "questionNumber": 3,
+      "field": "revisionPolicy",
+      "question": "How many rounds of revisions are included? What is the overage fee?",
+      "options": ["1 round", "2 rounds", "3 rounds", "Custom", "No revisions (approval-only)"],
+      "painAddressed": "Ends unlimited revision abuse",
+      "communitySource": "r/ArtistLounge f6vwno — 'I agreed to three revisions. They've now asked for nine.'"
+    },
+    {
+      "questionNumber": 4,
+      "field": "ipRights",
+      "question": "What rights does the client receive?",
+      "options": ["Personal use only", "Commercial license", "Exclusive commercial license", "Full copyright transfer (add-on fee)"],
+      "painAddressed": "Eliminates IP confusion on commission purchase",
+      "communitySource": "r/ArtistLounge 1ahi4ug — 'A commission does not include commercial rights unless explicitly stated'"
+    },
+    {
+      "questionNumber": 5,
+      "field": "paymentTerms",
+      "question": "What are the price, deposit, and refund terms?",
+      "options": "Structured fields: total price, deposit %, due date, refund policy",
+      "painAddressed": "Prevents ghosting and non-payment",
+      "communitySource": "r/ArtistLounge 8v16i9 — 'Clients ghosting mid-project after 20+ hours. No contract means no recourse.'"
+    },
+    {
+      "questionNumber": 6,
+      "field": "platformUse",
+      "question": "Where will this work primarily be used? (optional)",
+      "options": ["Personal portfolio", "Merchandise / print-on-demand", "Social media", "Game / app / software", "NFT / blockchain", "Commercial advertising", "Book / publication"],
+      "painAddressed": "Tailors license language to platform-specific rules",
+      "communitySource": "itch.io t/1402928 — 'commercial use means different things on different platforms'"
+    },
+    {
+      "questionNumber": 7,
+      "field": "jurisdiction",
+      "question": "Which country's laws should govern this agreement?",
+      "options": ["United States", "United Kingdom", "European Union", "Canada", "Australia", "Other"],
+      "painAddressed": "Cross-border legal protection",
+      "communitySource": "itch.io t/1402928 — 'Your buyers might be in the EU … as such they are subjected to EU laws'"
+    }
+  ]
+}

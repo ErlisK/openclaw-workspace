@@ -1,0 +1,956 @@
+{
+  "$schema": "https://clipspark.io/schemas/template/v0.2.json",
+  "$comment": "ClipSpark Clip Template Schema v0.2 — canonical reference for rendering pipeline",
+  "schema_version": "0.2.0",
+  "created": "2026-04-09",
+  "changelog": [
+    "v0.1: initial 3-template schema (default_vertical, linkedin_professional, tiktok_bold)",
+    "v0.2: added lower_third, progress_bar, waveform_layer, thumbnail spec, full font registry, color tokens, per-platform safe-zones, 5 production templates"
+  ],
+
+  "_design_principles": [
+    "1. Every field maps to a concrete FFmpeg/Canvas rendering parameter",
+    "2. Templates are additive — a niche_override only changes what it specifies",
+    "3. All sizes in px at 1080×1920 (9:16 base); scale linearly for other resolutions",
+    "4. Colors as 6-digit hex or 8-digit hex (last 2 = alpha)",
+    "5. Time values in seconds (float) unless named _ms"
+  ],
+
+  "font_registry": {
+    "_comment": "Available fonts. 'system' fonts are bundled with the renderer; 'google' require fetch at build.",
+    "inter_bold": {
+      "family": "Inter",
+      "weight": 700,
+      "style": "normal",
+      "source": "google",
+      "fallback": "LiberationSans-Bold"
+    },
+    "inter_black": {
+      "family": "Inter",
+      "weight": 900,
+      "style": "normal",
+      "source": "google",
+      "fallback": "DejaVuSans-Bold"
+    },
+    "inter_regular": {
+      "family": "Inter",
+      "weight": 400,
+      "style": "normal",
+      "source": "google",
+      "fallback": "LiberationSans-Regular"
+    },
+    "open_sans_bold": {
+      "family": "Open Sans",
+      "weight": 700,
+      "style": "normal",
+      "source": "system",
+      "fallback": "OpenSans-Bold"
+    },
+    "mono_bold": {
+      "family": "DejaVu Sans Mono",
+      "weight": 700,
+      "style": "normal",
+      "source": "system",
+      "fallback": "DejaVuSansMono-Bold"
+    }
+  },
+
+  "color_tokens": {
+    "_comment": "Brand-level color palette. Templates reference these by token name.",
+    "brand_primary": "#6366F1",
+    "brand_secondary": "#A855F7",
+    "brand_accent_tiktok": "#FF3E9D",
+    "brand_accent_yellow": "#FFDC00",
+    "brand_accent_orange": "#F97316",
+    "neutral_black": "#0A0A0A",
+    "neutral_dark": "#1A1A2E",
+    "neutral_gray": "#3D3D3D",
+    "neutral_light": "#F8F8FF",
+    "neutral_white": "#FFFFFF",
+    "caption_outline": "#000000CC",
+    "progress_bar_fill": "#6366F1",
+    "progress_bar_track": "#FFFFFF33",
+    "lower_third_bg": "#000000B3",
+    "lower_third_accent": "#6366F1"
+  },
+
+  "safe_zones": {
+    "_comment": "Platform-specific UI elements that overlap the video. Keep text/branding outside these zones.",
+    "tiktok": {
+      "top_percent": 8,
+      "bottom_percent": 22,
+      "right_percent": 12,
+      "note": "Right column: like/comment/share buttons. Bottom: caption area."
+    },
+    "instagram_reels": {
+      "top_percent": 8,
+      "bottom_percent": 20,
+      "right_percent": 10
+    },
+    "youtube_shorts": {
+      "top_percent": 5,
+      "bottom_percent": 15,
+      "right_percent": 0
+    },
+    "linkedin": {
+      "top_percent": 5,
+      "bottom_percent": 10,
+      "right_percent": 0
+    }
+  },
+
+  "templates": {
+
+    "podcast_pro": {
+      "id": "podcast-pro-v02",
+      "name": "Podcast Pro",
+      "description": "Universal default for solo podcasters. Dark canvas, bold centered captions, optional waveform, clean lower-third. Works on all platforms.",
+      "preset_label": "Podcast Pro",
+      "use_cases": ["podcast", "coaching", "founder", "education"],
+      "platforms": ["youtube_shorts", "instagram_reels", "tiktok", "linkedin"],
+      "csat_preferred_by": ["marcus", "tom", "dev", "raj"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "gradient",
+          "gradient_type": "linear",
+          "gradient_start_color": "#0A0A0A",
+          "gradient_end_color": "#1A1A2E",
+          "gradient_angle_deg": 180
+        }
+      },
+
+      "layers": {
+        "video": {
+          "enabled": true,
+          "z_index": 10,
+          "position": "top_center",
+          "top_px": 80,
+          "width_px": 1080,
+          "height_px": 1080,
+          "corner_radius_px": 0,
+          "reframe_mode": "auto_speaker_track",
+          "fallback_reframe": "center_crop",
+          "aspect_ratio_fill": "cover",
+          "opacity": 1.0
+        },
+
+        "caption": {
+          "enabled": true,
+          "z_index": 30,
+          "position": "absolute",
+          "top_px": 1200,
+          "left_px": 60,
+          "width_px": 960,
+          "font": "inter_bold",
+          "font_size_px": 56,
+          "line_height_multiplier": 1.35,
+          "text_color": "#FFFFFF",
+          "text_align": "center",
+          "max_words_per_line": 4,
+          "max_lines_visible": 2,
+          "highlight_mode": "keyword_color",
+          "highlight_color": "#A855F7",
+          "highlight_weight": "inter_black",
+          "outline": {
+            "enabled": true,
+            "color": "#000000CC",
+            "width_px": 4
+          },
+          "shadow": {
+            "enabled": true,
+            "color": "#00000088",
+            "blur_px": 6,
+            "offset_x_px": 0,
+            "offset_y_px": 3
+          },
+          "background_pill": {
+            "enabled": false,
+            "color": "#00000000",
+            "radius_px": 12,
+            "padding_x_px": 20,
+            "padding_y_px": 10
+          },
+          "animation": {
+            "type": "word_pop",
+            "timing": "word_sync",
+            "active_word_scale": 1.08,
+            "active_word_color": "#FFDC00",
+            "transition_ms": 80
+          }
+        },
+
+        "lower_third": {
+          "enabled": true,
+          "z_index": 40,
+          "position": "absolute",
+          "top_px": 1600,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 120,
+          "background": {
+            "type": "solid",
+            "color": "#000000B3"
+          },
+          "accent_bar": {
+            "enabled": true,
+            "side": "left",
+            "width_px": 8,
+            "color": "#6366F1"
+          },
+          "show_name": {
+            "enabled": true,
+            "text_source": "creator_name",
+            "font": "inter_bold",
+            "font_size_px": 36,
+            "color": "#FFFFFF",
+            "left_px": 40,
+            "top_px": 20
+          },
+          "show_label": {
+            "enabled": true,
+            "text_source": "episode_title_short",
+            "font": "inter_regular",
+            "font_size_px": 28,
+            "color": "#AAAAAA",
+            "left_px": 40,
+            "top_px": 68
+          },
+          "logo": {
+            "enabled": false,
+            "src": null,
+            "width_px": 72,
+            "height_px": 72,
+            "right_px": 40,
+            "vertical_center": true
+          },
+          "animation": {
+            "type": "slide_up",
+            "trigger": "clip_start",
+            "duration_ms": 300,
+            "delay_ms": 500
+          }
+        },
+
+        "progress_bar": {
+          "enabled": true,
+          "z_index": 50,
+          "position": "absolute",
+          "top_px": 1720,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 6,
+          "track": {
+            "color": "#FFFFFF22",
+            "border_radius_px": 3
+          },
+          "fill": {
+            "color": "#6366F1",
+            "border_radius_px": 3,
+            "animation": "realtime_sync"
+          },
+          "dot_indicator": {
+            "enabled": false,
+            "radius_px": 8,
+            "color": "#FFFFFF"
+          }
+        },
+
+        "waveform": {
+          "enabled": false,
+          "z_index": 20,
+          "position": "absolute",
+          "top_px": 1150,
+          "left_px": 60,
+          "width_px": 960,
+          "height_px": 80,
+          "style": "bar",
+          "bar_count": 60,
+          "bar_width_px": 6,
+          "bar_gap_px": 10,
+          "color_active": "#6366F1",
+          "color_inactive": "#FFFFFF33",
+          "animation": "realtime_amplitude",
+          "note": "Enable for audio-only episodes where video layer is absent"
+        }
+      },
+
+      "thumbnail": {
+        "enabled": true,
+        "style": "split_face_text",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background_gradient": ["#1A1A2E", "#0A0A2E"],
+        "headline_font": "inter_black",
+        "headline_size_px": 80,
+        "headline_color": "#FFFFFF",
+        "headline_max_lines": 3,
+        "accent_color": "#6366F1",
+        "creator_name_font": "inter_bold",
+        "creator_name_size_px": 42,
+        "creator_name_color": "#A855F7"
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "libx264",
+        "preset": "fast",
+        "crf": 23,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "audio_sample_rate_hz": 44100,
+        "max_duration_sec": 60,
+        "max_file_size_mb": 50,
+        "pixel_format": "yuv420p"
+      }
+    },
+
+    "tiktok_native": {
+      "id": "tiktok-native-v02",
+      "name": "TikTok Native",
+      "description": "Maximum scroll-stop energy. Yellow word highlights, bold stroke text, dark gradient. Comedy, fitness, lifestyle.",
+      "preset_label": "TikTok Native",
+      "use_cases": ["comedy", "fitness", "lifestyle", "true_crime", "entertainment"],
+      "platforms": ["tiktok", "instagram_reels"],
+      "csat_preferred_by": ["james", "nick", "jamie", "angela"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "gradient",
+          "gradient_type": "radial",
+          "gradient_start_color": "#1a0533",
+          "gradient_end_color": "#0d0d2b",
+          "gradient_center_x_percent": 50,
+          "gradient_center_y_percent": 40
+        }
+      },
+
+      "layers": {
+        "video": {
+          "enabled": true,
+          "z_index": 10,
+          "position": "top_center",
+          "top_px": 0,
+          "width_px": 1080,
+          "height_px": 1200,
+          "corner_radius_px": 0,
+          "reframe_mode": "auto_speaker_track",
+          "fallback_reframe": "center_crop",
+          "opacity": 1.0
+        },
+
+        "caption": {
+          "enabled": true,
+          "z_index": 30,
+          "position": "absolute",
+          "top_px": 1250,
+          "left_px": 44,
+          "width_px": 992,
+          "font": "inter_black",
+          "font_size_px": 62,
+          "line_height_multiplier": 1.25,
+          "text_color": "#FFFFFF",
+          "text_align": "center",
+          "max_words_per_line": 3,
+          "max_lines_visible": 2,
+          "highlight_mode": "last_word_color",
+          "highlight_color": "#FFDC00",
+          "highlight_weight": "inter_black",
+          "outline": {
+            "enabled": true,
+            "color": "#000000",
+            "width_px": 5
+          },
+          "shadow": {
+            "enabled": false
+          },
+          "background_pill": {
+            "enabled": false
+          },
+          "animation": {
+            "type": "word_pop_scale",
+            "timing": "word_sync",
+            "active_word_scale": 1.15,
+            "active_word_color": "#FFDC00",
+            "transition_ms": 60
+          }
+        },
+
+        "lower_third": {
+          "enabled": false,
+          "note": "TikTok native style avoids lower-thirds — platform UI occupies right rail"
+        },
+
+        "progress_bar": {
+          "enabled": true,
+          "z_index": 50,
+          "position": "absolute",
+          "top_px": 1870,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 8,
+          "track": {
+            "color": "#FFFFFF15"
+          },
+          "fill": {
+            "color": "#FF3E9D",
+            "animation": "realtime_sync"
+          },
+          "dot_indicator": {
+            "enabled": true,
+            "radius_px": 10,
+            "color": "#FF3E9D"
+          }
+        },
+
+        "waveform": {
+          "enabled": false
+        }
+      },
+
+      "thumbnail": {
+        "enabled": true,
+        "style": "tiktok_loud",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background_color": "#FF3E9D",
+        "headline_font": "inter_black",
+        "headline_size_px": 96,
+        "headline_color": "#FFFFFF",
+        "headline_max_lines": 3,
+        "accent_color": "#FFDC00",
+        "emoji_size_px": 280
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "libx264",
+        "preset": "fast",
+        "crf": 22,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "audio_sample_rate_hz": 44100,
+        "max_duration_sec": 60,
+        "max_file_size_mb": 50,
+        "pixel_format": "yuv420p"
+      }
+    },
+
+    "linkedin_pro": {
+      "id": "linkedin-pro-v02",
+      "name": "LinkedIn Pro",
+      "description": "Clean professional aesthetic. Light canvas, pill captions, branded lower-third with host name. Coaches, founders, educators.",
+      "preset_label": "LinkedIn Pro",
+      "use_cases": ["coaching", "founder", "education", "consulting", "b2b"],
+      "platforms": ["linkedin", "youtube_shorts"],
+      "csat_preferred_by": ["lisa", "elena", "angela"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "solid",
+          "color": "#F8F8FF"
+        }
+      },
+
+      "layers": {
+        "video": {
+          "enabled": true,
+          "z_index": 10,
+          "position": "top_center",
+          "top_px": 0,
+          "width_px": 1080,
+          "height_px": 1080,
+          "corner_radius_px": 0,
+          "reframe_mode": "auto_speaker_track",
+          "fallback_reframe": "center_crop",
+          "opacity": 1.0
+        },
+
+        "caption": {
+          "enabled": true,
+          "z_index": 30,
+          "position": "absolute",
+          "top_px": 1120,
+          "left_px": 60,
+          "width_px": 960,
+          "font": "open_sans_bold",
+          "font_size_px": 52,
+          "line_height_multiplier": 1.45,
+          "text_color": "#111111",
+          "text_align": "left",
+          "max_words_per_line": 5,
+          "max_lines_visible": 3,
+          "highlight_mode": "none",
+          "outline": {
+            "enabled": false
+          },
+          "shadow": {
+            "enabled": false
+          },
+          "background_pill": {
+            "enabled": true,
+            "color": "#00000011",
+            "radius_px": 16,
+            "padding_x_px": 24,
+            "padding_y_px": 12
+          },
+          "accent_left_bar": {
+            "enabled": true,
+            "width_px": 6,
+            "color": "#6366F1",
+            "left_px": 0,
+            "height_matches": "caption_block"
+          },
+          "animation": {
+            "type": "fade_word",
+            "timing": "word_sync",
+            "active_word_color": "#6366F1",
+            "transition_ms": 120
+          }
+        },
+
+        "lower_third": {
+          "enabled": true,
+          "z_index": 40,
+          "position": "absolute",
+          "top_px": 1700,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 140,
+          "background": {
+            "type": "solid",
+            "color": "#FFFFFF"
+          },
+          "border_top": {
+            "enabled": true,
+            "color": "#6366F1",
+            "width_px": 3
+          },
+          "show_name": {
+            "enabled": true,
+            "font": "open_sans_bold",
+            "font_size_px": 40,
+            "color": "#111111",
+            "left_px": 48,
+            "top_px": 24
+          },
+          "show_label": {
+            "enabled": true,
+            "font": "inter_regular",
+            "font_size_px": 30,
+            "color": "#6366F1",
+            "left_px": 48,
+            "top_px": 76
+          },
+          "logo": {
+            "enabled": false,
+            "width_px": 72,
+            "height_px": 72,
+            "right_px": 48,
+            "vertical_center": true
+          },
+          "animation": {
+            "type": "slide_up",
+            "trigger": "clip_start",
+            "duration_ms": 250,
+            "delay_ms": 400
+          }
+        },
+
+        "progress_bar": {
+          "enabled": true,
+          "z_index": 50,
+          "position": "absolute",
+          "top_px": 1840,
+          "left_px": 48,
+          "width_px": 984,
+          "height_px": 5,
+          "track": {
+            "color": "#00000022",
+            "border_radius_px": 3
+          },
+          "fill": {
+            "color": "#6366F1",
+            "border_radius_px": 3,
+            "animation": "realtime_sync"
+          },
+          "dot_indicator": {
+            "enabled": false
+          }
+        },
+
+        "waveform": {
+          "enabled": false
+        }
+      },
+
+      "thumbnail": {
+        "enabled": true,
+        "style": "quote_card",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background_color": "#FFFFFF",
+        "headline_font": "open_sans_bold",
+        "headline_size_px": 72,
+        "headline_color": "#111111",
+        "headline_max_lines": 4,
+        "accent_color": "#6366F1",
+        "creator_name_font": "inter_regular",
+        "creator_name_size_px": 40,
+        "creator_name_color": "#6366F1"
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "libx264",
+        "preset": "fast",
+        "crf": 21,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "audio_sample_rate_hz": 44100,
+        "max_duration_sec": 90,
+        "max_file_size_mb": 75,
+        "pixel_format": "yuv420p"
+      }
+    },
+
+    "audio_only": {
+      "id": "audio-only-v02",
+      "name": "Audio Only (Waveform)",
+      "description": "For podcast clips without usable video. Animated waveform over gradient background. Clean and modern.",
+      "preset_label": "Audio Only",
+      "use_cases": ["podcast", "coaching", "education"],
+      "platforms": ["youtube_shorts", "instagram_reels", "linkedin"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "gradient",
+          "gradient_type": "linear",
+          "gradient_start_color": "#0F0F23",
+          "gradient_end_color": "#1A0A2E",
+          "gradient_angle_deg": 135
+        }
+      },
+
+      "layers": {
+        "video": {
+          "enabled": false
+        },
+
+        "cover_art": {
+          "enabled": true,
+          "z_index": 10,
+          "position": "absolute",
+          "top_px": 300,
+          "left_px": 240,
+          "width_px": 600,
+          "height_px": 600,
+          "corner_radius_px": 24,
+          "src": "podcast_cover_art",
+          "fallback_gradient": ["#6366F1", "#A855F7"],
+          "shadow": {
+            "enabled": true,
+            "color": "#00000088",
+            "blur_px": 40,
+            "offset_y_px": 20
+          }
+        },
+
+        "waveform": {
+          "enabled": true,
+          "z_index": 20,
+          "position": "absolute",
+          "top_px": 1040,
+          "left_px": 60,
+          "width_px": 960,
+          "height_px": 120,
+          "style": "mirror_bar",
+          "bar_count": 80,
+          "bar_width_px": 7,
+          "bar_gap_px": 5,
+          "color_active": "#A855F7",
+          "color_inactive": "#FFFFFF22",
+          "animation": "realtime_amplitude"
+        },
+
+        "caption": {
+          "enabled": true,
+          "z_index": 30,
+          "position": "absolute",
+          "top_px": 1220,
+          "left_px": 60,
+          "width_px": 960,
+          "font": "inter_bold",
+          "font_size_px": 54,
+          "line_height_multiplier": 1.35,
+          "text_color": "#FFFFFF",
+          "text_align": "center",
+          "max_words_per_line": 4,
+          "max_lines_visible": 2,
+          "highlight_mode": "keyword_color",
+          "highlight_color": "#A855F7",
+          "outline": {
+            "enabled": false
+          },
+          "animation": {
+            "type": "word_pop",
+            "timing": "word_sync",
+            "active_word_color": "#FFDC00",
+            "transition_ms": 80
+          }
+        },
+
+        "lower_third": {
+          "enabled": true,
+          "z_index": 40,
+          "position": "absolute",
+          "top_px": 1620,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 160,
+          "background": {
+            "type": "gradient",
+            "gradient_start_color": "#00000000",
+            "gradient_end_color": "#000000CC",
+            "gradient_angle_deg": 180
+          },
+          "show_name": {
+            "enabled": true,
+            "font": "inter_bold",
+            "font_size_px": 40,
+            "color": "#FFFFFF",
+            "left_px": 60,
+            "top_px": 30
+          },
+          "show_label": {
+            "enabled": true,
+            "font": "inter_regular",
+            "font_size_px": 32,
+            "color": "#AAAAAA",
+            "left_px": 60,
+            "top_px": 82
+          },
+          "animation": {
+            "type": "fade_in",
+            "trigger": "clip_start",
+            "duration_ms": 400
+          }
+        },
+
+        "progress_bar": {
+          "enabled": true,
+          "z_index": 50,
+          "position": "absolute",
+          "top_px": 1780,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 8,
+          "track": { "color": "#FFFFFF22" },
+          "fill": { "color": "#A855F7", "animation": "realtime_sync" },
+          "dot_indicator": { "enabled": true, "radius_px": 12, "color": "#A855F7" }
+        }
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "libx264",
+        "preset": "fast",
+        "crf": 23,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "audio_sample_rate_hz": 44100,
+        "max_duration_sec": 60,
+        "max_file_size_mb": 50,
+        "pixel_format": "yuv420p"
+      }
+    },
+
+    "comedy_kinetic": {
+      "id": "comedy-kinetic-v02",
+      "name": "Comedy Kinetic",
+      "description": "One-word-at-a-time large captions with beat-sync bounce. Preserves punchline timing with silence buffer. For comedy/reaction clips.",
+      "preset_label": "Comedy Kinetic",
+      "use_cases": ["comedy", "reaction", "entertainment"],
+      "platforms": ["tiktok", "instagram_reels"],
+      "csat_preferred_by": ["james"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "gradient",
+          "gradient_start_color": "#0A0A0A",
+          "gradient_end_color": "#1A0A0A",
+          "gradient_angle_deg": 180
+        }
+      },
+
+      "layers": {
+        "video": {
+          "enabled": true,
+          "z_index": 10,
+          "top_px": 0,
+          "width_px": 1080,
+          "height_px": 1280,
+          "reframe_mode": "auto_speaker_track"
+        },
+
+        "caption": {
+          "enabled": true,
+          "z_index": 30,
+          "position": "absolute",
+          "top_px": 1310,
+          "left_px": 40,
+          "width_px": 1000,
+          "font": "inter_black",
+          "font_size_px": 108,
+          "line_height_multiplier": 1.15,
+          "text_color": "#FFFFFF",
+          "text_align": "center",
+          "max_words_per_line": 1,
+          "max_lines_visible": 2,
+          "highlight_mode": "current_word_color",
+          "highlight_color": "#FFDC00",
+          "outline": {
+            "enabled": true,
+            "color": "#000000",
+            "width_px": 6
+          },
+          "animation": {
+            "type": "kinetic_bounce",
+            "timing": "word_sync",
+            "active_word_scale": 1.2,
+            "active_word_color": "#FFDC00",
+            "transition_ms": 50,
+            "silence_hold_ms": 400,
+            "note": "silence_hold_ms: caption freezes for silence gaps — critical for comedy timing"
+          }
+        },
+
+        "lower_third": {
+          "enabled": false
+        },
+
+        "progress_bar": {
+          "enabled": true,
+          "z_index": 50,
+          "top_px": 1880,
+          "left_px": 0,
+          "width_px": 1080,
+          "height_px": 10,
+          "track": { "color": "#FFFFFF15" },
+          "fill": { "color": "#FFDC00", "animation": "realtime_sync" }
+        }
+      },
+
+      "clip_rules": {
+        "punchline_buffer_sec": 1.5,
+        "note": "Extend clip end by 1.5s after last scored PUNCHLINE_MOMENT to preserve silence+reaction"
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "libx264",
+        "preset": "fast",
+        "crf": 22,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "max_duration_sec": 60,
+        "max_file_size_mb": 50,
+        "pixel_format": "yuv420p"
+      }
+    }
+  },
+
+  "platform_export_rules": {
+    "youtube_shorts": {
+      "preferred_template": "podcast_pro",
+      "fallback_template": "audio_only",
+      "clip_duration_min_sec": 15,
+      "clip_duration_target_sec": 55,
+      "clip_duration_max_sec": 60,
+      "resolution": "1080x1920",
+      "max_file_size_mb": 256,
+      "caption_language": "en",
+      "title_max_chars": 100,
+      "hashtag_count": 3,
+      "hashtag_placement": "description"
+    },
+    "linkedin": {
+      "preferred_template": "linkedin_pro",
+      "fallback_template": "podcast_pro",
+      "clip_duration_min_sec": 10,
+      "clip_duration_target_sec": 60,
+      "clip_duration_max_sec": 600,
+      "resolution": "1080x1920",
+      "max_file_size_mb": 200,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 5,
+      "hashtag_placement": "end_of_post_text"
+    },
+    "tiktok": {
+      "preferred_template": "tiktok_native",
+      "fallback_template": "podcast_pro",
+      "clip_duration_min_sec": 5,
+      "clip_duration_target_sec": 45,
+      "clip_duration_max_sec": 60,
+      "resolution": "1080x1920",
+      "max_file_size_mb": 287,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 5,
+      "hashtag_placement": "inline_post"
+    },
+    "instagram_reels": {
+      "preferred_template": "tiktok_native",
+      "fallback_template": "podcast_pro",
+      "clip_duration_min_sec": 3,
+      "clip_duration_target_sec": 55,
+      "clip_duration_max_sec": 90,
+      "resolution": "1080x1920",
+      "max_file_size_mb": 100,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 10,
+      "hashtag_placement": "end_of_caption"
+    }
+  },
+
+  "niche_template_map": {
+    "business_podcast":   "podcast_pro",
+    "founder_podcast":    "podcast_pro",
+    "saas_founder":       "podcast_pro",
+    "coaching":           "linkedin_pro",
+    "education":          "linkedin_pro",
+    "consulting":         "linkedin_pro",
+    "b2b":                "linkedin_pro",
+    "comedy":             "tiktok_native",
+    "comedy_kinetic":     "comedy_kinetic",
+    "fitness":            "tiktok_native",
+    "lifestyle":          "tiktok_native",
+    "true_crime":         "tiktok_native",
+    "parenting":          "tiktok_native",
+    "tech_interview":     "podcast_pro",
+    "education_bilingual":"linkedin_pro",
+    "audio_only_fallback":"audio_only"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/admin/alpha-migrate": {
+      "maxDuration": 120
+    },
+    "/api/backtest": {
+      "maxDuration": 120
+    },
+    "/api/connectors/aws/setup": {
+      "maxDuration": 30
+    },
+    "/api/alerts/generate": {
+      "maxDuration": 60
+    },
+    "/api/connectors/stripe/setup": {
+      "maxDuration": 30
+    },
+    "/api/backtest/replay": {
+      "maxDuration": 300
+    },
+    "/api/alerts/instant": {
+      "maxDuration": 30
+    },
+    "/api/connectors/workspace/callback": {
+      "maxDuration": 30
+    },
+    "/api/detectors/tos-diff": {
+      "maxDuration": 300
+    },
+    "/api/connectors/slack/setup": {
+      "maxDuration": 20
+    },
+    "/api/e2e-test": {
+      "maxDuration": 60
+    },
+    "/api/observatory/collect": {
+      "maxDuration": 300
+    },
+    "/api/rule-refinement": {
+      "maxDuration": 120
+    },
+    "/api/rules/evaluate": {
+      "maxDuration": 30
+    },
+    "/api/notifications/test": {
+      "maxDuration": 30
+    },
+    "/api/weekly-brief": {
+      "maxDuration": 120
+    },
+    "/rule-refinement": {
+      "maxDuration": 60
+    },
+    "/backtest": {
+      "maxDuration": 120
+    }
+  }
+}

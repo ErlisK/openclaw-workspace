@@ -1,0 +1,59 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🦖  Roary the Dinosaur</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="384" cy="580" rx="160" ry="130" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <ellipse cx="520" cy="380" rx="105" ry="90" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Snout -->
+  <path d="M590,380 Q650,370 680,400 Q670,440 610,435 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Teeth top -->
+  <path d="M595,410 L610,430 L625,410 L640,432 L655,410" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Eye -->
+  <circle cx="540" cy="350" r="22" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="540" cy="350" r="10" fill="black"/>
+  <!-- Nostril -->
+  <ellipse cx="645" cy="375" rx="8" ry="5" fill="black"/>
+  <!-- Neck -->
+  <path d="M440,350 Q430,430 380,450" fill="none" stroke="black" stroke-width="10"/>
+  <path d="M515,350 Q510,440 470,460" fill="none" stroke="black" stroke-width="10"/>
+  <!-- Arms (tiny T-Rex arms) -->
+  <path d="M430,510 Q400,490 380,520 Q375,540 400,545" fill="white" stroke="black" stroke-width="8"/>
+  <path d="M395,520 L385,550" stroke="black" stroke-width="6"/>
+  <path d="M400,520 L392,552" stroke="black" stroke-width="6"/>
+  <!-- Legs -->
+  <path d="M320,680 Q300,750 280,800 Q260,820 270,840 Q310,860 340,830 Q350,800 360,740 Q370,700 360,670" fill="white" stroke="black" stroke-width="10"/>
+  <path d="M420,680 Q430,750 440,800 Q450,820 440,840 Q400,860 375,830 Q370,800 370,740 Q368,700 390,670" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Tail -->
+  <path d="M230,600 Q150,620 100,580 Q70,555 90,530 Q120,510 180,540 Q220,570 280,580" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Spines on back -->
+  <path d="M280,480 L265,440 L280,460" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M320,450 L310,405 L325,425" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M360,430 L355,380 L370,400" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Ground -->
+  <path d="M80,870 Q200,850 384,860 Q560,870 700,855" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Grass -->
+  <path d="M100,860 Q105,830 110,860" stroke="black" stroke-width="5" fill="none"/>
+  <path d="M150,855 Q156,822 162,855" stroke="black" stroke-width="5" fill="none"/>
+  <path d="M600,858 Q606,825 612,858" stroke="black" stroke-width="5" fill="none"/>
+  <path d="M650,853 Q656,820 662,853" stroke="black" stroke-width="5" fill="none"/>
+  <!-- Stars in sky -->
+  <text x="120" y="220" font-size="30" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="620" y="200" font-size="24" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="200" y="180" font-size="18" fill="none" stroke="black" stroke-width="2">✦</text>
+
+
+</svg>

@@ -1,0 +1,69 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🤖  Beep the Robot</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <rect x="265" y="440" width="238" height="210" rx="20" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Chest panel -->
+  <rect x="295" y="470" width="178" height="150" rx="10" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Buttons -->
+  <circle cx="335" cy="510" r="18" fill="white" stroke="black" stroke-width="6"/>
+  <circle cx="384" cy="510" r="18" fill="white" stroke="black" stroke-width="6"/>
+  <circle cx="433" cy="510" r="18" fill="white" stroke="black" stroke-width="6"/>
+  <!-- Screen on chest -->
+  <rect x="310" y="545" width="148" height="60" rx="8" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M325,575 Q350,555 375,570 Q395,580 420,562 Q435,555 445,565" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Head -->
+  <rect x="284" y="285" width="200" height="155" rx="25" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Antenna -->
+  <line x1="384" y1="285" x2="384" y2="215" stroke="black" stroke-width="8"/>
+  <circle cx="384" cy="205" r="18" fill="white" stroke="black" stroke-width="7"/>
+  <!-- Eyes -->
+  <rect x="308" y="315" width="65" height="50" rx="10" fill="white" stroke="black" stroke-width="8"/>
+  <rect x="395" y="315" width="65" height="50" rx="10" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Eye glow circles -->
+  <circle cx="340" cy="340" r="16" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="427" cy="340" r="16" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Mouth -->
+  <rect x="320" y="390" width="128" height="28" rx="8" fill="none" stroke="black" stroke-width="7"/>
+  <line x1="352" y1="390" x2="352" y2="418" stroke="black" stroke-width="4"/>
+  <line x1="384" y1="390" x2="384" y2="418" stroke="black" stroke-width="4"/>
+  <line x1="416" y1="390" x2="416" y2="418" stroke="black" stroke-width="4"/>
+  <!-- Arms -->
+  <rect x="155" y="450" width="110" height="50" rx="20" fill="white" stroke="black" stroke-width="9"/>
+  <rect x="155" y="510" width="40" height="120" rx="15" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M140,628 Q130,650 145,665 Q165,670 175,648 L175,628" fill="white" stroke="black" stroke-width="8"/>
+  <rect x="503" y="450" width="110" height="50" rx="20" fill="white" stroke="black" stroke-width="9"/>
+  <rect x="573" y="510" width="40" height="120" rx="15" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M628,628 Q638,650 623,665 Q603,670 593,648 L593,628" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Neck bolts -->
+  <circle cx="305" cy="443" r="10" fill="white" stroke="black" stroke-width="6"/>
+  <circle cx="463" cy="443" r="10" fill="white" stroke="black" stroke-width="6"/>
+  <!-- Legs -->
+  <rect x="295" y="650" width="80" height="120" rx="15" fill="white" stroke="black" stroke-width="9"/>
+  <rect x="393" y="650" width="80" height="120" rx="15" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Feet -->
+  <rect x="272" y="765" width="120" height="45" rx="18" fill="white" stroke="black" stroke-width="8"/>
+  <rect x="376" y="765" width="120" height="45" rx="18" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Gear deco -->
+  <circle cx="140" cy="320" r="35" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="140" cy="320" r="20" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M140,280 L140,262 M140,358 L140,376 M180,320 L198,320 M100,320 L82,320 M168,292 L181,279 M112,348 L99,361 M168,348 L181,361 M112,292 L99,279" stroke="black" stroke-width="6"/>
+  <circle cx="628" cy="320" r="35" fill="none" stroke="black" stroke-width="6"/>
+  <circle cx="628" cy="320" r="20" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M628,280 L628,262 M628,358 L628,376 M668,320 L686,320 M588,320 L570,320" stroke="black" stroke-width="6"/>
+
+
+</svg>

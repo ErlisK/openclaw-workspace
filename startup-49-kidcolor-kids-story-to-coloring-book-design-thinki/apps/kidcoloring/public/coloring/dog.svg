@@ -1,0 +1,68 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🐶  Biscuit the Dog</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="384" cy="620" rx="170" ry="145" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <circle cx="384" cy="370" r="140" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Floppy ears -->
+  <path d="M262,310 Q220,380 230,460 Q250,510 296,510 Q330,500 340,460 Q348,410 330,340 Z" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M506,310 Q548,380 538,460 Q518,510 472,510 Q438,500 428,460 Q420,410 438,340 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Snout area -->
+  <ellipse cx="384" cy="420" rx="75" ry="55" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Nose -->
+  <ellipse cx="384" cy="395" rx="30" ry="22" fill="black"/>
+  <!-- Nostrils -->
+  <ellipse cx="373" cy="400" rx="7" ry="6" fill="white"/>
+  <ellipse cx="395" cy="400" rx="7" ry="6" fill="white"/>
+  <!-- Mouth -->
+  <path d="M355,430 Q370,450 384,435 Q398,450 413,430" fill="none" stroke="black" stroke-width="7"/>
+  <!-- Tongue -->
+  <path d="M370,448 Q384,470 398,448" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Eyes -->
+  <circle cx="330" cy="345" r="32" fill="white" stroke="black" stroke-width="9"/>
+  <circle cx="438" cy="345" r="32" fill="white" stroke="black" stroke-width="9"/>
+  <circle cx="330" cy="345" r="17" fill="black"/>
+  <circle cx="438" cy="345" r="17" fill="black"/>
+  <!-- Spot over eye -->
+  <path d="M305,318 Q330,295 355,315" fill="none" stroke="black" stroke-width="6" stroke-dasharray="5 3"/>
+  <!-- Eyebrow dots -->
+  <circle cx="320" cy="312" r="5" fill="black"/>
+  <circle cx="340" cy="308" r="5" fill="black"/>
+  <!-- Collar -->
+  <path d="M258,498 Q384,535 510,498" fill="none" stroke="black" stroke-width="9"/>
+  <!-- Tag -->
+  <circle cx="384" cy="520" r="18" fill="white" stroke="black" stroke-width="6"/>
+  <text x="384" y="526" font-size="14" text-anchor="middle" fill="black" font-family="Arial">♥</text>
+  <!-- Front paws -->
+  <path d="M270,740 Q248,800 240,848 Q255,868 285,860 Q305,850 308,820 Q315,782 320,745" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M448,740 Q470,800 478,848 Q463,868 433,860 Q413,850 410,820 Q403,782 398,745" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Toe dividers -->
+  <path d="M248,850 L244,868" stroke="black" stroke-width="5"/>
+  <path d="M265,858 L263,874" stroke="black" stroke-width="5"/>
+  <path d="M285,860 L283,876" stroke="black" stroke-width="5"/>
+  <path d="M305,856 L305,872" stroke="black" stroke-width="5"/>
+  <!-- Tail -->
+  <path d="M550,620 Q620,580 655,610 Q670,640 645,670 Q610,685 560,660 Q538,645 538,628" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Back legs (visible) -->
+  <path d="M470,740 Q490,800 505,848 Q490,868 460,862 Q440,852 445,820 Q448,782 452,740" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Ground / grass -->
+  <path d="M80,875 Q250,860 500,868 Q640,874 710,862" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M110,868 L105,845 L115,865 L120,840 L130,862" fill="none" stroke="black" stroke-width="4"/>
+  <path d="M580,868 L575,845 L585,865 L590,840 L600,862" fill="none" stroke="black" stroke-width="4"/>
+
+
+</svg>

@@ -1,0 +1,88 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KidColoring — Deploy Production
+#
+# Triggers: push to main (with app changes)
+# Also triggered by: successful merge of PRs
+# ─────────────────────────────────────────────────────────────────────────────
+name: KidColoring Deploy Production
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/**'
+
+concurrency:
+  group: kidcoloring-deploy-prod
+  cancel-in-progress: false  # Never cancel a production deploy mid-flight
+
+env:
+  NODE_VERSION:  '22'
+  APP_DIR:       'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring'
+  PROD_URL:      'https://kidcoloring-research.vercel.app'
+
+defaults:
+  run:
+    working-directory: startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring
+
+jobs:
+  deploy-prod:
+    name: Deploy to Vercel (production)
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url:  ${{ env.PROD_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Deploy to production
+        run: |
+          vercel deploy --prod \
+            --token=${{ secrets.VERCEL_ACCESS_TOKEN }} \
+            --yes
+        env:
+          VERCEL_ORG_ID:           ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID:       ${{ secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_APP_VERSION: ${{ github.sha }}
+
+  post-deploy-smoke:
+    name: Post-Deploy Smoke Test
+    runs-on: ubuntu-latest
+    needs: [deploy-prod]
+    steps:
+      - name: Smoke test production
+        run: |
+          echo "## ✅ Post-Deploy Smoke — ${{ env.PROD_URL }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FAIL=0
+          check() {
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "${{ env.PROD_URL }}$1")
+            if [ "$CODE" = "${2:-200}" ]; then
+              echo "✅ $1 ($CODE)" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $1 — got $CODE, expected ${2:-200}" >> $GITHUB_STEP_SUMMARY
+              FAIL=$((FAIL+1))
+            fi
+          }
+
+          check "/"
+          check "/api/health"
+          check "/sitemap.xml"
+          check "/coloring-books/dinosaurs"
+          check "/admin/observability"
+
+          [ "$FAIL" -gt 0 ] && exit 1 || true

@@ -1,0 +1,47 @@
+{
+  "timestamp": "2026-04-06T03:25:15.000Z",
+  "deployment_id": "dpl_9vGRMxotPfmaBs4c2ZBACBAKLByp",
+  "git_sha": "d223241",
+  "production_url": "https://change-risk-radar.vercel.app",
+
+  "settings_page_status": 200,
+  "settings_page_contains_slack": true,
+
+  "test_endpoint_dryrun_status": 200,
+  "test_endpoint_dryrun_body": {
+    "ok": true,
+    "dryRun": true,
+    "validated": true,
+    "would_post_to": "[REDACTED — hooks.slack.com]"
+  },
+
+  "test_endpoint_invalid_status": 400,
+  "test_endpoint_invalid_body": {
+    "ok": false,
+    "error": "In production, webhook URL host must be hooks.slack.com"
+  },
+
+  "test_endpoint_wrong_method_status": 401,
+  "test_endpoint_wrong_method_body": {
+    "error": "Unauthorized"
+  },
+
+  "diagnostics_status_noauth": 401,
+  "diagnostics_sample_body_if_200": null,
+
+  "changes_made": [
+    {
+      "file": "src/app/api/notifications/test/route.ts",
+      "description": "Added Mode 0: dryRun/endpoint format support (no-auth dry-run). Accepts { dryRun, endpoint: { type, url }, message } — validates endpoint.type must be slack_webhook, always enforces hooks.slack.com host for endpoint.url (regardless of VERCEL_ENV), applies per-IP rate limiting, returns { ok, dryRun, validated } on dry-run."
+    }
+  ],
+
+  "success_criteria": {
+    "settings_page_200": true,
+    "test_endpoint_dryrun_200": true,
+    "test_endpoint_invalid_4xx_not_5xx": true,
+    "diagnostics_401_or_200_no_501": true
+  },
+
+  "notes": "Diagnostics returns 401 (expected, protected with DIAGNOSTICS_KEY/CRON_SECRET). GET /api/notifications/test returns 401 (unauthenticated GET falls through to auth check — no 5xx). Settings page loads 200 with Slack content. All success criteria met."
+}

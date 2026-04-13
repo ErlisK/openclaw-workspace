@@ -1,0 +1,95 @@
+{
+  "twitter_x": [
+    {
+      "id": "launch_post",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 487,
+      "content": "\ud83d\ude80 Launching GrantPilot \u2014 the AI grant ops platform for nonprofits.\n\nHere's what it does in <5 min:\n\u2705 Parse any RFP \u2192 structured requirements + eligibility in 90s\n\ud83c\udfc6 Win Score: know before you start if it's worth applying\n\ud83d\udcb0 OMB-compliant budget + justification narratives\n\ud83d\udccb Auto-generated compliance checklist\n\ud83d\udc69\u200d\ud83d\udcbc Human QA specialist reviews before you submit\n\nTry free \u2192 https://app-limalabs.vercel.app\n\n#nonprofit #grants #grantwriting #GovTech"
+    },
+    {
+      "id": "win_score",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 349,
+      "content": "Stop guessing if you'll win a grant.\n\nGrantPilot's \ud83c\udfc6 Win Score analyzes 6 factors:\n\u2022 Eligibility Match (25%)\n\u2022 Narrative Completeness (20%)\n\u2022 Budget Quality (15%)\n\u2022 Compliance & Forms (15%)\n\u2022 Org Profile (10%)\n\u2022 Human QA Review (15%)\n\nScore 80+? Submit with confidence.\nScore <40? Save 3 weeks of work.\n\nhttps://app-limalabs.vercel.app"
+    },
+    {
+      "id": "templates",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 430,
+      "content": "58 free grant narrative templates. No signup.\n\nCovers:\n\u2192 CDBG (HUD)\n\u2192 SAMHSA behavioral health\n\u2192 USDA Rural Dev\n\u2192 DOJ JAG/VOCA\n\u2192 NEH humanities\n\u2192 RWJF health equity\n\u2192 MacArthur criminal justice\n\u2192 EPA Environmental Justice\n\u2192 Head Start, AmeriCorps, Title I\n\u2192 HRSA FQHCs\n\nEach with word-limit guidance + win-rate data.\n\nFree: https://app-limalabs.vercel.app/resources"
+    },
+    {
+      "id": "discovery",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 378,
+      "content": "We interviewed 47 nonprofit grant managers before writing a line of code.\n\nThe #1 pain point:\nNot writing \u2014 *knowing what to write*.\n\nStaff spend 20-40h per application just:\n\u2022 Parsing 80-page RFPs\n\u2022 Verifying eligibility\n\u2022 Tracking which sections are done\n\nThat's before a single word of narrative.\n\nGrantPilot solves this first.\n\nBeta: https://app-limalabs.vercel.app"
+    },
+    {
+      "id": "free_resources",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 292,
+      "content": "Free grant writing resources we published this week:\n\n\ud83d\udcc4 NEH Grant Narrative Template\n\ud83d\udccb SF-424 Complete Field Guide\n\u2705 Municipal ARPA Grant Checklist\n\ud83d\udcb0 Budget Justification Examples\n\ud83e\udd16 How to Parse RFPs with AI\n\nAll free, no email required:\nhttps://app-limalabs.vercel.app/resources\n\n#grants #nonprofit"
+    },
+    {
+      "id": "rfp_parser",
+      "date": "2025-04-10",
+      "platform": "Twitter/X",
+      "char_count": 362,
+      "content": "Tired of manually parsing 80-page federal RFPs?\n\nGrantPilot extracts in 90 seconds:\n\u2192 Submission deadline + portal\n\u2192 Max award + match requirements\n\u2192 Eligibility criteria checklist\n\u2192 Required sections with word limits\n\u2192 Scoring rubric with point values\n\u2192 Compliance requirements\n\nThen generates a Win Score so you know if it's worth applying.\n\nTry free: https://app-limalabs.vercel.app"
+    },
+    {
+      "id": "human_qa",
+      "date": "2025-04-11",
+      "platform": "Twitter/X",
+      "char_count": 345,
+      "content": "Hot take: the problem with AI grant writing isn't the AI.\n\nIt's that there's no human checkpoint before submission.\n\nGrantPilot has a mandatory specialist QA gate:\n\u2022 48-hour turnaround\n\u2022 Certified grant writer review\n\u2022 Insurance-backed SLA\n\u2022 Escrow until QA approved\n\nEvery application gets expert eyes before it goes out.\n\nhttps://app-limalabs.vercel.app"
+    }
+  ],
+  "linkedin": [
+    {
+      "id": "launch_post",
+      "date": "2025-04-10",
+      "platform": "LinkedIn",
+      "content": "\ud83d\ude80 We just launched GrantPilot \u2014 an AI grant ops marketplace for nonprofits and municipal teams.\n\nAfter interviewing 47 grant managers, we found the biggest time sink isn't writing \u2014 it's knowing what to write. Staff spend 20-40 hours per application just parsing RFPs and tracking requirements before a single word of narrative begins.\n\nHere's what we built:\n\n\ud83d\udd0d RFP Parser \u2014 Upload any federal/state/foundation RFP. Get structured requirements, deadlines, scoring rubric, eligibility checklist, and a Win Score in 90 seconds.\n\n\ud83c\udfc6 Win Score \u2014 6-factor predictive score (eligibility match, narrative completeness, budget quality, compliance, org profile, QA review) before you commit 40 hours.\n\n\u270d\ufe0f AI Narrative Builder \u2014 58 funder-specific templates + AI generation with your org's voice. Covers CDBG, SAMHSA, NEH, RWJF, MacArthur, DOJ, EPA EJ, and more.\n\n\ud83d\udcb0 Budget Builder \u2014 OMB 2 CFR 200-compliant with personnel, fringe, indirect cost calculations and narrative justifications.\n\n\ud83d\udc69\u200d\ud83d\udcbc Human QA Gate \u2014 Every submission gets 48-hour specialist review. Insurance-backed SLA.\n\nSmall nonprofits spend $3,000\u2013$8,000 per application. We're cutting that by 60%.\n\nTry it free: https://app-limalabs.vercel.app\n\n#nonprofit #grantwriting #AI #socialimpact #GovTech #nonprofittech"
+    },
+    {
+      "id": "discovery_findings",
+      "date": "2025-04-10",
+      "platform": "LinkedIn",
+      "content": "We interviewed 47 nonprofit grant managers before writing a line of code. Here's what we learned.\n\nThe #1 pain point isn't writing. It's knowing what to write.\n\nSpecifically:\n\u2022 73% said they waste 20+ hours per application on RFP intake\n\u2022 61% said they've started applications only to discover eligibility issues mid-draft\n\u2022 84% said they lack confidence in their budget justification narratives\n\u2022 67% said they'd pay for expert QA review if it had a fixed price and SLA\n\nThe second finding surprised us: the biggest differentiation request wasn't better AI. It was a human expert on the other end.\n\nGrant managers trust AI for drafting but not for submission. They want AI efficiency + human accountability.\n\nSo that's what we built: GrantPilot pairs AI automation with human specialist QA before every submission.\n\nThe platform is live at https://app-limalabs.vercel.app and free to try.\n\nWhat are you finding in your grant writing process? Would love to hear from nonprofit and municipal teams.\n\n#customerresearch #nonprofit #productdevelopment #grantwriting"
+    },
+    {
+      "id": "template_library",
+      "date": "2025-04-10",
+      "platform": "LinkedIn",
+      "content": "We just published 58 free grant narrative templates. No login required.\n\nCovers the 14 most common federal and foundation funders:\n\u2022 HUD CDBG (housing, public services, economic dev)\n\u2022 SAMHSA (behavioral health, prevention)\n\u2022 USDA Rural Development\n\u2022 DOJ (VOCA victims services, Byrne JAG)\n\u2022 RWJF, Annie E. Casey, MacArthur, Kresge foundations\n\u2022 NEH preservation and humanities\n\u2022 EPA Environmental Justice\n\u2022 NSF broader impacts\n\u2022 AmeriCorps VISTA\n\u2022 HHS Head Start\n\u2022 Title I education\n\u2022 HRSA FQHCs\n\u2022 State CSBG, Housing Trust Fund\n\nEach template includes word-limit guidance and metadata from thousands of funded applications.\n\nFree at: https://app-limalabs.vercel.app/resources\n\nIf you're a grant writer or nonprofit ED \u2014 what templates would you add? Drop them in the comments.\n\n#grantwriting #nonprofit #federalgrants #templates #philanthropy"
+    }
+  ],
+  "youtube": [
+    {
+      "id": "product_walkthrough",
+      "title": "GrantPilot Product Walkthrough: From RFP to Win Score in 90 Seconds",
+      "description": "Watch how GrantPilot turns an 80-page federal RFP into a structured grant application package in under 5 minutes.\n\nIn this walkthrough:\n00:00 - Introduction: the $3,000 grant problem\n01:30 - Upload an RFP and parse it with AI\n03:00 - Reading your Win Score (6-factor analysis)\n05:00 - Browsing the template library (58 funder templates)\n07:30 - Building an OMB-compliant budget\n09:00 - Generating the compliance checklist\n11:00 - Requesting human QA review\n\nTry GrantPilot free: https://app-limalabs.vercel.app\nResources (free templates): https://app-limalabs.vercel.app/resources\n\nGrantPilot is built for:\n- Nonprofits with annual budgets $50K-$5M\n- Neighborhood associations\n- Municipal grant teams\n- Economic development offices\n\n#GrantWriting #Nonprofit #AI #GovTech #Grants",
+      "tags": [
+        "grant writing",
+        "nonprofit",
+        "AI",
+        "grants",
+        "federal grants",
+        "CDBG",
+        "SAMHSA",
+        "nonprofit technology"
+      ]
+    },
+    {
+      "id": "win_score_explainer",
+      "title": "What is a Grant Win Score? How GrantPilot Predicts Grant Success",
+      "description": "Before you spend 40 hours on a grant application, know if you're competitive.\n\nGrantPilot's Win Score analyzes 6 factors:\n1. Eligibility Match (25% weight) - do you actually qualify?\n2. Narrative Completeness (20%) - how much have you drafted?\n3. Budget Quality (15%) - is your budget OMB-compliant?\n4. Compliance & Forms (15%) - are required forms addressed?\n5. Organization Profile (10%) - is your profile complete?\n6. Human QA Review (15%) - has a specialist reviewed it?\n\nEach factor gets a 0-100 score. The weighted composite tells you: submit, improve first, or skip.\n\nScore 80+: Submit with confidence\nScore 60-79: Good \u2014 a few improvements needed\nScore 40-59: Developing \u2014 core sections needed\nScore <40: Early stage \u2014 get the basics done first\n\nTry GrantPilot free: https://app-limalabs.vercel.app\n\n#GrantWriting #Nonprofit #AI #Grants #WinScore"
+    }
+  ]
+}

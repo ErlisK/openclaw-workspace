@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# KidColoring — Deploy Staging
+#
+# Triggers: push to `kidcoloring-staging` branch
+# Purpose:  Persistent staging URL for burn-in testing, demos, and QA.
+#
+# Staging env vars should be set in the Vercel staging project dashboard:
+#   NEXT_PUBLIC_ENV_LABEL = 'staging'
+#   NEXT_PUBLIC_APP_VERSION = <commit sha>
+#
+# URL pattern: https://kidcoloring-staging.vercel.app  (or preview URL)
+# ─────────────────────────────────────────────────────────────────────────────
+name: KidColoring Deploy Staging
+
+on:
+  push:
+    branches: [kidcoloring-staging]
+    paths:
+      - 'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/**'
+
+concurrency:
+  group: kidcoloring-deploy-staging
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '22'
+  APP_DIR:      'startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring'
+
+defaults:
+  run:
+    working-directory: startup-49-kidcolor-kids-story-to-coloring-book-design-thinki/apps/kidcoloring
+
+jobs:
+  deploy-staging:
+    name: Deploy to Vercel (staging)
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url:  ${{ steps.deploy.outputs.preview_url }}
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.preview_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel@latest
+
+      - name: Pull Vercel environment (staging)
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_ACCESS_TOKEN }}
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID || secrets.VERCEL_PROJECT_ID }}
+
+      - name: Build (staging)
+        run: vercel build --token=${{ secrets.VERCEL_ACCESS_TOKEN }}
+        env:
+          VERCEL_ORG_ID:             ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID:         ${{ secrets.VERCEL_STAGING_PROJECT_ID || secrets.VERCEL_PROJECT_ID }}
+          NEXT_PUBLIC_APP_VERSION:   ${{ github.sha }}
+          NEXT_PUBLIC_ENV_LABEL:     staging
+
+      - name: Deploy to Vercel (staging)
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --token=${{ secrets.VERCEL_ACCESS_TOKEN }} 2>&1 | tail -1)
+          echo "preview_url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "Staging URL: $DEPLOY_URL"
+        env:
+          VERCEL_ORG_ID:     ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_STAGING_PROJECT_ID || secrets.VERCEL_PROJECT_ID }}
+
+  smoke-staging:
+    name: Smoke Test (staging)
+    runs-on: ubuntu-latest
+    needs: [deploy-staging]
+    steps:
+      - name: HTTP smoke tests
+        run: |
+          BASE="${{ needs.deploy-staging.outputs.preview_url }}"
+          if [ -z "$BASE" ]; then
+            echo "No preview URL, skipping smoke"
+            exit 0
+          fi
+          echo "Smoke testing: $BASE"
+          for ROUTE in "/" "/api/health" "/coloring-books/dinosaurs" "/sitemap.xml"; do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$BASE$ROUTE")
+            echo "$ROUTE → $CODE"
+          done

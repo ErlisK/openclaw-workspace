@@ -1,0 +1,58 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🐉  Ember the Dragon</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="370" cy="590" rx="165" ry="135" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Neck -->
+  <path d="M440,470 Q470,400 460,330" fill="none" stroke="black" stroke-width="10"/>
+  <path d="M490,480 Q525,415 515,345" fill="none" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <ellipse cx="490" cy="295" rx="85" ry="70" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Snout/Jaw -->
+  <path d="M540,310 Q595,315 610,345 Q608,375 545,375 Q510,368 500,350 Z" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Fire breath -->
+  <path d="M610,345 Q655,330 690,310 Q670,365 630,380 Q660,380 695,400 Q655,395 620,380 Q640,400 660,430 Q615,410 595,390" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Eye -->
+  <ellipse cx="470" cy="272" rx="20" ry="24" fill="white" stroke="black" stroke-width="8"/>
+  <ellipse cx="470" cy="272" rx="8" ry="14" fill="black"/>
+  <!-- Horn -->
+  <path d="M445,225 L430,155 L460,220 Z" fill="white" stroke="black" stroke-width="7"/>
+  <path d="M475,215 L475,148 L498,212 Z" fill="white" stroke="black" stroke-width="7"/>
+  <!-- Wings -->
+  <path d="M260,480 Q160,380 130,280 Q170,270 220,360 Q240,320 210,220 Q260,230 270,340 Q290,380 310,440" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Wing membranes -->
+  <path d="M215,360 Q230,320 245,330" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M235,300 Q248,265 258,278" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Tail -->
+  <path d="M210,610 Q130,640 90,600 Q65,565 90,530 Q125,510 195,545 Q240,575 270,600" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Tail spike -->
+  <path d="M86,565 L50,540 L95,555 Z" fill="white" stroke="black" stroke-width="7"/>
+  <!-- Legs -->
+  <path d="M290,690 Q270,760 255,820 Q250,845 275,845 Q305,845 312,820 Q320,775 330,700" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Claws left -->
+  <path d="M255,843 L240,868" stroke="black" stroke-width="7"/>
+  <path d="M272,845 L265,872" stroke="black" stroke-width="7"/>
+  <path d="M288,843 L287,870" stroke="black" stroke-width="7"/>
+  <path d="M310,690 Q330,760 345,820 Q350,845 375,845 Q398,842 390,817 Q378,775 370,700" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Scales on back -->
+  <path d="M350,480 Q360,450 370,480" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M380,460 Q390,430 400,460" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M410,455 Q420,420 430,455" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Ground -->
+  <path d="M80,870 Q250,855 500,862 Q640,868 710,858" fill="none" stroke="black" stroke-width="6"/>
+
+
+</svg>

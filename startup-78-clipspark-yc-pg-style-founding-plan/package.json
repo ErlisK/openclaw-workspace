@@ -1,0 +1,12 @@
+{
+  "name": "clipspark-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=apps/clipspark",
+    "build": "npm run build --workspace=apps/clipspark",
+    "lint": "npm run lint --workspace=apps/clipspark"
+  }
+}

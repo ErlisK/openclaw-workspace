@@ -1,0 +1,65 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🐱  Whiskers the Cat</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="384" cy="630" rx="155" ry="145" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <circle cx="384" cy="390" r="130" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Ears -->
+  <path d="M270,290 L240,200 L320,278 Z" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M498,290 L528,200 L448,278 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Inner ears -->
+  <path d="M270,280 L255,220 L310,272 Z" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M498,280 L513,220 L458,272 Z" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Eyes -->
+  <ellipse cx="330" cy="380" rx="35" ry="40" fill="white" stroke="black" stroke-width="9"/>
+  <ellipse cx="438" cy="380" rx="35" ry="40" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Pupils (cat slits) -->
+  <ellipse cx="330" cy="380" rx="12" ry="28" fill="black"/>
+  <ellipse cx="438" cy="380" rx="12" ry="28" fill="black"/>
+  <!-- Nose -->
+  <path d="M374,432 L384,446 L394,432 Q394,420 384,416 Q374,420 374,432 Z" fill="black"/>
+  <!-- Mouth -->
+  <path d="M374,446 Q360,468 348,462" fill="none" stroke="black" stroke-width="6"/>
+  <path d="M394,446 Q408,468 420,462" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Whiskers -->
+  <line x1="290" y1="435" x2="365" y2="440" stroke="black" stroke-width="4"/>
+  <line x1="290" y1="448" x2="365" y2="448" stroke="black" stroke-width="4"/>
+  <line x1="290" y1="461" x2="365" y2="456" stroke="black" stroke-width="4"/>
+  <line x1="478" y1="435" x2="403" y2="440" stroke="black" stroke-width="4"/>
+  <line x1="478" y1="448" x2="403" y2="448" stroke="black" stroke-width="4"/>
+  <line x1="478" y1="461" x2="403" y2="456" stroke="black" stroke-width="4"/>
+  <!-- Front paws -->
+  <path d="M295,740 Q270,790 265,830 Q280,845 310,840 Q330,830 330,800 Q325,760 320,740" fill="white" stroke="black" stroke-width="9"/>
+  <path d="M450,740 Q475,790 480,830 Q465,845 435,840 Q415,830 415,800 Q420,760 425,740" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Toe lines left -->
+  <path d="M270,832 L268,848" stroke="black" stroke-width="5"/>
+  <path d="M288,838 L287,854" stroke="black" stroke-width="5"/>
+  <path d="M308,838 L308,854" stroke="black" stroke-width="5"/>
+  <!-- Toe lines right -->
+  <path d="M498,832 L500,848" stroke="black" stroke-width="5"/>
+  <path d="M478,838 L479,854" stroke="black" stroke-width="5"/>
+  <path d="M460,838 L460,854" stroke="black" stroke-width="5"/>
+  <!-- Tail -->
+  <path d="M538,650 Q620,600 650,640 Q670,680 640,720 Q600,740 555,700 Q535,680 530,660" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Collar -->
+  <path d="M265,498 Q384,530 503,498" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Bell on collar -->
+  <circle cx="384" cy="512" r="16" fill="white" stroke="black" stroke-width="6"/>
+  <line x1="384" y1="524" x2="384" y2="534" stroke="black" stroke-width="4"/>
+
+
+</svg>

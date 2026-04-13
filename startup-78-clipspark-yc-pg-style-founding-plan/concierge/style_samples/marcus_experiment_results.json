@@ -1,0 +1,139 @@
+{
+  "session_id": "marcus",
+  "niche": "business",
+  "creator_name": "Marcus",
+  "clip_text": "Stop chasing viral. Start serving one person. I make every episode for Sarah. Not for the algorithm.",
+  "timestamp": "2026-04-09T16:54:23.394707+00:00",
+  "caption_variants": [
+    {
+      "style_id": "bold_white_outline",
+      "label": "Bold White + Black Outline",
+      "description": "Classic podcast caption \u2014 white text, heavy black outline. Max readability on any background.",
+      "use_case": "Universal. Works on TikTok, Reels, Shorts, LinkedIn.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/caption_bold_white_outline.png",
+      "size_kb": 75
+    },
+    {
+      "style_id": "yellow_highlight",
+      "label": "Yellow Word Highlight",
+      "description": "Key word highlighted in yellow on each line. High engagement on TikTok.",
+      "use_case": "TikTok, Reels. Drama, comedy, education niches.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/caption_yellow_highlight.png",
+      "size_kb": 75
+    },
+    {
+      "style_id": "pill_caption",
+      "label": "Dark Pill Background",
+      "description": "Text inside semi-transparent rounded pill. Clean, modern. LinkedIn/professional.",
+      "use_case": "LinkedIn, YouTube Shorts. Professional, business, coaching niches.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/caption_pill_caption.png",
+      "size_kb": 55
+    },
+    {
+      "style_id": "kinetic_word",
+      "label": "Kinetic Single Word",
+      "description": "One word at a time, large, centered. Max impact. Highly viral on TikTok.",
+      "use_case": "TikTok, Reels. Comedy, fitness, motivation niches.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/caption_kinetic_word.png",
+      "size_kb": 47
+    },
+    {
+      "style_id": "brand_color",
+      "label": "Brand Color Accent",
+      "description": "White text with accent line in brand color. Professional and distinctive.",
+      "use_case": "LinkedIn, YouTube Shorts. Founder, B2B, coach niches.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/caption_brand_color.png",
+      "size_kb": 53
+    }
+  ],
+  "thumbnail_variants": [
+    {
+      "style_id": "bold_text_bg",
+      "label": "Bold Text on Gradient Background",
+      "description": "Full-bleed dark gradient, large white headline, creator name small at bottom.",
+      "use_case": "Business, founder, education niches. LinkedIn + YT Shorts.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/thumbnail_bold_text_bg.png",
+      "size_kb": 78
+    },
+    {
+      "style_id": "split_face_text",
+      "label": "Split: Face Left + Text Right",
+      "description": "Left half: creator face (placeholder). Right half: hook text. Classic YouTube thumbnail.",
+      "use_case": "Any niche. Highest CTR template on YouTube Shorts.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/thumbnail_split_face_text.png",
+      "size_kb": 54
+    },
+    {
+      "style_id": "quote_card",
+      "label": "Quote Card",
+      "description": "Large pull quote, attribution below, minimal design. Shareable as image.",
+      "use_case": "LinkedIn, Twitter/X. Text-heavy content, coaching, thought leadership.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/thumbnail_quote_card.png",
+      "size_kb": 44
+    },
+    {
+      "style_id": "tiktok_loud",
+      "label": "TikTok Loud",
+      "description": "Bright color block, oversized emoji, short hook in caps. Max scroll-stop.",
+      "use_case": "TikTok, Reels. Comedy, fitness, lifestyle niches.",
+      "file": "/tmp/clipspark_pilot/style_experiments/marcus/thumbnail_tiktok_loud.png",
+      "size_kb": 71
+    }
+  ],
+  "hook_variants": [
+    {
+      "hook_id": "question_hook",
+      "label": "Question Hook",
+      "description": "Opens with a question that creates curiosity gap. Strong for educational/business content.",
+      "example": "Why do podcasters who post LESS grow FASTER?",
+      "platform_fit": [
+        "youtube_shorts",
+        "linkedin"
+      ]
+    },
+    {
+      "hook_id": "number_hook",
+      "label": "Number Hook",
+      "description": "Number hooks set expectations and promise concrete value. High CTR on all platforms.",
+      "example": "3 things that tripled my downloads in 90 days",
+      "platform_fit": [
+        "youtube_shorts",
+        "tiktok",
+        "linkedin",
+        "instagram_reels"
+      ]
+    },
+    {
+      "hook_id": "story_hook",
+      "label": "Story/Confession Hook",
+      "description": "Personal story creates instant relatability. Best conversion for coaching/founder niches.",
+      "example": "I posted every day for 6 months. My numbers barely moved.",
+      "platform_fit": [
+        "tiktok",
+        "instagram_reels",
+        "youtube_shorts"
+      ]
+    },
+    {
+      "hook_id": "stat_hook",
+      "label": "Statistic/Result Hook",
+      "description": "Proof-first hook. Best for skeptical audiences. High trust signal.",
+      "example": "Downloads tripled in 90 days. Here's exactly what changed.",
+      "platform_fit": [
+        "linkedin",
+        "youtube_shorts"
+      ]
+    },
+    {
+      "hook_id": "contrarian_hook",
+      "label": "Contrarian Hook",
+      "description": "Pattern-interrupt. Stops scroll immediately. Works best for opinionated founders/coaches.",
+      "example": "Stop trying to go viral. Start serving ONE person.",
+      "platform_fit": [
+        "tiktok",
+        "linkedin",
+        "instagram_reels"
+      ]
+    }
+  ]
+}

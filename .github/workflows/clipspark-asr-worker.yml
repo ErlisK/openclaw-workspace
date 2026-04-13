@@ -1,0 +1,49 @@
+name: ClipSpark ASR Worker
+
+on:
+  schedule:
+    # Every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'Whisper model (tiny|small|medium)'
+        required: false
+        default: 'small'
+
+jobs:
+  asr:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: startup-78-clipspark-yc-pg-style-founding-plan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Whisper models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/whisper
+          key: whisper-models-small-v1
+
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends
+
+      - name: Install Python deps
+        run: pip install openai-whisper torch --index-url https://download.pytorch.org/whl/cpu --quiet
+
+      - name: Run ASR worker
+        run: python3 workers/asr_worker.py --once --model ${{ github.event.inputs.model || 'small' }}
+        env:
+          SUPABASE_URL: https://twctmwwqxvenvieijmtn.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.CLIPSPARK_SERVICE_ROLE_KEY }}
+          POLL_INTERVAL: '5'
+          # Optional: set OPENAI_API_KEY to use OpenAI API instead of local Whisper
+          # OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

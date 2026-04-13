@@ -1,0 +1,58 @@
+# DocsCI GitHub Actions Template
+# Place this file at: .github/workflows/docsci.yml
+#
+# This workflow runs the DocsCI pipeline on every PR and push to main.
+# It verifies code examples, detects API/SDK drift, and posts fix comments.
+#
+# Required secrets:
+#   DOCSCI_API_KEY  — your DocsCI API key (from https://snippetci.com/dashboard/settings)
+#
+# Required variables (optional, auto-detected from repo):
+#   DOCSCI_DOCS_PATH     — path to docs directory (default: docs/)
+#   DOCSCI_OPENAPI_PATH  — path to OpenAPI spec (default: auto-detected)
+#   DOCSCI_SDK_LANGUAGES — comma-separated list of SDK languages (default: python,typescript)
+
+name: DocsCI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - "docs/**"
+      - "*.md"
+      - "src/**"       # Trigger on SDK source changes too
+      - "openapi.yaml"
+      - "swagger.json"
+  pull_request:
+    paths:
+      - "docs/**"
+      - "*.md"
+      - "src/**"
+      - "openapi.yaml"
+      - "swagger.json"
+
+jobs:
+  docs-ci:
+    name: "DocsCI — Verify Examples & Detect Drift"
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write   # Required for posting PR comments
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run DocsCI
+        uses: docsci/action@v1
+        with:
+          api-key: ${{ secrets.DOCSCI_API_KEY }}
+          docs-path: ${{ vars.DOCSCI_DOCS_PATH || 'docs/' }}
+          openapi-path: ${{ vars.DOCSCI_OPENAPI_PATH || '' }}
+          sdk-languages: ${{ vars.DOCSCI_SDK_LANGUAGES || 'python,typescript' }}
+          # Post inline PR comments with AI-generated fixes
+          post-pr-comments: true
+          # Fail the check if any examples fail
+          fail-on-error: true
+          # Fail if API/SDK drift is detected
+          fail-on-drift: false  # set to true for strict mode

@@ -1,0 +1,41 @@
+rfp_id,rfp_name,source_type,amount_min,amount_max,eligibility_type,ORG-MISSION,NEED-COMM,PROG-DESC,GOALS-OBJ,EVAL,ORG-BG,BUDGET-NAR,POP-SERVED,SUSTAIN,ORG-CAP,COMMUNITY-ENG,LOGIC-MODEL,EQUITY,PARTNER,GEO-DESC,ORG-FIN-HEALTH,LOI-OPEN,REPORT-NAR,unique_requirement
+RFP-001,NEA Our Town,federal,25000,150000,nonprofit,1,1,1,1,1,1,1,1,0,1,1,1,0,1,0,0,0,0,Creative placemaking + local government partner required
+RFP-002,NEA Challenge America,federal,10000,10000,nonprofit-small,1,1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,Budget <$250K; must document underserved status
+RFP-003,NEA Grants for Arts Projects,federal,10000,100000,nonprofit,1,1,1,0,1,1,1,1,0,0,1,0,0,0,0,0,0,0,Artistic vision section required
+RFP-004,USDA Community Facilities,federal,75000,3000000,nonprofit-rural,0,1,1,0,0,1,1,0,0,1,0,0,0,0,1,1,0,0,Rural area required; environmental review
+RFP-005,USDA SNAP-Ed Nutrition,federal,0,0,nonprofit,0,1,1,1,1,0,1,1,0,1,0,1,0,0,0,0,0,0,Logic model required as attachment
+RFP-006,HUD CDBG,federal-passthrough,0,0,nonprofit,0,1,1,0,1,0,1,1,0,1,0,0,0,0,1,0,0,0,National objective citation required
+RFP-007,HHS CSBG,federal,0,0,community-action-agency,0,1,0,1,1,1,1,1,0,1,0,0,0,0,0,0,0,0,ROMA framework required
+RFP-008,DOJ Byrne JAG,federal,0,0,state-local-nonprofit,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,30-page program narrative; DOJ metrics
+RFP-009,CDC Injury Prevention,federal,100000,500000,nonprofit,0,1,1,0,1,1,1,1,0,1,0,1,0,0,0,0,0,0,Human subjects protection may apply
+RFP-010,NEH Preservation and Access,federal,10000,350000,nonprofit,0,0,1,0,1,1,1,0,0,1,0,0,0,0,0,0,0,0,Staff qualifications section required
+RFP-011,AmeriCorps,federal,0,0,nonprofit,0,0,1,1,1,1,1,0,1,1,0,1,0,0,0,0,0,0,Standardized AmeriCorps performance measures
+RFP-012,IMLS Museums for America,federal,5000,500000,museum,1,1,1,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,Museum definition broadly applied
+RFP-013,CAC Organizational Support,state,25000,150000,ca-arts-nonprofit,1,0,1,1,0,1,1,0,0,1,1,0,1,0,0,0,0,0,Dedicated EDI section required; 3+ years operating
+RFP-014,CAC Creative CA Communities,state,0,30000,ca-arts-nonprofit,1,1,1,0,0,0,1,0,0,0,0,0,1,1,0,0,0,0,Non-arts community partner required
+RFP-015,CA Humanities Humanities for All,state,0,20000,ca-nonprofit,1,1,1,0,1,0,1,1,0,0,1,0,0,0,0,0,1,0,LOI required first; humanities scholar involvement
+RFP-016,CA State Library LSTA,state,20000,150000,library,0,1,1,1,1,0,1,0,1,0,0,0,0,0,0,0,0,0,Library technology focus
+RFP-017,USDA Rural Business Dev (CA),state-federal,0,500000,nonprofit-rural,0,1,1,1,0,1,1,0,0,0,0,0,0,0,1,0,0,0,Rural area and job creation required
+RFP-018,CA HCD CDBG Non-Entitlement,state,0,3000000,local-gov-nonprofit,0,1,1,0,0,0,1,1,0,1,0,0,0,0,1,0,0,0,Environmental review; national objective
+RFP-019,CA Wellness Foundation,state,100000,250000,ca-nonprofit,1,1,1,0,1,1,1,1,0,1,0,0,1,0,0,0,0,0,Health equity + equity statement required
+RFP-020,CA Endowment BHC,state,0,0,ca-nonprofit,1,1,1,0,1,0,1,1,0,0,1,1,0,0,0,0,0,0,Resident leadership focus
+RFP-021,EBCF Civic Engagement,community-foundation,15000,75000,nonprofit-bay-area,1,1,1,1,1,0,1,1,0,0,1,1,1,0,1,0,0,0,BIPOC-led priority; power building framing
+RFP-022,SVCF Rapid Response,community-foundation,5000,25000,nonprofit-sv,1,1,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,Short turnaround; urgent need emphasis
+RFP-023,SF Arts Commission CEI,local-gov,10000,50000,sf-nonprofit,1,0,1,1,0,1,1,1,0,0,1,0,1,0,0,0,0,0,Work samples required; racial equity section
+RFP-024,City of Oakland Cultural,local-gov,5000,30000,oakland-nonprofit,1,0,1,0,1,0,1,0,0,0,1,0,0,0,1,1,0,0,Oakland residency required; financial health
+RFP-025,Zellerbach Family Foundation,private-foundation,10000,50000,bay-area-arts,1,0,1,0,1,1,1,0,0,0,1,0,0,0,0,0,0,0,Contemporary arts; emerging artists
+RFP-026,Walter & Elise Haas Fund,private-foundation,25000,100000,bay-area-nonprofit,1,1,1,0,1,1,1,1,0,0,1,1,0,0,0,0,1,0,LOI required; trust-based philanthropy
+RFP-027,Marin Community Foundation,community-foundation,10000,40000,marin-nonprofit,1,1,1,1,1,0,1,0,0,1,0,0,0,0,1,0,0,0,Marin County focus
+RFP-028,PG&E Foundation Environmental,corporate,5000,25000,ca-nonprofit,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0,0,0,0,PG&E service area required
+RFP-029,Salesforce.org Community,corporate,0,25000,verified-nonprofit,1,0,1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,Technology component preferred
+RFP-030,Home Depot Foundation,corporate,5000,50000,us-nonprofit,1,1,1,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,Veteran housing or disaster focus
+RFP-031,RWJF Health Equity,private-foundation,50000,500000,us-nonprofit,1,1,1,0,1,1,1,0,1,1,0,1,1,0,0,0,0,0,Health equity; sustainability required
+RFP-032,Kellogg Civic Engagement,private-foundation,150000,2000000,us-nonprofit,0,1,1,0,1,0,1,0,0,1,1,1,1,0,0,0,0,0,Community voice; systems change framing
+RFP-033,Ford Creative Placemaking,private-foundation,50000,250000,us-nonprofit,1,1,1,0,0,1,1,0,0,0,1,0,1,0,0,0,0,0,Artist co-design; equity approach
+RFP-034,Wells Fargo Community,corporate,5000,50000,us-nonprofit,1,1,1,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,Community investment focus
+RFP-035,Bank of America Neighborhood Builders,corporate,0,200000,us-nonprofit,0,0,0,0,0,1,0,0,0,1,1,1,0,0,0,1,0,0,Leadership development focus; multi-year
+RFP-036,Google.org Impact Challenge,corporate,250000,1000000,us-nonprofit,0,1,1,0,0,1,1,0,1,0,0,1,0,0,0,0,0,0,Innovation and scale emphasis
+RFP-037,Kaiser Community Health,corporate,25000,100000,ca-nonprofit,0,1,1,0,1,0,1,0,0,0,1,0,0,1,0,0,0,0,CHNA data required; community partnerships
+RFP-038,LISC Community Development,private-foundation,25000,150000,us-nonprofit,0,0,1,0,0,1,1,0,1,1,0,0,0,0,1,0,0,0,Leveraged resources; neighborhood focus
+RFP-039,NCDFI Resident-Led,private-foundation,5000,20000,us-nonprofit,0,1,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,Resident leadership required
+RFP-040,San Jose Cultural Affairs,local-gov,5000,25000,sj-nonprofit,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,San Jose location required

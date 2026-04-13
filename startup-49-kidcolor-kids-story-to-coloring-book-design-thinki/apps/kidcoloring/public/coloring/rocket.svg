@@ -1,0 +1,51 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🚀  Zoom the Rocket</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Rocket body -->
+  <path d="M384,160 Q330,200 310,350 L310,650 Q310,680 384,680 Q458,680 458,650 L458,350 Q438,200 384,160 Z" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Window -->
+  <circle cx="384" cy="380" r="55" fill="white" stroke="black" stroke-width="10"/>
+  <circle cx="384" cy="380" r="35" fill="white" stroke="black" stroke-width="6"/>
+  <!-- Window reflection -->
+  <path d="M358,355 Q368,345 385,350" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Fins left -->
+  <path d="M310,550 Q240,580 210,650 L310,650 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Fins right -->
+  <path d="M458,550 Q528,580 558,650 L458,650 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Engine nozzle -->
+  <path d="M330,650 Q320,695 310,720 Q330,710 384,715 Q438,710 458,720 Q448,695 438,650 Z" fill="white" stroke="black" stroke-width="9"/>
+  <!-- Flame -->
+  <path d="M340,720 Q355,790 384,840 Q413,790 428,720" fill="none" stroke="black" stroke-width="8"/>
+  <path d="M355,720 Q364,770 384,800 Q404,770 413,720" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Stars -->
+  <text x="120" y="220" font-size="36" fill="none" stroke="black" stroke-width="3">★</text>
+  <text x="580" y="200" font-size="28" fill="none" stroke="black" stroke-width="2.5">★</text>
+  <text x="640" y="320" font-size="22" fill="none" stroke="black" stroke-width="2">★</text>
+  <text x="100" y="380" font-size="26" fill="none" stroke="black" stroke-width="2.5">★</text>
+  <text x="660" y="460" font-size="18" fill="none" stroke="black" stroke-width="2">✦</text>
+  <text x="130" y="500" font-size="20" fill="none" stroke="black" stroke-width="2">✦</text>
+  <!-- Planet -->
+  <circle cx="620" cy="580" r="65" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Saturn rings -->
+  <ellipse cx="620" cy="580" rx="100" ry="20" fill="none" stroke="black" stroke-width="6"/>
+  <!-- Craters -->
+  <circle cx="600" cy="560" r="12" fill="none" stroke="black" stroke-width="5"/>
+  <circle cx="635" cy="590" r="8" fill="none" stroke="black" stroke-width="4"/>
+  <!-- Moon -->
+  <path d="M130,300 Q110,350 130,400 Q170,380 170,320 Q160,295 130,300 Z" fill="white" stroke="black" stroke-width="7"/>
+
+
+</svg>

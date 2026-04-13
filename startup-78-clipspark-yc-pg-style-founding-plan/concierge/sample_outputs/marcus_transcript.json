@@ -1,0 +1,980 @@
+{
+  "text": "Welcome to the ClipSpark pilot test episode. Today I want to share three things that changed everything about how I grow my podcast. The first thing I learned is that posting less content can actually grow your audience faster. I spent six months posting every single day and my numbers barely moved. Then I took a two week break, came back with one deeply researched episode per week, and my downloads tripled in ninety days. The second insight is about the first sixty seconds of your episode. Most podcasters spend their intro talking about themselves. Your listeners don't care who you are yet. Start with the most surprising thing you're going to say in the episode. Lead with the punchline. Trust me, the context can come later. Stop trying to go viral and start trying to be useful to a specific person. I have a listener named Sarah. She's a freelance designer trying to build a podcast about creative burnout. I make every episode for Sarah. Not for the algorithm. Not for the charts. For Sarah. And funnily enough, when I started doing that, my show started growing faster than when I was chasing downloads.",
+  "words": [
+    {
+      "word": "Welcome",
+      "start": 0.0,
+      "end": 0.5
+    },
+    {
+      "word": "to",
+      "start": 0.5,
+      "end": 0.8
+    },
+    {
+      "word": "the",
+      "start": 0.8,
+      "end": 1.0
+    },
+    {
+      "word": "ClipSpark",
+      "start": 1.0,
+      "end": 1.5
+    },
+    {
+      "word": "pilot",
+      "start": 1.5,
+      "end": 2.0
+    },
+    {
+      "word": "test",
+      "start": 2.0,
+      "end": 2.3
+    },
+    {
+      "word": "episode.",
+      "start": 2.3,
+      "end": 2.8
+    },
+    {
+      "word": "Today",
+      "start": 3.0,
+      "end": 3.3
+    },
+    {
+      "word": "I",
+      "start": 3.3,
+      "end": 3.5
+    },
+    {
+      "word": "want",
+      "start": 3.5,
+      "end": 3.8
+    },
+    {
+      "word": "to",
+      "start": 3.8,
+      "end": 4.0
+    },
+    {
+      "word": "share",
+      "start": 4.0,
+      "end": 4.3
+    },
+    {
+      "word": "three",
+      "start": 4.3,
+      "end": 4.6
+    },
+    {
+      "word": "things",
+      "start": 4.6,
+      "end": 4.9
+    },
+    {
+      "word": "that",
+      "start": 4.9,
+      "end": 5.1
+    },
+    {
+      "word": "changed",
+      "start": 5.1,
+      "end": 5.4
+    },
+    {
+      "word": "everything",
+      "start": 5.4,
+      "end": 5.8
+    },
+    {
+      "word": "about",
+      "start": 5.8,
+      "end": 6.0
+    },
+    {
+      "word": "how",
+      "start": 6.0,
+      "end": 6.2
+    },
+    {
+      "word": "I",
+      "start": 6.2,
+      "end": 6.4
+    },
+    {
+      "word": "grow",
+      "start": 6.4,
+      "end": 6.8
+    },
+    {
+      "word": "my",
+      "start": 6.8,
+      "end": 7.0
+    },
+    {
+      "word": "podcast.",
+      "start": 7.0,
+      "end": 7.5
+    },
+    {
+      "word": "The",
+      "start": 8.0,
+      "end": 8.4
+    },
+    {
+      "word": "first",
+      "start": 8.4,
+      "end": 8.7
+    },
+    {
+      "word": "thing",
+      "start": 8.7,
+      "end": 9.0
+    },
+    {
+      "word": "I",
+      "start": 9.0,
+      "end": 9.2
+    },
+    {
+      "word": "learned",
+      "start": 9.2,
+      "end": 9.5
+    },
+    {
+      "word": "is",
+      "start": 9.5,
+      "end": 9.7
+    },
+    {
+      "word": "that",
+      "start": 9.7,
+      "end": 9.9
+    },
+    {
+      "word": "posting",
+      "start": 9.9,
+      "end": 10.2
+    },
+    {
+      "word": "less",
+      "start": 10.2,
+      "end": 10.4
+    },
+    {
+      "word": "content",
+      "start": 10.4,
+      "end": 10.7
+    },
+    {
+      "word": "can",
+      "start": 10.7,
+      "end": 10.9
+    },
+    {
+      "word": "actually",
+      "start": 10.9,
+      "end": 11.1
+    },
+    {
+      "word": "grow",
+      "start": 11.1,
+      "end": 11.4
+    },
+    {
+      "word": "your",
+      "start": 11.4,
+      "end": 11.6
+    },
+    {
+      "word": "audience",
+      "start": 11.6,
+      "end": 12.0
+    },
+    {
+      "word": "faster.",
+      "start": 12.0,
+      "end": 12.3
+    },
+    {
+      "word": "I",
+      "start": 13.0,
+      "end": 13.2
+    },
+    {
+      "word": "spent",
+      "start": 13.2,
+      "end": 13.4
+    },
+    {
+      "word": "six",
+      "start": 13.4,
+      "end": 13.6
+    },
+    {
+      "word": "months",
+      "start": 13.6,
+      "end": 13.9
+    },
+    {
+      "word": "posting",
+      "start": 13.9,
+      "end": 14.1
+    },
+    {
+      "word": "every",
+      "start": 14.1,
+      "end": 14.3
+    },
+    {
+      "word": "single",
+      "start": 14.3,
+      "end": 14.5
+    },
+    {
+      "word": "day",
+      "start": 14.5,
+      "end": 14.7
+    },
+    {
+      "word": "and",
+      "start": 14.7,
+      "end": 15.0
+    },
+    {
+      "word": "my",
+      "start": 15.0,
+      "end": 15.1
+    },
+    {
+      "word": "numbers",
+      "start": 15.1,
+      "end": 15.3
+    },
+    {
+      "word": "barely",
+      "start": 15.3,
+      "end": 15.5
+    },
+    {
+      "word": "moved.",
+      "start": 15.5,
+      "end": 15.8
+    },
+    {
+      "word": "Then",
+      "start": 16.5,
+      "end": 16.7
+    },
+    {
+      "word": "I",
+      "start": 16.7,
+      "end": 16.9
+    },
+    {
+      "word": "took",
+      "start": 16.9,
+      "end": 17.1
+    },
+    {
+      "word": "a",
+      "start": 17.1,
+      "end": 17.3
+    },
+    {
+      "word": "two",
+      "start": 17.3,
+      "end": 17.6
+    },
+    {
+      "word": "week",
+      "start": 17.6,
+      "end": 17.8
+    },
+    {
+      "word": "break,",
+      "start": 17.8,
+      "end": 18.0
+    },
+    {
+      "word": "came",
+      "start": 18.0,
+      "end": 18.2
+    },
+    {
+      "word": "back",
+      "start": 18.2,
+      "end": 18.5
+    },
+    {
+      "word": "with",
+      "start": 18.5,
+      "end": 18.7
+    },
+    {
+      "word": "one",
+      "start": 18.7,
+      "end": 18.9
+    },
+    {
+      "word": "deeply",
+      "start": 18.9,
+      "end": 19.2
+    },
+    {
+      "word": "researched",
+      "start": 19.2,
+      "end": 19.5
+    },
+    {
+      "word": "episode",
+      "start": 19.5,
+      "end": 19.8
+    },
+    {
+      "word": "per",
+      "start": 19.8,
+      "end": 20.0
+    },
+    {
+      "word": "week,",
+      "start": 20.0,
+      "end": 20.2
+    },
+    {
+      "word": "and",
+      "start": 20.2,
+      "end": 20.4
+    },
+    {
+      "word": "my",
+      "start": 20.4,
+      "end": 20.6
+    },
+    {
+      "word": "downloads",
+      "start": 20.6,
+      "end": 21.0
+    },
+    {
+      "word": "tripled",
+      "start": 21.0,
+      "end": 21.4
+    },
+    {
+      "word": "in",
+      "start": 21.4,
+      "end": 21.6
+    },
+    {
+      "word": "ninety",
+      "start": 21.6,
+      "end": 21.9
+    },
+    {
+      "word": "days.",
+      "start": 21.9,
+      "end": 22.3
+    },
+    {
+      "word": "The",
+      "start": 24.0,
+      "end": 24.3
+    },
+    {
+      "word": "second",
+      "start": 24.3,
+      "end": 24.6
+    },
+    {
+      "word": "insight",
+      "start": 24.6,
+      "end": 24.9
+    },
+    {
+      "word": "is",
+      "start": 24.9,
+      "end": 25.1
+    },
+    {
+      "word": "about",
+      "start": 25.1,
+      "end": 25.3
+    },
+    {
+      "word": "the",
+      "start": 25.3,
+      "end": 25.5
+    },
+    {
+      "word": "first",
+      "start": 25.5,
+      "end": 25.7
+    },
+    {
+      "word": "sixty",
+      "start": 25.7,
+      "end": 26.0
+    },
+    {
+      "word": "seconds",
+      "start": 26.0,
+      "end": 26.3
+    },
+    {
+      "word": "of",
+      "start": 26.3,
+      "end": 26.5
+    },
+    {
+      "word": "your",
+      "start": 26.5,
+      "end": 26.7
+    },
+    {
+      "word": "episode.",
+      "start": 26.7,
+      "end": 27.0
+    },
+    {
+      "word": "Most",
+      "start": 27.5,
+      "end": 27.7
+    },
+    {
+      "word": "podcasters",
+      "start": 27.7,
+      "end": 28.0
+    },
+    {
+      "word": "spend",
+      "start": 28.0,
+      "end": 28.2
+    },
+    {
+      "word": "their",
+      "start": 28.2,
+      "end": 28.4
+    },
+    {
+      "word": "intro",
+      "start": 28.4,
+      "end": 28.6
+    },
+    {
+      "word": "talking",
+      "start": 28.6,
+      "end": 28.8
+    },
+    {
+      "word": "about",
+      "start": 28.8,
+      "end": 29.0
+    },
+    {
+      "word": "themselves.",
+      "start": 29.0,
+      "end": 29.3
+    },
+    {
+      "word": "Your",
+      "start": 30.0,
+      "end": 30.2
+    },
+    {
+      "word": "listeners",
+      "start": 30.2,
+      "end": 30.4
+    },
+    {
+      "word": "don't",
+      "start": 30.4,
+      "end": 30.6
+    },
+    {
+      "word": "care",
+      "start": 30.6,
+      "end": 30.8
+    },
+    {
+      "word": "who",
+      "start": 30.8,
+      "end": 31.0
+    },
+    {
+      "word": "you",
+      "start": 31.0,
+      "end": 31.2
+    },
+    {
+      "word": "are",
+      "start": 31.2,
+      "end": 31.4
+    },
+    {
+      "word": "yet.",
+      "start": 31.4,
+      "end": 31.6
+    },
+    {
+      "word": "Start",
+      "start": 32.0,
+      "end": 32.3
+    },
+    {
+      "word": "with",
+      "start": 32.3,
+      "end": 32.5
+    },
+    {
+      "word": "the",
+      "start": 32.5,
+      "end": 32.7
+    },
+    {
+      "word": "most",
+      "start": 32.7,
+      "end": 32.9
+    },
+    {
+      "word": "surprising",
+      "start": 32.9,
+      "end": 33.2
+    },
+    {
+      "word": "thing",
+      "start": 33.2,
+      "end": 33.4
+    },
+    {
+      "word": "you're",
+      "start": 33.4,
+      "end": 33.6
+    },
+    {
+      "word": "going",
+      "start": 33.6,
+      "end": 33.8
+    },
+    {
+      "word": "to",
+      "start": 33.8,
+      "end": 34.0
+    },
+    {
+      "word": "say",
+      "start": 34.0,
+      "end": 34.2
+    },
+    {
+      "word": "in",
+      "start": 34.2,
+      "end": 34.4
+    },
+    {
+      "word": "the",
+      "start": 34.4,
+      "end": 34.6
+    },
+    {
+      "word": "episode.",
+      "start": 34.6,
+      "end": 34.8
+    },
+    {
+      "word": "Lead",
+      "start": 36.0,
+      "end": 36.2
+    },
+    {
+      "word": "with",
+      "start": 36.2,
+      "end": 36.4
+    },
+    {
+      "word": "the",
+      "start": 36.4,
+      "end": 36.6
+    },
+    {
+      "word": "punchline.",
+      "start": 36.6,
+      "end": 36.9
+    },
+    {
+      "word": "Trust",
+      "start": 38.0,
+      "end": 38.2
+    },
+    {
+      "word": "me,",
+      "start": 38.2,
+      "end": 38.4
+    },
+    {
+      "word": "the",
+      "start": 38.4,
+      "end": 38.6
+    },
+    {
+      "word": "context",
+      "start": 38.6,
+      "end": 38.8
+    },
+    {
+      "word": "can",
+      "start": 38.8,
+      "end": 39.0
+    },
+    {
+      "word": "come",
+      "start": 39.0,
+      "end": 39.2
+    },
+    {
+      "word": "later.",
+      "start": 39.2,
+      "end": 39.4
+    },
+    {
+      "word": "Stop",
+      "start": 42.0,
+      "end": 42.2
+    },
+    {
+      "word": "trying",
+      "start": 42.2,
+      "end": 42.4
+    },
+    {
+      "word": "to",
+      "start": 42.4,
+      "end": 42.6
+    },
+    {
+      "word": "go",
+      "start": 42.6,
+      "end": 42.9
+    },
+    {
+      "word": "viral",
+      "start": 42.9,
+      "end": 43.2
+    },
+    {
+      "word": "and",
+      "start": 43.2,
+      "end": 43.4
+    },
+    {
+      "word": "start",
+      "start": 43.4,
+      "end": 43.6
+    },
+    {
+      "word": "trying",
+      "start": 43.6,
+      "end": 43.8
+    },
+    {
+      "word": "to",
+      "start": 43.8,
+      "end": 44.0
+    },
+    {
+      "word": "be",
+      "start": 44.0,
+      "end": 44.2
+    },
+    {
+      "word": "useful",
+      "start": 44.2,
+      "end": 44.5
+    },
+    {
+      "word": "to",
+      "start": 44.5,
+      "end": 44.7
+    },
+    {
+      "word": "a",
+      "start": 44.7,
+      "end": 44.9
+    },
+    {
+      "word": "specific",
+      "start": 44.9,
+      "end": 45.2
+    },
+    {
+      "word": "person.",
+      "start": 45.2,
+      "end": 45.5
+    },
+    {
+      "word": "I",
+      "start": 46.0,
+      "end": 46.2
+    },
+    {
+      "word": "have",
+      "start": 46.2,
+      "end": 46.4
+    },
+    {
+      "word": "a",
+      "start": 46.4,
+      "end": 46.6
+    },
+    {
+      "word": "listener",
+      "start": 46.6,
+      "end": 46.9
+    },
+    {
+      "word": "named",
+      "start": 46.9,
+      "end": 47.1
+    },
+    {
+      "word": "Sarah.",
+      "start": 47.1,
+      "end": 47.3
+    },
+    {
+      "word": "She's",
+      "start": 47.8,
+      "end": 47.9
+    },
+    {
+      "word": "a",
+      "start": 47.9,
+      "end": 48.1
+    },
+    {
+      "word": "freelance",
+      "start": 48.1,
+      "end": 48.4
+    },
+    {
+      "word": "designer",
+      "start": 48.4,
+      "end": 48.7
+    },
+    {
+      "word": "trying",
+      "start": 48.7,
+      "end": 48.9
+    },
+    {
+      "word": "to",
+      "start": 48.9,
+      "end": 49.1
+    },
+    {
+      "word": "build",
+      "start": 49.1,
+      "end": 49.3
+    },
+    {
+      "word": "a",
+      "start": 49.3,
+      "end": 49.5
+    },
+    {
+      "word": "podcast",
+      "start": 49.5,
+      "end": 49.8
+    },
+    {
+      "word": "about",
+      "start": 49.8,
+      "end": 50.0
+    },
+    {
+      "word": "creative",
+      "start": 50.0,
+      "end": 50.3
+    },
+    {
+      "word": "burnout.",
+      "start": 50.3,
+      "end": 50.6
+    },
+    {
+      "word": "I",
+      "start": 51.0,
+      "end": 51.2
+    },
+    {
+      "word": "make",
+      "start": 51.2,
+      "end": 51.4
+    },
+    {
+      "word": "every",
+      "start": 51.4,
+      "end": 51.6
+    },
+    {
+      "word": "episode",
+      "start": 51.6,
+      "end": 51.9
+    },
+    {
+      "word": "for",
+      "start": 51.9,
+      "end": 52.1
+    },
+    {
+      "word": "Sarah.",
+      "start": 52.1,
+      "end": 52.4
+    },
+    {
+      "word": "Not",
+      "start": 53.0,
+      "end": 53.2
+    },
+    {
+      "word": "for",
+      "start": 53.2,
+      "end": 53.4
+    },
+    {
+      "word": "the",
+      "start": 53.4,
+      "end": 53.7
+    },
+    {
+      "word": "algorithm.",
+      "start": 53.7,
+      "end": 54.0
+    },
+    {
+      "word": "Not",
+      "start": 54.5,
+      "end": 54.7
+    },
+    {
+      "word": "for",
+      "start": 54.7,
+      "end": 54.9
+    },
+    {
+      "word": "the",
+      "start": 54.9,
+      "end": 55.1
+    },
+    {
+      "word": "charts.",
+      "start": 55.1,
+      "end": 55.4
+    },
+    {
+      "word": "For",
+      "start": 56.0,
+      "end": 56.2
+    },
+    {
+      "word": "Sarah.",
+      "start": 56.2,
+      "end": 56.5
+    },
+    {
+      "word": "And",
+      "start": 57.5,
+      "end": 57.7
+    },
+    {
+      "word": "funnily",
+      "start": 57.7,
+      "end": 57.9
+    },
+    {
+      "word": "enough,",
+      "start": 57.9,
+      "end": 58.1
+    },
+    {
+      "word": "when",
+      "start": 58.1,
+      "end": 58.4
+    },
+    {
+      "word": "I",
+      "start": 58.4,
+      "end": 58.6
+    },
+    {
+      "word": "started",
+      "start": 58.6,
+      "end": 58.8
+    },
+    {
+      "word": "doing",
+      "start": 58.8,
+      "end": 59.0
+    },
+    {
+      "word": "that,",
+      "start": 59.0,
+      "end": 59.2
+    },
+    {
+      "word": "my",
+      "start": 59.2,
+      "end": 59.4
+    },
+    {
+      "word": "show",
+      "start": 59.4,
+      "end": 59.6
+    },
+    {
+      "word": "started",
+      "start": 59.6,
+      "end": 59.8
+    },
+    {
+      "word": "growing",
+      "start": 59.8,
+      "end": 60.0
+    },
+    {
+      "word": "faster",
+      "start": 60.0,
+      "end": 60.3
+    },
+    {
+      "word": "than",
+      "start": 60.3,
+      "end": 60.5
+    },
+    {
+      "word": "when",
+      "start": 60.5,
+      "end": 60.7
+    },
+    {
+      "word": "I",
+      "start": 60.7,
+      "end": 60.9
+    },
+    {
+      "word": "was",
+      "start": 60.9,
+      "end": 61.1
+    },
+    {
+      "word": "chasing",
+      "start": 61.1,
+      "end": 61.4
+    },
+    {
+      "word": "downloads.",
+      "start": 61.4,
+      "end": 61.7
+    }
+  ]
+}

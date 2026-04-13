@@ -1,0 +1,270 @@
+{
+  "$schema": "https://clipspark.io/schemas/template/v0.1.json",
+  "version": "0.1.0",
+  "created": "2026-04-09",
+  "description": "ClipSpark clip template schema v0.1 — defines visual, caption, and export parameters for a clip",
+
+  "templates": {
+    "default_vertical": {
+      "id": "default-vertical-v01",
+      "name": "Clean Vertical (Default)",
+      "description": "Dark background, bold keyword captions, suitable for all niches",
+      "use_cases": ["podcast", "coaching", "founder", "education"],
+      "platforms": ["youtube_shorts", "instagram_reels", "tiktok", "linkedin"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "solid",
+          "color": "#0f0f0f"
+        }
+      },
+
+      "video_layer": {
+        "position": "center",
+        "width_percent": 100,
+        "height_percent": 60,
+        "top_offset_percent": 5,
+        "corner_radius_px": 0,
+        "reframe_mode": "auto_speaker_track",
+        "fallback_reframe": "center_crop"
+      },
+
+      "caption_layer": {
+        "position": "bottom",
+        "top_offset_percent": 67,
+        "width_percent": 90,
+        "font_family": "Inter",
+        "font_weight": "700",
+        "font_size_px": 52,
+        "line_height": 1.3,
+        "text_color": "#FFFFFF",
+        "text_align": "center",
+        "max_words_per_line": 4,
+        "max_lines_visible": 2,
+        "highlight_mode": "keyword",
+        "highlight_color": "#A855F7",
+        "highlight_bg": null,
+        "animation": "word_pop",
+        "animation_timing": "word_sync",
+        "shadow": {
+          "enabled": true,
+          "color": "#000000",
+          "blur_px": 4,
+          "offset_x": 2,
+          "offset_y": 2
+        }
+      },
+
+      "title_overlay": {
+        "enabled": false,
+        "note": "Title displayed as social caption text, not burned into video"
+      },
+
+      "branding": {
+        "logo_enabled": false,
+        "lower_third_enabled": false,
+        "note": "v0.1: no branding overlays to keep aesthetic clean"
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "h264",
+        "bitrate_kbps": 4000,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "max_file_size_mb": 50
+      }
+    },
+
+    "linkedin_professional": {
+      "id": "linkedin-professional-v01",
+      "name": "LinkedIn Professional",
+      "description": "Clean white background, minimal bold captions — suits coaches and founders posting on LinkedIn",
+      "use_cases": ["coaching", "founder", "education", "consulting"],
+      "platforms": ["linkedin"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "solid",
+          "color": "#F8F8F8"
+        }
+      },
+
+      "video_layer": {
+        "position": "top",
+        "width_percent": 100,
+        "height_percent": 55,
+        "top_offset_percent": 0,
+        "corner_radius_px": 0,
+        "reframe_mode": "auto_speaker_track",
+        "fallback_reframe": "center_crop"
+      },
+
+      "caption_layer": {
+        "position": "bottom",
+        "top_offset_percent": 58,
+        "width_percent": 88,
+        "font_family": "Inter",
+        "font_weight": "700",
+        "font_size_px": 48,
+        "line_height": 1.4,
+        "text_color": "#1A1A1A",
+        "text_align": "left",
+        "max_words_per_line": 5,
+        "max_lines_visible": 3,
+        "highlight_mode": "none",
+        "highlight_color": null,
+        "animation": "fade_word",
+        "animation_timing": "word_sync",
+        "shadow": {
+          "enabled": false
+        }
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "h264",
+        "bitrate_kbps": 5000,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "max_file_size_mb": 75
+      }
+    },
+
+    "tiktok_bold": {
+      "id": "tiktok-bold-v01",
+      "name": "TikTok Bold",
+      "description": "Vibrant gradient background, large outlined captions — maximizes scroll-stopping on TikTok",
+      "use_cases": ["comedy", "entertainment", "true_crime", "fitness"],
+      "platforms": ["tiktok", "instagram_reels"],
+
+      "canvas": {
+        "aspect_ratio": "9:16",
+        "width_px": 1080,
+        "height_px": 1920,
+        "background": {
+          "type": "gradient",
+          "gradient_start": "#1a0533",
+          "gradient_end": "#0d0d2b",
+          "gradient_direction": "top_to_bottom"
+        }
+      },
+
+      "video_layer": {
+        "position": "center",
+        "width_percent": 100,
+        "height_percent": 65,
+        "top_offset_percent": 3,
+        "corner_radius_px": 12,
+        "reframe_mode": "auto_speaker_track",
+        "fallback_reframe": "center_crop"
+      },
+
+      "caption_layer": {
+        "position": "bottom",
+        "top_offset_percent": 70,
+        "width_percent": 92,
+        "font_family": "Inter",
+        "font_weight": "900",
+        "font_size_px": 58,
+        "line_height": 1.25,
+        "text_color": "#FFFFFF",
+        "text_align": "center",
+        "max_words_per_line": 3,
+        "max_lines_visible": 2,
+        "highlight_mode": "keyword_box",
+        "highlight_color": "#FF3E9D",
+        "highlight_bg": "#FF3E9D22",
+        "animation": "word_pop_bounce",
+        "animation_timing": "word_sync",
+        "stroke": {
+          "enabled": true,
+          "color": "#000000",
+          "width_px": 3
+        },
+        "shadow": {
+          "enabled": true,
+          "color": "#000000",
+          "blur_px": 6,
+          "offset_x": 0,
+          "offset_y": 3
+        }
+      },
+
+      "export": {
+        "format": "mp4",
+        "codec": "h264",
+        "bitrate_kbps": 4000,
+        "fps": 30,
+        "audio_codec": "aac",
+        "audio_bitrate_kbps": 128,
+        "max_file_size_mb": 50
+      }
+    }
+  },
+
+  "platform_defaults": {
+    "youtube_shorts": {
+      "template": "default_vertical",
+      "clip_duration_target_sec": 55,
+      "clip_duration_max_sec": 60,
+      "caption_language": "en",
+      "title_max_chars": 100,
+      "hashtag_count": 3,
+      "hashtag_placement": "description"
+    },
+    "linkedin": {
+      "template": "linkedin_professional",
+      "clip_duration_target_sec": 75,
+      "clip_duration_max_sec": 90,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 5,
+      "hashtag_placement": "end_of_caption"
+    },
+    "tiktok": {
+      "template": "tiktok_bold",
+      "clip_duration_target_sec": 45,
+      "clip_duration_max_sec": 60,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 5,
+      "hashtag_placement": "inline"
+    },
+    "instagram_reels": {
+      "template": "tiktok_bold",
+      "clip_duration_target_sec": 60,
+      "clip_duration_max_sec": 90,
+      "caption_language": "en",
+      "title_max_chars": 150,
+      "hashtag_count": 10,
+      "hashtag_placement": "end_of_caption"
+    }
+  },
+
+  "niche_overrides": {
+    "comedy": {
+      "preferred_template": "tiktok_bold",
+      "timing_buffer_end_sec": 1.5,
+      "note": "Add 1.5s buffer after punchline — preserve intentional silence before audience response"
+    },
+    "linkedin_professional": {
+      "preferred_template": "linkedin_professional",
+      "caption_pace": "slower",
+      "note": "Slower caption animation for professional viewers not consuming at TikTok speed"
+    },
+    "education": {
+      "preferred_template": "linkedin_professional",
+      "max_words_per_line": 6,
+      "note": "Educational content benefits from more words per caption line for concept continuity"
+    }
+  }
+}

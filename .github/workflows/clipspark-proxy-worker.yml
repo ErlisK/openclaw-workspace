@@ -1,0 +1,36 @@
+name: ClipSpark Proxy Worker
+
+on:
+  schedule:
+    # Every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+    inputs:
+      once:
+        description: 'Run once and exit'
+        required: false
+        default: 'true'
+
+jobs:
+  proxy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: startup-78-clipspark-yc-pg-style-founding-plan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends
+
+      - name: Install Python deps
+        run: pip install yt-dlp --quiet
+
+      - name: Run proxy worker
+        run: python3 workers/proxy_worker.py --once
+        env:
+          SUPABASE_URL: https://twctmwwqxvenvieijmtn.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.CLIPSPARK_SERVICE_ROLE_KEY }}
+          PROXY_POLL_INTERVAL: '5'

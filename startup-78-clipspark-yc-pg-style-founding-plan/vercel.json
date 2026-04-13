@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "name": "clipspark",
+  "builds": [
+    {
+      "src": "apps/clipspark/package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "apps/clipspark/$1" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/batch-render",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/email-sequences",
+      "schedule": "0 * * * *"
+    },
+    {
+      "path": "/api/cron/funnel-alerts",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/dlq-monitor",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/ab/update-heuristic",
+      "schedule": "0 3 * * 0"
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+<svg width="768" height="1024" viewBox="0 0 768 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="768" height="1024" fill="white"/>
+  <!-- Page border -->
+  <rect x="18" y="18" width="732" height="988" fill="none" stroke="black" stroke-width="8" rx="24" stroke-dasharray="0"/>
+  <!-- Inner border -->
+  <rect x="30" y="30" width="708" height="964" fill="none" stroke="black" stroke-width="3" rx="18" stroke-dasharray="16 8"/>
+  <!-- Title area -->
+  <rect x="18" y="18" width="732" height="100" fill="none" stroke="black" stroke-width="8" rx="24"/>
+  <line x1="18" y1="118" x2="750" y2="118" stroke="black" stroke-width="6"/>
+  <!-- Emoji + title -->
+  <text x="384" y="82" font-family="Arial, sans-serif" font-size="38" font-weight="bold" text-anchor="middle" fill="black">🐘  Ellie the Elephant</text>
+  <!-- Footer -->
+  <line x1="18" y1="950" x2="750" y2="950" stroke="black" stroke-width="4"/>
+  <text x="384" y="993" font-family="Arial, sans-serif" font-size="20" text-anchor="middle" fill="black">KidColoring · Color me! 🎨</text>
+  <!-- Main art -->
+
+  <!-- Body -->
+  <ellipse cx="370" cy="590" rx="195" ry="165" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Head -->
+  <ellipse cx="230" cy="420" rx="140" ry="120" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Ear -->
+  <ellipse cx="130" cy="390" rx="90" ry="110" fill="white" stroke="black" stroke-width="9"/>
+  <ellipse cx="140" cy="395" rx="62" ry="78" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Eye -->
+  <circle cx="270" cy="390" r="25" fill="white" stroke="black" stroke-width="8"/>
+  <circle cx="270" cy="390" r="13" fill="black"/>
+  <!-- Lashes -->
+  <path d="M255,368 L248,352" stroke="black" stroke-width="4"/>
+  <path d="M265,364 L260,348" stroke="black" stroke-width="4"/>
+  <path d="M275,363 L273,347" stroke="black" stroke-width="4"/>
+  <!-- Trunk -->
+  <path d="M165,460 Q110,500 90,560 Q75,615 95,660 Q115,695 145,680 Q170,665 165,625 Q158,580 185,535" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Trunk nostrils -->
+  <ellipse cx="105" cy="668" rx="15" ry="10" fill="none" stroke="black" stroke-width="5"/>
+  <ellipse cx="145" cy="675" rx="15" ry="10" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Tusks -->
+  <path d="M185,480 Q155,500 140,530 Q135,555 155,560 Q175,558 185,535 Q195,515 193,490" fill="white" stroke="black" stroke-width="7"/>
+  <!-- Legs -->
+  <path d="M210,720 L195,840 Q192,868 220,870 Q248,870 252,842 L250,720" fill="white" stroke="black" stroke-width="10"/>
+  <path d="M315,740 L305,840 Q302,868 330,870 Q358,870 362,842 L355,740" fill="white" stroke="black" stroke-width="10"/>
+  <path d="M415,740 L420,840 Q422,868 450,868 Q478,868 476,840 L468,740" fill="white" stroke="black" stroke-width="10"/>
+  <path d="M500,720 L510,840 Q513,868 538,866 Q563,864 558,838 L545,720" fill="white" stroke="black" stroke-width="10"/>
+  <!-- Nails -->
+  <path d="M197,868 Q210,878 225,870" fill="none" stroke="black" stroke-width="5"/>
+  <path d="M233,868 Q248,878 262,870" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Tail -->
+  <path d="M560,590 Q620,570 640,600 Q648,625 625,635 Q600,638 575,620" fill="white" stroke="black" stroke-width="8"/>
+  <!-- Tail tuft -->
+  <path d="M630,633 L645,660 L640,638 L660,650 L638,638 L655,622" fill="none" stroke="black" stroke-width="5"/>
+  <!-- Background trees -->
+  <line x1="660" y1="300" x2="660" y2="500" stroke="black" stroke-width="8"/>
+  <circle cx="660" cy="265" r="55" fill="none" stroke="black" stroke-width="8"/>
+  <!-- Ground -->
+  <path d="M80,870 Q250,850 500,858 Q630,864 710,854" fill="none" stroke="black" stroke-width="6"/>
+
+
+</svg>
