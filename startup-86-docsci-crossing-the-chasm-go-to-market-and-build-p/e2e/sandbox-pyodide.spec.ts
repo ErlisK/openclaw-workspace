@@ -23,6 +23,7 @@ test.describe("Pyodide Sandbox — security isolation", () => {
     const res = await request.post(`${BASE}/api/execute`, {
       data: { code: "print('ok')", language: "python", timeout_ms: 30000 },
       headers: { "Content-Type": "application/json" },
+      timeout: 35000,
     });
     const body = await res.json();
     expect(body.success).toBe(true);
@@ -103,6 +104,7 @@ test.describe("Pyodide Sandbox — Python execution", () => {
         timeout_ms: 30000,
       },
       headers: { "Content-Type": "application/json" },
+      timeout: 35000,
     });
     const body = await res.json();
     expect(body.success).toBe(true);
