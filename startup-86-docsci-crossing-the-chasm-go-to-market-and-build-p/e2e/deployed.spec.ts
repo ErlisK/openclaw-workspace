@@ -73,7 +73,7 @@ test.describe("Deployed production smoke tests", () => {
       await page.setExtraHTTPHeaders(bypassHeaders());
     }
     await page.goto(`${BASE}/signup`);
-    await expect(page.locator("h1, h2")).toContainText(/sign up|create account|get started/i);
+    await expect(page.locator("h1, h2")).toContainText(/sign up|create account|get started|start for free/i);
     await expect(page.locator("input[type=email]")).toBeVisible();
   });
 

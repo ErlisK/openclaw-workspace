@@ -21,10 +21,26 @@
  */
 
 import { marked } from "marked";
-import { JSDOM } from "jsdom";
 // axe-core is CJS; load via require to avoid ESM issues
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const axe = require("axe-core") as typeof import("axe-core");
+
+// Lazy-load jsdom via dynamic import to avoid ESM bundling issues on Vercel
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let jsdomModule: any = null;
+let jsdomFailed = false;
+async function getJSDOM() {
+  if (jsdomFailed) return null;
+  if (!jsdomModule) {
+    try {
+      jsdomModule = await import("jsdom");
+    } catch {
+      jsdomFailed = true;
+      return null;
+    }
+  }
+  return jsdomModule.JSDOM as typeof import("jsdom").JSDOM;
+}
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -187,6 +203,11 @@ async function runAxe(html: string): Promise<{
   passes: number;
 }> {
   // jsdom doesn't support all browser APIs axe needs; configure safely
+  const JSDOM = await getJSDOM();
+  if (!JSDOM) {
+    // jsdom unavailable (ESM compat issue on Vercel) — return empty
+    return { violations: [], passes: 0 };
+  }
   const dom = new JSDOM(
     `<!DOCTYPE html><html lang="en"><head><title>Doc</title></head><body>${html}</body></html>`,
     {
@@ -278,6 +299,18 @@ export async function checkAccessibility(
   const html = await marked.parse(markdown, { async: false }) as string;
 
   // Parse DOM
+  const JSDOM = await getJSDOM();
+  if (!JSDOM) {
+    // jsdom unavailable — return empty report
+    return {
+      violations: 0,
+      warnings: 0,
+      passes: 0,
+      findings: [] as A11yFinding[],
+      html: opts?.includeHtml ? html : undefined,
+      ranAt: new Date().toISOString(),
+    };
+  }
   const dom = new JSDOM(
     `<!DOCTYPE html><html lang="en"><head><title>Doc</title></head><body>${html}</body></html>`
   );

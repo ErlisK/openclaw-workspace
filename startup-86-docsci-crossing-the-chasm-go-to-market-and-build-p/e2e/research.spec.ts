@@ -4,7 +4,7 @@ const BASE = process.env.BASE_URL || "http://localhost:3000";
 
 test.describe("DocsCI core pages", () => {
   test("landing page loads", async ({ page }) => {
-    await page.goto(BASE);
+    await page.goto(BASE, { waitUntil: "networkidle" });
     await expect(page).toHaveTitle(/DocsCI/);
     await expect(page.getByText("Stop shipping")).toBeVisible();
   });
