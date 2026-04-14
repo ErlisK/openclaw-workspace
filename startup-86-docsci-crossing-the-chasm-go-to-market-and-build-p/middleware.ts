@@ -1,12 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { randomUUID } from "node:crypto";
 
+function generateNonce(): string {
+  // Use Web Crypto API (available in Edge runtime)
+  const arr = new Uint8Array(16);
+  crypto.getRandomValues(arr);
+  return Buffer.from(arr).toString('base64');
+}
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   // Generate a nonce for CSP
-  const nonce = Buffer.from(randomUUID()).toString("base64");
+  const nonce = generateNonce();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
