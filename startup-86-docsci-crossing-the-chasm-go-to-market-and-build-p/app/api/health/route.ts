@@ -21,18 +21,10 @@ export async function GET() {
   return NextResponse.json({
     status: "ok",
     service: "docsci",
-    version: "0.1.0",
     timestamp: new Date().toISOString(),
-    uptime_seconds: uptimeSec,
     checks: {
       database: dbError ? "error" : "ok",
       auth: "ok",
-      rls: "enabled",
-    },
-    endpoints: {
-      healthcheck: "/api/healthcheck",
-      rls_verification: "/api/rls-check",
-      docs: "/docs-guide",
     },
   }, {
     headers: {
