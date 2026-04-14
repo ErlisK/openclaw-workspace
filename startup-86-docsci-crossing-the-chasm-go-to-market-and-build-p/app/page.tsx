@@ -37,6 +37,7 @@ const jsonLd = {
   "screenshot": "https://snippetci.com/opengraph-image"
 };
 
+
 export default function Home() {
   return (
     <>
