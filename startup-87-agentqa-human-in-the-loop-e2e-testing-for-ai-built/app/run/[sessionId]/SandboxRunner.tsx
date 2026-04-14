@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import RunLogger, { LogEvent } from './RunLogger'
+import SessionControls, { SessionPhase } from './SessionControls'
 
 interface Job {
   id: string
@@ -39,6 +40,7 @@ export default function SandboxRunner({ sessionId, job }: Props) {
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const [panelTab, setPanelTab] = useState<FilterTab>('all')
   const [flushedCount, setFlushedCount] = useState(0)
+  const [sessionPhase, setSessionPhase] = useState<SessionPhase>('idle')
   const logsEndRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -158,6 +160,25 @@ export default function SandboxRunner({ sessionId, job }: Props) {
           )}
           <span className="px-2 py-0.5 bg-indigo-900 text-indigo-300 rounded-full">{job.tier}</span>
         </div>
+      </div>
+
+      {/* Session controls bar */}
+      <div className="px-4 py-2 bg-gray-850 border-b border-gray-700 shrink-0" data-testid="session-controls-bar">
+        <SessionControls
+          sessionId={sessionId}
+          tier={job.tier}
+          onPhaseChange={setSessionPhase}
+          onComplete={(notes, reason) => {
+            // Log end event
+            const ga = (window as unknown as Record<string, unknown>).agentQA as
+              { log?: (ev: object) => void } | undefined
+            ga?.log?.({
+              event_type: 'navigation',
+              ts: new Date().toISOString(),
+              log_message: `Session ${reason}: ${notes ? notes.slice(0, 80) : '(no notes)'}`,
+            })
+          }}
+        />
       </div>
 
       {/* Instructions banner */}

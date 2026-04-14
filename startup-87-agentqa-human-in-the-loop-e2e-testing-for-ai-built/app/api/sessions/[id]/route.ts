@@ -48,12 +48,15 @@ export async function PATCH(
   if (session.tester_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const allowed = ['status', 'ended_at', 'recording_url']
+  const allowed = ['status', 'ended_at', 'recording_url', 'notes', 'timeout_at', 'end_reason']
   const updates: Record<string, unknown> = {}
   for (const k of allowed) { if (k in body) updates[k] = body[k] }
 
   if (updates.status === 'complete' || updates.status === 'abandoned') {
     updates.ended_at = updates.ended_at ?? new Date().toISOString()
+  }
+  if (updates.status === 'active' && !updates.started_at) {
+    updates.started_at = new Date().toISOString()
   }
 
   const { data, error } = await admin
