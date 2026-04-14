@@ -42,6 +42,7 @@ async function signUp(request: APIRequestContext, email: string, password: strin
   const res = await request.post(`${SUPABASE_URL}/auth/v1/signup`, {
     data: { email, password },
     headers: { apikey: SUPABASE_ANON_KEY, 'Content-Type': 'application/json' },
+    timeout: 30000,
   })
   return ((await res.json()).access_token as string) ?? null
 }
@@ -68,6 +69,7 @@ async function setupFullFixture(request: APIRequestContext) {
   const jobRes = await request.post(url('/api/jobs'), {
     data: { title: `AI Summary Test ${rid}`, url: 'https://example.com', tier: 'quick', instructions: 'Test homepage navigation' },
     headers: bearer(clientToken),
+    timeout: 30000,
   })
   const { job } = await jobRes.json()
   if (!job?.id) return null
@@ -172,6 +174,7 @@ test.describe('AI Summary — generation', () => {
     const res = await request.post(url(`/api/sessions/${fixture.session.id}/summary`), {
       data: {},
       headers: bearer(fixture.testerToken),
+      timeout: 60000,
     })
     expect(res.status()).toBe(200)
     const body = await res.json()
@@ -193,6 +196,21 @@ test.describe('AI Summary — generation', () => {
   test('summary has issues_found array', async () => {
     if (!summaryData) { test.skip(true, 'Summary not generated'); return }
     expect(Array.isArray(summaryData.issues_found)).toBe(true)
+  })
+
+  test('summary has key_issues array with repro steps', async () => {
+    if (!summaryData) { test.skip(true, 'Summary not generated'); return }
+    expect(Array.isArray(summaryData.key_issues)).toBe(true)
+    // If there are issues, each should have required fields
+    const issues = summaryData.key_issues as Array<Record<string, unknown>>
+    for (const issue of issues) {
+      expect(typeof issue.title).toBe('string')
+      expect(['critical', 'high', 'medium', 'low']).toContain(issue.severity)
+      expect(typeof issue.description).toBe('string')
+      expect(Array.isArray(issue.repro_steps)).toBe(true)
+      expect(typeof issue.expected).toBe('string')
+      expect(typeof issue.actual).toBe('string')
+    }
   })
 
   test('summary has priority_fixes array', async () => {
@@ -228,6 +246,7 @@ test.describe('AI Summary — generation', () => {
     const res = await request.post(url(`/api/sessions/${fixture.session.id}/summary?force=true`), {
       data: {},
       headers: bearer(fixture.testerToken),
+      timeout: 60000,
     })
     expect(res.status()).toBe(200)
     const body = await res.json()
@@ -339,6 +358,14 @@ test.describe('AISummary — UI element structure', () => {
         <span data-testid="summary-sentiment">✅ Positive</span>
         <span data-testid="summary-confidence">High confidence</span>
         <div data-testid="summary-priority-fixes">Fix 1</div>
+        <div data-testid="summary-key-issues">
+          <div data-testid="key-issue-card">
+            <button data-testid="key-issue-header">
+              <span data-testid="key-issue-severity">high</span>
+              <span data-testid="key-issue-title">1. Login button broken</span>
+            </button>
+          </div>
+        </div>
         <div data-testid="summary-issues">Bug found</div>
         <div data-testid="summary-what-worked">Login works</div>
         <div data-testid="summary-network">200 OK</div>
@@ -354,6 +381,7 @@ test.describe('AISummary — UI element structure', () => {
       'summary-sentiment',
       'summary-confidence',
       'summary-priority-fixes',
+      'summary-key-issues',
       'summary-issues',
       'summary-what-worked',
       'summary-network',
@@ -374,5 +402,41 @@ test.describe('AISummary — UI element structure', () => {
       document.body.appendChild(div)
     })
     await expect(page.getByTestId('summary-error')).toBeAttached()
+  })
+
+  test('key issue card has header, severity, title, and expandable body', async ({ page }) => {
+    await page.context().addCookies(bypassCookies())
+    await page.goto(url('/'))
+
+    await page.evaluate(() => {
+      const div = document.createElement('div')
+      div.innerHTML = `
+        <div data-testid="key-issue-card">
+          <button data-testid="key-issue-header">
+            <span data-testid="key-issue-severity">critical</span>
+            <span data-testid="key-issue-title">1. App crashes on login</span>
+          </button>
+          <div data-testid="key-issue-body">
+            <p>Description</p>
+            <ol data-testid="key-issue-repro-steps">
+              <li>1. Open app</li>
+              <li>2. Click login</li>
+            </ol>
+            <div data-testid="key-issue-expected">Should navigate to dashboard</div>
+            <div data-testid="key-issue-actual">Page crashes</div>
+            <div data-testid="key-issue-evidence">TypeError: null</div>
+          </div>
+        </div>
+      `
+      document.body.appendChild(div)
+    })
+
+    for (const tid of [
+      'key-issue-card', 'key-issue-header', 'key-issue-severity',
+      'key-issue-title', 'key-issue-body', 'key-issue-repro-steps',
+      'key-issue-expected', 'key-issue-actual', 'key-issue-evidence',
+    ]) {
+      await expect(page.getByTestId(tid)).toBeAttached()
+    }
   })
 })

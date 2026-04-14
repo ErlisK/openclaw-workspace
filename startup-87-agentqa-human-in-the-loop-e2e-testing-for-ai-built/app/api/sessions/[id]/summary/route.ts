@@ -26,10 +26,21 @@ import { createAdminClient } from '@/lib/supabase/server'
  * Auth: tester who owns the session, or client who owns the job.
  */
 
+const IssueSchema = z.object({
+  title: z.string().describe('Short issue title (5-10 words)'),
+  severity: z.enum(['critical', 'high', 'medium', 'low']).describe('Impact severity'),
+  description: z.string().describe('Clear description of what went wrong (1-3 sentences)'),
+  repro_steps: z.array(z.string()).describe('Numbered steps to reproduce this issue. Each step is a single concrete action.'),
+  expected: z.string().describe('What the user expected to happen'),
+  actual: z.string().describe('What actually happened'),
+  evidence: z.string().optional().describe('Supporting evidence: console error message, HTTP status code, or specific UI element observed'),
+})
+
 const SummarySchema = z.object({
   overall_assessment: z.string().describe('One-sentence verdict on the app quality and test result'),
   what_worked: z.array(z.string()).describe('Bullet list of things that worked correctly during testing'),
-  issues_found: z.array(z.string()).describe('Bullet list of bugs, errors, or usability problems found'),
+  key_issues: z.array(IssueSchema).describe('Structured list of key issues found, each with repro steps. Max 8 issues, ordered by severity.'),
+  issues_found: z.array(z.string()).describe('Quick summary bullet list of bugs/problems (one line each, same issues as key_issues but condensed)'),
   network_observations: z.array(z.string()).describe('Notable network request observations (errors, slow calls, unexpected calls)'),
   console_observations: z.array(z.string()).describe('Notable console errors, warnings, or log anomalies'),
   priority_fixes: z.array(z.string()).describe('Ordered list of recommended fixes, most critical first'),
@@ -181,7 +192,18 @@ ${feedbackSummary ? `## Tester Feedback\n${feedbackSummary}` : '## Tester Feedba
 Generate a structured, actionable QA report that helps the developer understand what to fix.
 Be specific and concrete. If there are console errors, name them. If network calls failed, list them.
 If the app has no issues, say so clearly and explain what was verified.
-Keep bullets concise (1-2 sentences each). Prioritize severity in issues_found.`
+
+For EACH issue in key_issues:
+- Give a clear 5-10 word title
+- Assign severity (critical=app broken/data loss, high=major feature broken, medium=degraded UX, low=cosmetic)
+- Write repro_steps as numbered concrete actions (e.g. "1. Open the homepage", "2. Click the Login button")
+- State expected vs actual behavior
+- Include supporting evidence from console/network logs if available
+
+Use the navigation path and click events to reconstruct repro steps accurately.
+If multiple bugs share the same repro path, note it.
+Keep issues_found as a quick one-line summary of each key_issue.
+Keep bullets concise (1-2 sentences each). Prioritize severity in key_issues and issues_found.`
 
   try {
     const result = await generateObject({

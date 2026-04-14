@@ -2,9 +2,20 @@
 
 import { useState, useCallback } from 'react'
 
+interface Issue {
+  title: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  description: string
+  repro_steps: string[]
+  expected: string
+  actual: string
+  evidence?: string
+}
+
 interface SummaryData {
   overall_assessment: string
   what_worked: string[]
+  key_issues: Issue[]
   issues_found: string[]
   network_observations: string[]
   console_observations: string[]
@@ -28,6 +39,88 @@ const CONFIDENCE_CONFIG = {
   high: { label: 'High confidence', color: 'text-green-400' },
   medium: { label: 'Medium confidence', color: 'text-yellow-400' },
   low: { label: 'Low confidence', color: 'text-gray-500' },
+}
+
+const SEVERITY_BADGE: Record<string, string> = {
+  critical: 'bg-red-900 text-red-300 border-red-800',
+  high: 'bg-orange-900 text-orange-300 border-orange-800',
+  medium: 'bg-yellow-900 text-yellow-300 border-yellow-800',
+  low: 'bg-blue-900 text-blue-300 border-blue-800',
+}
+
+function KeyIssueCard({ issue, index }: { issue: Issue; index: number }) {
+  const [open, setOpen] = useState(false)
+  const badgeClass = SEVERITY_BADGE[issue.severity] ?? SEVERITY_BADGE.medium
+
+  return (
+    <div
+      className={`border rounded-lg overflow-hidden ${
+        issue.severity === 'critical' ? 'border-red-800/60' :
+        issue.severity === 'high' ? 'border-orange-800/60' :
+        'border-gray-700'
+      }`}
+      data-testid="key-issue-card"
+    >
+      {/* Header row */}
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center gap-3 px-3 py-2.5 bg-gray-800 hover:bg-gray-750 text-left transition-colors"
+        data-testid="key-issue-header"
+      >
+        <span className={`text-[10px] px-1.5 py-0.5 rounded border font-semibold shrink-0 ${badgeClass}`}
+          data-testid="key-issue-severity">
+          {issue.severity}
+        </span>
+        <span className="text-sm text-gray-200 flex-1 font-medium" data-testid="key-issue-title">
+          {index + 1}. {issue.title}
+        </span>
+        <span className="text-gray-500 text-xs">{open ? '▲' : '▼'}</span>
+      </button>
+
+      {/* Expandable body */}
+      {open && (
+        <div className="px-3 py-3 bg-gray-900 flex flex-col gap-3" data-testid="key-issue-body">
+          <p className="text-sm text-gray-300">{issue.description}</p>
+
+          {/* Repro steps */}
+          {issue.repro_steps.length > 0 && (
+            <div data-testid="key-issue-repro-steps">
+              <h5 className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mb-1.5">Steps to reproduce</h5>
+              <ol className="space-y-1">
+                {issue.repro_steps.map((step, i) => (
+                  <li key={i} className="flex gap-2 text-sm text-gray-300">
+                    <span className="text-indigo-500 font-mono text-xs shrink-0 mt-0.5">{i + 1}.</span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {/* Expected vs Actual */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-green-950/30 border border-green-900/40 rounded p-2" data-testid="key-issue-expected">
+              <span className="text-[10px] font-semibold text-green-500 uppercase">Expected</span>
+              <p className="text-xs text-gray-300 mt-1">{issue.expected}</p>
+            </div>
+            <div className="bg-red-950/30 border border-red-900/40 rounded p-2" data-testid="key-issue-actual">
+              <span className="text-[10px] font-semibold text-red-500 uppercase">Actual</span>
+              <p className="text-xs text-gray-300 mt-1">{issue.actual}</p>
+            </div>
+          </div>
+
+          {/* Evidence */}
+          {issue.evidence && (
+            <div className="bg-gray-800 rounded p-2" data-testid="key-issue-evidence">
+              <span className="text-[10px] font-semibold text-gray-400 uppercase">Evidence</span>
+              <p className="text-xs text-gray-400 font-mono mt-1 break-all">{issue.evidence}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function BulletList({
@@ -207,7 +300,21 @@ export default function AISummary({ sessionId, autoLoad = false }: Props) {
               </div>
             )}
 
-            {/* Issues */}
+            {/* Key issues with repro steps */}
+            {summary.key_issues && summary.key_issues.length > 0 && (
+              <div className="mb-4" data-testid="summary-key-issues">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  🐛 Key Issues ({summary.key_issues.length})
+                </h4>
+                <div className="flex flex-col gap-2">
+                  {summary.key_issues.map((issue, i) => (
+                    <KeyIssueCard key={i} issue={issue} index={i} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Issues (condensed) */}
             <BulletList
               title="Issues Found"
               items={summary.issues_found}
