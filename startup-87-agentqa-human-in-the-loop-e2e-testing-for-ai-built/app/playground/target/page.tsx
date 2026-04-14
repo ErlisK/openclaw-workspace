@@ -143,7 +143,10 @@ export default function PlaygroundTargetPage() {
   appendLog('Page loaded — JS active');
 
   // ── On load: make a deterministic fetch call ─────────────────────────────
-  fetch('/api/playground/ping?source=autoload')
+  var params = new URLSearchParams(window.location.search);
+  var bypass = params.get('x-vercel-protection-bypass') || '';
+  var pingUrl = '/api/playground/ping?source=autoload' + (bypass ? '&x-vercel-protection-bypass=' + bypass : '');
+  fetch(pingUrl)
     .then(function(r) {
       document.getElementById('api-status').textContent = r.ok ? 'OK (' + r.status + ')' : 'Error (' + r.status + ')';
       document.getElementById('api-status').className = r.ok ? 'badge badge-green' : 'badge badge-red';
@@ -183,7 +186,10 @@ export default function PlaygroundTargetPage() {
   // ── Button: trigger fetch ────────────────────────────────────────────────
   document.getElementById('btn-fetch').addEventListener('click', function() {
     appendLog('fetch triggered...');
-    fetch('/api/playground/ping?source=button&ts=' + Date.now())
+    var params = new URLSearchParams(window.location.search);
+    var bypass = params.get('x-vercel-protection-bypass') || '';
+    var fetchUrl = '/api/playground/ping?source=button&ts=' + Date.now() + (bypass ? '&x-vercel-protection-bypass=' + bypass : '');
+    fetch(fetchUrl)
       .then(function(r) { return r.json(); })
       .then(function(data) {
         appendLog('fetch → ' + data.status);
