@@ -46,23 +46,21 @@ export default async function Image() {
             color: "#6366f1",
             textAlign: "center",
             maxWidth: 900,
-            lineHeight: 1.3,
           }}
         >
-          Docs-Specific CI for API &amp; SDK Teams
+          Docs-Specific CI for API & SDK Teams
         </div>
         <div
           style={{
             marginTop: 32,
             fontSize: 24,
             color: "#64748b",
-            textAlign: "center",
           }}
         >
           snippetci.com
         </div>
       </div>
     ),
-    { ...size }
+    { width: 1200, height: 630 }
   );
 }

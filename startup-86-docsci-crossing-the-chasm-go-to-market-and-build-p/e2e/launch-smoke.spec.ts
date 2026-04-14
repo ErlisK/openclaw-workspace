@@ -25,7 +25,7 @@ test.describe("Launch smoke — homepage", () => {
     const ogImage = page.locator('meta[property="og:image"]');
     const content = await ogImage.getAttribute("content");
     expect(content).toBeTruthy();
-    expect(content).toContain("/og");
+    expect(content).toContain("opengraph-image");
   });
 });
 

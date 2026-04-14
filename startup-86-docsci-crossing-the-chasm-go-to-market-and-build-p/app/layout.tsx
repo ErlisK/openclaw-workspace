@@ -10,14 +10,14 @@ export const metadata: Metadata = {
     description: "Docs-specific CI pipeline for API/SDK platform teams",
     url: "https://snippetci.com",
     siteName: "DocsCI",
-    images: [{ url: '/og', width: 1200, height: 630, alt: 'DocsCI' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'DocsCI' }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
     title: "DocsCI – Docs-Specific CI for API & SDK Teams",
     description: "Eliminate broken examples, detect API drift, and keep docs in lockstep with releases.",
-    images: ['https://snippetci.com/og'],
+    images: ['https://snippetci.com/opengraph-image'],
   },
 };
 
