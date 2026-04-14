@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import NavBar from "@/components/NavBar";
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
@@ -30,18 +31,7 @@ export default function ContactPage() {
   return (
     <main className="min-h-screen bg-gray-950">
       {/* Nav */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">⚡</span>
-          <span className="font-bold text-xl text-white">DocsCI</span>
-        </Link>
-        <div className="flex gap-6 text-sm text-gray-400">
-          <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Get started free</Link>
-        </div>
-      </nav>
+      <NavBar />
 
       <div className="max-w-2xl mx-auto px-6 py-16">
         <div className="text-center mb-12">

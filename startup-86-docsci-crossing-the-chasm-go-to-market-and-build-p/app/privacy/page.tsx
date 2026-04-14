@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy — DocsCI",
+  description: "DocsCI privacy policy — how we collect, use, and protect your data.",
+};
+
 export default function PrivacyPage() {
   return (
     <main className="min-h-screen bg-gray-950 text-gray-300">

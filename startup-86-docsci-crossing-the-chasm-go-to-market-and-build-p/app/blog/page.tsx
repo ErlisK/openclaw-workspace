@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import NavBar from "@/components/NavBar";
 
 export const metadata: Metadata = {
   title: "Blog — DocsCI",
@@ -61,11 +62,7 @@ const posts = [
 export default function BlogIndexPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100" data-testid="blog-index">
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center gap-4">
-        <Link href="/" className="text-white font-bold text-lg">⚡ DocsCI</Link>
-        <span className="text-gray-700">/</span>
-        <span className="text-gray-300">Blog</span>
-      </nav>
+      <NavBar />
 
       <div className="max-w-3xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold text-white mb-3" data-testid="page-h1">Blog</h1>

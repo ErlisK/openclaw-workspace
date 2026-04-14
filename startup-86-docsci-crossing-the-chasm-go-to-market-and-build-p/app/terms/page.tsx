@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms of Service — DocsCI",
+  description: "DocsCI terms of service and usage agreement.",
+};
+
 export default function TermsPage() {
   return (
     <main className="min-h-screen bg-gray-950 text-gray-300">

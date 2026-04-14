@@ -89,9 +89,9 @@ export default function Home() {
 
       {/* Social Proof */}
       <section className="max-w-5xl mx-auto px-6 py-16 text-center">
-        <p className="text-gray-500 text-sm uppercase tracking-widest mb-8">Trusted by developers at leading API companies</p>
+        <p className="text-gray-500 text-sm uppercase tracking-widest mb-8">Built for developer-experience teams at API-first companies</p>
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {["Stripe", "Twilio", "PagerDuty", "Contentful", "Algolia", "Postman"].map(company => (
+          {["API-first teams", "SDK platform teams", "Developer Relations", "DevEx engineers", "Doc engineers", "Platform teams"].map(company => (
             <span key={company} className="bg-gray-900 border border-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-medium">
               {company}
             </span>
@@ -102,7 +102,7 @@ export default function Home() {
             &ldquo;DocsCI caught 23 broken examples before our SDK v2 launch. It would have taken us days to find manually — and one of them was in the getting started guide.&rdquo;
           </p>
           <footer className="text-gray-500 text-sm">
-            <span className="font-medium text-gray-400">Sarah Chen</span> · Developer Experience Lead
+            <span className="font-medium text-gray-400">Beta User</span> · Developer Experience Lead, API Platform Team
           </footer>
         </blockquote>
       </section>
@@ -125,6 +125,7 @@ export default function Home() {
           <Link href="/docs" className="hover:text-gray-300 transition-colors">Docs</Link>
           <Link href="/blog" className="hover:text-gray-300 transition-colors">Blog</Link>
           <Link href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</Link>
+          <Link href="/playground" className="hover:text-gray-300 transition-colors">Playground</Link>
           <Link href="/contact" className="hover:text-gray-300 transition-colors">Contact</Link>
           <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms</Link>
           <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>

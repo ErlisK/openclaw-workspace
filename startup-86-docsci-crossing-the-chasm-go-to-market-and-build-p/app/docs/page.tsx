@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NavBar from "@/components/NavBar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -45,28 +46,7 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
       {/* Nav */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-white font-bold text-lg tracking-tight">
-          DocsCI <span className="text-gray-500 font-normal text-sm ml-1">docs</span>
-        </Link>
-        <div className="flex gap-6 text-sm">
-          <Link href="/docs/getting-started" className="text-gray-400 hover:text-white transition-colors">
-            Getting started
-          </Link>
-          <Link href="/docs/guides" className="text-gray-400 hover:text-white transition-colors">
-            Guides
-          </Link>
-          <Link href="/docs/security" className="text-gray-400 hover:text-white transition-colors">
-            Security
-          </Link>
-          <Link href="/docs/templates" className="text-gray-400 hover:text-white transition-colors">
-            Templates
-          </Link>
-          <Link href="/signup" className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium">
-            Get started →
-          </Link>
-        </div>
-      </nav>
+      <NavBar />
 
       {/* Hero */}
       <div className="max-w-3xl mx-auto px-6 py-16">

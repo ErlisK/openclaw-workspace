@@ -1,4 +1,5 @@
 import Link from "next/link"
+import NavBar from "@/components/NavBar"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -9,21 +10,7 @@ export const metadata: Metadata = {
 export default function PricingPage() {
   return (
     <main className="min-h-screen bg-gray-950">
-      {/* Nav */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl">⚡</span>
-          <span className="font-bold text-xl text-white">DocsCI</span>
-        </Link>
-        <div className="flex gap-6 text-sm text-gray-400">
-          <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
-          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <Link href="/pricing" className="text-white font-medium">Pricing</Link>
-          <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Get started free</Link>
-        </div>
-      </nav>
+      <NavBar />
 
       <div className="max-w-6xl mx-auto px-6 py-16 text-center">
         <h1 className="text-4xl font-bold text-white mb-4">Simple, transparent pricing</h1>
