@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
+import { buildLoggerScript } from './logger/route'
 
 /**
  * GET /api/proxy?url=<target>&session=<sessionId>
@@ -81,105 +82,8 @@ function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessio
 }
 
 function buildInjectedScript(sessionId: string, appUrl: string, reportUrl: string): string {
-  return `
-<script id="agentqa-logger">
-(function() {
-  var SESSION_ID = ${JSON.stringify(sessionId)};
-  var APP_URL = ${JSON.stringify(appUrl)};
-  var REPORT_URL = ${JSON.stringify(reportUrl)};
-  var buf = [];
-  var flushTimer = null;
-
-  function now() { return new Date().toISOString(); }
-
-  function queue(ev) {
-    buf.push(ev);
-    if (buf.length >= 20) flush();
-    else if (!flushTimer) flushTimer = setTimeout(flush, 1200);
-  }
-
-  function flush() {
-    if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
-    if (buf.length === 0) return;
-    var events = buf.splice(0);
-    // Post to parent window first (for RunLogger), then directly to API
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'agentqa_event_batch', events: events }, '*');
-      }
-    } catch(e) {}
-    // Also send directly to API (works cross-origin because we're inside the proxy)
-    try {
-      fetch(REPORT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(events),
-        credentials: 'include',
-      }).catch(function(){});
-    } catch(e) {}
-  }
-
-  // ─── Console patching ───────────────────────────────────────
-  ['log','info','warn','error'].forEach(function(level) {
-    var orig = console[level].bind(console);
-    console[level] = function() {
-      orig.apply(console, arguments);
-      try {
-        var msg = Array.from(arguments).map(function(a) {
-          try { return typeof a === 'object' ? JSON.stringify(a) : String(a); } catch(e) { return String(a); }
-        }).join(' ');
-        queue({ event_type: 'console_log', ts: now(), log_level: level, log_message: msg });
-      } catch(e) {}
-    };
-  });
-
-  // ─── fetch patching ─────────────────────────────────────────
-  var _fetch = window.fetch;
-  window.fetch = function(input, init) {
-    var reqUrl = typeof input === 'string' ? input : (input && input.url) || String(input);
-    var method = (init && init.method) || 'GET';
-    var t0 = Date.now();
-    queue({ event_type: 'network_request', ts: now(), method: method, request_url: reqUrl });
-    return _fetch.call(this, input, init).then(function(res) {
-      queue({ event_type: 'network_response', ts: now(), method: method,
-        request_url: reqUrl, status_code: res.status, response_time_ms: Date.now() - t0 });
-      return res;
-    }, function(err) {
-      queue({ event_type: 'network_response', ts: now(), method: method,
-        request_url: reqUrl, status_code: 0, log_message: String(err), response_time_ms: Date.now() - t0 });
-      throw err;
-    });
-  };
-
-  // ─── XHR patching ───────────────────────────────────────────
-  var _XHROpen = XMLHttpRequest.prototype.open;
-  var _XHRSend = XMLHttpRequest.prototype.send;
-  XMLHttpRequest.prototype.open = function(method, url) {
-    this._aqMethod = method;
-    this._aqUrl = url;
-    return _XHROpen.apply(this, arguments);
-  };
-  XMLHttpRequest.prototype.send = function() {
-    var self = this;
-    var t0 = Date.now();
-    queue({ event_type: 'network_request', ts: now(), method: self._aqMethod || 'GET', request_url: String(self._aqUrl || '') });
-    this.addEventListener('loadend', function() {
-      queue({ event_type: 'network_response', ts: now(), method: self._aqMethod || 'GET',
-        request_url: String(self._aqUrl || ''), status_code: self.status, response_time_ms: Date.now() - t0 });
-    });
-    return _XHRSend.apply(this, arguments);
-  };
-
-  // ─── Navigation logging ─────────────────────────────────────
-  queue({ event_type: 'navigation', ts: now(), request_url: APP_URL, log_message: 'Proxy page loaded: ' + APP_URL });
-
-  // Flush on unload
-  window.addEventListener('beforeunload', flush);
-  window.addEventListener('pagehide', flush);
-  setInterval(flush, 5000);
-})();
-</script>
-`
+  // Delegate to the shared logger builder (same script, wrapped in <script> tags)
+  return `<script id="agentqa-logger">\n${buildLoggerScript(sessionId, appUrl, reportUrl)}\n</script>`
 }
 
 export async function GET(req: NextRequest) {

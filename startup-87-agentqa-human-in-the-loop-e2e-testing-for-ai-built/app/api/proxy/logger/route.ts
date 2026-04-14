@@ -1,0 +1,246 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getSupabaseClient } from '@/lib/supabase/get-client'
+
+/**
+ * GET /api/proxy/logger?session=<id>&report_url=<url>
+ *
+ * Serves the agentqa-logger JavaScript as a standalone file.
+ * This is the same script that gets injected by /api/proxy,
+ * but served as a <script src="..."> reference for:
+ *   - Cached delivery (max-age=60)
+ *   - Unit testing in isolation
+ *   - Manual injection into non-proxied pages
+ *
+ * Auth required.
+ */
+export async function GET(req: NextRequest) {
+  const supabase = await getSupabaseClient(req)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return new NextResponse('Unauthorized', { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const sessionId = searchParams.get('session') ?? ''
+  const reportUrl = searchParams.get('report_url') ??
+    `${new URL(req.url).origin}/api/sessions/${sessionId}/events`
+  const appUrl = searchParams.get('app_url') ?? ''
+
+  const script = buildLoggerScript(sessionId, appUrl, reportUrl)
+
+  return new NextResponse(script, {
+    status: 200,
+    headers: {
+      'content-type': 'application/javascript; charset=utf-8',
+      'cache-control': 'public, max-age=60',
+      'x-session-id': sessionId,
+    },
+  })
+}
+
+export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: string): string {
+  return `
+// AgentQA Logger v1.0 — auto-injected by proxy
+// Captures fetch, XHR, and console events and reports them to the session events API.
+(function(SESSION_ID, APP_URL, REPORT_URL) {
+  'use strict';
+
+  // ─── State ──────────────────────────────────────────────────
+  var buf = [];
+  var flushTimer = null;
+  var started = Date.now();
+
+  // Save raw fetch BEFORE any patching to avoid recursion in flush
+  var _rawFetch = (typeof window !== 'undefined' && window.fetch)
+    ? window.fetch.bind(window)
+    : null;
+
+  // ─── Helpers ────────────────────────────────────────────────
+  function now() { return new Date().toISOString(); }
+
+  function safeStr(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'string') return v.slice(0, 4096); // cap at 4KB
+    try { return JSON.stringify(v).slice(0, 4096); } catch(e) { return String(v).slice(0, 4096); }
+  }
+
+  // ─── Event queue + flush ────────────────────────────────────
+  function queue(ev) {
+    buf.push(ev);
+    if (buf.length >= 25) flush();
+    else if (!flushTimer) flushTimer = setTimeout(flush, 1500);
+  }
+
+  function flush() {
+    if (flushTimer) { clearTimeout(flushTimer); flushTimer = null; }
+    if (!buf.length) return;
+    var events = buf.splice(0);
+    // 1) postMessage to parent (RunLogger picks this up)
+    try {
+      if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
+        window.parent.postMessage({ type: 'agentqa_event_batch', events: events, session: SESSION_ID }, '*');
+      }
+    } catch(e) {}
+    // 2) POST directly to API using raw fetch (no recursion)
+    if (!_rawFetch || !REPORT_URL) return;
+    try {
+      _rawFetch(REPORT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(events),
+        credentials: 'include',
+      }).catch(function() {});
+    } catch(e) {}
+  }
+
+  // ─── Console patching ────────────────────────────────────────
+  if (typeof console !== 'undefined') {
+    ['log', 'info', 'warn', 'error', 'debug'].forEach(function(level) {
+      var orig = console[level] && console[level].bind(console);
+      if (!orig) return;
+      console[level] = function() {
+        orig.apply(console, arguments);
+        try {
+          var args = Array.prototype.slice.call(arguments);
+          var msg = args.map(safeStr).join(' ');
+          queue({
+            event_type: 'console_log',
+            ts: now(),
+            log_level: level === 'debug' ? 'log' : level,
+            log_message: msg,
+          });
+        } catch(e) {}
+      };
+    });
+  }
+
+  // ─── window.fetch patching ───────────────────────────────────
+  if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
+    var _origFetch = window.fetch;
+    window.fetch = function(input, init) {
+      var reqUrl;
+      try { reqUrl = typeof input === 'string' ? input : (input.url || String(input)); }
+      catch(e) { reqUrl = String(input); }
+
+      // Skip the reporting URL itself to prevent infinite loops
+      if (REPORT_URL && (reqUrl === REPORT_URL || reqUrl.indexOf(REPORT_URL) === 0)) {
+        return _origFetch.call(this, input, init);
+      }
+
+      var method = (init && init.method) ? init.method.toUpperCase() : 'GET';
+      var t0 = Date.now();
+
+      queue({
+        event_type: 'network_request',
+        ts: now(),
+        method: method,
+        request_url: reqUrl,
+      });
+
+      return _origFetch.call(this, input, init).then(
+        function(res) {
+          queue({
+            event_type: 'network_response',
+            ts: now(),
+            method: method,
+            request_url: reqUrl,
+            status_code: res.status,
+            response_time_ms: Date.now() - t0,
+          });
+          return res;
+        },
+        function(err) {
+          queue({
+            event_type: 'network_response',
+            ts: now(),
+            method: method,
+            request_url: reqUrl,
+            status_code: 0,
+            log_message: safeStr(err),
+            response_time_ms: Date.now() - t0,
+          });
+          throw err;
+        }
+      );
+    };
+  }
+
+  // ─── XMLHttpRequest patching ─────────────────────────────────
+  if (typeof XMLHttpRequest !== 'undefined') {
+    var _XHROpen = XMLHttpRequest.prototype.open;
+    var _XHRSend = XMLHttpRequest.prototype.send;
+    var _XHRSetHeader = XMLHttpRequest.prototype.setRequestHeader;
+
+    XMLHttpRequest.prototype.open = function(method, url) {
+      this._aqMethod = (method || 'GET').toUpperCase();
+      this._aqUrl = String(url || '');
+      this._aqHeaders = {};
+      return _XHROpen.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
+      if (this._aqHeaders) this._aqHeaders[name] = value;
+      return _XHRSetHeader.apply(this, arguments);
+    };
+
+    XMLHttpRequest.prototype.send = function(body) {
+      var self = this;
+      var t0 = Date.now();
+      var reqUrl = self._aqUrl || '';
+      var method = self._aqMethod || 'GET';
+
+      // Skip reporting URL
+      if (REPORT_URL && (reqUrl === REPORT_URL || reqUrl.indexOf(REPORT_URL) === 0)) {
+        return _XHRSend.apply(this, arguments);
+      }
+
+      queue({
+        event_type: 'network_request',
+        ts: now(),
+        method: method,
+        request_url: reqUrl,
+        request_headers: self._aqHeaders || null,
+      });
+
+      this.addEventListener('loadend', function() {
+        queue({
+          event_type: 'network_response',
+          ts: now(),
+          method: method,
+          request_url: reqUrl,
+          status_code: self.status || 0,
+          response_time_ms: Date.now() - t0,
+        });
+      });
+
+      return _XHRSend.apply(this, arguments);
+    };
+  }
+
+  // ─── Navigation / page load event ────────────────────────────
+  queue({
+    event_type: 'navigation',
+    ts: now(),
+    request_url: APP_URL || (typeof location !== 'undefined' ? location.href : ''),
+    log_message: 'AgentQA logger initialized',
+    payload: { session_id: SESSION_ID, started: started },
+  });
+
+  // ─── Periodic + exit flush ───────────────────────────────────
+  setInterval(flush, 5000);
+  if (typeof window !== 'undefined') {
+    window.addEventListener('beforeunload', flush);
+    window.addEventListener('pagehide', flush);
+  }
+
+  // ─── Public API ──────────────────────────────────────────────
+  if (typeof window !== 'undefined') {
+    window.__agentqa__ = {
+      session: SESSION_ID,
+      flush: flush,
+      queue: queue,
+      getBuffer: function() { return buf.slice(); },
+    };
+  }
+
+})(${JSON.stringify(sessionId)}, ${JSON.stringify(appUrl)}, ${JSON.stringify(reportUrl)});
+`
+}
