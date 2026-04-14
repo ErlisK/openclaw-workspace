@@ -11,7 +11,10 @@ export default function Home() {
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
           <Link href="/docs/research" className="hover:text-white transition-colors">Research</Link>
+          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <a href="mailto:hello@snippetci.com" className="hover:text-white transition-colors">Contact</a>
+          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
         </div>
       </nav>
 
@@ -29,9 +32,9 @@ export default function Home() {
           DocsCI runs a docs-specific CI pipeline: executes code examples in hermetic sandboxes, detects API/SDK drift, validates accessibility, and files precise PR comments — before your customers hit a <code className="bg-gray-800 px-1 rounded text-red-400">NameError</code>.
         </p>
         <div className="flex gap-4 justify-center">
-          <a href="mailto:hello@snippetci.com" className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-medium transition-colors">
             Get early access →
-          </a>
+          </Link>
           <Link href="/docs/research" className="border border-gray-700 hover:border-gray-500 text-gray-300 px-6 py-3 rounded-lg font-medium transition-colors">
             View research
           </Link>
@@ -55,7 +58,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-gray-800 max-w-7xl mx-auto px-6 py-8 flex justify-between text-sm text-gray-500">
-        <span>© 2025 DocsCI · snippetci.com</span>
+        <span>© {new Date().getFullYear()} DocsCI · snippetci.com</span>
         <a href="mailto:hello@snippetci.com" className="hover:text-gray-300 transition-colors">hello@snippetci.com</a>
       </footer>
     </main>

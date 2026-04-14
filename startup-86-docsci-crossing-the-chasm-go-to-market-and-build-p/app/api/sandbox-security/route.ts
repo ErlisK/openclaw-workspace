@@ -18,10 +18,14 @@ import {
   getSandboxCaps,
   type AllowlistConfig,
 } from "@/lib/sandbox-security";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  try { await requireUser() } catch {
+    return NextResponse.json({ status: 'ok', service: 'DocsCI Sandbox Security' })
+  }
   const sp = req.nextUrl.searchParams;
   if (sp.get("action") === "caps") {
     const caps = getSandboxCaps({

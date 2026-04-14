@@ -16,11 +16,15 @@
  */
 import { NextResponse } from "next/server";
 import { importRepoByUrl } from "@/lib/repo-import";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 export async function POST(req: Request) {
+  try { await requireUser() } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   let body: { url?: string };
   try {
     body = await req.json();

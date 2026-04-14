@@ -19,6 +19,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { runSmokeTests, isUrlAllowed } from "@/lib/smoke-test";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Vercel function max
@@ -57,6 +58,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  try { await requireUser() } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   let body: Record<string, unknown>;
   try {
     body = await req.json();

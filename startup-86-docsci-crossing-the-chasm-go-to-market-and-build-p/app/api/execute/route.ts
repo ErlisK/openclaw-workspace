@@ -14,6 +14,7 @@
  */
 import { NextResponse } from "next/server";
 import { executeSnippet, probeSandbox } from "@/lib/sandbox";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -21,6 +22,9 @@ export const maxDuration = 60;
 const SUPPORTED_LANGUAGES = ["python", "javascript", "typescript", "py", "js", "ts"];
 
 export async function POST(req: Request) {
+  try { await requireUser() } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   let body: { code?: string; language?: string; timeout_ms?: number };
   try {
     body = await req.json();

@@ -24,6 +24,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,9 @@ function svc() {
 }
 
 export async function GET(req: NextRequest) {
+  try { await requireUser() } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   const sp = req.nextUrl.searchParams;
   const projectId = sp.get("project_id");
   const orgId = sp.get("org_id");

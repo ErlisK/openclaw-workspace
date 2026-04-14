@@ -1,103 +1,63 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
+import { requireUser } from '@/lib/auth'
+import { createClient } from '@/lib/supabase/server'
 
-const SUPABASE_URL = process.env.SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
+export const dynamic = 'force-dynamic'
 
-async function supabaseQuery(query: string) {
-  const res = await fetch(
-    `${SUPABASE_URL}/rest/v1/rpc/query_market_research`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: SUPABASE_SERVICE_KEY,
-        Authorization: `Bearer ${SUPABASE_SERVICE_KEY}`,
-      },
-      body: JSON.stringify({ sql: query }),
-    }
-  );
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Supabase error: ${err}`);
-  }
-  return res.json();
-}
-
-async function directQuery(query: string) {
-  const projectRef = process.env.SUPABASE_PROJECT_REF!;
-  const res = await fetch(
-    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.SUPABASE_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify({ query }),
-    }
-  );
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-export async function GET(req: NextRequest) {
-  // Admin flag check
-  const adminKey = req.headers.get("x-admin-key") || req.nextUrl.searchParams.get("admin_key");
-  if (adminKey !== process.env.ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function GET(req: Request) {
+  try {
+    await requireUser()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const type = req.nextUrl.searchParams.get("type") || "all";
-  const search = req.nextUrl.searchParams.get("q") || "";
-  const limit = parseInt(req.nextUrl.searchParams.get("limit") || "100");
+  // TODO: check is_admin flag for user
+  const url = new URL(req.url)
+  const type = url.searchParams.get('type') || 'all'
+  const search = url.searchParams.get('q') || ''
+  const limit = Math.min(Number(url.searchParams.get('limit') || '100'), 200)
+  const supabase = createClient()
 
-  let whereClause = "";
-  if (type !== "all") whereClause += ` AND research_type = '${type}'`;
-  if (search) whereClause += ` AND (title ILIKE '%${search}%' OR content::text ILIKE '%${search}%')`;
+  let query = supabase
+    .from('market_research')
+    .select('id,research_type,title,content,tags,source,priority,created_at')
+    .order('priority', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(limit)
 
-  const query = `
-    SELECT id, research_type, title, content, tags, source, priority, created_at
-    FROM market_research
-    WHERE 1=1 ${whereClause}
-    ORDER BY priority DESC, created_at DESC
-    LIMIT ${limit}
-  `;
+  if (type !== 'all') query = query.eq('research_type', type)
+  if (search) query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`)
 
-  const data = await directQuery(query.trim());
-  const counts = await directQuery(`SELECT research_type, COUNT(*) FROM market_research GROUP BY research_type`);
-
-  return NextResponse.json({
-    records: data,
-    counts: Object.fromEntries(counts.map((r: { research_type: string; count: string }) => [r.research_type, parseInt(r.count)])),
-    total: data.length,
-  });
+  const { data, error } = await query
+  if (error) return NextResponse.json({ error: 'Query failed' }, { status: 400 })
+  return NextResponse.json({ data })
 }
 
-export async function POST(req: NextRequest) {
-  const adminKey = req.headers.get("x-admin-key");
-  if (adminKey !== process.env.ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+export async function POST(req: Request) {
+  try {
+    await requireUser()
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await req.json();
-  const { research_type, title, content, tags, source, priority } = body;
+  // TODO: check is_admin flag for user
+  const supabase = createClient()
+  const body = await req.json()
+  const { research_type, title, content, tags, source, priority } = body
 
-  const projectRef = process.env.SUPABASE_PROJECT_REF!;
-  const tagsArray = JSON.stringify(tags || []).replace(/"/g, "'");
-  
-  const res = await fetch(
-    `https://api.supabase.com/v1/projects/${projectRef}/database/query`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.SUPABASE_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify({
-        query: `INSERT INTO market_research (research_type, title, content, tags, source, priority) VALUES ('${research_type}', '${title.replace(/'/g, "''")}', '${JSON.stringify(content).replace(/'/g, "''")}'::jsonb, ARRAY[${(tags || []).map((t: string) => `'${t}'`).join(",")}], '${(source||"").replace(/'/g, "''")}', ${priority || 5}) RETURNING *`,
-      }),
-    }
-  );
-  const data = await res.json();
-  return NextResponse.json({ record: data[0] }, { status: 201 });
+  if (!research_type || !title) {
+    return NextResponse.json({ error: 'research_type and title are required' }, { status: 400 })
+  }
+
+  const { data, error } = await supabase.from('market_research').insert({
+    research_type,
+    title,
+    content,
+    tags: Array.isArray(tags) ? tags : [],
+    source: source || '',
+    priority: typeof priority === 'number' ? priority : 5,
+  }).select().single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+  return NextResponse.json({ record: data }, { status: 201 })
 }

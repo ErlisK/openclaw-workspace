@@ -244,8 +244,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET: list recent runs (no auth required for demo)
+// GET: list recent runs (requires auth)
 export async function GET(req: NextRequest) {
+  const authSupabase = createAuthClient();
+  const { data: { user } } = await authSupabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   const supabase = getServiceClient();
   const projectId = req.nextUrl.searchParams.get("project_id");
 
