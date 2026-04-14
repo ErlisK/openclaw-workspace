@@ -52,5 +52,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/listings`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 },
     { url: `${base}/case-studies`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
     { url: `${base}/case-studies/sdk-docs-broken-examples`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${base}/for/openapi-enterprise`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${base}/for/nextjs-mdx-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${base}/for/gitlab-ci-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
   ];
 }

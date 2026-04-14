@@ -36,6 +36,27 @@ const pages = [
     icon: "🔬",
     tags: ["code examples", "snippet testing", "multi-language"],
   },
+  {
+    slug: "openapi-enterprise",
+    title: "OpenAPI-First Enterprise Platforms",
+    description: "Documentation CI for enterprise API teams. Diff your OpenAPI spec against docs on every PR. Critical drift fails the check. AI-generated fixes close the gap in 8 minutes.",
+    icon: "🏢",
+    tags: ["OpenAPI", "enterprise", "API drift"],
+  },
+  {
+    slug: "nextjs-mdx-docs",
+    title: "Next.js / MDX Documentation",
+    description: "Execute fenced code blocks in .mdx files, validate component props, and catch accessibility issues. Works with Nextra, Mintlify, and custom Next.js doc sites.",
+    icon: "▲",
+    tags: ["Next.js", "MDX", "Nextra", "Mintlify"],
+  },
+  {
+    slug: "gitlab-ci-docs",
+    title: "GitLab CI Users",
+    description: "Drop DocsCI into your .gitlab-ci.yml as a docs:verify job. MR comments, OpenAPI drift detection, customer-hosted runner for air-gapped GitLab instances.",
+    icon: "🦊",
+    tags: ["GitLab CI", "self-managed", "MR comments"],
+  },
 ];
 
 export default function ForIndexPage() {
