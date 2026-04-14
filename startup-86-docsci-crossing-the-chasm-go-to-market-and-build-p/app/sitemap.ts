@@ -43,5 +43,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/blog/broken-docs-cost`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: `${base}/blog/api-drift-detection`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: `${base}/blog/github-actions-docs-ci`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    // New technical blog posts
+    { url: `${base}/blog/hermetic-snippet-execution`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/blog/detecting-api-drift-openapi`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/blog/automating-accessibility-checks-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
   ];
 }

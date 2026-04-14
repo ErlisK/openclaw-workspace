@@ -9,6 +9,30 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: "automating-accessibility-checks-docs",
+    title: "Automating Accessibility Checks for Documentation",
+    date: "2025-06-28",
+    readTime: "11 min",
+    tags: ["accessibility", "WCAG", "CI"],
+    excerpt: "How DocsCI integrates axe-core and structural validation rules to catch accessibility issues in API documentation — missing alt text, heading hierarchy, color contrast, and ARIA violations — in CI.",
+  },
+  {
+    slug: "detecting-api-drift-openapi",
+    title: "Detecting API Drift from OpenAPI + Docs",
+    date: "2025-06-25",
+    readTime: "13 min",
+    tags: ["OpenAPI", "drift detection", "architecture"],
+    excerpt: "A technical deep-dive into how DocsCI diffs your OpenAPI spec against your documentation to detect parameter drift, schema mismatches, and deprecated endpoints before they reach your users.",
+  },
+  {
+    slug: "hermetic-snippet-execution",
+    title: "Hermetic Snippet Execution for Documentation",
+    date: "2025-06-20",
+    readTime: "14 min",
+    tags: ["sandbox", "security", "architecture"],
+    excerpt: "How DocsCI runs documentation code examples safely at scale — V8 isolates for JavaScript/TypeScript, Pyodide WebAssembly for Python, and ephemeral network allowlists for curl examples.",
+  },
+  {
     slug: "broken-docs-cost",
     title: "The Hidden Cost of Broken Documentation: $47K per Quarter per Broken Example",
     date: "2025-06-15",
