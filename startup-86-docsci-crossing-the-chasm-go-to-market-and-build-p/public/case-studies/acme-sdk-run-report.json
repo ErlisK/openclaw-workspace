@@ -1,0 +1,177 @@
+{
+  "report_id": "cs-acme-sdk-2024-q4",
+  "generated_at": "2024-11-15T14:32:07Z",
+  "organization": "Acme SDK Corp (anonymized)",
+  "repository": "acme-org/acme-sdk-docs",
+  "period": {
+    "start": "2024-08-01",
+    "end": "2024-11-15",
+    "releases_analyzed": 8
+  },
+  "summary": {
+    "snippets_total": 247,
+    "snippets_passing_before": 189,
+    "snippets_failing_before": 58,
+    "snippets_passing_after": 244,
+    "snippets_failing_after": 3,
+    "failure_rate_before_pct": 23.5,
+    "failure_rate_after_pct": 1.2,
+    "drift_findings_before": 34,
+    "drift_findings_after": 2,
+    "accessibility_violations_before": 41,
+    "accessibility_violations_after": 4,
+    "pr_comments_filed": 127,
+    "auto_fix_acceptance_rate_pct": 71,
+    "median_fix_time_minutes": 8
+  },
+  "support_tickets": {
+    "before_monthly_avg": 47,
+    "after_monthly_avg": 11,
+    "reduction_pct": 76.6,
+    "estimated_cost_saving_usd_monthly": 14200
+  },
+  "releases": [
+    {
+      "release": "v2.1.0",
+      "date": "2024-08-14",
+      "snippets": 198,
+      "failures": 44,
+      "drift_findings": 12,
+      "a11y_violations": 18,
+      "docsci_enabled": false,
+      "support_tickets_next_30d": 52
+    },
+    {
+      "release": "v2.2.0",
+      "date": "2024-08-28",
+      "snippets": 204,
+      "failures": 51,
+      "drift_findings": 15,
+      "a11y_violations": 22,
+      "docsci_enabled": false,
+      "support_tickets_next_30d": 61
+    },
+    {
+      "release": "v2.3.0",
+      "date": "2024-09-11",
+      "snippets": 211,
+      "failures": 38,
+      "drift_findings": 9,
+      "a11y_violations": 19,
+      "docsci_enabled": false,
+      "support_tickets_next_30d": 43
+    },
+    {
+      "release": "v2.4.0",
+      "date": "2024-09-25",
+      "snippets": 218,
+      "failures": 42,
+      "drift_findings": 11,
+      "a11y_violations": 24,
+      "docsci_enabled": false,
+      "support_tickets_next_30d": 49
+    },
+    {
+      "release": "v3.0.0",
+      "date": "2024-10-09",
+      "snippets": 231,
+      "failures": 12,
+      "drift_findings": 5,
+      "a11y_violations": 11,
+      "docsci_enabled": true,
+      "docsci_pr_comments": 28,
+      "support_tickets_next_30d": 19,
+      "note": "DocsCI enabled. First run caught 28 issues before merge."
+    },
+    {
+      "release": "v3.1.0",
+      "date": "2024-10-23",
+      "snippets": 238,
+      "failures": 6,
+      "drift_findings": 3,
+      "a11y_violations": 7,
+      "docsci_enabled": true,
+      "docsci_pr_comments": 16,
+      "support_tickets_next_30d": 14
+    },
+    {
+      "release": "v3.2.0",
+      "date": "2024-11-06",
+      "snippets": 244,
+      "failures": 4,
+      "drift_findings": 2,
+      "a11y_violations": 5,
+      "docsci_enabled": true,
+      "docsci_pr_comments": 11,
+      "support_tickets_next_30d": 9
+    },
+    {
+      "release": "v3.3.0",
+      "date": "2024-11-15",
+      "snippets": 247,
+      "failures": 3,
+      "drift_findings": 2,
+      "a11y_violations": 4,
+      "docsci_enabled": true,
+      "docsci_pr_comments": 8,
+      "support_tickets_next_30d": null,
+      "note": "Latest release. Support ticket data pending."
+    }
+  ],
+  "sample_findings": [
+    {
+      "type": "snippet_failure",
+      "file": "docs/quickstart/python.md",
+      "line": 47,
+      "snippet_lang": "python",
+      "error": "ImportError: No module named 'acme_sdk.v2.auth'. Module was renamed to 'acme_sdk.auth' in v3.0.0.",
+      "suggested_fix": "import acme_sdk.auth as auth",
+      "fix_accepted": true
+    },
+    {
+      "type": "api_drift",
+      "file": "docs/reference/payments.md",
+      "line": 112,
+      "endpoint": "POST /payments",
+      "issue": "Parameter 'currency_code' documented as optional but marked required in OpenAPI spec v3.0.0",
+      "openapi_source": "components/schemas/CreatePaymentRequest/required[2]",
+      "suggested_fix": "| currency_code | string | Yes | ISO 4217 currency code |",
+      "fix_accepted": true
+    },
+    {
+      "type": "api_drift",
+      "file": "docs/reference/users.md",
+      "line": 89,
+      "endpoint": "GET /users/{id}",
+      "issue": "Response field 'metadata' not documented. Added in v3.0.0.",
+      "openapi_source": "components/schemas/User/properties/metadata",
+      "suggested_fix": "Add '| metadata | object | No | Arbitrary key-value metadata attached to the user. |' to response table.",
+      "fix_accepted": true
+    },
+    {
+      "type": "accessibility",
+      "file": "docs/guides/webhooks.md",
+      "line": 23,
+      "rule": "heading-order",
+      "wcag": "1.3.1",
+      "issue": "Heading jumps from H2 to H4 (skips H3).",
+      "suggested_fix": "Change '#### Retry logic' to '### Retry logic'",
+      "fix_accepted": true
+    },
+    {
+      "type": "snippet_failure",
+      "file": "docs/guides/batch-api.md",
+      "line": 78,
+      "snippet_lang": "javascript",
+      "error": "TypeError: client.batch is not a function. Method removed in v3.0.0, replaced by client.operations.batch()",
+      "suggested_fix": "const result = await client.operations.batch(requests);",
+      "fix_accepted": false,
+      "note": "Fix requires more context — sent to docs team for review."
+    }
+  ],
+  "methodology": {
+    "simulation_basis": "Run DocsCI against 8 historical release tags of a representative open-source SDK documentation repository. Pre-DocsCI releases (v2.x) analyzed retrospectively with DocsCI in read-only audit mode to count failures that were present at release time. Post-DocsCI releases (v3.x) reflect actual gated runs where findings must be resolved before merge.",
+    "support_ticket_methodology": "Support ticket count derived from docs-tagged GitHub issues opened within 30 days after each release. Tickets flagged as 'broken example' or 'wrong parameter' by triage label.",
+    "cost_model": "Each support ticket estimated at $150 in developer + support time (15 min developer + 45 min support + $30 tooling overhead). Source: internal survey of 12 API-first companies."
+  }
+}

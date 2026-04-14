@@ -50,5 +50,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/gists`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 },
     { url: `${base}/social`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 },
     { url: `${base}/listings`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 },
+    { url: `${base}/case-studies`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${base}/case-studies/sdk-docs-broken-examples`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
   ];
 }
