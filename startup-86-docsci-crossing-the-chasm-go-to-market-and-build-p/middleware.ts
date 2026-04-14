@@ -71,7 +71,7 @@ export async function middleware(request: NextRequest) {
   const csp = [
     "default-src 'self'",
     "img-src 'self' data: https:",
-    `script-src 'self' 'nonce-${nonce}' blob:`,
+    `script-src 'self' 'nonce-${nonce}' blob: 'unsafe-eval'`,
     "worker-src blob:",
     "style-src 'self' 'unsafe-inline'",
     "font-src 'self' data:",
