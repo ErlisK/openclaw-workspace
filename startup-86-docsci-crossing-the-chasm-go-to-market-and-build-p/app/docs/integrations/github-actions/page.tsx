@@ -384,6 +384,9 @@ export default function GitHubActionsPage() {
             <Link href="/docs/guides/migration" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors">
               Migration guide →
             </Link>
+            <Link href="/gists" className="px-4 py-2 bg-indigo-700 hover:bg-indigo-600 text-white text-sm rounded-lg border border-indigo-600 transition-colors">
+              Public templates &amp; gists →
+            </Link>
             <Link href="/docs/templates" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg border border-gray-700 transition-colors">
               More templates →
             </Link>

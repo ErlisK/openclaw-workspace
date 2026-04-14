@@ -1,0 +1,35 @@
+# .pre-commit-config.yaml — DocsCI local documentation checks
+# Full docs: https://snippetci.com/docs/guides
+# Get a free API token: https://snippetci.com/signup
+#
+# Usage:
+#   1. pip install pre-commit
+#   2. export DOCSCI_TOKEN=<your-token>
+#   3. pre-commit install
+#   4. pre-commit run --all-files  (optional: run immediately on all files)
+#
+# After setup, DocsCI checks run automatically before every `git commit`.
+# To skip a specific commit: git commit --no-verify
+
+repos:
+  - repo: https://github.com/docsci/pre-commit-hooks
+    rev: v0.3.0
+    hooks:
+      # Check that all code snippets in changed docs files can be executed
+      - id: docsci-snippets
+        name: DocsCI snippet verification
+        description: "Verify code examples in documentation are syntactically valid and executable."
+        language: system
+        entry: bash -c 'tar czf /tmp/docsci-pre-commit.tar.gz $@ 2>/dev/null && curl -sf -X POST https://snippetci.com/api/runs/queue -H "Authorization: Bearer $DOCSCI_TOKEN" -F "docs_archive=@/tmp/docsci-pre-commit.tar.gz" | grep -q "\"status\":\"passed\""' --
+        types: [markdown]
+        pass_filenames: true
+
+      # Scan for credential patterns in documentation
+      - id: docsci-secrets
+        name: DocsCI credential scan
+        description: "Scan documentation for accidentally included API keys, tokens, or credentials."
+        language: system
+        entry: bash -c 'curl -sf -X POST https://snippetci.com/api/scan/secrets -H "Authorization: Bearer $DOCSCI_TOKEN" -F "files=$(echo "$@" | tr " " ",")" | grep -q "\"findings\":[]"' --
+        types: [markdown]
+        pass_filenames: true
+        always_run: false

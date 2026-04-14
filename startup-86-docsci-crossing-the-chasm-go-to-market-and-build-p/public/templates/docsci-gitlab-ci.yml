@@ -1,0 +1,72 @@
+# .gitlab-ci.yml — DocsCI documentation testing stage
+# Full docs: https://snippetci.com/docs/integrations/gitlab-ci
+# Get a free API token: https://snippetci.com/signup
+
+# Add this to your existing .gitlab-ci.yml, or use it as-is for docs-only pipelines.
+
+stages:
+  - build
+  - test
+  - docs
+
+variables:
+  DOCSCI_API: "https://snippetci.com/api/runs/queue"
+
+# ── Documentation CI (DocsCI) ────────────────────────────────────────────────
+
+docs:verify:
+  stage: docs
+  image: curlimages/curl:latest
+  rules:
+    # Run on merge requests and pushes to the default branch
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  variables:
+    # Optional: point at your staging OpenAPI spec for drift detection
+    # OPENAPI_URL: "https://staging-api.example.com/openapi.json"
+  script:
+    - |
+      echo "Archiving documentation..."
+      tar czf docs.tar.gz docs/ *.md README.md 2>/dev/null || tar czf docs.tar.gz docs/
+
+    - |
+      echo "Submitting to DocsCI..."
+      RESPONSE=$(curl -sf -X POST "$DOCSCI_API" \
+        -H "Authorization: Bearer $DOCSCI_TOKEN" \
+        -F "docs_archive=@docs.tar.gz" \
+        ${OPENAPI_URL:+-F "openapi_url=$OPENAPI_URL"} \
+        ${CI_PROJECT_URL:+-F "repo_url=$CI_PROJECT_URL"} \
+        ${CI_MERGE_REQUEST_IID:+-F "pr_number=$CI_MERGE_REQUEST_IID"})
+      echo "$RESPONSE"
+
+    - |
+      STATUS=$(echo "$RESPONSE" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+      echo "DocsCI status: $STATUS"
+      if [ "$STATUS" = "failed" ]; then
+        echo "DocsCI found critical issues. See PR comments for details."
+        exit 1
+      fi
+
+  allow_failure: false
+  artifacts:
+    reports:
+      dotenv: docsci.env
+    expire_in: 1 week
+
+# ── Optional: post results to MR as a note ───────────────────────────────────
+# Uncomment and configure the GITLAB_TOKEN variable if you want inline MR comments.
+# (DocsCI also posts comments via its native GitLab integration when configured.)
+#
+# docs:comment:
+#   stage: docs
+#   needs: ["docs:verify"]
+#   image: curlimages/curl:latest
+#   rules:
+#     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#   script:
+#     - |
+#       curl -X POST \
+#         --header "PRIVATE-TOKEN: $GITLAB_TOKEN" \
+#         --header "Content-Type: application/json" \
+#         "$CI_API_V4_URL/projects/$CI_PROJECT_ID/merge_requests/$CI_MERGE_REQUEST_IID/notes" \
+#         --data '{"body": "DocsCI: All documentation checks passed ✅"}'
