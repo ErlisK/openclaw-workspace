@@ -22,5 +22,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/postman-collections`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/mintlify`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/readme-checks`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    // Use-case landing pages
+    { url: `${base}/for`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/for/docusaurus-docs-ci`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/for/api-docs-testing`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/for/openapi-docs-validation`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/for/prevent-broken-code-examples`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
   ];
 }
