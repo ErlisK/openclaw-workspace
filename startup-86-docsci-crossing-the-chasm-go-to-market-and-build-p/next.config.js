@@ -9,7 +9,17 @@ const nextConfig = {
     return config;
   },
   async headers() {
+    const allowed = process.env.ALLOWED_ORIGINS?.split(',') ?? ['https://snippetci.com'];
     return [
+      {
+        source: '/api/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: allowed[0] || 'https://snippetci.com' },
+          { key: 'Vary', value: 'Origin' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, X-Admin-Key' },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [
@@ -17,10 +27,11 @@ const nextConfig = {
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
-          { key: 'Content-Security-Policy', value: "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://api.posthog.com https://*.supabase.co; frame-ancestors 'none'" },
+          // Removed 'unsafe-inline' from script-src; style-src retains it for Tailwind
+          { key: 'Content-Security-Policy', value: "default-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; connect-src 'self' https://api.posthog.com https://*.supabase.co wss://*.supabase.co; frame-ancestors 'none'" },
         ],
       },
-    ]
+    ];
   },
 };
 module.exports = nextConfig;

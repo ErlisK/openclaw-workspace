@@ -178,15 +178,35 @@ export default async function DashboardPage() {
 
           {/* Quick actions / empty state */}
           {orgs.length === 0 ? (
-            <div className="bg-gray-900 border border-gray-700 border-dashed rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-4">🚀</div>
-              <h3 className="text-lg font-semibold text-white mb-2">Create your first org</h3>
-              <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
-                Connect your GitHub org, point DocsCI at your Docusaurus + OpenAPI repo, and get your first CI run in under 5 minutes.
-              </p>
-              <Link href="/docs-guide" className="text-sm text-indigo-400 hover:text-indigo-300">
-                View setup guide →
-              </Link>
+            <div className="bg-gray-900 border border-gray-700 border-dashed rounded-2xl p-10">
+              <div className="max-w-xl mx-auto">
+                <div className="text-center mb-8">
+                  <div className="text-4xl mb-3">🚀</div>
+                  <h3 className="text-xl font-bold text-white mb-2">Get started in 3 steps</h3>
+                  <p className="text-gray-400 text-sm">Connect your repo and get your first CI run in under 5 minutes.</p>
+                </div>
+                <ol className="space-y-4 mb-8">
+                  {[
+                    { step: 1, title: "Create an org", desc: "Group your team and projects under one organization.", href: "/dashboard/settings/org", cta: "Create org" },
+                    { step: 2, title: "Import a repository", desc: "Connect your GitHub repo with docs + OpenAPI spec.", href: "/import", cta: "Import repo" },
+                    { step: 3, title: "Run your first CI check", desc: "DocsCI verifies every code example and detects drift.", href: "/demo", cta: "Try demo" },
+                  ].map(({ step, title, desc, href, cta }) => (
+                    <li key={step} className="flex items-start gap-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700">
+                      <span className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold text-white">{step}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-white text-sm">{title}</div>
+                        <div className="text-gray-400 text-xs mt-0.5">{desc}</div>
+                      </div>
+                      <Link href={href} className="flex-shrink-0 text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg transition-colors">{cta}</Link>
+                    </li>
+                  ))}
+                </ol>
+                <div className="text-center">
+                  <Link href="/demo" className="inline-flex items-center gap-2 text-sm text-indigo-400 hover:text-indigo-300 border border-indigo-800 hover:border-indigo-600 px-4 py-2 rounded-lg transition-colors">
+                    ▶ Run sample (no setup required)
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">

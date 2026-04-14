@@ -1,11 +1,11 @@
 "use client";
 export const dynamic = "force-dynamic";
 import { useState } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { createBrowserSupabase } from "@/lib/supabaseBrowserClient";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-function getSupabase() {
+function getSupabase() { // eslint-disable-next-line @typescript-eslint/no-unused-vars
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

@@ -28,7 +28,13 @@ const TABLE_POLICIES = [
   { table: "docsci_pain_points", policies: ["docsci_pain_points_read_all"], isolation: "public read (research data)" },
 ];
 
-export async function GET() {
+export async function GET(req: Request) {
+  // Guard detailed schema info behind admin key to prevent schema leakage
+  const isAdmin = req.headers.get('x-admin-key') === process.env.ADMIN_KEY && !!process.env.ADMIN_KEY;
+  if (!isAdmin) {
+    return NextResponse.json({ status: 'ok', rls: 'enabled' });
+  }
+
   // Probe: anon (unauthenticated) client should see empty org/project data
   const anonClient = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
