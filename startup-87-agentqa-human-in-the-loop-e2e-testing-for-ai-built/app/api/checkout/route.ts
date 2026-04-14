@@ -53,6 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   const origin = req.headers.get('origin') ?? req.nextUrl.origin
+  try {
   const session = await stripe.checkout.sessions.create({
     customer: stripeCustomerId ?? undefined,
     mode: 'payment',
@@ -77,4 +78,9 @@ export async function POST(req: NextRequest) {
     url: session.url,
     session_id: session.id,
   }, { status: 201 })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Checkout error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
+  }
 }
