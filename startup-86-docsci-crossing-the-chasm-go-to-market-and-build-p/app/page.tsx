@@ -1,4 +1,5 @@
 import Link from "next/link";
+import NavBar from "@/components/NavBar";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -44,23 +45,9 @@ export default function Home() {
       <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-indigo-600 text-white px-4 py-2 rounded z-50">
         Skip to content
       </a>
-      <main id="main-content" className="min-h-screen bg-gray-950">
+      <main id="main-content" className="min-h-screen bg-gray-950 overflow-x-hidden">
       {/* Nav */}
-      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">⚡</span>
-          <span className="font-bold text-xl text-white">DocsCI</span>
-        </div>
-        <div className="flex gap-6 text-sm text-gray-400">
-          <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
-          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
-          <Link href="/playground" className="hover:text-white transition-colors">Playground</Link>
-          <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
-          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
-        </div>
-      </nav>
+      <NavBar />
 
       {/* Hero */}
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
