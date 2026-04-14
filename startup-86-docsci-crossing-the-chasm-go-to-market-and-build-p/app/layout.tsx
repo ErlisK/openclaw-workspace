@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: "DocsCI – Docs-Specific CI for API & SDK Teams",
   description: "Eliminate broken examples, detect API drift, and keep docs in lockstep with releases.",
   metadataBase: new URL('https://snippetci.com'),
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
   openGraph: {
     title: "DocsCI",
     description: "Docs-specific CI pipeline for API/SDK platform teams",

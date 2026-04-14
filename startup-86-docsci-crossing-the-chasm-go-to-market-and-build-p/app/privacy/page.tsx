@@ -35,7 +35,7 @@ export default function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-white font-semibold mb-2">6. Your Rights</h2>
-            <p>Depending on your jurisdiction, you may have rights to access, correct, or delete your personal data. Contact us to exercise these rights.</p>
+            <p>Depending on your jurisdiction, you may have rights to access, correct, or delete your personal data. To exercise these rights, email <a href="mailto:privacy@snippetci.com" className="text-indigo-400 hover:underline">privacy@snippetci.com</a> or contact us at: DocsCI / Lima Labs, 2298 Johanna Court, Pinole, CA 94564.</p>
           </div>
           <div>
             <h2 className="text-white font-semibold mb-2">7. Contact</h2>

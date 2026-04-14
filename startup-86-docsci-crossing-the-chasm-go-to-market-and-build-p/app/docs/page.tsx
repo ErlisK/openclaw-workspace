@@ -40,6 +40,14 @@ const SECTIONS = [
     badge: "Download",
     badgeColor: "bg-green-900 text-green-300",
   },
+  {
+    icon: "🔌",
+    title: "API Reference",
+    desc: "Full REST API docs: authentication, runs/queue, findings, tokens, rate limits, and error codes.",
+    href: "/docs/api",
+    badge: "v1",
+    badgeColor: "bg-gray-800 text-gray-300",
+  },
 ];
 
 export default function DocsPage() {
@@ -100,6 +108,7 @@ export default function DocsPage() {
               { label: "Sandbox security model", href: "/docs/security#sandbox" },
               { label: "Network allowlists", href: "/docs/security#allowlist" },
               { label: "Pricing", href: "/pricing" },
+              { label: "API Reference", href: "/docs/api" },
             ].map((link) => (
               <Link
                 key={link.href}

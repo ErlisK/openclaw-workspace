@@ -38,8 +38,24 @@ export default function TermsPage() {
             <p>DocsCI is not liable for any indirect, incidental, or consequential damages arising from your use of the Service. Our maximum liability is limited to the amount you paid us in the preceding 12 months.</p>
           </div>
           <div>
-            <h2 className="text-white font-semibold mb-2">7. Contact</h2>
-            <p>For questions about these terms, email <a href="mailto:hello@snippetci.com" className="text-indigo-400 hover:underline">hello@snippetci.com</a>.</p>
+            <h2 className="text-white font-semibold mb-2">7. Governing Law</h2>
+            <p>These Terms shall be governed by and construed in accordance with the laws of the State of California, without regard to its conflict of law provisions. You agree to submit to the personal jurisdiction of courts located in San Francisco County, California.</p>
+          </div>
+          <div>
+            <h2 className="text-white font-semibold mb-2">8. Dispute Resolution</h2>
+            <p>Any dispute arising from these Terms will first be attempted to be resolved through good-faith negotiation. If unresolved after 30 days, disputes will be submitted to binding arbitration under the American Arbitration Association rules, conducted in San Francisco, California.</p>
+          </div>
+          <div>
+            <h2 className="text-white font-semibold mb-2">9. Changes to Terms</h2>
+            <p>We may update these Terms at any time. We will notify users of material changes via email or a prominent notice on the Service. Continued use after changes constitutes acceptance of the updated Terms.</p>
+          </div>
+          <div>
+            <h2 className="text-white font-semibold mb-2">10. Termination</h2>
+            <p>Either party may terminate this agreement at any time. Upon termination, your right to use the Service ceases immediately. We will retain your data for 30 days post-termination, after which it may be deleted.</p>
+          </div>
+          <div>
+            <h2 className="text-white font-semibold mb-2">11. Contact</h2>
+            <p>For questions about these terms, email <a href="mailto:hello@snippetci.com" className="text-indigo-400 hover:underline">hello@snippetci.com</a>. For legal notices: DocsCI / Lima Labs, 2298 Johanna Court, Pinole, CA 94564.</p>
           </div>
         </section>
       </div>
