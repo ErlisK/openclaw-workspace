@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react'
 import RunLogger, { LogEvent } from './RunLogger'
 import SessionControls, { SessionPhase } from './SessionControls'
+import FeedbackForm from './FeedbackForm'
 
 interface Job {
   id: string
@@ -35,12 +36,14 @@ function tabOf(et: string): FilterTab {
   return 'all'
 }
 
-export default function SandboxRunner({ sessionId, job }: Props) {
+export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const [panelTab, setPanelTab] = useState<FilterTab>('all')
   const [flushedCount, setFlushedCount] = useState(0)
   const [sessionPhase, setSessionPhase] = useState<SessionPhase>('idle')
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [feedbackDone, setFeedbackDone] = useState(false)
   const logsEndRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -167,7 +170,13 @@ export default function SandboxRunner({ sessionId, job }: Props) {
         <SessionControls
           sessionId={sessionId}
           tier={job.tier}
-          onPhaseChange={setSessionPhase}
+          onPhaseChange={(phase) => {
+            setSessionPhase(phase)
+            // Auto-open feedback form when session ends
+            if (['complete', 'abandoned', 'timed_out'].includes(phase)) {
+              setShowFeedback(true)
+            }
+          }}
           onComplete={(notes, reason) => {
             // Log end event
             const ga = (window as unknown as Record<string, unknown>).agentQA as
@@ -341,6 +350,68 @@ export default function SandboxRunner({ sessionId, job }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── Feedback drawer (slides up when session ends) ── */}
+      {showFeedback && !feedbackDone && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+          data-testid="feedback-drawer-overlay"
+        >
+          <div
+            className="w-full max-w-2xl max-h-[90vh] bg-gray-900 border border-gray-700 rounded-t-xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden"
+            data-testid="feedback-drawer"
+          >
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700 shrink-0">
+              <h2 className="text-sm font-semibold text-white">
+                Submit feedback
+                {sessionPhase === 'timed_out' && (
+                  <span className="ml-2 text-xs text-orange-400">(session timed out)</span>
+                )}
+              </h2>
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="text-gray-500 hover:text-gray-300 text-lg transition-colors"
+                data-testid="btn-close-feedback-drawer"
+                aria-label="Close feedback drawer"
+              >
+                ✕
+              </button>
+            </div>
+            {/* Drawer body */}
+            <div className="flex-1 overflow-y-auto px-5 py-4">
+              <FeedbackForm
+                sessionId={sessionId}
+                jobId={job.id}
+                assignmentId={assignmentId}
+                onSubmitted={(feedbackId) => {
+                  setFeedbackDone(true)
+                  setShowFeedback(false)
+                  // Log feedback event
+                  const ga = (window as unknown as Record<string, unknown>).agentQA as
+                    { log?: (ev: object) => void } | undefined
+                  ga?.log?.({
+                    event_type: 'navigation',
+                    ts: new Date().toISOString(),
+                    log_message: `Feedback submitted: ${feedbackId}`,
+                  })
+                }}
+                onCancel={() => setShowFeedback(false)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Feedback done banner ──────────────────────────── */}
+      {feedbackDone && (
+        <div
+          className="fixed bottom-4 right-4 z-50 bg-green-900 border border-green-700 text-green-200 text-sm rounded-lg px-4 py-2 shadow-lg"
+          data-testid="feedback-done-banner"
+        >
+          ✓ Feedback submitted
+        </div>
+      )}
     </div>
   )
 }
