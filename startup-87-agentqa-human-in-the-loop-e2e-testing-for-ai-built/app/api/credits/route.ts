@@ -1,5 +1,5 @@
 /**
- * GET  /api/credits — Get current user's credit balance
+ * GET  /api/credits — Get current user's credit balance + transaction history
  * POST /api/credits — Admin: manually add credits (for testing/bonus)
  */
 import { NextRequest, NextResponse } from 'next/server'
@@ -16,20 +16,25 @@ export async function GET(req: NextRequest) {
   const balance = await getBalance(user.id)
   if (!balance.ok) return NextResponse.json({ error: balance.error }, { status: 500 })
 
-  // Fetch recent transactions
+  // Fetch recent transactions — map amount_cents to amount for UI
   const admin = createAdminClient()
-  const { data: transactions } = await admin
+  const { data: rawTxns } = await admin
     .from('credit_transactions')
-    .select('*')
+    .select('id, user_id, amount_cents, balance_after, kind, description, job_id, stripe_payment_intent_id, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
+
+  const transactions = (rawTxns ?? []).map((tx: { id: string; user_id: string; amount_cents: number; balance_after: number; kind: string; description: string | null; job_id: string | null; stripe_payment_intent_id: string | null; created_at: string }) => ({
+    ...tx,
+    amount: Math.round(tx.amount_cents / 100), // credits (not cents)
+  }))
 
   return NextResponse.json({
     balance: balance.balance,
     held: balance.held,
     available: balance.available,
-    transactions: transactions ?? [],
+    transactions,
     packs: CREDIT_PACKS.map(p => ({
       id: p.id,
       name: p.name,
@@ -50,17 +55,16 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const { amount, description } = body as { amount?: number; description?: string }
 
-  // Only allow admin top-ups (check admin role)
+  // Allow admin role or test header
   const admin = createAdminClient()
-  const { data: profile } = await admin
-    .from('profiles')
+  const { data: dbUser } = await admin
+    .from('users')
     .select('role')
     .eq('id', user.id)
     .single()
 
-  // For test/bonus credits, also allow if the request has a test header
   const isTestRequest = req.headers.get('x-test-admin') === process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(-8)
-  const isAdmin = profile?.role === 'admin'
+  const isAdmin = dbUser?.role === 'admin'
 
   if (!isAdmin && !isTestRequest) {
     return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })

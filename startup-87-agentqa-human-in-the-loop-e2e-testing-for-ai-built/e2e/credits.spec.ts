@@ -47,8 +47,7 @@ function uid(t: string) {
 /** Top up credits via Supabase admin — bypasses RLS */
 async function topUpCredits(request: APIRequestContext, userId: string, amount: number) {
   if (!SERVICE_ROLE_KEY) return
-  // Direct Supabase update using service role
-  await request.patch(`${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`, {
+  await request.patch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
     data: { credits_balance: amount, credits_held: 0 },
     headers: {
       apikey: SERVICE_ROLE_KEY,

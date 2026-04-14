@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   // Get or create Stripe customer
   let stripeCustomerId: string | null = null
   const { data: profile } = await admin
-    .from('profiles')
+    .from('users')
     .select('stripe_customer_id')
     .eq('id', user.id)
     .single()
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     })
     stripeCustomerId = customer.id
     await admin
-      .from('profiles')
+      .from('users')
       .update({ stripe_customer_id: customer.id })
       .eq('id', user.id)
   }
