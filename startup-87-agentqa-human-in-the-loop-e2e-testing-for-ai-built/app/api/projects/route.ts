@@ -8,12 +8,12 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { data, error } = await supabase
-    .from('test_jobs')
-    .select('*')
-    .eq('client_id', user.id)
+    .from('projects')
+    .select('*, test_jobs(count)')
+    .eq('owner_id', user.id)
     .order('created_at', { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ jobs: data })
+  return NextResponse.json({ projects: data })
 }
 
 export async function POST(req: NextRequest) {
@@ -23,30 +23,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const body = await req.json()
-  const { title, url, tier = 'quick', instructions = '', project_id } = body
-
-  if (!url || !title) {
-    return NextResponse.json({ error: 'title and url are required' }, { status: 400 })
-  }
-
-  const PRICE = { quick: 500, standard: 1000, deep: 1500 }
-  const price_cents = PRICE[tier as keyof typeof PRICE] ?? 500
+  const { name, description, url } = body
+  if (!name) return NextResponse.json({ error: 'name is required' }, { status: 400 })
 
   const { data, error } = await supabase
-    .from('test_jobs')
-    .insert({
-      client_id: user.id,
-      title,
-      url,
-      tier,
-      price_cents,
-      instructions,
-      project_id: project_id ?? null,
-      status: 'draft',
-    })
+    .from('projects')
+    .insert({ owner_id: user.id, name, description: description ?? null, url: url ?? null })
     .select()
     .single()
-
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ job: data }, { status: 201 })
+  return NextResponse.json({ project: data }, { status: 201 })
 }

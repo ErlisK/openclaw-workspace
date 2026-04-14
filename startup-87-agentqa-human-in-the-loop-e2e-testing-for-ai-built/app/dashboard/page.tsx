@@ -1,86 +1,320 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
+'use client'
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+import { useEffect, useState, useCallback } from 'react'
+import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
+import type { TestJob, Project } from '@/lib/types'
+import { TIER_CONFIG } from '@/lib/types'
 
-  // Fetch user's test jobs
-  const { data: jobs } = await supabase
-    .from('test_jobs')
-    .select('id, url, tier, status, created_at')
-    .eq('buyer_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(10)
+const STATUS_COLORS: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  published: 'bg-blue-100 text-blue-700',
+  assigned: 'bg-yellow-100 text-yellow-700',
+  complete: 'bg-green-100 text-green-700',
+  expired: 'bg-red-100 text-red-700',
+  cancelled: 'bg-gray-100 text-gray-500',
+}
 
-  const tierColors: Record<string, string> = {
-    quick: 'bg-green-100 text-green-700',
-    standard: 'bg-blue-100 text-blue-700',
-    deep: 'bg-purple-100 text-purple-700',
+export default function DashboardPage() {
+  const supabase = createClient()
+  const router = useRouter()
+  const [userEmail, setUserEmail] = useState('')
+  const [projects, setProjects] = useState<Project[]>([])
+  const [jobs, setJobs] = useState<TestJob[]>([])
+  const [activeTab, setActiveTab] = useState<'jobs' | 'projects'>('jobs')
+  const [loading, setLoading] = useState(true)
+
+  // New project form
+  const [showNewProject, setShowNewProject] = useState(false)
+  const [projectName, setProjectName] = useState('')
+  const [projectUrl, setProjectUrl] = useState('')
+  const [projectDesc, setProjectDesc] = useState('')
+  const [projectSaving, setProjectSaving] = useState(false)
+
+  // New job form
+  const [showNewJob, setShowNewJob] = useState(false)
+  const [jobTitle, setJobTitle] = useState('')
+  const [jobUrl, setJobUrl] = useState('')
+  const [jobTier, setJobTier] = useState<'quick' | 'standard' | 'deep'>('quick')
+  const [jobInstructions, setJobInstructions] = useState('')
+  const [jobProjectId, setJobProjectId] = useState('')
+  const [jobSaving, setJobSaving] = useState(false)
+
+  const [error, setError] = useState('')
+
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    const [pRes, jRes] = await Promise.all([
+      fetch('/api/projects'),
+      fetch('/api/jobs'),
+    ])
+    if (pRes.ok) { const d = await pRes.json(); setProjects(d.projects ?? []) }
+    if (jRes.ok) { const d = await jRes.json(); setJobs(d.jobs ?? []) }
+    setLoading(false)
+  }, [])
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { router.push('/login'); return }
+      setUserEmail(user.email ?? '')
+      loadData()
+    })
+  }, [supabase, router, loadData])
+
+  async function handleSignOut() {
+    await fetch('/api/auth/signout', { method: 'POST' })
+    router.push('/login')
   }
-  const statusColors: Record<string, string> = {
-    queued: 'bg-gray-100 text-gray-600',
-    assigned: 'bg-yellow-100 text-yellow-700',
-    in_progress: 'bg-orange-100 text-orange-700',
-    tester_complete: 'bg-blue-100 text-blue-700',
-    report_ready: 'bg-green-100 text-green-700',
+
+  async function createProject(e: React.FormEvent) {
+    e.preventDefault()
+    setProjectSaving(true); setError('')
+    const res = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: projectName, url: projectUrl, description: projectDesc }),
+    })
+    const d = await res.json()
+    if (!res.ok) { setError(d.error); setProjectSaving(false); return }
+    setProjects(prev => [d.project, ...prev])
+    setShowNewProject(false); setProjectName(''); setProjectUrl(''); setProjectDesc('')
+    setProjectSaving(false)
+  }
+
+  async function deleteProject(id: string) {
+    if (!confirm('Delete this project? Jobs will not be deleted.')) return
+    await fetch(`/api/projects/${id}`, { method: 'DELETE' })
+    setProjects(prev => prev.filter(p => p.id !== id))
+  }
+
+  async function createJob(e: React.FormEvent) {
+    e.preventDefault()
+    setJobSaving(true); setError('')
+    const res = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: jobTitle, url: jobUrl, tier: jobTier,
+        instructions: jobInstructions, project_id: jobProjectId || undefined,
+      }),
+    })
+    const d = await res.json()
+    if (!res.ok) { setError(d.error); setJobSaving(false); return }
+    setJobs(prev => [d.job, ...prev])
+    setShowNewJob(false); setJobTitle(''); setJobUrl(''); setJobTier('quick'); setJobInstructions(''); setJobProjectId('')
+    setJobSaving(false)
+  }
+
+  async function deleteJob(id: string) {
+    if (!confirm('Delete this draft job?')) return
+    const res = await fetch(`/api/jobs/${id}`, { method: 'DELETE' })
+    if (res.ok) setJobs(prev => prev.filter(j => j.id !== id))
+    else { const d = await res.json(); setError(d.error) }
+  }
+
+  async function publishJob(id: string) {
+    const res = await fetch(`/api/jobs/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'published' }),
+    })
+    if (res.ok) {
+      const d = await res.json()
+      setJobs(prev => prev.map(j => j.id === id ? d.job : j))
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-indigo-600 font-bold text-lg">AgentQA</Link>
+      {/* Header */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-xl font-bold text-gray-900">AgentQA</span>
+          <span className="text-sm text-gray-400">Dashboard</span>
+        </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{user.email}</span>
-          <form action="/api/auth/signout" method="post">
-            <button type="submit" className="text-sm text-gray-500 hover:text-gray-700">Sign out</button>
-          </form>
+          <span className="text-sm text-gray-600">{userEmail}</span>
+          <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-gray-900">Sign out</button>
         </div>
-      </nav>
+      </header>
 
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-5xl mx-auto px-6 py-8">
+        {/* Tabs */}
+        <div className="flex gap-1 mb-8 bg-gray-100 p-1 rounded-lg w-fit">
+          {(['jobs', 'projects'] as const).map(tab => (
+            <button key={tab} onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors capitalize
+                ${activeTab === tab ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              {tab} {tab === 'jobs' ? `(${jobs.length})` : `(${projects.length})`}
+            </button>
+          ))}
+        </div>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm" data-testid="dashboard-error">
+            {error}
+          </div>
+        )}
+
+        {/* JOBS TAB */}
+        {activeTab === 'jobs' && (
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Your Tests</h1>
-            <p className="text-gray-500 mt-1">Track your submitted test jobs</p>
-          </div>
-          <Link
-            href="/submit"
-            className="px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
-          >
-            + New test
-          </Link>
-        </div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Test Jobs</h2>
+              <button onClick={() => setShowNewJob(true)} data-testid="new-job-button"
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
+                + New Job
+              </button>
+            </div>
 
-        {!jobs || jobs.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
-            <div className="text-5xl mb-4">🧪</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No tests yet</h2>
-            <p className="text-gray-500 mb-6">Submit your first test and get results in under 4 hours.</p>
-            <Link href="/submit" className="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700">
-              Start a test — from $5
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3" data-testid="jobs-list">
-            {jobs.map((job: { id: string; url: string; tier: string; status: string; created_at: string }) => (
-              <div key={job.id} className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between hover:border-gray-300 transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{job.url}</p>
-                  <p className="text-xs text-gray-400 mt-1">{new Date(job.created_at).toLocaleString()}</p>
+            {/* New Job Form */}
+            {showNewJob && (
+              <form onSubmit={createJob} data-testid="new-job-form"
+                className="mb-6 p-5 bg-white border border-gray-200 rounded-xl shadow-sm space-y-3">
+                <h3 className="font-medium text-gray-900 text-sm">New Test Job</h3>
+                <input required value={jobTitle} onChange={e => setJobTitle(e.target.value)}
+                  placeholder="Job title" data-testid="job-title-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input required value={jobUrl} onChange={e => setJobUrl(e.target.value)}
+                  placeholder="App URL (https://...)" data-testid="job-url-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <select value={jobTier} onChange={e => setJobTier(e.target.value as typeof jobTier)}
+                  data-testid="job-tier-select"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  {Object.entries(TIER_CONFIG).map(([k, v]) => (
+                    <option key={k} value={k}>{v.label} — ${v.price_cents / 100} (~{v.duration_min} min)</option>
+                  ))}
+                </select>
+                {projects.length > 0 && (
+                  <select value={jobProjectId} onChange={e => setJobProjectId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">No project</option>
+                    {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                  </select>
+                )}
+                <textarea value={jobInstructions} onChange={e => setJobInstructions(e.target.value)}
+                  placeholder="Testing instructions (optional)" rows={3} data-testid="job-instructions-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <div className="flex gap-2">
+                  <button type="submit" disabled={jobSaving} data-testid="job-save-button"
+                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                    {jobSaving ? 'Saving…' : 'Create Draft'}
+                  </button>
+                  <button type="button" onClick={() => setShowNewJob(false)}
+                    className="px-4 py-2 text-gray-600 text-sm hover:text-gray-900">Cancel</button>
                 </div>
-                <div className="flex items-center gap-3 ml-4">
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full capitalize ${tierColors[job.tier] || 'bg-gray-100 text-gray-600'}`}>
-                    {job.tier}
-                  </span>
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${statusColors[job.status] || 'bg-gray-100 text-gray-600'}`}>
-                    {job.status.replace('_', ' ')}
-                  </span>
-                </div>
+              </form>
+            )}
+
+            {loading ? (
+              <div className="text-sm text-gray-400 py-8 text-center">Loading…</div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center py-16 text-gray-400" data-testid="jobs-empty">
+                <p className="text-lg mb-2">No test jobs yet</p>
+                <p className="text-sm">Create your first job to get started</p>
               </div>
-            ))}
+            ) : (
+              <div className="space-y-3" data-testid="jobs-list">
+                {jobs.map(job => (
+                  <div key={job.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between"
+                    data-testid={`job-row-${job.id}`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-gray-900 text-sm truncate">{job.title}</span>
+                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${STATUS_COLORS[job.status]}`}>
+                          {job.status}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium">
+                          {TIER_CONFIG[job.tier]?.label ?? job.tier} — ${job.price_cents / 100}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 truncate">{job.url}</p>
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      {job.status === 'draft' && (
+                        <>
+                          <button onClick={() => publishJob(job.id)}
+                            className="text-xs px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md font-medium"
+                            data-testid={`publish-job-${job.id}`}>
+                            Publish
+                          </button>
+                          <button onClick={() => deleteJob(job.id)}
+                            className="text-xs px-3 py-1 text-red-500 hover:bg-red-50 rounded-md"
+                            data-testid={`delete-job-${job.id}`}>
+                            Delete
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* PROJECTS TAB */}
+        {activeTab === 'projects' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
+              <button onClick={() => setShowNewProject(true)} data-testid="new-project-button"
+                className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
+                + New Project
+              </button>
+            </div>
+
+            {/* New Project Form */}
+            {showNewProject && (
+              <form onSubmit={createProject} data-testid="new-project-form"
+                className="mb-6 p-5 bg-white border border-gray-200 rounded-xl shadow-sm space-y-3">
+                <h3 className="font-medium text-gray-900 text-sm">New Project</h3>
+                <input required value={projectName} onChange={e => setProjectName(e.target.value)}
+                  placeholder="Project name" data-testid="project-name-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input value={projectUrl} onChange={e => setProjectUrl(e.target.value)}
+                  placeholder="App base URL (optional)" data-testid="project-url-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <textarea value={projectDesc} onChange={e => setProjectDesc(e.target.value)}
+                  placeholder="Description (optional)" rows={2} data-testid="project-desc-input"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <div className="flex gap-2">
+                  <button type="submit" disabled={projectSaving} data-testid="project-save-button"
+                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50">
+                    {projectSaving ? 'Saving…' : 'Create Project'}
+                  </button>
+                  <button type="button" onClick={() => setShowNewProject(false)}
+                    className="px-4 py-2 text-gray-600 text-sm hover:text-gray-900">Cancel</button>
+                </div>
+              </form>
+            )}
+
+            {loading ? (
+              <div className="text-sm text-gray-400 py-8 text-center">Loading…</div>
+            ) : projects.length === 0 ? (
+              <div className="text-center py-16 text-gray-400" data-testid="projects-empty">
+                <p className="text-lg mb-2">No projects yet</p>
+                <p className="text-sm">Organize your test jobs into projects</p>
+              </div>
+            ) : (
+              <div className="space-y-3" data-testid="projects-list">
+                {projects.map(project => (
+                  <div key={project.id} className="bg-white border border-gray-200 rounded-xl p-4 flex items-center justify-between"
+                    data-testid={`project-row-${project.id}`}>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">{project.name}</p>
+                      {project.url && <p className="text-xs text-gray-400 mt-0.5">{project.url}</p>}
+                      {project.description && <p className="text-xs text-gray-500 mt-1">{project.description}</p>}
+                    </div>
+                    <button onClick={() => deleteProject(project.id)}
+                      className="text-xs px-3 py-1 text-red-500 hover:bg-red-50 rounded-md"
+                      data-testid={`delete-project-${project.id}`}>
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
