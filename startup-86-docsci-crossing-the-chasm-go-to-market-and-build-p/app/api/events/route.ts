@@ -31,6 +31,8 @@ const ALLOWED_EVENTS = new Set([
   "project.created", "project.updated",
   // Export
   "export.downloaded",
+  // Patches
+  "patch.downloaded", "patch_downloaded",
   // Templates
   "template.viewed", "template.downloaded",
   // UI
