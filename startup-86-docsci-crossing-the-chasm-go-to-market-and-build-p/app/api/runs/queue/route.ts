@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
   const mode = (body.mode as string) || "inline";
   const branch = (body.branch as string) || "main";
   const openapiText = body.openapi_text as string | undefined;
+  const docsciConfigText = body.docsci_config as string | undefined;
 
   const supabase = getServiceClient();
 
@@ -220,6 +221,7 @@ export async function POST(req: NextRequest) {
       openapiText: effectiveOpenapiText,
       branch,
       commitSha: (body.commit_sha as string) || "HEAD",
+      docsciConfigText,
     });
 
     return NextResponse.json({
@@ -233,6 +235,8 @@ export async function POST(req: NextRequest) {
       snippets_passed: result.snippetsPassed,
       snippets_failed: result.snippetsFailed,
       drift_detected: result.driftDetected,
+      config_loaded: result.configLoaded,
+      checks_enabled: result.checksEnabled,
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
