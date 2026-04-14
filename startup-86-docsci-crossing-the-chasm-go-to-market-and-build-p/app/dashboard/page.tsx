@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { DashboardTourWrapper } from "@/components/DashboardTourWrapper";
 
 async function signOut() {
   "use server";
@@ -52,6 +53,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex">
+      <DashboardTourWrapper />
       {/* Sidebar */}
       <aside className="w-56 border-r border-gray-800 flex flex-col shrink-0">
         <div className="p-5 border-b border-gray-800">

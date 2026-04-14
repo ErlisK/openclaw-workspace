@@ -108,6 +108,17 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     triggeredBy = user.id;
 
+    // RBAC: viewer role cannot trigger runs
+    const { data: membership } = await supabase
+      .from("docsci_org_members")
+      .select("role")
+      .eq("user_id", user.id)
+      .limit(1)
+      .single();
+    if (membership?.role === "viewer") {
+      return NextResponse.json({ error: "Forbidden: viewers cannot trigger runs" }, { status: 403 });
+    }
+
     const repoId = body.repo_id as string;
     if (!repoId) return NextResponse.json({ error: "repo_id required for mode=repo" }, { status: 400 });
 
