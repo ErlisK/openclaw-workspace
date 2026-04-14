@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import type { JobTier, JobStatus } from '@/lib/types'
 import { TIER_CONFIG } from '@/lib/types'
+import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
 
 // ─── Auth helpers ────────────────────────────────────────────
 
@@ -164,27 +165,81 @@ export async function updateJob(
 export async function publishJob(jobId: string): Promise<ActionResult<void>> {
   const { supabase, user } = await requireUser()
 
-  // Verify ownership and current status
   const { data: job, error: fetchError } = await supabase
     .from('test_jobs')
-    .select('status, payment_status')
+    .select('status, payment_status, published_at')
     .eq('id', jobId)
     .eq('client_id', user.id)
     .single()
 
   if (fetchError || !job) return { ok: false, error: 'Job not found' }
-  if (job.status !== 'draft') return { ok: false, error: 'Only draft jobs can be published' }
+
+  const transition = validateTransition(job.status as JobStatus, 'published', { actorIsClient: true })
+  if (!transition.ok) return transition
 
   const { error } = await supabase
     .from('test_jobs')
     .update({
       status: 'published' as JobStatus,
       published_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
     })
     .eq('id', jobId)
     .eq('client_id', user.id)
 
   if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/dashboard')
+  revalidatePath(`/jobs/${jobId}`)
+  revalidatePath('/marketplace')
+  return { ok: true, data: undefined }
+}
+
+export async function completeJob(jobId: string, assignmentId: string): Promise<ActionResult<void>> {
+  const { supabase, user } = await requireUser()
+
+  // Verify tester owns this assignment
+  const { data: assignment } = await supabase
+    .from('job_assignments')
+    .select('job_id, status')
+    .eq('id', assignmentId)
+    .eq('tester_id', user.id)
+    .single()
+
+  if (!assignment) return { ok: false, error: 'Assignment not found' }
+  if (assignment.job_id !== jobId) return { ok: false, error: 'Assignment does not match job' }
+  if (assignment.status !== 'active') return { ok: false, error: 'Assignment is not active' }
+
+  // Get current job status
+  const { data: job } = await supabase
+    .from('test_jobs')
+    .select('status, published_at')
+    .eq('id', jobId)
+    .single()
+
+  if (!job) return { ok: false, error: 'Job not found' }
+
+  // Check if expired
+  if (isJobExpired(job.published_at)) {
+    await supabase.from('test_jobs').update({ status: 'expired' as JobStatus }).eq('id', jobId)
+    return { ok: false, error: 'Job has expired' }
+  }
+
+  const transition = validateTransition(job.status as JobStatus, 'complete', { actorIsTester: true })
+  if (!transition.ok) return transition
+
+  // Complete the job and mark assignment as submitted
+  const { error: jobError } = await supabase
+    .from('test_jobs')
+    .update({ status: 'complete' as JobStatus, completed_at: new Date().toISOString() })
+    .eq('id', jobId)
+
+  if (jobError) return { ok: false, error: jobError.message }
+
+  await supabase
+    .from('job_assignments')
+    .update({ status: 'submitted', submitted_at: new Date().toISOString() })
+    .eq('id', assignmentId)
 
   revalidatePath('/dashboard')
   revalidatePath(`/jobs/${jobId}`)
@@ -203,9 +258,9 @@ export async function cancelJob(jobId: string): Promise<ActionResult<void>> {
     .single()
 
   if (!job) return { ok: false, error: 'Job not found' }
-  if (!['draft', 'published'].includes(job.status)) {
-    return { ok: false, error: 'Only draft or published jobs can be cancelled' }
-  }
+
+  const transition = validateTransition(job.status as JobStatus, 'cancelled', { actorIsClient: true })
+  if (!transition.ok) return transition
 
   const { error } = await supabase
     .from('test_jobs')
