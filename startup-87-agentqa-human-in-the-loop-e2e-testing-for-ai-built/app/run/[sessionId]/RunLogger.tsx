@@ -87,9 +87,14 @@ export default function RunLogger({ sessionId, targetUrl, onEvent }: Props) {
 
     // Listen for messages from the iframe (if the target sends them)
     // Expected message format: { type: 'agentqa_event', event: LogEvent }
+    // Or batch format from injected proxy script: { type: 'agentqa_event_batch', events: LogEvent[] }
     function onMessage(e: MessageEvent) {
       if (e.data?.type === 'agentqa_event' && e.data?.event) {
         logEvent(e.data.event as LogEvent)
+      }
+      // Batch events from the proxy injector
+      if (e.data?.type === 'agentqa_event_batch' && Array.isArray(e.data?.events)) {
+        ;(e.data.events as LogEvent[]).forEach(ev => logEvent(ev))
       }
       // Also handle console messages forwarded from iframe
       if (e.data?.type === 'agentqa_console') {

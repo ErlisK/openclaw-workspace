@@ -38,6 +38,9 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
   const logsEndRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
+  // Route the iframe through our proxy so the injected logger can capture events
+  const iframeSrc = `/api/proxy?url=${encodeURIComponent(job.url)}&session=${sessionId}`
+
   const handleEvent = useCallback((ev: {
     event_type: string
     ts: string
@@ -131,7 +134,7 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
           )}
           <iframe
             ref={iframeRef}
-            src={job.url}
+            src={iframeSrc}
             className="w-full h-full border-none"
             onLoad={handleIframeLoad}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
