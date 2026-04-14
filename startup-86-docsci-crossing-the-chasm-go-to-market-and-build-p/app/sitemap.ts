@@ -55,5 +55,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/for/openapi-enterprise`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
     { url: `${base}/for/nextjs-mdx-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
     { url: `${base}/for/gitlab-ci-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${base}/roadmap`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${base}/roadmap/gitlab-integration`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/roadmap/customer-hosted-runner`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/roadmap/graphql-schema-smoke-tests`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
   ];
 }
