@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const DEFAULT_JS = `// Run any JavaScript snippet here
 const nums = [1, 2, 3, 4, 5];
@@ -8,33 +8,78 @@ console.log("Sum:", sum);
 console.log("DocsCI Playground 🚀");
 `;
 
+const DEFAULT_PY = `# DocsCI Python Playground
+nums = [1, 2, 3, 4, 5]
+total = sum(nums)
+print(f"Sum: {total}")
+print("DocsCI supports Python too! 🐍")
+`;
+
+type Language = "javascript" | "python";
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    loadPyodide: (opts: { indexURL: string }) => Promise<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    pyodideInstance: any;
+    pyodideLoading: boolean;
+  }
+}
+
 export default function PlaygroundPage() {
-  const [code, setCode] = useState(DEFAULT_JS);
+  const [lang, setLang] = useState<Language>("javascript");
+  const [jsCode, setJsCode] = useState(DEFAULT_JS);
+  const [pyCode, setPyCode] = useState(DEFAULT_PY);
   const [output, setOutput] = useState<string[]>([]);
   const [running, setRunning] = useState(false);
+  const [pyodideReady, setPyodideReady] = useState(false);
+  const [pyodideLoading, setPyodideLoading] = useState(false);
   const workerRef = useRef<Worker | null>(null);
 
-  function runCode() {
+  const code = lang === "javascript" ? jsCode : pyCode;
+  const setCode = lang === "javascript" ? setJsCode : setPyCode;
+
+  // Load Pyodide when Python tab is selected
+  useEffect(() => {
+    if (lang !== "python" || pyodideReady || pyodideLoading) return;
+    setPyodideLoading(true);
+
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/pyodide.js";
+    script.onload = async () => {
+      try {
+        const py = await window.loadPyodide({
+          indexURL: "https://cdn.jsdelivr.net/pyodide/v0.24.1/full/",
+        });
+        window.pyodideInstance = py;
+        setPyodideReady(true);
+      } catch (e) {
+        console.error("Pyodide load error", e);
+      } finally {
+        setPyodideLoading(false);
+      }
+    };
+    document.head.appendChild(script);
+  }, [lang, pyodideReady, pyodideLoading]);
+
+  function runJavaScript() {
     setRunning(true);
     setOutput([]);
-
-    const logs: string[] = [];
 
     try {
       const workerBlob = new Blob(
         [
           `
 self.onmessage = function(e) {
-  const logs = [];
   const origConsole = {
     log: (...a) => self.postMessage({ type: 'log', text: a.map(x => String(x)).join(' ') }),
     error: (...a) => self.postMessage({ type: 'error', text: a.map(x => String(x)).join(' ') }),
     warn: (...a) => self.postMessage({ type: 'warn', text: a.map(x => String(x)).join(' ') }),
   };
-  const sandboxConsole = { log: origConsole.log, error: origConsole.error, warn: origConsole.warn };
   try {
     const fn = new Function('console', e.data.code);
-    fn(sandboxConsole);
+    fn(origConsole);
     self.postMessage({ type: 'done' });
   } catch(err) {
     self.postMessage({ type: 'error', text: String(err) });
@@ -79,11 +124,49 @@ self.onmessage = function(e) {
         URL.revokeObjectURL(url);
       };
 
-      worker.postMessage({ code });
+      worker.postMessage({ code: jsCode });
     } catch (err) {
       setOutput([`❌ ${String(err)}`]);
       setRunning(false);
     }
+  }
+
+  async function runPython() {
+    if (!pyodideReady || !window.pyodideInstance) return;
+    setRunning(true);
+    setOutput([]);
+
+    const logs: string[] = [];
+    try {
+      const py = window.pyodideInstance;
+      // Capture stdout
+      py.runPython(`
+import sys
+import io
+sys.stdout = io.StringIO()
+sys.stderr = io.StringIO()
+      `);
+      try {
+        py.runPython(pyCode);
+        const stdout = py.runPython("sys.stdout.getvalue()");
+        const stderr = py.runPython("sys.stderr.getvalue()");
+        if (stdout) stdout.trim().split("\n").forEach((l: string) => logs.push(l));
+        if (stderr) stderr.trim().split("\n").forEach((l: string) => logs.push(`⚠️ ${l}`));
+      } catch (err) {
+        logs.push(`❌ ${String(err)}`);
+      } finally {
+        py.runPython("sys.stdout = sys.__stdout__; sys.stderr = sys.__stderr__");
+      }
+    } catch (err) {
+      logs.push(`❌ ${String(err)}`);
+    }
+    setOutput(logs);
+    setRunning(false);
+  }
+
+  function runCode() {
+    if (lang === "javascript") runJavaScript();
+    else runPython();
   }
 
   return (
@@ -107,9 +190,9 @@ self.onmessage = function(e) {
 
       <div className="max-w-5xl mx-auto px-6 py-8">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-2">JavaScript Sandbox</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">Code Sandbox</h1>
           <p className="text-gray-400 text-sm">
-            Run JavaScript snippets in-browser with no network access. This is a public demo — no account required.{" "}
+            Run code snippets in-browser with no network access. No account required.{" "}
             <a href="/signup" className="text-indigo-400 hover:underline">
               Sign up
             </a>{" "}
@@ -117,14 +200,41 @@ self.onmessage = function(e) {
           </p>
         </div>
 
+        {/* Language Tabs */}
+        <div className="flex gap-2 mb-4">
+          {(["javascript", "python"] as Language[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => { setLang(l); setOutput([]); }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                lang === l
+                  ? "bg-indigo-600 text-white"
+                  : "bg-gray-800 text-gray-400 hover:text-white"
+              }`}
+            >
+              {l === "javascript" ? "⚡ JavaScript" : "🐍 Python"}
+            </button>
+          ))}
+          {lang === "python" && !pyodideReady && (
+            <span className="text-xs text-gray-500 self-center ml-2">
+              {pyodideLoading ? "Loading Python runtime…" : "Click Python to load runtime"}
+            </span>
+          )}
+          {lang === "python" && pyodideReady && (
+            <span className="text-xs text-green-500 self-center ml-2">✓ Python ready</span>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Editor */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-              <span className="text-sm font-medium text-gray-300">JavaScript</span>
+              <span className="text-sm font-medium text-gray-300">
+                {lang === "javascript" ? "JavaScript" : "Python"}
+              </span>
               <button
                 onClick={runCode}
-                disabled={running}
+                disabled={running || (lang === "python" && !pyodideReady)}
                 className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors"
               >
                 {running ? (

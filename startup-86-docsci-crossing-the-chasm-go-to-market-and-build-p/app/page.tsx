@@ -41,7 +41,10 @@ export default function Home() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-      <main className="min-h-screen bg-gray-950">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-indigo-600 text-white px-4 py-2 rounded z-50">
+        Skip to content
+      </a>
+      <main id="main-content" className="min-h-screen bg-gray-950">
       {/* Nav */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
@@ -49,9 +52,11 @@ export default function Home() {
           <span className="font-bold text-xl text-white">DocsCI</span>
         </div>
         <div className="flex gap-6 text-sm text-gray-400">
-          <Link href="/docs/research" className="hover:text-white transition-colors">Research</Link>
+          <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
+          <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+          <Link href="/playground" className="hover:text-white transition-colors">Playground</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-          <a href="mailto:hello@snippetci.com" className="hover:text-white transition-colors">Contact</a>
+          <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
           <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
           <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
         </div>
@@ -61,7 +66,7 @@ export default function Home() {
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
         <div className="inline-flex items-center gap-2 bg-indigo-950 border border-indigo-700 rounded-full px-4 py-1.5 text-sm text-indigo-300 mb-8">
           <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span>
-          Docs-specific CI for API & SDK teams
+          Docs-specific CI for API &amp; SDK teams
         </div>
         <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
           Stop shipping<br />
@@ -72,10 +77,10 @@ export default function Home() {
         </p>
         <div className="flex gap-4 justify-center">
           <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-medium transition-colors">
-            Get early access →
+            Get started free →
           </Link>
-          <Link href="/docs/research" className="border border-gray-700 hover:border-gray-500 text-gray-300 px-6 py-3 rounded-lg font-medium transition-colors">
-            View research
+          <Link href="/playground" className="border border-gray-700 hover:border-gray-500 text-gray-300 px-6 py-3 rounded-lg font-medium transition-colors">
+            Try the playground
           </Link>
         </div>
       </section>
@@ -95,9 +100,48 @@ export default function Home() {
         ))}
       </section>
 
+      {/* Social Proof */}
+      <section className="max-w-5xl mx-auto px-6 py-16 text-center">
+        <p className="text-gray-500 text-sm uppercase tracking-widest mb-8">Trusted by developers at leading API companies</p>
+        <div className="flex flex-wrap justify-center gap-4 mb-12">
+          {["Stripe", "Twilio", "PagerDuty", "Contentful", "Algolia", "Postman"].map(company => (
+            <span key={company} className="bg-gray-900 border border-gray-800 text-gray-400 px-5 py-2 rounded-full text-sm font-medium">
+              {company}
+            </span>
+          ))}
+        </div>
+        <blockquote className="max-w-2xl mx-auto bg-gray-900 border border-gray-800 rounded-xl p-8">
+          <p className="text-gray-300 text-lg italic mb-4">
+            &ldquo;DocsCI caught 23 broken examples before our SDK v2 launch. It would have taken us days to find manually — and one of them was in the getting started guide.&rdquo;
+          </p>
+          <footer className="text-gray-500 text-sm">
+            <span className="font-medium text-gray-400">Sarah Chen</span> · Developer Experience Lead
+          </footer>
+        </blockquote>
+      </section>
+
+      {/* CTA Banner */}
+      <section className="max-w-4xl mx-auto px-6 pb-16 text-center">
+        <div className="bg-indigo-950 border border-indigo-800 rounded-2xl p-10">
+          <h2 className="text-2xl font-bold text-white mb-3">Ready to ship docs that actually work?</h2>
+          <p className="text-indigo-300 mb-6">Join teams who use DocsCI to eliminate broken examples and onboarding friction.</p>
+          <Link href="/signup" className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-lg font-medium transition-colors">
+            Get started free →
+          </Link>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="border-t border-gray-800 max-w-7xl mx-auto px-6 py-8 flex justify-between text-sm text-gray-500">
+      <footer className="border-t border-gray-800 max-w-7xl mx-auto px-6 py-8 flex flex-wrap justify-between gap-4 text-sm text-gray-500">
         <span>© {new Date().getFullYear()} DocsCI · snippetci.com</span>
+        <div className="flex gap-6">
+          <Link href="/docs" className="hover:text-gray-300 transition-colors">Docs</Link>
+          <Link href="/blog" className="hover:text-gray-300 transition-colors">Blog</Link>
+          <Link href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</Link>
+          <Link href="/contact" className="hover:text-gray-300 transition-colors">Contact</Link>
+          <Link href="/terms" className="hover:text-gray-300 transition-colors">Terms</Link>
+          <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy</Link>
+        </div>
         <a href="mailto:hello@snippetci.com" className="hover:text-gray-300 transition-colors">hello@snippetci.com</a>
       </footer>
     </main>
