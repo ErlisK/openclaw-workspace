@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
+import { holdCredits, spendCredits, releaseCredits } from '@/lib/credits'
 import type { JobStatus } from '@/lib/types'
 
 /**
  * POST /api/jobs/[id]/transition
  * Body: { to: JobStatus, assignment_id?: string }
  *
- * Enforces the job lifecycle state machine server-side.
- * RLS ensures the user can only act on jobs they own or are assigned to.
+ * Enforces the job lifecycle state machine + credit gating:
+ * - draft → published:  hold credits (gate if insufficient)
+ * - published → complete:  spend held credits
+ * - published → expired/cancelled:  release held credits
  */
 export async function POST(
   req: NextRequest,
@@ -24,10 +27,10 @@ export async function POST(
 
   if (!to) return NextResponse.json({ error: 'to (target status) is required' }, { status: 400 })
 
-  // Fetch the job — RLS will filter to what the user can see
+  // Fetch the job — include tier for credit calculation
   const { data: job, error: jobError } = await supabase
     .from('test_jobs')
-    .select('id, status, client_id, published_at')
+    .select('id, status, client_id, published_at, tier')
     .eq('id', jobId)
     .single()
 
@@ -54,8 +57,9 @@ export async function POST(
 
   // Check expiry for published/assigned jobs
   if (['published', 'assigned'].includes(job.status) && isJobExpired(job.published_at)) {
-    // Auto-expire
+    // Auto-expire + release credits
     await supabase.from('test_jobs').update({ status: 'expired' as JobStatus }).eq('id', jobId)
+    if (isClient) await releaseCredits(user.id, jobId, job.tier)
     return NextResponse.json({ error: 'Job has expired and cannot be transitioned' }, { status: 409 })
   }
 
@@ -71,6 +75,23 @@ export async function POST(
       { error: validation.error, code: validation.code },
       { status: 422 }
     )
+  }
+
+  // ── Credit gating ─────────────────────────────────────────────────────────
+
+  if (to === 'published' && isClient) {
+    // Hold credits — gate publish if insufficient
+    const holdResult = await holdCredits(user.id, jobId, job.tier)
+    if (!holdResult.ok) {
+      return NextResponse.json(
+        {
+          error: holdResult.error,
+          code: 'INSUFFICIENT_CREDITS',
+          credits_required: true,
+        },
+        { status: 402 }  // Payment Required
+      )
+    }
   }
 
   // Build the update payload
@@ -92,7 +113,25 @@ export async function POST(
     .select()
     .single()
 
-  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+  if (updateError) {
+    // Rollback hold if publish DB update failed
+    if (to === 'published' && isClient) {
+      await releaseCredits(user.id, jobId, job.tier)
+    }
+    return NextResponse.json({ error: updateError.message }, { status: 500 })
+  }
+
+  // ── Post-transition credit actions ────────────────────────────────────────
+
+  // Complete → spend credits (deduct held amount)
+  if (to === 'complete' && isClient) {
+    await spendCredits(user.id, jobId, job.tier)
+  }
+
+  // Expired/cancelled → release held credits
+  if ((to === 'expired' || to === 'cancelled') && isClient) {
+    await releaseCredits(user.id, jobId, job.tier)
+  }
 
   // If completing, also mark assignment as submitted
   if (to === 'complete' && assignment_id) {
