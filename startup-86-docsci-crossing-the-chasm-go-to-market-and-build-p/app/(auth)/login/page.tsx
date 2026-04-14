@@ -5,11 +5,8 @@ import { createBrowserSupabase } from "@/lib/supabaseBrowserClient";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-function getSupabase() { // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+function getSupabase() {
+  return createBrowserSupabase();
 }
 
 export default function LoginPage() {
