@@ -224,6 +224,102 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     payload: { session_id: SESSION_ID, started: started },
   });
 
+  // ─── Click capture (optional) ────────────────────────────────
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', function(e) {
+      try {
+        var t = e.target;
+        if (!t || !(t instanceof Element)) return;
+        // Build a minimal selector path (tag + id/class/text)
+        function describeEl(el) {
+          if (!el || !(el instanceof Element)) return '';
+          var tag = el.tagName.toLowerCase();
+          var id = el.id ? '#' + el.id : '';
+          var cls = el.className && typeof el.className === 'string'
+            ? '.' + el.className.trim().replace(/\s+/g, '.').slice(0, 40) : '';
+          var txt = (el.textContent || '').trim().slice(0, 60);
+          return tag + id + cls + (txt ? '[' + txt + ']' : '');
+        }
+        // Walk up to 4 levels for a breadcrumb
+        var path = [];
+        var cur = t;
+        for (var i = 0; i < 4 && cur && cur instanceof Element; i++) {
+          path.unshift(describeEl(cur));
+          cur = cur.parentElement;
+        }
+        queue({
+          event_type: 'click',
+          ts: now(),
+          log_message: path.join(' > '),
+          payload: {
+            tag: t.tagName.toLowerCase(),
+            id: t.id || null,
+            class: (typeof t.className === 'string' ? t.className.trim() : '') || null,
+            text: (t.textContent || '').trim().slice(0, 120) || null,
+            x: Math.round(e.clientX),
+            y: Math.round(e.clientY),
+          },
+        });
+      } catch(e) {}
+    }, true /* capture phase — fires before any stopPropagation */);
+  }
+
+  // ─── DOM snapshot (optional, throttled) ─────────────────────
+  var _lastSnapshot = 0;
+  var SNAPSHOT_COOLDOWN_MS = 10000; // at most one snapshot per 10s
+
+  function takeSnapshot(trigger) {
+    if (typeof document === 'undefined') return;
+    var now_ms = Date.now();
+    if (now_ms - _lastSnapshot < SNAPSHOT_COOLDOWN_MS) return;
+    _lastSnapshot = now_ms;
+    try {
+      // Lightweight structural snapshot: tags + ids + key attrs, no content
+      function snapshotNode(el, depth) {
+        if (!el || !(el instanceof Element)) return null;
+        if (depth > 5) return { tag: '...', children: [] };
+        var tag = el.tagName.toLowerCase();
+        // Skip script/style/svg internals for brevity
+        if (['script','style','noscript'].indexOf(tag) !== -1) return null;
+        var attrs = {};
+        var keep = ['id','class','href','src','type','name','role','aria-label'];
+        for (var i = 0; i < keep.length; i++) {
+          var v = el.getAttribute(keep[i]);
+          if (v) attrs[keep[i]] = v.slice(0, 80);
+        }
+        var children = [];
+        var childEls = el.children;
+        for (var j = 0; j < Math.min(childEls.length, 12); j++) {
+          var c = snapshotNode(childEls[j], depth + 1);
+          if (c) children.push(c);
+        }
+        var node = { tag: tag };
+        if (Object.keys(attrs).length) node['attrs'] = attrs;
+        if (children.length) node['children'] = children;
+        return node;
+      }
+      var snap = snapshotNode(document.body, 0);
+      queue({
+        event_type: 'dom_snapshot',
+        ts: now(),
+        log_message: 'DOM snapshot: ' + trigger,
+        payload: { trigger: trigger, snapshot: snap },
+      });
+    } catch(e) {}
+  }
+
+  // Expose snapshot on public API so RunLogger can trigger on demand
+  // Also take one snapshot on initial load
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(function() { takeSnapshot('load'); }, 500);
+    } else {
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() { takeSnapshot('DOMContentLoaded'); }, 500);
+      });
+    }
+  }
+
   // ─── Periodic + exit flush ───────────────────────────────────
   setInterval(flush, 5000);
   if (typeof window !== 'undefined') {
@@ -238,6 +334,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
       flush: flush,
       queue: queue,
       getBuffer: function() { return buf.slice(); },
+      snapshot: function(trigger) { takeSnapshot(trigger || 'manual'); },
     };
   }
 

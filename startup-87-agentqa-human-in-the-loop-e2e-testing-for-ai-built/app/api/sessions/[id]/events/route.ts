@@ -61,6 +61,9 @@ export async function POST(
     response_body: ev.response_body ?? null,
     log_level: ev.log_level ?? null,
     log_message: ev.log_message ?? null,
+    element_selector: ev.element_selector ?? (ev.event_type === 'click' && ev.log_message ? ev.log_message : null),
+    element_text: ev.element_text ?? (ev.payload?.text ?? null),
+    page_url: ev.page_url ?? ev.request_url ?? null,
     payload: ev.payload ?? null,
   }))
 

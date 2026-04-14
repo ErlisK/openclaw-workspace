@@ -84,6 +84,8 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
       return 'text-green-400'
     }
     if (entry.event_type === 'navigation') return 'text-blue-400'
+    if (entry.event_type === 'click') return 'text-purple-400'
+    if (entry.event_type === 'dom_snapshot') return 'text-indigo-400'
     if (entry.status_code && entry.status_code >= 400) return 'text-red-400'
     return 'text-gray-300'
   }
@@ -93,6 +95,8 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
     if (entry.event_type === 'navigation') return '→'
     if (entry.event_type === 'network_request') return '↑'
     if (entry.event_type === 'network_response') return '↓'
+    if (entry.event_type === 'click') return '✓'
+    if (entry.event_type === 'dom_snapshot') return '▦'
     return '·'
   }
 
