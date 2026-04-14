@@ -26,9 +26,28 @@ import { createAdminClient } from '@/lib/supabase/server'
  * Auth: tester who owns the session, or client who owns the job.
  */
 
+const AFFECTED_AREAS = [
+  'authentication',
+  'navigation',
+  'forms',
+  'payments',
+  'api',
+  'ui_layout',
+  'performance',
+  'data_display',
+  'search_filter',
+  'notifications',
+  'file_upload',
+  'permissions',
+  'onboarding',
+  'settings',
+  'other',
+] as const
+
 const IssueSchema = z.object({
   title: z.string().describe('Short issue title (5-10 words)'),
   severity: z.enum(['critical', 'high', 'medium', 'low']).describe('Impact severity'),
+  affected_areas: z.array(z.enum(AFFECTED_AREAS)).describe('Which product areas are affected by this issue (1-3 areas max)'),
   description: z.string().describe('Clear description of what went wrong (1-3 sentences)'),
   repro_steps: z.array(z.string()).describe('Numbered steps to reproduce this issue. Each step is a single concrete action.'),
   expected: z.string().describe('What the user expected to happen'),
@@ -41,6 +60,17 @@ const SummarySchema = z.object({
   what_worked: z.array(z.string()).describe('Bullet list of things that worked correctly during testing'),
   key_issues: z.array(IssueSchema).describe('Structured list of key issues found, each with repro steps. Max 8 issues, ordered by severity.'),
   issues_found: z.array(z.string()).describe('Quick summary bullet list of bugs/problems (one line each, same issues as key_issues but condensed)'),
+  severity_breakdown: z.object({
+    critical: z.number().int().min(0).describe('Count of critical severity issues'),
+    high: z.number().int().min(0).describe('Count of high severity issues'),
+    medium: z.number().int().min(0).describe('Count of medium severity issues'),
+    low: z.number().int().min(0).describe('Count of low severity issues'),
+  }).describe('Count of issues at each severity level'),
+  affected_areas_summary: z.array(z.object({
+    area: z.enum(AFFECTED_AREAS).describe('Product area'),
+    issue_count: z.number().int().min(1).describe('Number of issues in this area'),
+    max_severity: z.enum(['critical', 'high', 'medium', 'low']).describe('Highest severity issue in this area'),
+  })).describe('Summary of which product areas are affected and how severely, sorted by severity then count'),
   network_observations: z.array(z.string()).describe('Notable network request observations (errors, slow calls, unexpected calls)'),
   console_observations: z.array(z.string()).describe('Notable console errors, warnings, or log anomalies'),
   priority_fixes: z.array(z.string()).describe('Ordered list of recommended fixes, most critical first'),
@@ -196,9 +226,13 @@ If the app has no issues, say so clearly and explain what was verified.
 For EACH issue in key_issues:
 - Give a clear 5-10 word title
 - Assign severity (critical=app broken/data loss, high=major feature broken, medium=degraded UX, low=cosmetic)
+- Assign 1-3 affected_areas from: authentication, navigation, forms, payments, api, ui_layout, performance, data_display, search_filter, notifications, file_upload, permissions, onboarding, settings, other
 - Write repro_steps as numbered concrete actions (e.g. "1. Open the homepage", "2. Click the Login button")
 - State expected vs actual behavior
 - Include supporting evidence from console/network logs if available
+
+For severity_breakdown: count the number of issues at each severity level.
+For affected_areas_summary: aggregate which areas have issues, with the highest severity seen in each area.
 
 Use the navigation path and click events to reconstruct repro steps accurately.
 If multiple bugs share the same repro path, note it.

@@ -5,6 +5,7 @@ import { useState, useCallback } from 'react'
 interface Issue {
   title: string
   severity: 'critical' | 'high' | 'medium' | 'low'
+  affected_areas?: string[]
   description: string
   repro_steps: string[]
   expected: string
@@ -17,6 +18,8 @@ interface SummaryData {
   what_worked: string[]
   key_issues: Issue[]
   issues_found: string[]
+  severity_breakdown?: { critical: number; high: number; medium: number; low: number }
+  affected_areas_summary?: Array<{ area: string; issue_count: number; max_severity: string }>
   network_observations: string[]
   console_observations: string[]
   priority_fixes: string[]
@@ -82,6 +85,17 @@ function KeyIssueCard({ issue, index }: { issue: Issue; index: number }) {
       {open && (
         <div className="px-3 py-3 bg-gray-900 flex flex-col gap-3" data-testid="key-issue-body">
           <p className="text-sm text-gray-300">{issue.description}</p>
+
+          {/* Affected areas */}
+          {issue.affected_areas && issue.affected_areas.length > 0 && (
+            <div className="flex flex-wrap gap-1.5" data-testid="key-issue-affected-areas">
+              {issue.affected_areas!.map((area) => (
+                <span key={area} className="text-[10px] px-1.5 py-0.5 bg-indigo-950 border border-indigo-800 text-indigo-300 rounded capitalize">
+                  {area.replace('_', ' ')}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Repro steps */}
           {issue.repro_steps.length > 0 && (
@@ -282,6 +296,56 @@ export default function AISummary({ sessionId, autoLoad = false }: Props) {
                 )}
               </div>
             </div>
+
+            {/* ── Severity breakdown ── */}
+            {summary.severity_breakdown && (
+              <div className="mb-4 grid grid-cols-4 gap-2" data-testid="summary-severity-breakdown">
+                {(['critical', 'high', 'medium', 'low'] as const).map(level => {
+                  const count = summary.severity_breakdown![level]
+                  const colors = {
+                    critical: 'bg-red-950 border-red-800 text-red-300',
+                    high: 'bg-orange-950 border-orange-800 text-orange-300',
+                    medium: 'bg-yellow-950 border-yellow-800 text-yellow-300',
+                    low: 'bg-blue-950 border-blue-800 text-blue-300',
+                  }[level]
+                  return (
+                    <div key={level}
+                      className={`border rounded-lg p-2 text-center ${colors}`}
+                      data-testid={`severity-count-${level}`}
+                    >
+                      <div className="text-lg font-bold">{count}</div>
+                      <div className="text-[10px] uppercase tracking-wide opacity-80">{level}</div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* ── Affected areas ── */}
+            {summary.affected_areas_summary && summary.affected_areas_summary.length > 0 && (
+              <div className="mb-4" data-testid="summary-affected-areas">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">
+                  🗺️ Affected Areas
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {summary.affected_areas_summary.map(({ area, issue_count, max_severity }) => {
+                    const dot = { critical: '🔴', high: '🟠', medium: '🟡', low: '🔵' }[max_severity] ?? '⚪'
+                    return (
+                      <div
+                        key={area}
+                        className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-800 border border-gray-700 rounded-full text-xs text-gray-300"
+                        data-testid="affected-area-badge"
+                        title={`${issue_count} issue${issue_count !== 1 ? 's' : ''} — max severity: ${max_severity}`}
+                      >
+                        <span>{dot}</span>
+                        <span className="capitalize">{area.replace('_', ' ')}</span>
+                        {issue_count > 1 && <span className="text-gray-500">({issue_count})</span>}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Priority fixes (most important — shown first) */}
             {summary.priority_fixes.length > 0 && (
