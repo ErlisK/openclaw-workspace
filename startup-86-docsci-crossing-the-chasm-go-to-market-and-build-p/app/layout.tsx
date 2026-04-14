@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,9 +22,17 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const nonce = (await headers()).get("x-nonce") ?? "";
   return (
     <html lang="en">
+      <head>
+        {nonce && (
+          // Pass nonce to Next.js so it can attach to inline scripts
+          // eslint-disable-next-line @next/next/no-head-element
+          <meta name="x-nonce" content={nonce} />
+        )}
+      </head>
       <body className="bg-gray-950 text-gray-100 font-sans antialiased">{children}</body>
     </html>
   );

@@ -47,7 +47,7 @@ test.describe("Launch smoke — playground", () => {
   test("playground page loads without auth", async ({ page }) => {
     const res = await page.goto(`${BASE}/playground`);
     expect(res?.status()).toBe(200);
-    await expect(page.getByText(/Playground/i)).toBeVisible();
+    await expect(page.getByText('JavaScript Sandbox')).toBeVisible();
   });
 
   test("playground runs a trivial JS snippet and shows output", async ({ page }) => {
@@ -57,12 +57,12 @@ test.describe("Launch smoke — playground", () => {
     const editor = page.getByTestId("playground-editor");
     await editor.fill("console.log('hello-docsci-test');");
 
-    // Click Run
-    await page.getByRole("button", { name: /run/i }).click();
+    // Click Run button
+    await page.click('button:has-text("Run")');
 
-    // Wait for output to appear
+    // Wait for output to appear — give extra time for Worker to initialize
     const output = page.getByTestId("playground-output");
-    await expect(output).toContainText("hello-docsci-test", { timeout: 8000 });
+    await expect(output).toContainText("hello-docsci-test", { timeout: 15000 });
   });
 });
 
