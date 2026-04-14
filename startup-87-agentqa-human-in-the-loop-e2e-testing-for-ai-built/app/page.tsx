@@ -2,7 +2,18 @@ import Link from 'next/link'
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col items-center justify-center min-h-screen px-4 py-16 text-center">
+    <div className="min-h-screen bg-white">
+      {/* Nav */}
+      <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+        <span className="text-lg font-bold text-gray-900">AgentQA</span>
+        <div className="flex items-center gap-4 text-sm">
+          <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">Find jobs</Link>
+          <Link href="/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
+          <Link href="/signup" className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700">Get started</Link>
+        </div>
+      </nav>
+
+      <main className="flex flex-col items-center justify-center px-4 py-16 text-center">
       <div className="max-w-3xl">
         <div className="inline-block mb-6 px-3 py-1 text-xs font-semibold tracking-wide uppercase bg-indigo-100 text-indigo-700 rounded-full">
           Built for vibe coders & AI agent operators
@@ -17,7 +28,7 @@ export default function HomePage() {
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
           <Link
-            href="/submit"
+            href="/jobs/new"
             className="px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-lg"
           >
             Start a test — from $5
@@ -62,6 +73,7 @@ export default function HomePage() {
           No SDK install required on your app · Chrome desktop · Public URLs only
         </p>
       </div>
-    </main>
+      </main>
+    </div>
   )
 }
