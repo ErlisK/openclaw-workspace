@@ -90,6 +90,10 @@ export interface SnippetsSection {
 export interface SecuritySection {
   network_isolated?: boolean;
   allowlist?: string[];
+  /** Maximum memory in MB per JS/TS isolate (default: 64, max: 256) */
+  memory_limit_mb?: number;
+  /** Maximum CPU time in seconds per snippet (default: same as timeout_seconds) */
+  cpu_limit_seconds?: number;
 }
 
 export interface ChecksSection {
@@ -124,6 +128,8 @@ export const CONFIG_DEFAULTS: Required<DocsConfig> = {
   security: {
     network_isolated: false,
     allowlist: [],
+    memory_limit_mb: 64,
+    cpu_limit_seconds: 10,
   },
   checks: {
     accessibility: true,
@@ -158,6 +164,8 @@ export interface EffectiveConfig {
   security: {
     network_isolated: boolean;
     allowlist: string[];
+    memory_limit_mb: number;
+    cpu_limit_seconds: number;
   };
   checks: {
     accessibility: boolean;
@@ -303,6 +311,14 @@ export function buildEffective(cfg: DocsConfig): EffectiveConfig {
     security: {
       network_isolated: cfg.security?.network_isolated ?? false,
       allowlist: cfg.security?.allowlist ?? [],
+      memory_limit_mb: Math.min(
+        Math.max(cfg.security?.memory_limit_mb ?? 64, 32),
+        256  // hard max: 256 MB
+      ),
+      cpu_limit_seconds: Math.min(
+        Math.max(cfg.security?.cpu_limit_seconds ?? 10, 1),
+        60  // hard max: 60 s (same as timeout_seconds max)
+      ),
     },
     checks: {
       accessibility: cfg.checks?.accessibility ?? true,

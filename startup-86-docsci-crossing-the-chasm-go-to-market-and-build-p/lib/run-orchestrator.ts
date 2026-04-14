@@ -349,6 +349,7 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
               code: fence.code,
               language: execLang,
               timeout_ms: runConfig.snippets.timeout_ms,
+              memory_limit_mb: runConfig.security.memory_limit_mb,
             });
 
             // ── Redact logs before persisting ─────────────────────────────────

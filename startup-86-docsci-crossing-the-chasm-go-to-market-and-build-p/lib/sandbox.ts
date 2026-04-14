@@ -71,14 +71,17 @@ export interface SnippetInput {
   code: string;
   language: string;
   timeout_ms?: number;
+  /** Memory cap for JS/TS isolate in MB (default: 64, max: 256) */
+  memory_limit_mb?: number;
 }
 
 import { executeInIsolate } from "./sandbox-ivm";
 import { executeInPyodide } from "./sandbox-pyodide";
 
 export async function executeSnippet(input: SnippetInput): Promise<SandboxResult> {
-  const { code, language, timeout_ms = DEFAULT_TIMEOUT_MS } = input;
+  const { code, language, timeout_ms = DEFAULT_TIMEOUT_MS, memory_limit_mb = 64 } = input;
   const timeoutMs = Math.min(timeout_ms, MAX_TIMEOUT_MS);
+  const memoryLimitMb = Math.min(Math.max(memory_limit_mb, 32), 256);
   const lang = language.toLowerCase();
 
   // In Vercel serverless, use simulated execution (no subprocess/pyodide available)
@@ -88,7 +91,7 @@ export async function executeSnippet(input: SnippetInput): Promise<SandboxResult
 
   if (["js", "javascript", "ts", "typescript"].includes(lang)) {
     // Use isolated-vm for true V8 isolation: no fs/net/process access
-    return executeInIsolate(code, lang === "typescript" || lang === "ts", timeoutMs);
+    return executeInIsolate(code, lang === "typescript" || lang === "ts", timeoutMs, memoryLimitMb);
   }
   if (["py", "python"].includes(lang)) {
     // Use Pyodide (CPython WASM): no subprocess, stubbed requests

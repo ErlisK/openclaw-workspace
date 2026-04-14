@@ -15,12 +15,33 @@ import {
   checkAllowlist,
   redactLogs,
   scanCodeForSecrets,
+  getSandboxCaps,
   type AllowlistConfig,
 } from "@/lib/sandbox-security";
 
 export const dynamic = "force-dynamic";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const sp = req.nextUrl.searchParams;
+  if (sp.get("action") === "caps") {
+    const caps = getSandboxCaps({
+      memory_limit_mb: parseInt(sp.get("memory_limit_mb") ?? "64") || 64,
+      timeout_seconds: parseInt(sp.get("timeout_seconds") ?? "20") || 20,
+      cpu_limit_seconds: parseInt(sp.get("cpu_limit_seconds") ?? "10") || 10,
+      network_isolated: sp.get("network_isolated") === "true",
+      allowlist: sp.get("allowlist")?.split(",").filter(Boolean) ?? [],
+    });
+    return NextResponse.json({ caps });
+  }
+  // fallthrough to existing handler
+  return getSecurityModel();
+}
+
+async function getSecurityModelOrCaps(_req: NextRequest) {
+  return getSecurityModel();
+}
+
+async function getSecurityModel() {
   return NextResponse.json({
     service: "DocsCI Sandbox Security",
     version: "1.0.0",

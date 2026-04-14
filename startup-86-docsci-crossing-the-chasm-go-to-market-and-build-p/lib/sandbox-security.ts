@@ -417,3 +417,53 @@ export function scanCodeForSecrets(code: string): SecretScanResult {
 
   return { hasSecrets: findings.length > 0, findings };
 }
+
+// ── 5. Sandbox caps ───────────────────────────────────────────────────────────
+
+export interface SandboxCaps {
+  memory_limit_mb: number;
+  cpu_limit_seconds: number;
+  timeout_seconds: number;
+  max_timeout_seconds: number;
+  max_memory_limit_mb: number;
+  max_snippets_per_run: number;
+  max_docs_per_run: number;
+  max_doc_file_size_bytes: number;
+  max_openapi_size_bytes: number;
+  secret_scan_rules_count: number;
+  redaction_rules_count: number;
+  network_isolated: boolean;
+  allowlist: string[];
+}
+
+/**
+ * Returns the effective sandbox caps for a given run config.
+ * Safe to expose publicly — contains no secrets.
+ */
+export function getSandboxCaps(opts?: {
+  memory_limit_mb?: number;
+  cpu_limit_seconds?: number;
+  timeout_seconds?: number;
+  network_isolated?: boolean;
+  allowlist?: string[];
+}): SandboxCaps {
+  const timeoutS = Math.min(Math.max(opts?.timeout_seconds ?? 20, 1), 60);
+  const memMb = Math.min(Math.max(opts?.memory_limit_mb ?? 64, 32), 256);
+  const cpuS = Math.min(Math.max(opts?.cpu_limit_seconds ?? 10, 1), 60);
+
+  return {
+    memory_limit_mb: memMb,
+    cpu_limit_seconds: cpuS,
+    timeout_seconds: timeoutS,
+    max_timeout_seconds: 60,
+    max_memory_limit_mb: 256,
+    max_snippets_per_run: 500,
+    max_docs_per_run: 1000,
+    max_doc_file_size_bytes: 1024 * 1024,       // 1 MB
+    max_openapi_size_bytes: 2 * 1024 * 1024,    // 2 MB
+    secret_scan_rules_count: SECRET_SCAN_RULES.length,
+    redaction_rules_count: REDACTION_RULES.length,
+    network_isolated: opts?.network_isolated ?? false,
+    allowlist: opts?.allowlist ?? [],
+  };
+}

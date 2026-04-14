@@ -107,7 +107,8 @@ process.stdout.write(stripped);
 export async function executeInIsolate(
   code: string,
   isTS: boolean,
-  timeoutMs: number = DEFAULT_TIMEOUT_MS
+  timeoutMs: number = DEFAULT_TIMEOUT_MS,
+  memoryLimitMb: number = MEMORY_LIMIT_MB
 ): Promise<SandboxResult> {
   // Dynamic import to avoid breaking Vercel build (native module)
   let ivm: typeof import("isolated-vm");
@@ -156,7 +157,7 @@ export async function executeInIsolate(
   // Wrap code in an async IIFE
   const wrappedCode = `(async () => {\n${jsCode}\n})()`;
 
-  const isolate = new ivm.Isolate({ memoryLimit: MEMORY_LIMIT_MB });
+  const isolate = new ivm.Isolate({ memoryLimit: Math.min(Math.max(memoryLimitMb, 32), 256) });
   let stdout = "";
   let stderr = "";
   let timedOut = false;
