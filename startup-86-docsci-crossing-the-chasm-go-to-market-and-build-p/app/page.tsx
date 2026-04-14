@@ -1,8 +1,47 @@
 import Link from "next/link";
 
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DocsCI",
+  "url": "https://snippetci.com",
+  "description": "Docs-specific CI pipeline for API and SDK teams. Executes code examples, detects API drift, validates accessibility, files PR comments.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "description": "Free tier available"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "DocsCI",
+    "url": "https://snippetci.com",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "hello@snippetci.com",
+      "contactType": "customer support"
+    }
+  },
+  "featureList": [
+    "Execute code examples in hermetic sandboxes",
+    "Detect API/SDK drift on every release",
+    "Multi-language: Python, JavaScript, TypeScript, Go, Ruby, Bash, curl",
+    "PR comments with line numbers and AI fixes",
+    "OpenAPI spec validation",
+    "Accessibility checks",
+    "GitHub Actions and GitLab CI integration"
+  ],
+  "screenshot": "https://snippetci.com/opengraph-image"
+};
+
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gray-950">
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <main className="min-h-screen bg-gray-950">
       {/* Nav */}
       <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <div className="flex items-center gap-2">
@@ -62,5 +101,6 @@ export default function Home() {
         <a href="mailto:hello@snippetci.com" className="hover:text-gray-300 transition-colors">hello@snippetci.com</a>
       </footer>
     </main>
+    </>
   );
 }
