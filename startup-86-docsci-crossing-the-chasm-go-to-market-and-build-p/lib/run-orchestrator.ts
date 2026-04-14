@@ -18,6 +18,7 @@
  * Does NOT require auth — use the service role key.
  */
 
+import { captureEvent, captureError } from "./analytics";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { executeSnippet } from "./sandbox";
 import { checkAccessibility } from "./a11y-check";
@@ -514,6 +515,24 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
         completed_at: new Date().toISOString(),
       })
       .eq("id", runId);
+
+    // Capture analytics event
+    void captureEvent({
+      event: "run.completed",
+      runId,
+      projectId,
+      properties: {
+        status,
+        finding_count: findingCount,
+        suggestion_count: suggestionCount,
+        snippets_total: snippetsTotal,
+        snippets_passed: snippetsPassed,
+        snippets_failed: snippetsFailed,
+        drift_detected: driftDetected,
+        duration_ms: durationMs,
+        checks_enabled: runConfig.checks,
+      },
+    });
 
     return {
       runId,
