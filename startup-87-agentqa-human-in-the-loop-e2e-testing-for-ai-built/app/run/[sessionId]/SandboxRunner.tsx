@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from 'react'
 import RunLogger, { LogEvent } from './RunLogger'
 import SessionControls, { SessionPhase } from './SessionControls'
 import FeedbackForm from './FeedbackForm'
+import AISummary from './AISummary'
 
 interface Job {
   id: string
@@ -350,6 +351,13 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
           </div>
         </div>
       </div>
+
+      {/* ── AI Summary panel (shown when session ends) ── */}
+      {['complete', 'abandoned', 'timed_out'].includes(sessionPhase) && (
+        <div className="px-4 py-3" data-testid="ai-summary-section">
+          <AISummary sessionId={sessionId} />
+        </div>
+      )}
 
       {/* ── Feedback drawer (slides up when session ends) ── */}
       {showFeedback && !feedbackDone && (
