@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
-import RunLogger from './RunLogger'
+import RunLogger, { LogEvent } from './RunLogger'
 
 interface Job {
   id: string
@@ -11,15 +11,8 @@ interface Job {
   instructions: string
 }
 
-interface LogEntry {
+interface LogEntry extends LogEvent {
   id: string
-  event_type: string
-  ts: string
-  method?: string | null
-  request_url?: string | null
-  status_code?: number | null
-  log_level?: string | null
-  log_message?: string | null
 }
 
 interface Props {
@@ -31,38 +24,45 @@ interface Props {
 let entryCounter = 0
 function makeId() { return `e-${++entryCounter}` }
 
-export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
+type FilterTab = 'all' | 'network' | 'console' | 'click'
+
+/** Map event_type → FilterTab for count badges */
+function tabOf(et: string): FilterTab {
+  if (et === 'network_request' || et === 'network_response') return 'network'
+  if (et === 'console_log') return 'console'
+  if (et === 'click') return 'click'
+  return 'all'
+}
+
+export default function SandboxRunner({ sessionId, job }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([])
   const [iframeLoaded, setIframeLoaded] = useState(false)
-  const [panelTab, setPanelTab] = useState<'network' | 'console' | 'all'>('all')
+  const [panelTab, setPanelTab] = useState<FilterTab>('all')
+  const [flushedCount, setFlushedCount] = useState(0)
   const logsEndRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   // Route the iframe through our proxy so the injected logger can capture events
   const iframeSrc = `/api/proxy?url=${encodeURIComponent(job.url)}&session=${sessionId}`
 
-  const handleEvent = useCallback((ev: {
-    event_type: string
-    ts: string
-    method?: string
-    request_url?: string
-    status_code?: number
-    log_level?: string
-    log_message?: string
-  }) => {
+  const handleEvent = useCallback((ev: LogEvent) => {
     setLogs(prev => {
-      const next = [...prev, { id: makeId(), ...ev }].slice(-500) // keep last 500
+      const next = [...prev, { id: makeId(), ...ev }].slice(-1000) // keep last 1000
       return next
     })
-    // Auto-scroll
+    // Auto-scroll to bottom
     setTimeout(() => logsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
+  }, [])
+
+  const handleFlush = useCallback((count: number) => {
+    setFlushedCount(prev => prev + count)
   }, [])
 
   function handleIframeLoad() {
     setIframeLoaded(true)
-    // Log the load event
-    const logEvent = (window as unknown as Record<string, unknown>).agentQA as { log?: (ev: object) => void } | undefined
-    logEvent?.log?.({
+    const ga = (window as unknown as Record<string, unknown>).agentQA as
+      { log?: (ev: object) => void } | undefined
+    ga?.log?.({
       event_type: 'network_response',
       ts: new Date().toISOString(),
       request_url: job.url,
@@ -71,47 +71,92 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
     })
   }
 
+  // ─── Derived counts ────────────────────────────────────────
+  const counts = logs.reduce(
+    (acc, e) => {
+      acc.all++
+      const t = tabOf(e.event_type)
+      if (t !== 'all') acc[t] = (acc[t] ?? 0) + 1
+      return acc
+    },
+    { all: 0, network: 0, console: 0, click: 0 } as Record<FilterTab, number>
+  )
+
   const filteredLogs = logs.filter(e => {
     if (panelTab === 'network') return ['network_request', 'network_response'].includes(e.event_type)
     if (panelTab === 'console') return e.event_type === 'console_log'
+    if (panelTab === 'click') return e.event_type === 'click'
     return true
   })
 
+  // ─── Event appearance ──────────────────────────────────────
   function getLogColor(entry: LogEntry) {
-    if (entry.event_type === 'console_log') {
-      if (entry.log_level === 'error') return 'text-red-400'
-      if (entry.log_level === 'warn') return 'text-yellow-400'
-      return 'text-green-400'
+    switch (entry.event_type) {
+      case 'console_log':
+        if (entry.log_level === 'error') return 'text-red-400'
+        if (entry.log_level === 'warn') return 'text-yellow-400'
+        return 'text-green-400'
+      case 'navigation': return 'text-blue-400'
+      case 'click': return 'text-purple-400'
+      case 'dom_snapshot': return 'text-indigo-400'
+      case 'network_request': return 'text-gray-300'
+      case 'network_response':
+        if (entry.status_code && entry.status_code >= 400) return 'text-red-400'
+        return 'text-cyan-400'
+      default: return 'text-gray-400'
     }
-    if (entry.event_type === 'navigation') return 'text-blue-400'
-    if (entry.event_type === 'click') return 'text-purple-400'
-    if (entry.event_type === 'dom_snapshot') return 'text-indigo-400'
-    if (entry.status_code && entry.status_code >= 400) return 'text-red-400'
-    return 'text-gray-300'
   }
 
   function getLogIcon(entry: LogEntry) {
-    if (entry.event_type === 'console_log') return '>'
-    if (entry.event_type === 'navigation') return '→'
-    if (entry.event_type === 'network_request') return '↑'
-    if (entry.event_type === 'network_response') return '↓'
-    if (entry.event_type === 'click') return '✓'
-    if (entry.event_type === 'dom_snapshot') return '▦'
-    return '·'
+    switch (entry.event_type) {
+      case 'console_log': return '>'
+      case 'navigation': return '→'
+      case 'network_request': return '↑'
+      case 'network_response': return '↓'
+      case 'click': return '✓'
+      case 'dom_snapshot': return '▦'
+      default: return '·'
+    }
   }
+
+  function getEntryLabel(entry: LogEntry): string {
+    if (entry.event_type === 'console_log') return entry.log_message ?? ''
+    if (entry.event_type === 'click') return entry.log_message ?? `click ${entry.payload?.tag ?? ''}`
+    if (entry.event_type === 'dom_snapshot') return entry.log_message ?? 'DOM snapshot'
+    if (entry.event_type === 'navigation') return entry.request_url ?? ''
+    return [entry.method, entry.request_url].filter(Boolean).join(' ')
+  }
+
+  // ─── Tab definitions ───────────────────────────────────────
+  const tabs: { id: FilterTab; label: string; testId: string }[] = [
+    { id: 'all', label: 'All', testId: 'log-tab-all' },
+    { id: 'network', label: 'Network', testId: 'log-tab-network' },
+    { id: 'console', label: 'Console', testId: 'log-tab-console' },
+    { id: 'click', label: 'Clicks', testId: 'log-tab-click' },
+  ]
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white overflow-hidden" data-testid="sandbox-runner">
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <span className={`w-2 h-2 rounded-full shrink-0 ${iframeLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'}`} />
+          <span
+            className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
+              iframeLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'
+            }`}
+            data-testid="iframe-status-dot"
+          />
           <span className="text-sm font-medium text-gray-200 truncate">{job.title}</span>
           <span className="text-xs text-gray-500 truncate hidden sm:block">{job.url}</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs text-gray-500">{logs.length} events</span>
-          <span className="px-2 py-0.5 bg-indigo-900 text-indigo-300 text-xs rounded-full">{job.tier}</span>
+        <div className="flex items-center gap-2 shrink-0 text-xs text-gray-500">
+          <span data-testid="total-event-count">{logs.length} events</span>
+          {flushedCount > 0 && (
+            <span className="text-green-600" title="Events persisted to DB">
+              ✓ {flushedCount}
+            </span>
+          )}
+          <span className="px-2 py-0.5 bg-indigo-900 text-indigo-300 rounded-full">{job.tier}</span>
         </div>
       </div>
 
@@ -148,31 +193,45 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
         </div>
 
         {/* Log panel */}
-        <div className="w-80 lg:w-96 flex flex-col bg-gray-950 shrink-0" data-testid="log-panel">
-          {/* Tab bar */}
-          <div className="flex border-b border-gray-800 shrink-0">
-            {(['all', 'network', 'console'] as const).map(tab => (
+        <div
+          className="w-80 lg:w-96 flex flex-col bg-gray-950 shrink-0"
+          data-testid="log-panel"
+        >
+          {/* Tab bar with event-count badges */}
+          <div className="flex border-b border-gray-800 shrink-0" role="tablist" aria-label="Event filters">
+            {tabs.map(tab => (
               <button
-                key={tab}
-                onClick={() => setPanelTab(tab)}
-                className={`flex-1 px-3 py-2 text-xs font-medium capitalize transition-colors ${
-                  panelTab === tab
+                key={tab.id}
+                role="tab"
+                aria-selected={panelTab === tab.id}
+                onClick={() => setPanelTab(tab.id)}
+                className={`flex-1 px-2 py-2 text-xs font-medium transition-colors flex flex-col items-center gap-0.5 ${
+                  panelTab === tab.id
                     ? 'text-white border-b-2 border-indigo-400'
                     : 'text-gray-500 hover:text-gray-300'
                 }`}
-                data-testid={`log-tab-${tab}`}
+                data-testid={tab.testId}
               >
-                {tab} {tab === 'all' ? `(${logs.length})` : `(${logs.filter(e =>
-                  tab === 'network'
-                    ? ['network_request', 'network_response'].includes(e.event_type)
-                    : e.event_type === 'console_log'
-                ).length})`}
+                <span>{tab.label}</span>
+                <span
+                  className={`text-[10px] font-mono px-1 rounded ${
+                    panelTab === tab.id ? 'text-indigo-300' : 'text-gray-600'
+                  }`}
+                  data-testid={`${tab.testId}-count`}
+                >
+                  {counts[tab.id]}
+                </span>
               </button>
             ))}
           </div>
 
-          {/* Log entries */}
-          <div className="flex-1 overflow-y-auto font-mono text-xs" data-testid="log-entries">
+          {/* Live event timeline */}
+          <div
+            className="flex-1 overflow-y-auto font-mono text-xs"
+            data-testid="log-entries"
+            aria-live="polite"
+            aria-label="Live event log"
+          >
             {filteredLogs.length === 0 ? (
               <div className="flex items-center justify-center h-full text-gray-600">
                 <p>Waiting for events…</p>
@@ -181,30 +240,64 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
               filteredLogs.map(entry => (
                 <div
                   key={entry.id}
-                  className={`px-3 py-1.5 border-b border-gray-900 hover:bg-gray-900 ${getLogColor(entry)}`}
+                  className={`px-3 py-1.5 border-b border-gray-900 hover:bg-gray-900 transition-colors ${getLogColor(entry)}`}
                   data-testid="log-entry"
+                  data-event-type={entry.event_type}
                 >
                   <div className="flex items-start gap-2">
-                    <span className="shrink-0 opacity-60">{getLogIcon(entry)}</span>
+                    {/* Icon */}
+                    <span
+                      className="shrink-0 opacity-70 w-3 text-center"
+                      title={entry.event_type}
+                    >
+                      {getLogIcon(entry)}
+                    </span>
+
+                    {/* Content */}
                     <div className="min-w-0 flex-1">
-                      {entry.event_type === 'console_log' ? (
-                        <span className="break-all">{entry.log_message}</span>
-                      ) : (
-                        <div className="flex items-center gap-1 flex-wrap">
-                          {entry.method && <span className="text-gray-500">{entry.method}</span>}
-                          {entry.request_url && (
-                            <span className="truncate max-w-full opacity-80">{entry.request_url}</span>
-                          )}
-                          {entry.status_code && (
-                            <span className={`shrink-0 ${entry.status_code >= 400 ? 'text-red-400' : 'text-green-400'}`}>
-                              {entry.status_code}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      <span className="text-gray-600 text-[10px]">
-                        {new Date(entry.ts).toLocaleTimeString()}
-                      </span>
+                      <div className="flex items-center gap-1 flex-wrap">
+                        {/* Type pill */}
+                        <span
+                          className="inline-block text-[9px] px-1 rounded bg-gray-800 text-gray-400 shrink-0"
+                          data-testid="event-type-pill"
+                        >
+                          {entry.event_type.replace('_', ' ')}
+                        </span>
+
+                        {/* Status badge for network */}
+                        {entry.status_code != null && (
+                          <span
+                            className={`shrink-0 font-bold ${
+                              entry.status_code >= 400 ? 'text-red-400' : 'text-green-400'
+                            }`}
+                            data-testid="status-code"
+                          >
+                            {entry.status_code}
+                          </span>
+                        )}
+
+                        {/* Response time */}
+                        {entry.response_time_ms != null && (
+                          <span className="text-gray-600 shrink-0">
+                            {entry.response_time_ms}ms
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Primary label */}
+                      <div className="truncate opacity-90 mt-0.5" title={getEntryLabel(entry)}>
+                        {getEntryLabel(entry)}
+                      </div>
+
+                      {/* Timestamp */}
+                      <div className="text-gray-600 text-[10px] mt-0.5">
+                        {new Date(entry.ts).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          second: '2-digit',
+                          fractionalSecondDigits: 2,
+                        })}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -212,15 +305,21 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
             )}
             <div ref={logsEndRef} />
           </div>
+
+          {/* Footer: realtime status */}
+          <div className="border-t border-gray-800 px-3 py-1.5 flex items-center gap-2 shrink-0 text-[10px] text-gray-600">
+            <RunLogger
+              sessionId={sessionId}
+              targetUrl={job.url}
+              onEvent={handleEvent}
+              onFlush={handleFlush}
+            />
+            <span data-testid="log-panel-footer">
+              {filteredLogs.length} / {logs.length} shown
+            </span>
+          </div>
         </div>
       </div>
-
-      {/* RunLogger — side effect component */}
-      <RunLogger
-        sessionId={sessionId}
-        targetUrl={job.url}
-        onEvent={handleEvent}
-      />
     </div>
   )
 }
