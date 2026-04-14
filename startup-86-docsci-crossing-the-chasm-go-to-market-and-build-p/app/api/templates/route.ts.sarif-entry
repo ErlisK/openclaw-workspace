@@ -1,0 +1,11 @@
+
+  "github-actions-sarif": {
+    id: "github-actions-sarif",
+    name: "GitHub Actions + SARIF (Code Scanning)",
+    filename: "docsci-sarif.yml",
+    download_name: "docsci-sarif.yml",
+    description: "GitHub Actions workflow that uploads DocsCI findings as SARIF to GitHub Security tab",
+    content_type: "text/yaml",
+    content: GH_ACTIONS_SARIF,
+    category: "ci",
+  },

@@ -336,6 +336,76 @@ repos:
         files: docsci\\.yml
 `;
 
+
+const GH_ACTIONS_SARIF = `# .github/workflows/docsci-sarif.yml
+# DocsCI with GitHub Code Scanning (SARIF upload)
+# Findings appear as annotations in the GitHub Security tab + PR diff.
+#
+# Required secrets:   DOCSCI_TOKEN
+# Required variables: DOCSCI_PROJECT_ID
+#
+# Permissions needed: security-events: write
+
+name: DocsCI + Code Scanning
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  schedule:
+    - cron: '0 0 * * 1'
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  docs-ci:
+    name: DocsCI with SARIF
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run DocsCI
+        id: docsci
+        run: |
+          set -euo pipefail
+          RESULT=$(curl -sf -X POST https://snippetci.com/api/runs/queue \\
+            -H "Authorization: Bearer \${{ secrets.DOCSCI_TOKEN }}" \\
+            -H "Content-Type: application/json" \\
+            --max-time 120 \\
+            -d '{"mode":"repo","repo_id":"\${{ vars.DOCSCI_PROJECT_ID }}","branch":"\${{ github.ref_name }}","commit_sha":"\${{ github.sha }}"}'
+          )
+          RUN_ID=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('run_id',''))")
+          STATUS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))")
+          FINDINGS=$(echo "$RESULT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('finding_count',0))")
+          echo "run_id=$RUN_ID"    >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS"   >> "$GITHUB_OUTPUT"
+          echo "findings=$FINDINGS" >> "$GITHUB_OUTPUT"
+
+      - name: Download SARIF report
+        if: steps.docsci.outputs.run_id != ''
+        run: |
+          curl -sf "https://snippetci.com/api/runs/\${{ steps.docsci.outputs.run_id }}/sarif?resolved=false" \\
+            -o docsci-results.sarif
+          echo "SARIF: $(wc -c < docsci-results.sarif) bytes, $(python3 -c "import json; d=json.load(open('docsci-results.sarif')); print(len(d['runs'][0]['results']))" 2>/dev/null || echo '?') findings"
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && steps.docsci.outputs.run_id != ''
+        with:
+          sarif_file: docsci-results.sarif
+          category: docsci
+
+      - name: Fail if docs have errors
+        if: steps.docsci.outputs.status == 'failed'
+        run: |
+          echo "::error::DocsCI found \${{ steps.docsci.outputs.findings }} issue(s). See Security tab for annotations."
+          exit 1
+`;
+
 // ── Template registry ─────────────────────────────────────────────────────────
 
 const TEMPLATES: Record<string, {
@@ -348,6 +418,17 @@ const TEMPLATES: Record<string, {
   content: string;
   category: "ci" | "config" | "hook";
 }> = {
+  "github-actions-sarif": {
+    id: "github-actions-sarif",
+    name: "GitHub Actions + SARIF (Code Scanning)",
+    filename: "docsci-sarif.yml",
+    download_name: "docsci-sarif.yml",
+    description: "GitHub Actions with SARIF upload — findings appear in GitHub Security tab + PR annotations",
+    content_type: "text/yaml",
+    content: GH_ACTIONS_SARIF,
+    category: "ci",
+  },
+
   "github-actions": {
     id: "github-actions",
     name: "GitHub Actions",
