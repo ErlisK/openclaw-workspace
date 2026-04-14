@@ -62,20 +62,20 @@ test.describe("Docs site", () => {
     await expect(page.getByRole("heading", { name: /CI Templates/i })).toBeVisible();
     await expect(page.locator("[data-testid='template-github-actions']")).toBeVisible();
     await expect(page.locator("[data-testid='template-gitlab-ci']")).toBeVisible();
-    await expect(page.getByText("GitHub Actions")).toBeVisible();
-    await expect(page.getByText("GitLab CI")).toBeVisible();
+    await expect(page.locator("[data-testid='template-github-actions'] h2")).toBeVisible();
+    await expect(page.locator("[data-testid='template-gitlab-ci'] h2")).toBeVisible();
   });
 
   test("CI template download links are present", async ({ page }) => {
     await page.goto(`${BASE}/docs/templates`);
-    const ghDownload = page.locator("[data-testid='download-github-template']");
-    const glDownload = page.locator("[data-testid='download-gitlab-template']");
+    const ghDownload = page.locator("[data-testid='download-github-actions']");
+    const curlDownload = page.locator("[data-testid='download-curl-fallback']");
     await expect(ghDownload).toBeVisible();
-    await expect(glDownload).toBeVisible();
-    // Verify download attribute
+    await expect(curlDownload).toBeVisible();
+    // Verify link to /api/templates endpoint
     const ghHref = await ghDownload.getAttribute("href");
-    expect(ghHref).toContain("data:text/yaml");
-    expect(ghHref).toContain("docsci.yml");
+    expect(ghHref).toContain("/api/templates");
+    expect(ghHref).toContain("github-actions");
   });
 
   test("Docs nav links point to correct routes", async ({ page }) => {
@@ -301,7 +301,7 @@ test.describe("Docs site integration", () => {
 
   test("Templates page has YAML code blocks with correct content", async ({ page }) => {
     await page.goto(`${BASE}/docs/templates`);
-    await expect(page.locator("[data-testid='download-github-template']")).toBeVisible();
+    await expect(page.locator("[data-testid='download-github-actions']")).toBeVisible();
     await expect(page.locator("[data-testid='template-github-actions']").getByText("snippetci.com/api/runs/queue")).toBeVisible();
   });
 
