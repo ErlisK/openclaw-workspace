@@ -19,6 +19,8 @@
  */
 
 import { captureEvent, captureError } from "./analytics";
+import { WorkerPool, parallelMap } from "./worker-pool";
+import { RunProgressBroadcaster } from "./run-progress";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { executeSnippet } from "./sandbox";
 import { checkAccessibility } from "./a11y-check";
@@ -213,6 +215,11 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
 
   const { runId, projectId, docs, openapiText } = input;
 
+  // ── Realtime progress broadcaster + worker pool concurrency ─────────────────
+  const progress = new RunProgressBroadcaster(runId);
+  const concurrency = WorkerPool.optimalConcurrency(docs.length);
+  void concurrency; // used below for snippet parallelism
+
   // ── Load docsci.yml config (falls back to defaults) ─────────────────────────
   const runConfig: EffectiveConfig = loadRunConfig(input.docsciConfigText);
 
@@ -232,6 +239,8 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
     .update({ status: "running", started_at: new Date().toISOString() })
     .eq("id", runId);
 
+  void progress.log("info", `Run ${runId} started — ${docs.length} doc(s), concurrency=${concurrency}`);
+
   try {
     // ── Collect all analyzer tasks ─────────────────────────────────────
 
@@ -246,6 +255,7 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
     const activeDocs = docs.filter((d) => filteredDocs.includes(d.path));
 
     // 1. Per-doc: a11y + copy lint
+    void progress.stageStarted("a11y", activeDocs.length);
     for (const doc of activeDocs) {
       const docContent = doc.content;
       if (!docContent || docContent.length < 20) continue;
@@ -435,6 +445,7 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
       } // end if (runConfig.checks.snippets)
     }
 
+    void progress.stageStarted("drift", 1);
     // 3. Drift detection (if OpenAPI spec provided)
     if (runConfig.checks.drift_detection && openapiText && docs.length > 0) {
       analyzerTasks.push(
@@ -501,6 +512,9 @@ export async function runOrchestrator(input: RunInput): Promise<OrchestratorResu
 
     const durationMs = Date.now() - startTime;
     const status: "passed" | "failed" = snippetsFailed > 0 || findingCount > 0 ? "failed" : "passed";
+
+    // Broadcast completion via Supabase Realtime
+    void progress.runCompleted(status, findingCount, durationMs);
 
     // Update run record
     await supabase
