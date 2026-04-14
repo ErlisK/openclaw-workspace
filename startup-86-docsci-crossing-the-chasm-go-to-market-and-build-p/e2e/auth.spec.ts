@@ -16,7 +16,7 @@ test.describe("Auth pages", () => {
     await page.goto(`${BASE}/signup`);
     await expect(page.getByRole("heading", { name: "Start for free" })).toBeVisible();
     await expect(page.getByPlaceholder("Jane Smith")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Create free account/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /get started free/i })).toBeVisible();
   });
 
   test("login page links to signup", async ({ page }) => {
@@ -213,5 +213,65 @@ test.describe("/api/health endpoint", () => {
   test("health endpoint has no-store cache control", async ({ request }) => {
     const res = await request.get(`${BASE}/api/health`);
     expect(res.headers()["cache-control"]).toContain("no-store");
+  });
+});
+
+test.describe("Signup E2E with email verification (AgentMail)", () => {
+  const AGENTMAIL_API_KEY = process.env.AGENTMAIL_API_KEY || "";
+
+  async function createInbox(): Promise<{ id: string; address: string }> {
+    const ts = Date.now();
+    const res = await fetch("https://api.agentmail.to/v0/inboxes", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${AGENTMAIL_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ address: `test-signup-${ts}@snippetci.com` }),
+    });
+    if (!res.ok) throw new Error(`AgentMail inbox create failed: ${res.status}`);
+    return res.json();
+  }
+
+  async function waitForEmail(
+    inboxId: string,
+    timeoutMs = 60000
+  ): Promise<{ subject: string; body?: string } | null> {
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const res = await fetch(`https://api.agentmail.to/v0/inboxes/${inboxId}/messages`, {
+        headers: { Authorization: `Bearer ${AGENTMAIL_API_KEY}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const msgs = data.messages ?? data;
+        if (Array.isArray(msgs) && msgs.length > 0) return msgs[0];
+      }
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+    return null;
+  }
+
+  test("signup form submits and confirmation email arrives", async ({ page }) => {
+    if (!AGENTMAIL_API_KEY) {
+      console.log("AGENTMAIL_API_KEY not set — skipping email verification test");
+      return;
+    }
+
+    const inbox = await createInbox();
+
+    await page.goto(`${BASE}/signup`);
+    await page.getByPlaceholder("Jane Smith").fill("E2E Test User");
+    await page.getByPlaceholder("you@company.com").fill(inbox.address);
+    await page.getByPlaceholder("8+ characters").fill("TestPassword123!");
+    await page.getByTestId("signup-submit").click();
+
+    // After submit the app should show the "check your email" screen
+    await expect(page.getByText(/check your email/i)).toBeVisible({ timeout: 10000 });
+
+    // Poll for the confirmation email (up to 60s)
+    const email = await waitForEmail(inbox.id, 60000);
+    expect(email).not.toBeNull();
+    expect(email!.subject).toMatch(/confirm|verify|activate/i);
   });
 });

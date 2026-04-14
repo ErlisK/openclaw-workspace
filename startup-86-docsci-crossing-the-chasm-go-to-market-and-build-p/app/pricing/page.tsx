@@ -21,7 +21,7 @@ export default function PricingPage() {
           <Link href="/pricing" className="text-white font-medium">Pricing</Link>
           <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
           <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Get started free</Link>
         </div>
       </nav>
 

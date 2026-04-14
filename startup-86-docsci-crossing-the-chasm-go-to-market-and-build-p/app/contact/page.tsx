@@ -39,7 +39,7 @@ export default function ContactPage() {
           <Link href="/docs" className="hover:text-white transition-colors">Docs</Link>
           <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
           <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Get started free</Link>
         </div>
       </nav>
 

@@ -27,8 +27,8 @@ export default function NavBar() {
           {links.map(l => (
             <Link key={l.href} href={l.href} className="hover:text-white transition-colors">{l.label}</Link>
           ))}
-          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors">Start Free</Link>
+          <Link href="/login" className="hover:text-white transition-colors" data-testid="nav-signin">Sign In</Link>
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded-lg transition-colors" data-testid="nav-signup">Get started free</Link>
         </div>
 
         {/* Mobile hamburger */}
@@ -56,7 +56,7 @@ export default function NavBar() {
             <Link key={l.href} href={l.href} className="text-gray-300 hover:text-white transition-colors text-sm" onClick={() => setOpen(false)}>{l.label}</Link>
           ))}
           <Link href="/login" className="text-gray-300 hover:text-white transition-colors text-sm" onClick={() => setOpen(false)}>Sign In</Link>
-          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors text-sm text-center" onClick={() => setOpen(false)}>Start Free</Link>
+          <Link href="/signup" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg transition-colors text-sm text-center" onClick={() => setOpen(false)} data-testid="nav-signup-mobile">Get started free</Link>
         </div>
       )}
     </nav>

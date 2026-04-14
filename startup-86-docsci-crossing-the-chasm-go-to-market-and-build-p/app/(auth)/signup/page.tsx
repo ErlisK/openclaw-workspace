@@ -148,9 +148,10 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
+              data-testid="signup-submit"
               className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-medium py-3 px-4 rounded-lg transition-colors"
             >
-              {loading ? "Creating account…" : "Create free account"}
+              {loading ? "Creating account…" : "Get started free"}
             </button>
           </form>
 
