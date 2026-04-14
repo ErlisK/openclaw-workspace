@@ -84,9 +84,9 @@ type Run = {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { runId: string } },
 ) {
-  const runId = params.id;
+  const runId = params.runId;
   const sp = req.nextUrl.searchParams;
   const download = sp.get("download") === "1";
   const includeParam = sp.get("include") || "all";

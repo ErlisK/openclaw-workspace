@@ -39,6 +39,7 @@ export default function SecurityPage() {
       <div className="max-w-3xl mx-auto px-6 py-12">
         <div className="text-red-400 text-xs font-medium uppercase tracking-wide mb-2">Security</div>
         <h1 className="text-3xl font-bold text-white mb-3">Security & Trust</h1>
+        <h2 className="text-base text-gray-400 mt-1 mb-4">Security model — how DocsCI keeps your code and data safe</h2>
         <p className="text-gray-400 mb-10">
           DocsCI executes user-supplied code. This page documents how we isolate that execution,
           how access control is enforced at the database layer, and what limits apply to every run.
@@ -64,7 +65,7 @@ export default function SecurityPage() {
         <Section id="sandbox" icon="📦" title="Sandbox isolation">
           <div className="space-y-4 text-gray-400 text-sm">
             <p>
-              Every code snippet runs inside an <strong className="text-white">ephemeral sandbox</strong> that is
+              <strong className="text-white">Sandbox architecture:</strong> Every code snippet runs inside an <strong className="text-white">ephemeral sandbox</strong> that is
               torn down immediately after execution. We use two sandbox strategies:
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -117,7 +118,7 @@ export default function SecurityPage() {
           </div>
         </Section>
 
-        <Section id="rbac" icon="🔐" title="RBAC — Roles & Permissions">
+        <Section id="rbac" icon="🔐" title="Org roles">
           <p className="text-gray-400 text-sm mb-4">
             Three roles exist at the organization level. Roles are stored in{" "}
             <code className="bg-gray-800 px-1 rounded text-green-300">docsci_org_members.role</code> and
@@ -128,28 +129,28 @@ export default function SecurityPage() {
               <thead>
                 <tr className="border-b border-gray-700">
                   <th className="text-left text-gray-400 py-2 pr-8 font-medium">Permission</th>
-                  <th className="text-center text-purple-400 py-2 pr-4 font-medium">👑 Owner</th>
+                  <th className="text-center text-gray-400 py-2 pr-4 font-medium">👁 Viewer</th>
                   <th className="text-center text-blue-400 py-2 pr-4 font-medium">✏️ Editor</th>
-                  <th className="text-center text-gray-400 py-2 font-medium">👁 Viewer</th>
+                  <th className="text-center text-purple-400 py-2 font-medium">👑 Owner</th>
                 </tr>
               </thead>
               <tbody className="text-gray-300">
                 {[
-                  ["Trigger CI runs", "✓", "✓", "✗"],
+                  ["Trigger CI runs", "✗", "✓", "✓"],
                   ["View findings & run history", "✓", "✓", "✓"],
-                  ["Manage projects", "✓", "✓", "✗"],
-                  ["Create invite links", "✓", "✓", "✗"],
-                  ["Change member roles", "✓", "✗", "✗"],
-                  ["Remove members", "✓", "✗", "✗"],
-                  ["Delete organization", "✓", "✗", "✗"],
-                  ["Change billing", "✓", "✗", "✗"],
-                  ["Create owner invites", "✓", "✗", "✗"],
-                ].map(([perm, owner, editor, viewer]) => (
+                  ["Manage projects", "✗", "✓", "✓"],
+                  ["Invite members", "✗", "✓", "✓"],
+                  ["Change member roles", "✗", "✗", "✓"],
+                  ["Remove members", "✗", "✗", "✓"],
+                  ["Delete organization", "✗", "✗", "✓"],
+                  ["Change billing", "✗", "✗", "✓"],
+                  ["Create owner invites", "✗", "✗", "✓"],
+                ].map(([perm, viewer, editor, owner]) => (
                   <tr key={perm} className="border-b border-gray-800">
                     <td className="py-2 pr-8 text-gray-300">{perm}</td>
-                    <td className="py-2 pr-4 text-center">{owner === "✓" ? <span className="text-green-400">✓</span> : <span className="text-red-500">✗</span>}</td>
+                    <td className="py-2 pr-4 text-center">{viewer === "✓" ? <span className="text-green-400">✓</span> : <span>❌</span>}</td>
                     <td className="py-2 pr-4 text-center">{editor === "✓" ? <span className="text-green-400">✓</span> : <span className="text-red-500">✗</span>}</td>
-                    <td className="py-2 text-center">{viewer === "✓" ? <span className="text-green-400">✓</span> : <span className="text-red-500">✗</span>}</td>
+                    <td className="py-2 text-center">{owner === "✓" ? <span className="text-green-400">✓</span> : <span className="text-red-500">✗</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -222,7 +223,7 @@ export default function SecurityPage() {
           </div>
         </Section>
 
-        <Section id="caps" icon="⏱️" title="Runtime Caps">
+        <Section id="caps" icon="⏱️" title="Runtime caps">
           <p className="text-gray-400 text-sm mb-4">
             Every sandbox run enforces hard limits. These cannot be overridden by{" "}
             <code className="bg-gray-800 px-1 rounded text-green-300">docsci.yml</code> beyond the stated maximums.
@@ -252,10 +253,10 @@ export default function SecurityPage() {
           </div>
         </Section>
 
-        <Section id="network" icon="🌐" title="Network Policy">
+        <Section id="network" icon="🌐" title="Network allowlist">
           <div className="space-y-3 text-gray-400 text-sm">
             <p>
-              By default, snippet sandboxes have <strong className="text-white">no outbound network access</strong>.
+              By default, snippet sandboxes have <strong className="text-white">no outbound network access</strong>. Private RFC-1918 ranges are always blocked (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16).
               Outbound calls will silently fail or time out.
             </p>
             <p>

@@ -16,9 +16,9 @@ function svc() {
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: { runId: string } },
 ) {
-  const runId = params.id;
+  const runId = params.runId;
   const db = svc();
 
   const { data: run, error } = await db
