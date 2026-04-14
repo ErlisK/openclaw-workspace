@@ -48,5 +48,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/blog/detecting-api-drift-openapi`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: `${base}/blog/automating-accessibility-checks-docs`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
     { url: `${base}/gists`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${base}/social`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 },
   ];
 }
