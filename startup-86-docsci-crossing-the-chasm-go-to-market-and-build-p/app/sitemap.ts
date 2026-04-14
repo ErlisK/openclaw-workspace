@@ -28,5 +28,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/for/api-docs-testing`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/for/openapi-docs-validation`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/for/prevent-broken-code-examples`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    // Integration guides
+    { url: `${base}/docs/integrations`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/docs/integrations/github-actions`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/docs/integrations/gitlab-ci`, lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    // Migration guides
+    { url: `${base}/docs/guides/migration`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/docs/guides/migrate-from-sphinx`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/docs/guides/migrate-from-scripts`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/docs/guides/migrate-from-postman`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ];
 }
