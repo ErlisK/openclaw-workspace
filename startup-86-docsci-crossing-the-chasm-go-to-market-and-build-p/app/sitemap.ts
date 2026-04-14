@@ -37,5 +37,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/docs/guides/migrate-from-sphinx`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/docs/guides/migrate-from-scripts`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/docs/guides/migrate-from-postman`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    // Launch & blog pages
+    { url: `${base}/launch`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/blog`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.8 },
+    { url: `${base}/blog/broken-docs-cost`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/blog/api-drift-detection`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
+    { url: `${base}/blog/github-actions-docs-ci`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.8 },
   ];
 }

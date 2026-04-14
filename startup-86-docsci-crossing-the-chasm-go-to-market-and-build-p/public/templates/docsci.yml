@@ -1,58 +1,85 @@
-# DocsCI GitHub Actions Template
-# Place this file at: .github/workflows/docsci.yml
+# docsci.yml
+# DocsCI configuration file — add to your repository root
+# Full docs: https://snippetci.com/docs
+# Get free API token: https://snippetci.com/signup
+
+docs:
+  # Paths to search for documentation files
+  path: .
+  include:
+    - "docs/**/*.md"
+    - "docs/**/*.mdx"
+    - "docs/**/*.rst"
+    - "README.md"
+    - "*.md"
+  exclude:
+    - "node_modules/**"
+    - ".git/**"
+    - "docs/_build/**"
+    - "**/_static/**"
+    - "CHANGELOG.md"
+
+snippets:
+  # Languages to execute
+  languages:
+    - python
+    - javascript
+    - typescript
+    - bash
+    - curl
+    - go
+
+  # Execution timeout per snippet (seconds)
+  timeout_seconds: 20
+
+  # Skip patterns — snippets containing these strings are not executed
+  skip_patterns:
+    - "# doctest: +SKIP"
+    - "# docsci-skip"
+    - "YOUR_API_KEY"
+    - "YOUR_TOKEN"
+    - "example.com"         # remove if you want to test live examples
+
+checks:
+  # Execute and verify code snippets
+  snippets: true
+
+  # Detect API drift against OpenAPI spec (requires openapi_url in CI workflow)
+  drift: true
+
+  # Accessibility checks (axe-core rules on rendered doc components)
+  accessibility: false   # enable if you render doc pages
+
+  # Copy linting (passive voice, sensitive terms, reading level)
+  copy_lint: false       # enable for content quality gates
+
+# Security — scanned before execution (cannot be disabled)
+security:
+  # Secret patterns scanned in snippets (40+ built-in + custom below)
+  extra_patterns:
+    # - "my-custom-prefix-[A-Za-z0-9]{32}"
+
+# Thresholds — CI fails if exceeded
+thresholds:
+  max_findings: 0         # fail on any finding (set higher to allow warnings)
+  max_critical: 0         # always fail on critical findings
+  max_drift_findings: 0   # fail on any drift
+
+# Notifications (optional)
+# notify:
+#   slack_webhook: ${{ secrets.SLACK_WEBHOOK }}
+#   on: [failure]
+
+# ─────────────────────────────────────────────────────────────────
+# Usage in GitHub Actions:
 #
-# This workflow runs the DocsCI pipeline on every PR and push to main.
-# It verifies code examples, detects API/SDK drift, and posts fix comments.
+#   - name: Run DocsCI
+#     run: |
+#       tar czf docs.tar.gz docs/ *.md
+#       curl -sf -X POST https://snippetci.com/api/runs/queue \
+#         -H "Authorization: Bearer ${{ secrets.DOCSCI_TOKEN }}" \
+#         -F "docs_archive=@docs.tar.gz" \
+#       | jq -e '.status == "passed"'
 #
-# Required secrets:
-#   DOCSCI_API_KEY  — your DocsCI API key (from https://snippetci.com/dashboard/settings)
-#
-# Required variables (optional, auto-detected from repo):
-#   DOCSCI_DOCS_PATH     — path to docs directory (default: docs/)
-#   DOCSCI_OPENAPI_PATH  — path to OpenAPI spec (default: auto-detected)
-#   DOCSCI_SDK_LANGUAGES — comma-separated list of SDK languages (default: python,typescript)
-
-name: DocsCI
-
-on:
-  push:
-    branches: [main, master]
-    paths:
-      - "docs/**"
-      - "*.md"
-      - "src/**"       # Trigger on SDK source changes too
-      - "openapi.yaml"
-      - "swagger.json"
-  pull_request:
-    paths:
-      - "docs/**"
-      - "*.md"
-      - "src/**"
-      - "openapi.yaml"
-      - "swagger.json"
-
-jobs:
-  docs-ci:
-    name: "DocsCI — Verify Examples & Detect Drift"
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write   # Required for posting PR comments
-      contents: read
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run DocsCI
-        uses: docsci/action@v1
-        with:
-          api-key: ${{ secrets.DOCSCI_API_KEY }}
-          docs-path: ${{ vars.DOCSCI_DOCS_PATH || 'docs/' }}
-          openapi-path: ${{ vars.DOCSCI_OPENAPI_PATH || '' }}
-          sdk-languages: ${{ vars.DOCSCI_SDK_LANGUAGES || 'python,typescript' }}
-          # Post inline PR comments with AI-generated fixes
-          post-pr-comments: true
-          # Fail the check if any examples fail
-          fail-on-error: true
-          # Fail if API/SDK drift is detected
-          fail-on-drift: false  # set to true for strict mode
+# Full template: https://snippetci.com/public/templates/docsci-github-actions.yml
+# ─────────────────────────────────────────────────────────────────
