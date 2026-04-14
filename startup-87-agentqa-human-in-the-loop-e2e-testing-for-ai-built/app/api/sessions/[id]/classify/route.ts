@@ -194,11 +194,12 @@ ${issuesText}`
         severity_breakdown: result.object.severity_breakdown,
         affected_areas_summary: result.object.affected_areas_summary,
       }
-      await admin
-        .from('test_sessions')
-        .update({ ai_summary: updatedSummary } as Record<string, unknown>)
-        .eq('id', sessionId)
-        .catch(() => {})
+      try {
+        await admin
+          .from('test_sessions')
+          .update({ ai_summary: updatedSummary } as Record<string, unknown>)
+          .eq('id', sessionId)
+      } catch { /* non-fatal */ }
     }
 
     return NextResponse.json({

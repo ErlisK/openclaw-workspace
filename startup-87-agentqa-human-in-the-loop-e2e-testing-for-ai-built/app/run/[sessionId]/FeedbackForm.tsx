@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback } from 'react'
+import BugSuggestionsPanel from './BugSuggestionsPanel'
 
 export type Severity = 'low' | 'medium' | 'high' | 'critical'
 
@@ -61,6 +62,7 @@ export default function FeedbackForm({ sessionId, jobId, assignmentId, onSubmitt
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
+  const [submittedFeedbackId, setSubmittedFeedbackId] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // ─── Bug CRUD ─────────────────────────────────────────────
@@ -201,6 +203,7 @@ export default function FeedbackForm({ sessionId, jobId, assignmentId, onSubmitt
       }
 
       setSubmitted(true)
+      setSubmittedFeedbackId(feedback.id)
       onSubmitted?.(feedback.id)
     } catch (e) {
       setError(String(e))
@@ -212,12 +215,25 @@ export default function FeedbackForm({ sessionId, jobId, assignmentId, onSubmitt
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 py-12 text-center" data-testid="feedback-success">
-        <div className="w-12 h-12 rounded-full bg-green-900 flex items-center justify-center text-2xl">✓</div>
-        <h3 className="text-lg font-semibold text-white">Feedback submitted!</h3>
-        <p className="text-sm text-gray-400">Thank you for your detailed report.</p>
-        {screenshotUrls.length > 0 && (
-          <p className="text-xs text-gray-500">{screenshotUrls.length} screenshot(s) uploaded</p>
+      <div data-testid="feedback-submitted-view">
+        <div className="flex flex-col items-center justify-center gap-4 py-6 text-center" data-testid="feedback-success">
+          <div className="w-12 h-12 rounded-full bg-green-900 flex items-center justify-center text-2xl">✓</div>
+          <h3 className="text-lg font-semibold text-white">Feedback submitted!</h3>
+          <p className="text-sm text-gray-400">Thank you for your detailed report.</p>
+          {screenshotUrls.length > 0 && (
+            <p className="text-xs text-gray-500">{screenshotUrls.length} screenshot(s) uploaded</p>
+          )}
+        </div>
+        {submittedFeedbackId && (
+          <div className="mt-2" data-testid="bug-suggestions-section">
+            <BugSuggestionsPanel
+              feedbackId={submittedFeedbackId}
+              onApply={(title, severity, area) => {
+                // Log applied suggestion for analytics
+                console.info('Bug suggestion applied:', title, severity, area)
+              }}
+            />
+          </div>
         )}
       </div>
     )
