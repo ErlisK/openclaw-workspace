@@ -18,7 +18,7 @@
 
 export const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
-  'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  'https://betawindow.com'
 
 export interface UTMLink {
   slug: string

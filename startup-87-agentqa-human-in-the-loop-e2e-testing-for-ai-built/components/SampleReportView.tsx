@@ -232,7 +232,7 @@ function AgentReadySection({ report }: { report: SampleReport }) {
 // ─── Main Component ─────────────────────────────────────────────────────────────────────
 
 export default function SampleReportView({ report }: { report: SampleReport }) {
-  const BASE_URL = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
   const shareUrl = `${BASE_URL}/report/${report.slug}`
 
   const bugCounts = report.bugs.reduce((acc, b) => {

@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Everything you need to cover BetaWindow: screenshots, copy, logo, and product details.',
 }
 
-const DEPLOYED = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-nfkznkrzm.vercel.app'
+const DEPLOYED = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
 export default function LaunchPage() {
   const utmBase = `${DEPLOYED}`
