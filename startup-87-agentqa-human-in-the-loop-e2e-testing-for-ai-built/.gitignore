@@ -6,3 +6,9 @@ playwright-report/
 .env*.local
 test-results/
 playwright-report/
+
+# Generated launch assets (large binaries — keep in workspace, don't commit)
+public/assets/frame_*.png
+public/assets/demo-frames.json
+public/assets/demo-slideshow.html
+public/assets/demo.webm
