@@ -18,6 +18,41 @@ import { validateProxyUrl, checkRateLimit } from '@/lib/proxy-security'
 
 const MAX_RESPONSE_SIZE = 5 * 1024 * 1024 // 5 MB
 
+// Infer correct MIME type from URL path when upstream content-type is unreliable
+function inferMimeType(url: string, upstreamContentType: string): string {
+  // If upstream gives a sensible typed content-type, trust it
+  const ct = upstreamContentType.toLowerCase()
+  if (ct && !ct.startsWith('text/plain') && !ct.startsWith('application/octet-stream') && ct !== 'text/plain; charset=utf-8') {
+    return upstreamContentType
+  }
+  // Derive from path extension
+  try {
+    const { pathname } = new URL(url)
+    const ext = pathname.split('.').pop()?.toLowerCase() ?? ''
+    const extMap: Record<string, string> = {
+      js: 'application/javascript; charset=utf-8',
+      mjs: 'application/javascript; charset=utf-8',
+      cjs: 'application/javascript; charset=utf-8',
+      css: 'text/css; charset=utf-8',
+      json: 'application/json; charset=utf-8',
+      svg: 'image/svg+xml',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      gif: 'image/gif',
+      webp: 'image/webp',
+      woff: 'font/woff',
+      woff2: 'font/woff2',
+      ttf: 'font/ttf',
+      ico: 'image/x-icon',
+      mp4: 'video/mp4',
+      webm: 'video/webm',
+    }
+    if (ext && extMap[ext]) return extMap[ext]
+  } catch { /* ignore */ }
+  return upstreamContentType
+}
+
 // Headers to strip from upstream response (hop-by-hop + security headers that break embedding)
 const STRIP_RESPONSE_HEADERS = new Set([
   'content-security-policy',
@@ -170,17 +205,49 @@ export async function GET(req: NextRequest) {
 
   // For non-HTML resources (CSS, JS, images), proxy them directly
   if (!contentType.includes('text/html')) {
+    const correctedType = inferMimeType(currentTarget.toString(), contentType)
+    const isJavascript = correctedType.includes('javascript')
+    const isCSS = correctedType.includes('css')
+
+    const respHeaders = new Headers()
+    respHeaders.set('content-type', correctedType)
+    respHeaders.set('cache-control', 'public, max-age=300')
+    // Allow embedding — do NOT set restrictive CSP for sub-resources
+    respHeaders.delete('x-frame-options')
+    respHeaders.delete('content-security-policy')
+    respHeaders.set('access-control-allow-origin', '*')
+
+    // For JS files: rewrite webpack public path so dynamic chunk imports go through proxy
+    if (isJavascript && sessionId) {
+      const text = await upstreamRes.text()
+      if (text.length > MAX_RESPONSE_SIZE) {
+        return new NextResponse('Response too large', { status: 413 })
+      }
+      const reqUrl2 = new URL(req.url)
+      const proxyStaticBase = `${reqUrl2.origin}/api/proxy-static`
+      const targetProtocol = currentTarget.protocol.replace(':', '') // 'https' or 'http'
+      const targetHost = currentTarget.host // e.g. 'snippetci.com'
+      // Rewrite __webpack_require__.p to path-based proxy so webpack string-concatenation works:
+      //   publicPath + "static/chunks/foo.js"
+      //   => "/api/proxy-static/SESSION/https/host/_next/static/chunks/foo.js"
+      const patchedJs = text.replace(
+        /(__webpack_require__\.p\s*=\s*)("(\/[^"]+)"|'(\/[^']+)')/g,
+        (_m, prefix, _quoted, dq, sq) => {
+          const assetBase = dq ?? sq  // e.g. "/_next/"
+          const proxied = `${proxyStaticBase}/${sessionId}/${targetProtocol}/${targetHost}${assetBase}`
+          return `${prefix}"${proxied}"`
+        }
+      )
+      return new NextResponse(patchedJs, {
+        status: upstreamRes.status,
+        headers: respHeaders,
+      })
+    }
+
     const body = await upstreamRes.arrayBuffer()
     if (body.byteLength > MAX_RESPONSE_SIZE) {
       return new NextResponse('Response too large', { status: 413 })
     }
-
-    const respHeaders = new Headers()
-    respHeaders.set('content-type', contentType)
-    respHeaders.set('cache-control', 'public, max-age=300')
-    // Allow embedding
-    respHeaders.set('x-frame-options', 'SAMEORIGIN')
-    respHeaders.set('content-security-policy', "default-src 'self'")
 
     return new NextResponse(body, {
       status: upstreamRes.status,
