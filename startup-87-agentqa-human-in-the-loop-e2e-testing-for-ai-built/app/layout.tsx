@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { PHProvider } from '@/lib/analytics/provider'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://agentqa.vercel.app'
 const TITLE = 'AgentQA — Human QA Testing for AI-Built Apps'
@@ -138,6 +139,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
         <PHProvider>
           {children}
+          <FeedbackWidget />
         </PHProvider>
       </body>
     </html>
