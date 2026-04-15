@@ -155,9 +155,11 @@ test.describe('Feedback Widget — UI', () => {
 // ── Widget submission flow ─────────────────────────────────────────────────
 
 test.describe('Feedback Widget — submission', () => {
-  test('submitting comment shows success state', async ({ page }) => {
+  test('submitting comment + star shows success state', async ({ page }) => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
+    // Click a star first (UI state), then add a comment — covers full form submission
+    await page.locator('[data-testid="feedback-star-4"]').click()
     await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
     await page.waitForTimeout(300)
     await page.locator('[data-testid="feedback-submit"]').click()
