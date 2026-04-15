@@ -166,6 +166,11 @@ export default function DashboardPage() {
           <a href="/marketplace" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium ml-2">🧪 Find Test Jobs</a>
         </div>
         <div className="flex items-center gap-4">
+          <a href="/dashboard/api-keys"
+            className="flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+            <span>🔑</span>
+            <span>API Keys</span>
+          </a>
           <a href="/billing"
             data-testid="billing-link"
             className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">

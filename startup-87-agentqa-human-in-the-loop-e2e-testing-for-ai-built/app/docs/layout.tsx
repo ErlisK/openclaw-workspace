@@ -4,6 +4,7 @@ const NAV = [
   { href: '/docs/how-it-works', label: 'How it works' },
   { href: '/docs/pricing', label: 'Pricing & tiers' },
   { href: '/docs/api-quickstart', label: 'API quickstart' },
+  { href: '/docs/api-reference', label: 'Agent API reference' },
   { href: '/docs/security', label: 'Security & sandbox' },
   { href: '/docs/terms', label: 'Terms of service' },
   { href: '/docs/privacy', label: 'Privacy policy' },
