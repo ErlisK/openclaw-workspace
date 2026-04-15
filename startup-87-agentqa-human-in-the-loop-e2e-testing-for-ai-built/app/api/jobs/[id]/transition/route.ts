@@ -123,14 +123,15 @@ export async function POST(
 
   // ── Post-transition credit actions ────────────────────────────────────────
 
-  // Complete → spend credits (deduct held amount)
-  if (to === 'complete' && isClient) {
-    await spendCredits(user.id, jobId, job.tier)
+  // Complete → spend credits from the job owner's account
+  // (tester completes the job, but credits are deducted from the client)
+  if (to === 'complete') {
+    await spendCredits(job.client_id, jobId, job.tier)
   }
 
-  // Expired/cancelled → release held credits
-  if ((to === 'expired' || to === 'cancelled') && isClient) {
-    await releaseCredits(user.id, jobId, job.tier)
+  // Expired/cancelled → release held credits from job owner's account
+  if (to === 'expired' || to === 'cancelled') {
+    await releaseCredits(job.client_id, jobId, job.tier)
   }
 
   // If completing, also mark assignment as submitted
