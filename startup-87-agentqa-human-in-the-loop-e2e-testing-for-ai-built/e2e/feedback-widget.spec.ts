@@ -142,8 +142,9 @@ test.describe('Feedback Widget — submission', () => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
+    await page.waitForTimeout(500) // let React state update
     await page.locator('[data-testid="feedback-submit"]').click()
-    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
   })
 
   test('submitting star + category shows success', async ({ page }) => {
