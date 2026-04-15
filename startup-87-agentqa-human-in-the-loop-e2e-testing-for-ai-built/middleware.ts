@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Protected routes — marketplace is public (testers can browse without login)
-  const protectedPaths = ['/dashboard', '/jobs', '/submit', '/credits']
+  const protectedPaths = ['/dashboard', '/jobs', '/submit', '/credits', '/billing']
   const publicJobPaths = ['/marketplace']  // marketplace browsable without auth
   const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
   const isPublic = publicJobPaths.some(p => request.nextUrl.pathname.startsWith(p))
