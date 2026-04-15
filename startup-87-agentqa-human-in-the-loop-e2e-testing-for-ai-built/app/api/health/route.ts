@@ -5,6 +5,7 @@ const EXPECTED_TABLES = [
   'users', 'projects', 'test_jobs', 'job_assignments',
   'test_sessions', 'session_events', 'feedback', 'feedback_bugs',
   'credit_transactions', 'stripe_customers', 'stripe_events', 'platform_feedback',
+  'orders', 'payouts', 'tester_profile',
 ]
 
 export async function GET() {
