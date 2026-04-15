@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
+import { captureServerEvent } from '@/lib/analytics/events'
 
 export async function GET(req: NextRequest) {
   const supabase = await getSupabaseClient(req)
@@ -48,5 +49,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // Track job draft creation
+  captureServerEvent('create_job_draft', user.id, { job_id: data.id, tier: data.tier, title: data.title }).catch(() => {})
   return NextResponse.json({ job: data }, { status: 201 })
 }

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { createAdminClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/analytics/events'
 
 /**
- * POST /api/feedback — Submit structured feedback for a test session
  *
  * Body:
  * {
@@ -125,12 +125,18 @@ export async function POST(req: NextRequest) {
     insertedBugs = bugData ?? []
   }
 
+  captureServerEvent('submit_feedback', user.id, {
+    session_id: feedback.session_id,
+    job_id: feedback.job_id,
+    has_bugs: insertedBugs.length > 0,
+    bug_count: insertedBugs.length,
+  }).catch(() => {})
+
   return NextResponse.json({ feedback, bugs: insertedBugs }, { status: 201 })
 }
 
 /**
- * GET /api/feedback?session_id=<id> OR ?job_id=<id>
- * Returns feedback for a session or job (accessible by tester or client)
+ * GET /api/feedback — Returns feedback for a session or job (accessible by tester or client)
  */
 export async function GET(req: NextRequest) {
   const supabase = await getSupabaseClient(req)

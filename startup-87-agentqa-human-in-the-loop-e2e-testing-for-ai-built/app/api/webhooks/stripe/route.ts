@@ -9,6 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { addCredits } from '@/lib/credits'
+import { captureServerEvent } from '@/lib/analytics/events'
 
 export const runtime = 'nodejs'
 
@@ -60,6 +61,12 @@ export async function POST(req: NextRequest) {
         }
 
         console.log(`Webhook: added ${creditAmount} credits to user ${userId}, new balance: ${result.balance}`)
+        captureServerEvent('purchase_credits', userId, {
+          credits_purchased: creditAmount,
+          pack,
+          amount_cents: session.amount_total ?? 0,
+          stripe_session_id: session.id,
+        }).catch(() => {})
         break
       }
 

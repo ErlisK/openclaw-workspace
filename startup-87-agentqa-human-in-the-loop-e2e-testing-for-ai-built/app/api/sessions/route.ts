@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { createAdminClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/analytics/events'
 
 /**
  * POST /api/sessions — Create a test session for an assignment
@@ -61,6 +62,13 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (sessionError) return NextResponse.json({ error: sessionError.message }, { status: 500 })
+
+  // Track session start
+  captureServerEvent('start_session', user.id, {
+    session_id: session.id,
+    job_id: job_id,
+    assignment_id,
+  }).catch(() => {})
 
   return NextResponse.json({ session }, { status: 201 })
 }

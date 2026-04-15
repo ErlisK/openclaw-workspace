@@ -3,6 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { createAdminClient } from '@/lib/supabase/server'
 import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
 import { holdCredits, spendCredits, releaseCredits } from '@/lib/credits'
+import { captureServerEvent } from '@/lib/analytics/events'
 import type { JobStatus } from '@/lib/types'
 
 /**
@@ -130,11 +131,18 @@ export async function POST(
   // (tester completes the job, but credits are deducted from the client)
   if (to === 'complete') {
     await spendCredits(job.client_id, jobId, job.tier)
+    captureServerEvent('stop_session', user.id, { job_id: jobId, assignment_id, reason: 'complete' }).catch(() => {})
   }
 
   // Expired/cancelled → release held credits from job owner's account
   if (to === 'expired' || to === 'cancelled') {
     await releaseCredits(job.client_id, jobId, job.tier)
+    captureServerEvent('stop_session', user.id, { job_id: jobId, reason: to }).catch(() => {})
+  }
+
+  // publish_job event
+  if (to === 'published') {
+    captureServerEvent('publish_job', user.id, { job_id: jobId, tier: job.tier }).catch(() => {})
   }
 
   // If completing, also mark assignment as submitted
