@@ -139,10 +139,17 @@ test.describe('Feedback Widget — submission', () => {
   test('submitting comment shows success state', async ({ page }) => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
-    await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
-    await page.waitForTimeout(1000)
+    // Use type() not fill() — simulates real keystrokes to trigger React onChange
+    await page.locator('[data-testid="feedback-comment"]').click()
+    await page.keyboard.type(`E2E test comment ${Date.now()}`)
+    await page.waitForTimeout(300)
     await page.locator('[data-testid="feedback-submit"]').click()
-    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
+    // May show success or error depending on API; either way widget responded
+    await expect(
+      page.locator('[data-testid="feedback-success"], [data-testid="feedback-error"]').first()
+    ).toBeVisible({ timeout: 15000 })
+    // Verify it's specifically success
+    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 2000 })
   })
 
   test('submitting star + category shows success', async ({ page }) => {
