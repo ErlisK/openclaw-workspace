@@ -1,26 +1,24 @@
 /**
  * POST /api/test/credit-topup
  *
- * Test-only route that mints credits for E2E automation without going through Stripe.
+ * Test-only route that mints / resets credits for E2E automation without Stripe.
  * Guarded by:
  *   1. NODE_ENV !== 'production'  OR  E2E_TEST_SECRET header match
  *   2. Valid Supabase JWT (authenticated user) OR explicit user_id in body with secret
  *
- * This route is the ONLY intended way for E2E tests to fund credit balances,
- * replacing direct Supabase service-role PATCH calls that expose the service key.
- *
- * Request body:
- *   { amount: number, description?: string }          — top-up authed user
- *   { user_id: string, amount: number, description? } — top-up specific user (requires secret)
+ * Request body (mutually exclusive: use amount OR set_to, not both):
+ *   { amount: number, description? }                         — add N credits to authed user
+ *   { set_to: number, description? }                         — set exact balance for authed user
+ *   { user_id: string, amount: number, description? }        — add N credits (requires secret)
+ *   { user_id: string, set_to: number, description? }        — set exact balance (requires secret)
  *
  * Returns:
- *   { ok: true, balance: number, held: number, available: number, transaction_id: string }
+ *   { ok, balance, held, available, transaction_id, user_id }
  *
  * Security:
  *   - Returns 404 in production without E2E_TEST_SECRET header match
  *   - Returns 401 if no auth and no secret-with-user_id
- *   - Returns 400 for invalid amounts (must be 1–10000)
- *   - Rate-limited to 100 credits per call maximum
+ *   - Returns 400 for invalid amounts (amount: 1–10000; set_to: 0–10000)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
@@ -28,46 +26,65 @@ import { createAdminClient } from '@/lib/supabase/server'
 
 export const runtime = 'nodejs'
 
-const MAX_AMOUNT = 10000
-const MIN_AMOUNT = 1
+const MAX_CREDITS = 10000
 
 export async function POST(req: NextRequest) {
   const isProduction = process.env.NODE_ENV === 'production'
   const e2eSecret = process.env.E2E_TEST_SECRET
   const reqSecret = req.headers.get('x-e2e-secret')
 
-  // In production: require the secret header to even acknowledge this route exists
-  // (Prevents accidental exposure; deployed Vercel preview builds are not "production")
   if (isProduction && (!e2eSecret || reqSecret !== e2eSecret)) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
   }
 
-  // Outside production: still require secret if set (defense in depth)
   const secretValid = e2eSecret ? reqSecret === e2eSecret : true
 
-  // Parse body
-  let body: { user_id?: string; amount?: number; description?: string }
+  let body: { user_id?: string; amount?: number; set_to?: number; description?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { user_id: targetUserId, amount, description } = body
+  const { user_id: targetUserId, amount, set_to, description } = body
 
-  // Validate amount
-  if (!amount || typeof amount !== 'number' || amount < MIN_AMOUNT || amount > MAX_AMOUNT) {
+  // Validate: must have exactly one of amount / set_to
+  const hasAmount = amount !== undefined
+  const hasSetTo = set_to !== undefined
+
+  if (!hasAmount && !hasSetTo) {
     return NextResponse.json(
-      { error: `amount must be a number between ${MIN_AMOUNT} and ${MAX_AMOUNT}` },
+      { error: 'amount or set_to is required' },
       { status: 400 }
     )
+  }
+  if (hasAmount && hasSetTo) {
+    return NextResponse.json(
+      { error: 'provide amount or set_to, not both' },
+      { status: 400 }
+    )
+  }
+  if (hasAmount) {
+    if (typeof amount !== 'number' || amount < 1 || amount > MAX_CREDITS) {
+      return NextResponse.json(
+        { error: `amount must be a number between 1 and ${MAX_CREDITS}` },
+        { status: 400 }
+      )
+    }
+  }
+  if (hasSetTo) {
+    if (typeof set_to !== 'number' || set_to < 0 || set_to > MAX_CREDITS) {
+      return NextResponse.json(
+        { error: `set_to must be a number between 0 and ${MAX_CREDITS}` },
+        { status: 400 }
+      )
+    }
   }
 
   const admin = createAdminClient()
   let resolvedUserId: string
 
   if (targetUserId) {
-    // Explicit user_id: requires secret
     if (!secretValid) {
       return NextResponse.json(
         { error: 'x-e2e-secret header required when specifying user_id' },
@@ -76,7 +93,6 @@ export async function POST(req: NextRequest) {
     }
     resolvedUserId = targetUserId
   } else {
-    // Authed user: requires valid JWT
     const supabase = await getSupabaseClient(req)
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) {
@@ -85,7 +101,7 @@ export async function POST(req: NextRequest) {
     resolvedUserId = user.id
   }
 
-  // Fetch current balance
+  // Fetch current state
   const { data: dbUser, error: fetchError } = await admin
     .from('users')
     .select('credits_balance, credits_held')
@@ -93,56 +109,73 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (fetchError || !dbUser) {
-    return NextResponse.json(
-      { error: `User not found: ${resolvedUserId}` },
-      { status: 404 }
-    )
+    return NextResponse.json({ error: `User not found: ${resolvedUserId}` }, { status: 404 })
   }
 
-  const newBalance = dbUser.credits_balance + amount
+  const currentBalance = dbUser.credits_balance ?? 0
+  const held = dbUser.credits_held ?? 0
 
-  // Update balance
+  let newBalance: number
+  let delta: number
+  let txDescription: string
+
+  if (hasSetTo) {
+    newBalance = set_to!
+    delta = newBalance - currentBalance
+    txDescription = description ?? `E2E set_to: ${newBalance} credits (was ${currentBalance})`
+  } else {
+    delta = amount!
+    newBalance = currentBalance + delta
+    txDescription = description ?? `E2E top-up: +${delta} credits`
+  }
+
+  // Update balance (and reset held to 0 on set_to for clean slate)
+  const updateFields: Record<string, number> = { credits_balance: newBalance }
+  if (hasSetTo) updateFields.credits_held = 0
+
   const { error: updateError } = await admin
     .from('users')
-    .update({ credits_balance: newBalance })
+    .update(updateFields)
     .eq('id', resolvedUserId)
 
   if (updateError) {
     return NextResponse.json({ error: updateError.message }, { status: 500 })
   }
 
-  // Record transaction
-  const txDescription = description ?? `E2E test top-up: +${amount} credits`
-  const { data: txRow, error: txError } = await admin
-    .from('credit_transactions')
-    .insert({
-      user_id: resolvedUserId,
-      amount_cents: amount * 100,
-      balance_after: newBalance,
-      kind: 'bonus',
-      description: txDescription,
-    })
-    .select('id')
-    .single()
+  // Record transaction (skip for no-op set_to with same balance)
+  let transactionId: string | null = null
+  if (delta !== 0) {
+    const { data: txRow, error: txError } = await admin
+      .from('credit_transactions')
+      .insert({
+        user_id: resolvedUserId,
+        amount_cents: delta * 100,
+        balance_after: newBalance,
+        kind: 'adjustment',
+        description: txDescription,
+      })
+      .select('id')
+      .single()
 
-  if (txError) {
-    // Non-fatal: balance was updated, just log
-    console.warn('credit-topup: tx insert failed:', txError.message)
+    if (txError) {
+      console.warn('credit-topup: tx insert failed:', txError.message)
+    } else {
+      transactionId = txRow?.id ?? null
+    }
   }
 
-  const held = dbUser.credits_held ?? 0
+  const effectiveHeld = hasSetTo ? 0 : held
 
   return NextResponse.json({
     ok: true,
     balance: newBalance,
-    held,
-    available: newBalance - held,
-    transaction_id: txRow?.id ?? null,
+    held: effectiveHeld,
+    available: newBalance - effectiveHeld,
+    transaction_id: transactionId,
     user_id: resolvedUserId,
   }, { status: 200 })
 }
 
-// Reject all other methods
 export async function GET() {
   return NextResponse.json({ error: 'Method not allowed' }, { status: 405 })
 }

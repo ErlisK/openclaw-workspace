@@ -24,6 +24,7 @@ const BYPASS = process.env.VERCEL_BYPASS_TOKEN || ''
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://sreaczlbclzysmntltdf.supabase.co'
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || ''
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+const E2E_SECRET = process.env.E2E_TEST_SECRET || ''
 
 function url(path: string) {
   const u = `${BASE_URL}${path}`
@@ -52,12 +53,19 @@ function uid(t: string) {
   try { return JSON.parse(Buffer.from(t.split('.')[1] + '==', 'base64').toString()).sub ?? '' }
   catch { return '' }
 }
-async function setBalance(request: APIRequestContext, userId: string, balance: number, held = 0) {
-  if (!SERVICE_ROLE_KEY) return
-  await request.patch(`${SUPABASE_URL}/rest/v1/users?id=eq.${userId}`, {
-    data: { credits_balance: balance, credits_held: held },
-    headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' },
+async function setBalance(request: APIRequestContext, userId: string, balance: number) {
+  // Use /api/test/credit-topup (set_to) instead of direct Supabase service-role PATCH
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (BYPASS) headers['Cookie'] = `x-vercel-protection-bypass=${BYPASS}`
+  if (E2E_SECRET) headers['x-e2e-secret'] = E2E_SECRET
+  const res = await request.post(url('/api/test/credit-topup'), {
+    data: { user_id: userId, set_to: balance },
+    headers,
+    timeout: 15000,
   })
+  if (!res.ok()) {
+    console.warn(`setBalance failed (${res.status()}):`, await res.text())
+  }
 }
 
 const RUN = Date.now()

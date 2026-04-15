@@ -88,32 +88,51 @@ export async function topUpCreditsByUserId(
 }
 
 /**
- * Set a user's balance to an exact amount by topping up from 0.
- * Reads current balance first and adds the difference.
- * Uses JWT auth.
+ * Set a user's balance to an exact amount (JWT auth).
+ * Resets held to 0 — use before a fresh test scenario.
  */
 export async function setCreditsTo(
   request: APIRequestContext,
   token: string,
   targetBalance: number
 ): Promise<TopUpResult> {
-  // Get current balance
-  const creditsUrl = `${BASE_URL}/api/credits${BYPASS ? `?x-vercel-protection-bypass=${BYPASS}` : ''}`
-  const checkRes = await request.get(creditsUrl, {
+  const res = await request.post(url('/api/test/credit-topup'), {
+    data: { set_to: targetBalance, description: `E2E setCreditsTo(${targetBalance})` },
     headers: testHeaders(token),
-    timeout: 10000,
+    timeout: 15000,
   })
 
-  const { balance: current = 0, held = 0 } = checkRes.ok() ? await checkRes.json() : {}
-
-  // Release held credits first if needed — this is best-effort
-  const effectiveCurrent = current - held
-
-  if (effectiveCurrent >= targetBalance) {
-    // Already at or above target — return current state
-    return { ok: true, balance: current, held, available: effectiveCurrent, transaction_id: null, user_id: '' }
+  if (!res.ok()) {
+    const body = await res.text()
+    throw new Error(`setCreditsTo failed (${res.status()}): ${body}`)
   }
 
-  const topUpAmount = targetBalance - effectiveCurrent
-  return topUpCredits(request, token, topUpAmount, `E2E setCreditsTo(${targetBalance})`)
+  return res.json()
+}
+
+/**
+ * Set a user's balance to an exact amount by user_id (requires E2E_TEST_SECRET).
+ * Resets held to 0 — use in beforeAll for clean fixture setup.
+ */
+export async function setCreditsToByUserId(
+  request: APIRequestContext,
+  userId: string,
+  targetBalance: number
+): Promise<TopUpResult> {
+  if (!E2E_SECRET) {
+    throw new Error('E2E_TEST_SECRET env var required for setCreditsToByUserId')
+  }
+
+  const res = await request.post(url('/api/test/credit-topup'), {
+    data: { user_id: userId, set_to: targetBalance, description: `E2E setCreditsToByUserId(${targetBalance})` },
+    headers: testHeaders(),
+    timeout: 15000,
+  })
+
+  if (!res.ok()) {
+    const body = await res.text()
+    throw new Error(`setCreditsToByUserId failed (${res.status()}): ${body}`)
+  }
+
+  return res.json()
 }
