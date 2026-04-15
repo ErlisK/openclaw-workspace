@@ -72,8 +72,9 @@ export default function DashboardPage() {
   }, [supabase, router, loadData])
 
   async function handleSignOut() {
-    await fetch('/api/auth/signout', { method: 'POST' })
+    await supabase.auth.signOut()
     router.push('/login')
+    router.refresh()
   }
 
   async function createProject(e: React.FormEvent) {
@@ -159,6 +160,7 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <span className="text-xl font-bold text-gray-900">AgentQA</span>
           <span className="text-sm text-gray-400">Dashboard</span>
+          <a href="/marketplace" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium ml-2">🧪 Find Test Jobs</a>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-600">{userEmail}</span>
