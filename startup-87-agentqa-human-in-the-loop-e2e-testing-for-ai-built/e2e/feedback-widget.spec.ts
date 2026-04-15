@@ -44,12 +44,17 @@ function byCookie() {
 
 /** Set up bypass routing for /_next/ assets and navigate */
 async function gotoWithHydration(page: import('@playwright/test').Page, path: string) {
-  // Intercept /_next/ requests to add bypass token so React hydrates properly
+  // Intercept /_next/ and /api/ requests to add bypass token so React hydrates properly
   if (BYPASS) {
-    await page.route('**/_next/**', async route => {
-      const originalUrl = route.request().url()
-      const sep = originalUrl.includes('?') ? '&' : '?'
-      await route.continue({ url: `${originalUrl}${sep}x-vercel-protection-bypass=${BYPASS}` })
+    await page.route('**', async route => {
+      const reqUrl = route.request().url()
+      // Add bypass to all same-origin requests
+      if (reqUrl.startsWith(BASE_URL) && !reqUrl.includes('x-vercel-protection-bypass')) {
+        const sep = reqUrl.includes('?') ? '&' : '?'
+        await route.continue({ url: `${reqUrl}${sep}x-vercel-protection-bypass=${BYPASS}` })
+      } else {
+        await route.continue()
+      }
     })
   }
   await page.goto(url(path))
