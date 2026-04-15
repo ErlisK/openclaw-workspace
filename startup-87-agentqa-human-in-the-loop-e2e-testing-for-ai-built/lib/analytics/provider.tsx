@@ -26,6 +26,8 @@ export function PHProvider({ children }: { children: React.ReactNode }) {
         if (process.env.NODE_ENV === 'development') {
           ph.opt_out_capturing()
         }
+        // Make accessible for E2E checks
+        ;(window as unknown as Record<string, unknown>).posthog = ph
       },
     })
   }, [])
