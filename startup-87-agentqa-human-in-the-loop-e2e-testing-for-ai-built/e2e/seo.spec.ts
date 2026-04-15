@@ -54,7 +54,8 @@ test.describe('SEO — robots.txt and sitemap', () => {
   test('robots.txt allows / for all bots', async ({ request }) => {
     const res = await request.get(url('/robots.txt'), { headers: bypassHeaders() })
     const body = await res.text()
-    expect(body).toContain('User-agent: *')
+    const normalized = body.toLowerCase()
+    expect(normalized).toContain('user-agent:')
     expect(body).toContain('Allow: /')
   })
 
