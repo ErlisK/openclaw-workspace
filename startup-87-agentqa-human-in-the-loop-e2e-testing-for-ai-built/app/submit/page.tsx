@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { getTemplate } from '@/lib/templates/job-templates'
@@ -36,6 +36,14 @@ const TIERS = [
 ]
 
 export default function SubmitPage() {
+  return (
+    <Suspense>
+      <SubmitForm />
+    </Suspense>
+  )
+}
+
+function SubmitForm() {
   const [url, setUrl] = useState('')
   const [flows, setFlows] = useState('')
   const [tier, setTier] = useState('standard')
