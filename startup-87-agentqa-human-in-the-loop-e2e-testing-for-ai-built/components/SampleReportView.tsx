@@ -234,6 +234,7 @@ function AgentReadySection({ report }: { report: SampleReport }) {
 export default function SampleReportView({ report }: { report: SampleReport }) {
   const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
   const shareUrl = `${BASE_URL}/report/${report.slug}`
+  const [linkCopied, setLinkCopied] = useState(false)
 
   const bugCounts = report.bugs.reduce((acc, b) => {
     acc[b.severity] = (acc[b.severity] ?? 0) + 1
@@ -279,11 +280,12 @@ export default function SampleReportView({ report }: { report: SampleReport }) {
             <button
               onClick={() => {
                 navigator.clipboard?.writeText(shareUrl)
-                alert('Share link copied!')
+                setLinkCopied(true)
+                setTimeout(() => setLinkCopied(false), 2000)
               }}
               className="border border-gray-300 text-sm px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-1.5"
             >
-              🔗 Copy share link
+              {linkCopied ? '✓ Copied!' : '🔗 Copy share link'}
             </button>
             <button
               onClick={() => window.print()}
