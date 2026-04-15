@@ -54,7 +54,8 @@ function fmt(n: number) { return new Intl.NumberFormat().format(n ?? 0) }
 function pct(a: number, b: number) { return b === 0 ? '—' : `${((a / b) * 100).toFixed(1)}%` }
 
 function SparkBar({ data, valueKey, color = 'indigo' }: {
-  data: Record<string, unknown>[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any[]
   valueKey: string
   color?: string
 }) {
