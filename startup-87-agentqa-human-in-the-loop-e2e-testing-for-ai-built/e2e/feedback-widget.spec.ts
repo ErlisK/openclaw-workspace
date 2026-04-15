@@ -44,25 +44,10 @@ function byCookie() {
 
 /** Wait for React hydration before clicking interactive elements */
 async function waitForHydration(page: import('@playwright/test').Page) {
-  await waitForHydration(page)
-  // Wait until the feedback trigger button's click handler is wired up (React hydrated)
-  await page.waitForFunction(
-    () => {
-      const btn = document.querySelector('[data-testid="feedback-trigger"]')
-      if (!btn) return false
-      // React attaches handlers via event delegation on the root; check that
-      // React hydration markers are present
-      const root = document.getElementById('__next') ||
-                   document.querySelector('[data-reactroot]') ||
-                   document.body
-      const keys = Object.keys(root ?? {})
-      return keys.some(k => k.startsWith('__react') || k.startsWith('__REACT'))
-    },
-    { timeout: 10000 }
-  ).catch(() => {
-    // Fallback: just wait 2s if hydration marker not found
-    return new Promise(resolve => setTimeout(resolve, 2000))
-  })
+  await page.waitForLoadState('load')
+  // Wait for React hydration to complete (client bundle to execute)
+  // Using a 3s wait since the fiber key detection varies by React version
+  await page.waitForTimeout(3000)
 }
 function apiHeaders(extra?: Record<string, string>): Record<string, string> {
   return { 'Content-Type': 'application/json', ...bypassHeaders(), ...(extra ?? {}) }
