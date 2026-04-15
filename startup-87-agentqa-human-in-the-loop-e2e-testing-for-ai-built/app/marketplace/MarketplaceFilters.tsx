@@ -10,9 +10,9 @@ interface Props {
 
 const TIERS = [
   { value: '', label: 'All Tiers' },
-  { value: 'quick', label: '⚡ Quick ($4, 10 min)' },
-  { value: 'standard', label: '⏱ Standard ($8, 20 min)' },
-  { value: 'deep', label: '🔬 Deep ($12, 30 min)' },
+  { value: 'quick', label: '⚡ Quick ($5, 10 min)' },
+  { value: 'standard', label: '⏱ Standard ($10, 20 min)' },
+  { value: 'deep', label: '🔬 Deep ($15, 30 min)' },
 ]
 
 const SORTS = [
