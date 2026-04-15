@@ -141,8 +141,11 @@ test.describe('Feedback Widget — submission', () => {
   test('submitting comment shows success state', async ({ page }) => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
-    await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
-    await page.waitForTimeout(500) // let React state update
+    const comment = page.locator('[data-testid="feedback-comment"]')
+    await comment.click() // focus first
+    await comment.fill(`E2E test comment ${Date.now()}`)
+    await comment.evaluate((el: HTMLTextAreaElement) => el.dispatchEvent(new Event('input', { bubbles: true })))
+    await expect(page.locator('[data-testid="feedback-submit"]')).toBeEnabled({ timeout: 5000 })
     await page.locator('[data-testid="feedback-submit"]').click()
     await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
   })
