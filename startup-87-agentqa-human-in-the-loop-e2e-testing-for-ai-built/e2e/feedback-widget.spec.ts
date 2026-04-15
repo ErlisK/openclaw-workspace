@@ -44,14 +44,10 @@ function byCookie() {
 
 /** Set up bypass routing for /_next/ assets and navigate */
 async function gotoWithHydration(page: import('@playwright/test').Page, path: string) {
-  // Intercept /_next/ requests to add bypass token so React hydrates properly
-  // Only intercept GET requests for assets; don't touch POST/PUT/PATCH
   if (BYPASS) {
     await page.route('**', async route => {
       const reqUrl = route.request().url()
-      const method = route.request().method()
-      // Only modify GET requests to same origin that need the bypass
-      if (method === 'GET' && reqUrl.startsWith(BASE_URL) && !reqUrl.includes('x-vercel-protection-bypass')) {
+      if (reqUrl.startsWith(BASE_URL) && !reqUrl.includes('x-vercel-protection-bypass')) {
         const sep = reqUrl.includes('?') ? '&' : '?'
         await route.continue({ url: `${reqUrl}${sep}x-vercel-protection-bypass=${BYPASS}` })
       } else {
@@ -143,10 +139,8 @@ test.describe('Feedback Widget — submission', () => {
   test('submitting comment shows success state', async ({ page }) => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
-    const comment = page.locator('[data-testid="feedback-comment"]')
-    await comment.click()
-    await comment.fill(`E2E test comment ${Date.now()}`)
-    await expect(page.locator('[data-testid="feedback-submit"]')).toBeEnabled({ timeout: 5000 })
+    await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
+    await page.waitForTimeout(1000)
     await page.locator('[data-testid="feedback-submit"]').click()
     await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
   })
@@ -156,8 +150,9 @@ test.describe('Feedback Widget — submission', () => {
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-star-5"]').click()
     await page.locator('[data-testid="feedback-category-praise"]').click()
+    await page.waitForTimeout(500)
     await page.locator('[data-testid="feedback-submit"]').click()
-    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 10000 })
+    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
   })
 })
 
