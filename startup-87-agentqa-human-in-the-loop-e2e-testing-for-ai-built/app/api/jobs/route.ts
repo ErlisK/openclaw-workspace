@@ -30,6 +30,29 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'title and url are required' }, { status: 400 })
   }
 
+  // Input length limits
+  if (typeof title !== 'string' || title.length > 255) {
+    return NextResponse.json({ error: 'title must be ≤255 characters' }, { status: 400 })
+  }
+  if (typeof instructions === 'string' && instructions.length > 5000) {
+    return NextResponse.json({ error: 'instructions must be ≤5000 characters' }, { status: 400 })
+  }
+  if (typeof url !== 'string' || url.length > 2000) {
+    return NextResponse.json({ error: 'url must be ≤2000 characters' }, { status: 400 })
+  }
+
+  // URL validation — only http/https allowed; block javascript:, data:, file:, etc.
+  let parsedUrl: URL
+  try {
+    parsedUrl = new URL(url)
+  } catch {
+    return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
+  }
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return NextResponse.json({ error: `Disallowed URL scheme: ${parsedUrl.protocol}` }, { status: 400 })
+  }
+  const normalizedUrl = parsedUrl.toString()
+
   const PRICE = { quick: 500, standard: 1000, deep: 1500 }
   const price_cents = PRICE[tier as keyof typeof PRICE] ?? 500
 
@@ -38,7 +61,7 @@ export async function POST(req: NextRequest) {
     .insert({
       client_id: user.id,
       title,
-      url,
+      url: normalizedUrl,
       tier,
       price_cents,
       instructions,

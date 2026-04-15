@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
-import { validateProxyUrl } from '@/lib/proxy-security'
+import { validateProxyUrl, checkRateLimit } from '@/lib/proxy-security'
 
 const MAX_SIZE = 5 * 1024 * 1024 // 5 MB
 
@@ -119,6 +119,12 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return new NextResponse('Unauthorized', { status: 401 })
 
+  // Rate limit
+  const rateCheck = checkRateLimit(req, user.id)
+  if (!rateCheck.allowed) {
+    return new NextResponse('Too Many Requests', { status: 429, headers: { 'Retry-After': '60' } })
+  }
+
   const forwardHeaders: Record<string, string> = {
     'User-Agent': 'AgentQA-Sandbox/1.0 (testing-platform)',
     Accept: 'text/html,application/xhtml+xml,*/*;q=0.8',
@@ -129,14 +135,35 @@ export async function GET(req: NextRequest) {
   }
 
   let upstreamRes: Response
-  try {
-    upstreamRes = await fetch(urlCheck.url.toString(), {
-      method: 'GET',
-      headers: forwardHeaders,
-      redirect: 'follow',
-    })
-  } catch (err) {
-    return new NextResponse(`Failed to fetch: ${String(err)}`, { status: 502 })
+  let currentUrl = urlCheck.url
+  let redirectsRemaining = 5
+
+  while (true) {
+    try {
+      upstreamRes = await fetch(currentUrl.toString(), {
+        method: 'GET',
+        headers: forwardHeaders,
+        redirect: 'manual',
+      })
+    } catch {
+      return new NextResponse('Upstream fetch failed', { status: 502 })
+    }
+
+    if (upstreamRes.status >= 300 && upstreamRes.status < 400) {
+      if (redirectsRemaining <= 0) return new NextResponse('Too many redirects', { status: 502 })
+      const location = upstreamRes.headers.get('location')
+      if (!location) break
+      let rUrl: URL
+      try { rUrl = new URL(location, currentUrl.toString()) } catch {
+        return new NextResponse('Invalid redirect', { status: 502 })
+      }
+      const rCheck = await validateProxyUrl(rUrl.toString())
+      if (!rCheck.ok) return new NextResponse('Redirect blocked', { status: 403 })
+      currentUrl = rCheck.url
+      redirectsRemaining--
+      continue
+    }
+    break
   }
 
   const contentType = upstreamRes.headers.get('content-type') ?? ''
@@ -160,7 +187,7 @@ export async function GET(req: NextRequest) {
     ? `${origin}/api/sessions/${sessionId}/events`
     : `${origin}/api/proxy/sink`
 
-  let rewritten = rewriteUrls(html, urlCheck.url.toString(), origin, sessionId)
+  let rewritten = rewriteUrls(html, currentUrl.toString(), origin, sessionId)
   const script = buildCaptureScript(sessionId, eventsUrl)
 
   if (rewritten.includes('</head>')) {

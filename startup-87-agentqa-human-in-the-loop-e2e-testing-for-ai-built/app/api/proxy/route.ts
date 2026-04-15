@@ -92,8 +92,15 @@ export async function GET(req: NextRequest) {
   const targetUrl = searchParams.get('url')
   const sessionId = searchParams.get('session') ?? ''
 
+  // Auth check — only authenticated users can use the proxy
+  const supabase = await getSupabaseClient(req)
+  const { data: { user: earlyUser } } = await supabase.auth.getUser()
+  if (!earlyUser) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
   // Rate limit check (before any expensive work)
-  const rateCheck = checkRateLimit(req)
+  const rateCheck = checkRateLimit(req, earlyUser.id)
   if (!rateCheck.allowed) {
     return new NextResponse('Too Many Requests', {
       status: 429,
@@ -107,13 +114,6 @@ export async function GET(req: NextRequest) {
     return new NextResponse(urlCheck.reason, { status: urlCheck.status })
   }
   const parsedTarget = urlCheck.url
-
-  // Auth check — only authenticated users can use the proxy
-  const supabase = await getSupabaseClient(req)
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return new NextResponse('Unauthorized', { status: 401 })
-  }
 
   // Fetch the target URL
   const forwardHeaders: Record<string, string> = {
@@ -130,14 +130,39 @@ export async function GET(req: NextRequest) {
   }
 
   let upstreamRes: Response
-  try {
-    upstreamRes = await fetch(parsedTarget.toString(), {
-      method: 'GET',
-      headers: forwardHeaders,
-      redirect: 'follow',
-    })
-  } catch (err) {
-    return new NextResponse(`Failed to fetch target: ${String(err)}`, { status: 502 })
+  let currentTarget = parsedTarget
+  let redirectsRemaining = 5
+
+  while (true) {
+    try {
+      upstreamRes = await fetch(currentTarget.toString(), {
+        method: 'GET',
+        headers: forwardHeaders,
+        redirect: 'manual',
+      })
+    } catch {
+      return new NextResponse('Upstream fetch failed', { status: 502 })
+    }
+
+    if (upstreamRes.status >= 300 && upstreamRes.status < 400) {
+      if (redirectsRemaining <= 0) {
+        return new NextResponse('Too many redirects', { status: 502 })
+      }
+      const location = upstreamRes.headers.get('location')
+      if (!location) break
+      let redirectUrl: URL
+      try { redirectUrl = new URL(location, currentTarget.toString()) } catch {
+        return new NextResponse('Invalid redirect', { status: 502 })
+      }
+      const redirectCheck = await validateProxyUrl(redirectUrl.toString())
+      if (!redirectCheck.ok) {
+        return new NextResponse('Redirect blocked', { status: 403 })
+      }
+      currentTarget = redirectCheck.url
+      redirectsRemaining--
+      continue
+    }
+    break
   }
 
   const contentType = upstreamRes.headers.get('content-type') ?? 'text/plain'

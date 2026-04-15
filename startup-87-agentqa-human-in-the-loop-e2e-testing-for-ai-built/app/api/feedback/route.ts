@@ -57,6 +57,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Max 50 bugs per submission' }, { status: 400 })
   }
 
+  // Input length limits
+  if (summary && summary.length > 5000) {
+    return NextResponse.json({ error: 'summary must be ≤5000 characters' }, { status: 400 })
+  }
+  if (repro_steps && repro_steps.length > 5000) {
+    return NextResponse.json({ error: 'repro_steps must be ≤5000 characters' }, { status: 400 })
+  }
+  if (expected_behavior && expected_behavior.length > 2000) {
+    return NextResponse.json({ error: 'expected_behavior must be ≤2000 characters' }, { status: 400 })
+  }
+  if (actual_behavior && actual_behavior.length > 2000) {
+    return NextResponse.json({ error: 'actual_behavior must be ≤2000 characters' }, { status: 400 })
+  }
+
   const admin = createAdminClient()
 
   // Verify tester owns this assignment
@@ -68,6 +82,55 @@ export async function POST(req: NextRequest) {
 
   if (!assignment) return NextResponse.json({ error: 'Assignment not found' }, { status: 404 })
   if (assignment.tester_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  // Proof-of-work gating: verify session has sufficient duration and interaction
+  if (session_id) {
+    const { data: session } = await admin
+      .from('test_sessions')
+      .select('id, job_id, started_at, completed_at')
+      .eq('id', session_id)
+      .single()
+
+    if (session) {
+      // Get job tier for threshold
+      const { data: jobData } = await admin
+        .from('test_jobs')
+        .select('tier')
+        .eq('id', job_id)
+        .single()
+
+      const tier = jobData?.tier ?? 'quick'
+      // Tier thresholds: quick=10min, standard=20min, deep=30min; 80% rule
+      const TIER_MIN_MS: Record<string, number> = { quick: 8 * 60_000, standard: 16 * 60_000, deep: 24 * 60_000 }
+      const minMs = TIER_MIN_MS[tier] ?? TIER_MIN_MS.quick
+
+      const startedAt = session.started_at ? new Date(session.started_at).getTime() : null
+      const now2 = Date.now()
+      if (startedAt) {
+        const durationMs = now2 - startedAt
+        if (durationMs < minMs) {
+          return NextResponse.json(
+            { error: `Session too short. Minimum duration for ${tier} tier is ${Math.round(minMs / 60_000)} minutes.` },
+            { status: 400 }
+          )
+        }
+      }
+
+      // Verify minimum interaction count (≥10 non-console events)
+      const { count: eventCount } = await admin
+        .from('session_events')
+        .select('id', { count: 'exact', head: true })
+        .eq('session_id', session_id)
+        .neq('event_type', 'console_log')
+
+      if ((eventCount ?? 0) < 10) {
+        return NextResponse.json(
+          { error: 'Insufficient interaction recorded. At least 10 interactions required.' },
+          { status: 400 }
+        )
+      }
+    }
+  }
 
   const now = new Date().toISOString()
 
@@ -152,21 +215,38 @@ export async function GET(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+
+  // If querying by job_id, verify requester is the job client
+  if (job_id) {
+    const { data: job } = await admin
+      .from('test_jobs')
+      .select('client_id')
+      .eq('id', job_id)
+      .single()
+    if (job && job.client_id === user.id) {
+      // Client can see all feedback for their job
+      const { data, error } = await admin
+        .from('feedback')
+        .select('*, feedback_bugs(*)')
+        .eq('job_id', job_id)
+        .order('created_at', { ascending: false })
+      if (error) return NextResponse.json({ error: 'Internal error' }, { status: 500 })
+      return NextResponse.json({ feedback: data ?? [] })
+    }
+  }
+
+  // Otherwise: only tester can see their own feedback rows
   let query = admin
     .from('feedback')
     .select('*, feedback_bugs(*)')
+    .eq('tester_id', user.id)
     .order('created_at', { ascending: false })
 
   if (session_id) query = query.eq('session_id', session_id)
   if (job_id) query = query.eq('job_id', job_id)
 
   const { data, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Internal error' }, { status: 500 })
 
-  // Filter: only tester's own or job clients can see feedback
-  const accessible = (data ?? []).filter((fb: Record<string, unknown>) => {
-    return fb.tester_id === user.id // expand with job client check if needed
-  })
-
-  return NextResponse.json({ feedback: accessible })
+  return NextResponse.json({ feedback: data ?? [] })
 }

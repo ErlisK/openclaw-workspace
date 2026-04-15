@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (fetchError || !dbUser) {
-    return NextResponse.json({ error: `User not found: ${resolvedUserId}` }, { status: 404 })
+    return NextResponse.json({ error: 'User not found' }, { status: 404 })
   }
 
   const currentBalance = dbUser.credits_balance ?? 0

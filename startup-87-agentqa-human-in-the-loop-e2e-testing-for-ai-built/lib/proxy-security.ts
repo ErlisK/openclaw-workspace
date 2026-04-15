@@ -181,32 +181,36 @@ setInterval(() => {
   }
 }, 5 * 60_000)
 
-export function checkRateLimit(req: NextRequest): { allowed: boolean; remaining: number } {
+export function checkRateLimit(req: NextRequest, userId?: string): { allowed: boolean; remaining: number } {
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0].trim() ??
     req.headers.get('x-real-ip') ??
     'unknown'
 
   const now = Date.now()
-  let bucket = buckets.get(ip)
 
-  if (!bucket) {
-    bucket = { tokens: RATE_LIMIT.maxTokens, lastRefill: now }
-    buckets.set(ip, bucket)
+  // Check both IP-based and user-based buckets; either failing blocks the request
+  const keys = userId ? [`ip:${ip}`, `user:${userId}`] : [`ip:${ip}`]
+  for (const key of keys) {
+    let bucket = buckets.get(key)
+    if (!bucket) {
+      bucket = { tokens: RATE_LIMIT.maxTokens, lastRefill: now }
+      buckets.set(key, bucket)
+    }
+    const elapsed = now - bucket.lastRefill
+    const refilled = Math.floor(elapsed / RATE_LIMIT.refillIntervalMs) * RATE_LIMIT.refillRate
+    if (refilled > 0) {
+      bucket.tokens = Math.min(RATE_LIMIT.maxTokens, bucket.tokens + refilled)
+      bucket.lastRefill = now
+    }
+    if (bucket.tokens <= 0) return { allowed: false, remaining: 0 }
   }
 
-  // Refill tokens based on elapsed time
-  const elapsed = now - bucket.lastRefill
-  const refilled = Math.floor(elapsed / RATE_LIMIT.refillIntervalMs) * RATE_LIMIT.refillRate
-  if (refilled > 0) {
-    bucket.tokens = Math.min(RATE_LIMIT.maxTokens, bucket.tokens + refilled)
-    bucket.lastRefill = now
+  // Consume token from both buckets
+  for (const key of keys) {
+    const bucket = buckets.get(key)!
+    bucket.tokens -= 1
   }
-
-  if (bucket.tokens <= 0) {
-    return { allowed: false, remaining: 0 }
-  }
-
-  bucket.tokens -= 1
-  return { allowed: true, remaining: bucket.tokens }
+  const firstBucket = buckets.get(keys[0])!
+  return { allowed: true, remaining: firstBucket.tokens }
 }
