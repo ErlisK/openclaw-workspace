@@ -30,7 +30,7 @@ export default function NewJobPage() {
     const res = await fetch('/api/jobs', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, url, tier, instructions }),
+      body: JSON.stringify({ title, url: /^https?:\/\//i.test(url) ? url : `https://${url}`, tier, instructions }),
     })
     const data = await res.json()
     if (!res.ok) {

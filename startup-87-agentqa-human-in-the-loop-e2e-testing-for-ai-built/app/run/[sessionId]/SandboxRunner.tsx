@@ -53,8 +53,10 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
   // passing "undefined" to the proxy which would display a confusing error page.
   const safeJobUrl = (() => {
     if (!job.url) return ''
+    // Normalize bare domains like "snippetci.com" → "https://snippetci.com"
+    const raw = /^https?:\/\//i.test(job.url) ? job.url : `https://${job.url}`
     try {
-      const p = new URL(job.url)
+      const p = new URL(raw)
       return ['http:', 'https:'].includes(p.protocol) ? p.toString() : ''
     } catch {
       return ''

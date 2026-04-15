@@ -41,6 +41,11 @@ export default async function RunPage({ params }: Props) {
 
   if (!job || !job.url) notFound()
 
+  // Normalize bare domains (e.g. "snippetci.com" → "https://snippetci.com")
+  if (!/^https?:\/\//i.test(job.url)) {
+    job.url = `https://${job.url}`
+  }
+
   const isOwner = session.tester_id === user.id
   const isClient = job.client_id === user.id
   if (!isOwner && !isClient) redirect('/dashboard')
