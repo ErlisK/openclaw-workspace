@@ -45,19 +45,28 @@ function byCookie() {
 /** Set up bypass routing for /_next/ assets and navigate */
 async function gotoWithHydration(page: import('@playwright/test').Page, path: string) {
   if (BYPASS) {
-    // Add bypass token as a REQUEST HEADER (not query param) so POST bodies are never touched
     await page.route('**', async route => {
       const reqUrl = route.request().url()
-      if (reqUrl.startsWith(BASE_URL)) {
-        const originalHeaders = await route.request().allHeaders()
-        await route.continue({
-          headers: {
-            ...originalHeaders,
-            'x-vercel-protection-bypass': BYPASS,
-          },
-        })
+      if (!reqUrl.startsWith(BASE_URL)) return route.continue()
+
+      const method = route.request().method().toUpperCase()
+      if (method === 'GET') {
+        // For GET: inject bypass as a header (body irrelevant)
+        const hdrs = await route.request().allHeaders()
+        await route.continue({ headers: { ...hdrs, 'x-vercel-protection-bypass': BYPASS } })
       } else {
-        await route.continue()
+        // For non-GET: add bypass as URL param AND preserve body + headers explicitly
+        const sep = reqUrl.includes('?') ? '&' : '?'
+        const newUrl = reqUrl.includes('x-vercel-protection-bypass')
+          ? reqUrl
+          : `${reqUrl}${sep}x-vercel-protection-bypass=${BYPASS}`
+        const hdrs = await route.request().allHeaders()
+        const body = route.request().postDataBuffer()
+        await route.continue({
+          url: newUrl,
+          headers: hdrs,
+          ...(body ? { postData: body } : {}),
+        })
       }
     })
   }
