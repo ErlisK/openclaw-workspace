@@ -1,10 +1,14 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function SignupPage() {
+  return <Suspense><SignupForm /></Suspense>
+}
+
+function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -12,6 +16,9 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const searchParams = useSearchParams()
+  const refCode = searchParams.get('ref') ?? ''
+  const [referralCode, setReferralCode] = useState(refCode)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
@@ -27,6 +34,14 @@ export default function SignupPage() {
       setLoading(false)
     } else if (data.session) {
       // autoconfirm is on — session returned immediately
+      // Apply referral code if present
+      if (referralCode) {
+        await fetch('/api/referrals/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: referralCode }),
+        }).catch(() => {})
+      }
       router.push('/dashboard')
     } else {
       setSuccess(true)
@@ -93,6 +108,19 @@ export default function SignupPage() {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Min 6 characters"/>
           </div>
           {error && <p className="text-red-500 text-sm" data-testid="error-message">{error}</p>}
+          {/* Referral code */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Invite code <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <input type="text" data-testid="referral-code-input"
+              value={referralCode} onChange={e => setReferralCode(e.target.value.toUpperCase())}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono tracking-wider uppercase"
+              placeholder="e.g. ABC123" maxLength={8}/>
+            {referralCode && (
+              <p className="text-xs text-indigo-600 mt-1">🎁 +3 credits on your first purchase!</p>
+            )}
+          </div>
           <button type="submit" data-testid="signup-button" disabled={loading}
             className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
             {loading ? 'Creating account…' : 'Create account'}

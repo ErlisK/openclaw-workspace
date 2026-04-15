@@ -11,6 +11,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { addCredits } from '@/lib/credits'
+import { applyReferralCredits } from '@/lib/referrals'
 import { createAdminClient } from '@/lib/supabase/server'
 import { captureServerEvent } from '@/lib/analytics/events'
 
@@ -127,6 +128,10 @@ export async function POST(req: NextRequest) {
           }
 
           console.log(`Webhook: added ${creditAmount} credits to user ${userId}`)
+          // Apply referral bonus on first purchase (idempotent)
+          applyReferralCredits(userId).then(r => {
+            if (r.applied) console.log(`Webhook: referral credits applied for ${userId} (+${r.refereeGranted} each side)`)
+          }).catch(() => {})
           captureServerEvent('purchase_credits', userId, {
             credits_purchased: creditAmount,
             pack,

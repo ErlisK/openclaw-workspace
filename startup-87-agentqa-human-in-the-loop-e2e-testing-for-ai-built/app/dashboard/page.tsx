@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { TestJob, Project } from '@/lib/types'
@@ -349,6 +349,77 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Referral share widget — sticky bottom-left */}
+      <ReferralWidget />
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Referral share widget
+// ─────────────────────────────────────────────────────────────────────────────
+function ReferralWidget() {
+  const [open, setOpen] = React.useState(false)
+  const [referralLink, setReferralLink] = React.useState('')
+  const [copied, setCopied] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
+
+  async function loadLink() {
+    if (referralLink) { setOpen(true); return }
+    setLoading(true)
+    const res = await fetch('/api/referrals')
+    if (res.ok) {
+      const d = await res.json()
+      setReferralLink(d.link)
+    }
+    setLoading(false)
+    setOpen(true)
+  }
+
+  function copyLink() {
+    navigator.clipboard.writeText(referralLink).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <div className="fixed bottom-6 left-6 z-40" data-testid="referral-widget">
+      {open && referralLink && (
+        <div className="mb-3 bg-white border border-indigo-200 rounded-xl shadow-lg p-4 w-72">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-semibold text-sm text-gray-900">🎁 Invite a friend</span>
+            <button onClick={() => setOpen(false)} className="text-gray-400 hover:text-gray-700 text-xs">✕</button>
+          </div>
+          <p className="text-xs text-gray-500 mb-3">
+            Share your link — both of you get <strong>+3 credits</strong> when they make their first purchase.
+          </p>
+          <div className="flex gap-2">
+            <input
+              readOnly
+              value={referralLink}
+              data-testid="referral-link-input"
+              className="flex-1 text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 font-mono truncate"
+            />
+            <button
+              onClick={copyLink}
+              data-testid="copy-referral-link"
+              className="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 font-medium whitespace-nowrap"
+            >
+              {copied ? '✓ Copied!' : 'Copy'}
+            </button>
+          </div>
+        </div>
+      )}
+      <button
+        onClick={loadLink}
+        disabled={loading}
+        data-testid="referral-share-button"
+        className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 disabled:opacity-50"
+      >
+        🎁 {loading ? 'Loading…' : 'Share & earn credits'}
+      </button>
     </div>
   )
 }
