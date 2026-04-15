@@ -5,7 +5,7 @@ import { CREDIT_PACKS, TIER_CREDITS } from '@/lib/stripe'
 import BillingClient from './BillingClient'
 
 export const metadata = {
-  title: 'Billing — AgentQA',
+  title: 'Billing — BetaWindow',
   description: 'Manage your credits and billing history',
 }
 

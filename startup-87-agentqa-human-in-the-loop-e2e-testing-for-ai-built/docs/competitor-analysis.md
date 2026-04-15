@@ -1,4 +1,4 @@
-# Competitor Analysis — AgentQA
+# Competitor Analysis — BetaWindow
 
 *Last updated: April 2026*
 
@@ -65,4 +65,4 @@ Enterprise-grade exploratory testing, global tester pool. Same fundamental probl
 - With structured output (video, network logs, console errors, pass/fail)
 - Without requiring the buyer to write test cases
 
-This gap is the AgentQA opportunity.
+This gap is the BetaWindow opportunity.

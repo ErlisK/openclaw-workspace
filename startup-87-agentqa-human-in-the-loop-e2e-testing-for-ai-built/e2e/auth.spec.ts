@@ -45,7 +45,7 @@ test.describe('/api/health', () => {
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(body.status).toBe('ok')
-    expect(body.service).toBe('agentqa')
+    expect(body.service).toBe('betawindow')
     expect(typeof body.timestamp).toBe('string')
     expect(body.supabase_url).toBe('configured')
     expect(body.schema_table_count).toBeGreaterThanOrEqual(12)
@@ -288,7 +288,7 @@ test.describe('Dashboard — authenticated access', () => {
       return
     }
     await expect(authedPage).toHaveURL(/\/dashboard/)
-    await expect(authedPage.locator('text=AgentQA')).toBeVisible()
+    await expect(authedPage.locator('text=BetaWindow')).toBeVisible()
   })
 
   test('dashboard shows user email in header', async () => {

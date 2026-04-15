@@ -1,4 +1,4 @@
-// Database types matching the AgentQA schema
+// Database types matching the BetaWindow schema
 export type UserRole = 'client' | 'tester' | 'admin'
 export type JobTier = 'quick' | 'standard' | 'deep'
 export type JobStatus = 'draft' | 'published' | 'assigned' | 'complete' | 'expired' | 'cancelled'

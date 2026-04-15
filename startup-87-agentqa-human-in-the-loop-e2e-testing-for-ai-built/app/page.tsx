@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'AgentQA — Human QA Testing for AI-Built Apps',
+  title: 'BetaWindow — Human QA Testing for AI-Built Apps',
   description: 'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Results in under 4 hours.',
   alternates: { canonical: '/' },
 }
@@ -12,7 +12,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white">
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <span className="text-lg font-bold text-gray-900">AgentQA</span>
+        <span className="text-lg font-bold text-gray-900">BetaWindow</span>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">Find jobs</Link>
           <Link href="/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>

@@ -2,15 +2,15 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JOB_TEMPLATES, TEMPLATE_CATEGORIES } from '@/lib/templates/job-templates'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Testing Instruction Templates — AgentQA',
+  title: 'Testing Instruction Templates — BetaWindow',
   description:
     'Ready-made test instruction templates for signup flows, checkout, mobile UX, core product, and deep UX audits. One-click fill for your next test job.',
   alternates: { canonical: `${BASE_URL}/templates` },
   openGraph: {
-    title: 'AgentQA Testing Templates — Copy-Paste QA Instructions',
+    title: 'BetaWindow Testing Templates — Copy-Paste QA Instructions',
     description: '5 expert-written test instruction templates for AI-built apps. No login required to browse.',
     url: `${BASE_URL}/templates`,
     type: 'website',
@@ -32,7 +32,7 @@ const TIER_COLORS: Record<string, string> = {
 const structuredData = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'AgentQA Testing Instruction Templates',
+  name: 'BetaWindow Testing Instruction Templates',
   description: 'Ready-made QA test instruction templates for AI-built web applications.',
   url: `${BASE_URL}/templates`,
   numberOfItems: JOB_TEMPLATES.length,
@@ -142,7 +142,7 @@ export default function TemplatesPage() {
 }
 
 function TemplateCard({ tpl, featured }: { tpl: ReturnType<typeof JOB_TEMPLATES[0]['id'] extends string ? () => (typeof JOB_TEMPLATES)[0] : never> | (typeof JOB_TEMPLATES)[0]; featured?: boolean }) {
-  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
   const tierColors: Record<string, string> = {
     quick: 'bg-green-100 text-green-800',

@@ -80,7 +80,7 @@ export default function TesterPayoutsPage() {
         {/* Payout info */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 text-sm text-blue-800">
           <strong>How payouts work:</strong> After completing a test session, earnings are held for 48 hours
-          or until the requester approves your work. Payouts are processed manually by the AgentQA team
+          or until the requester approves your work. Payouts are processed manually by the BetaWindow team
           and sent via PayPal or bank transfer. Make sure to keep your payout information up to date.
         </div>
 

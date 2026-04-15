@@ -1,7 +1,7 @@
 /**
  * e2e/submissions.spec.ts
  * 
- * Automated directory submissions for AgentQA.
+ * Automated directory submissions for BetaWindow.
  * Uses Playwright to submit to directories and communities.
  * Documents results in submissions-log.json.
  */
@@ -9,11 +9,11 @@ import { test, expect, chromium } from '@playwright/test'
 import * as fs from 'fs'
 import * as path from 'path'
 
-const DEPLOYED = 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-nfkznkrzm.vercel.app'
+const DEPLOYED = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-nfkznkrzm.vercel.app'
 const EMAIL = 'scide-founder@agentmail.to'
-const PRODUCT_NAME = 'AgentQA'
+const PRODUCT_NAME = 'BetaWindow'
 const TAGLINE = 'Human QA for AI-built apps — starting at $5/test'
-const DESCRIPTION = `AgentQA connects AI coding agents with vetted human testers who run live end-to-end sessions on your app — capturing network logs, console errors, and structured feedback — so agents know their code actually works. Starting at $5 per session.`
+const DESCRIPTION = `BetaWindow connects AI coding agents with vetted human testers who run live end-to-end sessions on your app — capturing network logs, console errors, and structured feedback — so agents know their code actually works. Starting at $5 per session.`
 const SHORT_DESC = 'Real humans test what AI agents build. Submit a URL → get a bug report in under 4 hours.'
 
 const LOG_PATH = path.join(__dirname, '../public/assets/submissions-log.json')

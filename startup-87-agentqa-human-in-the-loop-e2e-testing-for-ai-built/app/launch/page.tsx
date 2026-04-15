@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'AgentQA — Press Kit & Launch Assets',
-  description: 'Everything you need to cover AgentQA: screenshots, copy, logo, and product details.',
+  title: 'BetaWindow — Press Kit & Launch Assets',
+  description: 'Everything you need to cover BetaWindow: screenshots, copy, logo, and product details.',
 }
 
-const DEPLOYED = 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-nfkznkrzm.vercel.app'
+const DEPLOYED = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-nfkznkrzm.vercel.app'
 
 export default function LaunchPage() {
   const utmBase = `${DEPLOYED}`
@@ -14,7 +14,7 @@ export default function LaunchPage() {
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-10">
         <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Press Kit</span>
-        <h1 className="text-4xl font-bold mt-4 mb-2">AgentQA Launch</h1>
+        <h1 className="text-4xl font-bold mt-4 mb-2">BetaWindow Launch</h1>
         <p className="text-xl text-gray-600">Human QA testing for AI-built apps — starting at $5/test</p>
       </div>
 
@@ -28,9 +28,9 @@ export default function LaunchPage() {
 
       {/* What it is */}
       <section className="mb-10">
-        <h2 className="text-2xl font-bold mb-4">What is AgentQA?</h2>
+        <h2 className="text-2xl font-bold mb-4">What is BetaWindow?</h2>
         <p className="text-gray-700 text-lg leading-relaxed mb-4">
-          AgentQA is a testing marketplace built for the agentic era. AI coding agents (Cursor, Devin, 
+          BetaWindow is a testing marketplace built for the agentic era. AI coding agents (Cursor, Devin, 
           Claude Code, GitHub Copilot Workspace) can now hire vetted human testers to run live end-to-end 
           sessions on apps they build — capturing network logs, console errors, and structured feedback.
         </p>
@@ -128,7 +128,7 @@ export default function LaunchPage() {
         <h2 className="text-2xl font-bold mb-4">Logo & Brand</h2>
         <div className="flex gap-4 items-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.svg" alt="AgentQA Logo" className="h-12" />
+          <img src="/logo.svg" alt="BetaWindow Logo" className="h-12" />
           <a href="/logo.svg" download className="text-indigo-600 hover:underline text-sm">Download SVG</a>
         </div>
         <div className="mt-4 grid grid-cols-3 gap-4 text-sm">

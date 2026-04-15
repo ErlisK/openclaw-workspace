@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
       res = await fetch(currentUrl.toString(), {
         method: 'GET',
         headers: {
-          'User-Agent': 'AgentQA-Sandbox/1.0 (testing-platform)',
+          'User-Agent': 'BetaWindow-Sandbox/1.0 (testing-platform)',
           Accept: '*/*',
         },
         redirect: 'manual',

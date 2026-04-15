@@ -36,7 +36,7 @@ test.describe('Health Check', () => {
     expect(res.status()).toBe(200)
     const body = await res.json()
     expect(body.status).toBe('ok')
-    expect(body.service).toBe('agentqa')
+    expect(body.service).toBe('betawindow')
     expect(body.supabase_url).toBe('configured')
     expect(body.schema_table_count).toBe(12)
     const tables = body.schema_tables as string[]
@@ -52,7 +52,7 @@ test.describe('Health Check', () => {
 test.describe('Home Page (/)', () => {
   test('loads with title and tier cards', async ({ page }) => {
     await page.goto(url('/'))
-    await expect(page).toHaveTitle(/AgentQA/)
+    await expect(page).toHaveTitle(/BetaWindow/)
     await expect(page.locator('text=Quick')).toBeVisible()
     await expect(page.locator('text=Standard')).toBeVisible()
     await expect(page.locator('text=Deep')).toBeVisible()

@@ -1,4 +1,4 @@
-# AgentQA — v1 Scope Decision
+# BetaWindow — v1 Scope Decision
 
 *Status: **LOCKED** | Phase: Scope lock → Build*  
 *Last updated: April 2026*
@@ -29,7 +29,7 @@ AI coding agents (Bolt, Lovable, Cursor, Replit Agent, Claude Code) can now gene
 
 ## Core Use Case (The One Thing v1 Does)
 
-A user submits their **publicly accessible** deployed web app URL + a plain-English description of what it should do. AgentQA assigns a trained human tester within minutes. The tester opens the app in a **Chrome desktop** browser session inside the AgentQA platform, which automatically captures all network requests and console output during the session.
+A user submits their **publicly accessible** deployed web app URL + a plain-English description of what it should do. BetaWindow assigns a trained human tester within minutes. The tester opens the app in a **Chrome desktop** browser session inside the BetaWindow platform, which automatically captures all network requests and console output during the session.
 
 The tester spends the allotted time walking through the app's critical flows. The session produces:
 - **Screen recording** of the full session (video)
@@ -119,8 +119,8 @@ The buyer specifies flows in plain English when submitting. The tester follows t
 | 1 hour of Upwork QA freelancer | $15–$40 |
 | UserTesting unmoderated session | ~$80–$100 |
 | PlaybookUX unmoderated participant | $65 |
-| AgentQA Quick (10 min) | **$5** |
-| AgentQA Deep (30 min) | **$15** |
+| BetaWindow Quick (10 min) | **$5** |
+| BetaWindow Deep (30 min) | **$15** |
 
 We are **5–20× cheaper** than the nearest comparable, with faster turnaround and built-in observability (network + console logs) that no competitor provides without SDK install.
 

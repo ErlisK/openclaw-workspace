@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { REPORT_DEMO_CLEAN } from '@/lib/sample-reports/data'
 import SampleReportView from '@/components/SampleReportView'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
   title: REPORT_DEMO_CLEAN.seo_title,

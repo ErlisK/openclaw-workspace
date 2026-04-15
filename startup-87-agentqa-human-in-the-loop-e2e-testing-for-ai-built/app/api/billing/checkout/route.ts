@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
           unit_amount: amountCents,
           product_data: {
             name: `${tierConfig.label} — ${job.title}`,
-            description: `AgentQA test job: ${tierConfig.duration} human testing session`,
+            description: `BetaWindow test job: ${tierConfig.duration} human testing session`,
           },
         },
       }],

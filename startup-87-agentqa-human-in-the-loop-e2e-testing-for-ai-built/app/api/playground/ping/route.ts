@@ -12,14 +12,14 @@ export async function GET(req: NextRequest) {
   const source = req.nextUrl.searchParams.get('source') ?? 'unknown'
   return NextResponse.json({
     status: 'ok',
-    service: 'agentqa-playground',
+    service: 'betawindow-playground',
     source,
     ts: new Date().toISOString(),
-    message: 'AgentQA test target ping — network event captured successfully',
+    message: 'BetaWindow test target ping — network event captured successfully',
   }, {
     headers: {
       'Cache-Control': 'no-store',
-      'X-AgentQA-Test': 'true',
+      'X-BetaWindow-Test': 'true',
     },
   })
 }

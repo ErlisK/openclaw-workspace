@@ -1,4 +1,4 @@
-# AgentQA — Launch Assets
+# BetaWindow — Launch Assets
 
 ## Tagline (≤10 words)
 **"Real humans test what AI agents build."**
@@ -7,10 +7,10 @@
 **"Human QA for AI-built apps."**
 
 ## Value Proposition (1 sentence)
-AgentQA connects AI coding agents with vetted human testers who run live end-to-end sessions on your app — capturing network logs, console errors, and structured feedback — so agents know their code actually works.
+BetaWindow connects AI coding agents with vetted human testers who run live end-to-end sessions on your app — capturing network logs, console errors, and structured feedback — so agents know their code actually works.
 
 ## Elevator Pitch (3 sentences)
-AI agents can now write code, but they can't tell if it *works*. AgentQA is the testing marketplace for the agentic era: post a test job, a human tester claims it within minutes, runs your app end-to-end, and sends back timestamped network logs, console captures, and a structured feedback report. Starting at $5 per session — cheaper than one debug hour.
+AI agents can now write code, but they can't tell if it *works*. BetaWindow is the testing marketplace for the agentic era: post a test job, a human tester claims it within minutes, runs your app end-to-end, and sends back timestamped network logs, console captures, and a structured feedback report. Starting at $5 per session — cheaper than one debug hour.
 
 ## Problem / Solution
 **Problem:** AI agents ship code without any human verification. Bug loops are expensive; agents can't self-test UX.
@@ -41,7 +41,7 @@ AI agents can now write code, but they can't tell if it *works*. AgentQA is the 
 - QA teams augmenting automated tests with human judgment
 
 ## URLs
-- Live app: https://startup-87-agentqa-human-in-the-loop-e2e-testing-j93ivfu33.vercel.app
+- Live app: https://startup-87-betawindow-human-in-the-loop-e2e-testing-j93ivfu33.vercel.app
 - Docs: /docs/how-it-works
 - Pricing: /pricing
 - API: /docs/api-quickstart
@@ -60,7 +60,7 @@ AI agents can now write code, but they can't tell if it *works*. AgentQA is the 
 
 The problem: AI can write code. It can't tell if the UX actually works.
 
-AgentQA fixes this 👇
+BetaWindow fixes this 👇
 
 ---
 How it works:
@@ -79,11 +79,11 @@ No flaky Playwright. No brittle selectors. Just a human brain, running your actu
 ### LinkedIn
 🤖 + 👤 = ✅
 
-We just launched AgentQA — a testing marketplace built for the agentic era.
+We just launched BetaWindow — a testing marketplace built for the agentic era.
 
 AI agents are shipping real products. The missing piece? Someone to actually use them.
 
-AgentQA connects AI coding agents with real human testers who run live sessions on your app — capturing every network request and console error — then send back structured feedback.
+BetaWindow connects AI coding agents with real human testers who run live sessions on your app — capturing every network request and console error — then send back structured feedback.
 
 Think of it as Mechanical Turk for QA, but purpose-built for AI agents and priced like a SaaS tool.
 
@@ -95,7 +95,7 @@ Think of it as Mechanical Turk for QA, but purpose-built for AI agents and price
 **Description:**
 AI agents can write code. They can't tell if it works.
 
-AgentQA is the testing marketplace for the agentic era. Post a test job from your agent (or dashboard), a vetted human tester claims it, runs your app end-to-end, and sends back timestamped network logs, console captures, and structured feedback.
+BetaWindow is the testing marketplace for the agentic era. Post a test job from your agent (or dashboard), a vetted human tester claims it, runs your app end-to-end, and sends back timestamped network logs, console captures, and structured feedback.
 
 Built for:
 → AI coding agents (Cursor, Devin, Claude Code)
@@ -105,16 +105,16 @@ Built for:
 Pricing: $5 for a 10-min Quick test, $15 for a 30-min Premium deep dive.
 
 ### Hacker News (Show HN)
-**Title:** Show HN: AgentQA – a marketplace where AI agents hire human testers ($5/test)
+**Title:** Show HN: BetaWindow – a marketplace where AI agents hire human testers ($5/test)
 
 **Body:**
 Hi HN,
 
-I built AgentQA: a testing marketplace designed specifically for AI coding agents.
+I built BetaWindow: a testing marketplace designed specifically for AI coding agents.
 
 The problem I kept running into: AI agents (Cursor, Devin, etc.) can write working-looking code, but they have no way to verify the UX actually works end-to-end. Automated tests miss the stuff that trips up real users.
 
-AgentQA lets you (or your agent) post a test job via API or dashboard. A human tester claims the job, runs your app through a sandboxed proxy that captures all network requests and console logs, then submits structured feedback.
+BetaWindow lets you (or your agent) post a test job via API or dashboard. A human tester claims the job, runs your app through a sandboxed proxy that captures all network requests and console logs, then submits structured feedback.
 
 Stack: Next.js 15 + Supabase + Stripe + PostHog
 
@@ -133,7 +133,7 @@ Hey r/SideProject,
 
 I've been building AI-assisted projects for a while and kept hitting the same problem: the agent writes code that *looks* right but breaks in weird ways when a real human actually uses it.
 
-So I built AgentQA — a testing marketplace where you (or your AI coding agent) can post a test job and a human tester will run your app end-to-end, capturing network logs, console errors, and structured feedback.
+So I built BetaWindow — a testing marketplace where you (or your AI coding agent) can post a test job and a human tester will run your app end-to-end, capturing network logs, console errors, and structured feedback.
 
 → {URL}
 
@@ -147,7 +147,7 @@ Would love feedback on the landing page / pricing / positioning!
 **Body:**
 Quick background: I've been building with AI coding assistants for months. The gap I kept noticing: AI agents are great at writing code, terrible at knowing if it works in the real world.
 
-So I built AgentQA: a testing marketplace where AI agents hire human testers.
+So I built BetaWindow: a testing marketplace where AI agents hire human testers.
 
 The agent posts a job via REST API → human tester runs the app → structured report comes back (network logs, console captures, star rating + notes).
 

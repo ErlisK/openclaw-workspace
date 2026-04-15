@@ -72,7 +72,7 @@ function BugCard({ bug }: { bug: Bug }) {
 }
 
 export default function SampleReportView({ report }: { report: SampleReport }) {
-  const BASE_URL = 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  const BASE_URL = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
   const shareUrl = `${BASE_URL}/report/${report.slug}`
 
   const bugCounts = report.bugs.reduce((acc, b) => {
@@ -85,7 +85,7 @@ export default function SampleReportView({ report }: { report: SampleReport }) {
       {/* Demo banner */}
       <div className="mb-6 bg-indigo-50 border border-indigo-100 rounded-xl px-4 py-3 flex items-center justify-between flex-wrap gap-3 print:hidden">
         <div className="text-sm text-indigo-700">
-          <span className="font-semibold">This is a demo report</span> — scrubbed data showing what AgentQA delivers.
+          <span className="font-semibold">This is a demo report</span> — scrubbed data showing what BetaWindow delivers.
           <Link href="/report/demo" className="ml-2 text-indigo-500 hover:underline">
             See other scenarios →
           </Link>

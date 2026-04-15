@@ -1,7 +1,7 @@
 {
-  "name": "agentqa-webhook-receiver",
+  "name": "betawindow-webhook-receiver",
   "version": "1.0.0",
-  "description": "Minimal Express webhook receiver for AgentQA job completion events",
+  "description": "Minimal Express webhook receiver for BetaWindow job completion events",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,6 +16,6 @@
   "devDependencies": {
     "nodemon": "^3.0.0"
   },
-  "keywords": ["agentqa", "webhook", "express", "qa"],
+  "keywords": ["betawindow", "webhook", "express", "qa"],
   "license": "MIT"
 }

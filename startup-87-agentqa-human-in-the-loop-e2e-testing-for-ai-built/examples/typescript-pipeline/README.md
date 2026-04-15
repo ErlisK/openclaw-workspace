@@ -1,4 +1,4 @@
-# AgentQA TypeScript Pipeline
+# BetaWindow TypeScript Pipeline
 
 Fully typed pipeline with quality gate assertions. Integrates cleanly into CI.
 
@@ -20,7 +20,7 @@ npx tsc && node dist/pipeline.js
 ## Features
 
 - **Full TypeScript types** for jobs, bugs, tiers, statuses
-- **`AgentQAClient` class** — reusable across your codebase
+- **`BetaWindowClient` class** — reusable across your codebase
 - **`assertJobQuality()`** — configurable gates: min rating, max bugs, forbidden severities
 - **CI exit codes** — exits 1 on quality gate failure, 0 on pass
 - **Progress indicator** — real-time status while polling

@@ -17,7 +17,7 @@ test.describe('QA Review Feedback Features', () => {
 
   test('marketplace page loads with filter UI', async ({ page }) => {
     await page.goto(`${BASE_URL}/marketplace`)
-    await expect(page).toHaveTitle(/AgentQA|Marketplace/)
+    await expect(page).toHaveTitle(/BetaWindow|Marketplace/)
     // Tier filter should be present
     await expect(page.locator('select').first()).toBeVisible()
     // Desktop notice

@@ -26,7 +26,7 @@ test.describe('Developer Examples — /docs/examples', () => {
   test('typescript-pipeline page loads', async ({ page }) => {
     await page.goto(`${BASE}/docs/examples/typescript-pipeline`)
     await expect(page.locator('h1')).toContainText('TypeScript Pipeline')
-    await expect(page.locator('text=AgentQAClient').first()).toBeVisible()
+    await expect(page.locator('text=BetaWindowClient').first()).toBeVisible()
     await expect(page.locator('text=assertJobQuality').first()).toBeVisible()
   })
 
@@ -34,7 +34,7 @@ test.describe('Developer Examples — /docs/examples', () => {
     await page.goto(`${BASE}/docs/examples/webhook-receiver`)
     await expect(page.locator('h1')).toContainText('Webhook Receiver')
     await expect(page.locator('text=job.completed').first()).toBeVisible()
-    await expect(page.locator('text=X-AgentQA-Signature').first()).toBeVisible()
+    await expect(page.locator('text=X-BetaWindow-Signature').first()).toBeVisible()
   })
 })
 

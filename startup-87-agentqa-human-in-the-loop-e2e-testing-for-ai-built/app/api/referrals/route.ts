@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
   const result = await getOrCreateReferralCode(user.id)
   if (!result) return NextResponse.json({ error: 'Failed to generate referral code' }, { status: 500 })
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://agentqa.dev'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://betawindow.dev'
   return NextResponse.json({
     code: result.code,
     link: `${baseUrl}/invite/${result.code}`,

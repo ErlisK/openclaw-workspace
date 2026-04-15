@@ -1,12 +1,12 @@
-# AgentQA — Social Media Profiles & Posts
+# BetaWindow — Social Media Profiles & Posts
 
 ## 🐦 X/Twitter (formerly Twitter)
 
 ### Account Setup
-- **Handle:** @AgentQA_io
-- **Name:** AgentQA
+- **Handle:** @BetaWindow_io
+- **Name:** BetaWindow
 - **Bio:** Human QA for AI-built apps. Real testers, real bugs, starting at $5. Built for AI coding agents 🤖
-- **Website:** https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_bio
+- **Website:** https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_bio
 - **Location:** San Francisco, CA
 - **Profile image:** /public/assets/logo.svg (32×32 icon version)
 - **Header image:** /public/assets/screenshot-homepage.png (1280×800 cropped to 1500×500)
@@ -15,8 +15,8 @@
 ### Steps to Create
 1. Go to https://twitter.com/i/flow/signup
 2. Use email: scide-founder@agentmail.to
-3. Name: AgentQA
-4. Handle: AgentQA_io (or AgentQA_app if taken)
+3. Name: BetaWindow
+4. Handle: BetaWindow_io (or BetaWindow_app if taken)
 5. Upload logo as profile picture
 6. Upload homepage screenshot as header
 7. Add bio text above
@@ -30,7 +30,7 @@
 ```
 🤖 + 👤 = ✅
 
-We just launched AgentQA — a testing marketplace built for the AI agent era.
+We just launched BetaWindow — a testing marketplace built for the AI agent era.
 
 AI agents can write code. They can't tell if it *works*.
 
@@ -39,7 +39,7 @@ AI agents can write code. They can't tell if it *works*.
 
 **Tweet 2/4:**
 ```
-How AgentQA works:
+How BetaWindow works:
 
 1. Your agent (or you) posts a test job via API
 2. A human tester claims it in minutes
@@ -63,7 +63,7 @@ Automated tests miss what humans catch. We're the missing link.
 ```
 Try it now 👇
 
-🔗 https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_launch
+🔗 https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_launch
 
 Quick (10 min): $5
 Standard (20 min): $10
@@ -85,9 +85,9 @@ Not because the code is wrong.
 
 Because a real human didn't USE it.
 
-AgentQA fixes this with $5 human test sessions 👇
+BetaWindow fixes this with $5 human test sessions 👇
 
-https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_vp
+https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=twitter_vp
 
 #vibecoding #AI #buildinpublic
 ```
@@ -105,7 +105,7 @@ Here's what the network log looks like after a 10-min QA session 🧵
 
 [attach screenshot-docs.png]
 
-https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/docs/how-it-works?utm_source=twitter&utm_medium=social&utm_campaign=twitter_tech
+https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/docs/how-it-works?utm_source=twitter&utm_medium=social&utm_campaign=twitter_tech
 ```
 
 ---
@@ -113,16 +113,16 @@ https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/do
 ## 💼 LinkedIn
 
 ### Company Page Setup
-- **Company name:** AgentQA
-- **Handle:** agentqa
+- **Company name:** BetaWindow
+- **Handle:** betawindow
 - **Tagline:** Human QA for AI-built apps — starting at $5/test
 - **Description (2000 char max):**
 
-> AgentQA is a testing marketplace built for the agentic era of software development.
+> BetaWindow is a testing marketplace built for the agentic era of software development.
 >
 > AI coding agents (Cursor, Devin, Claude Code, GitHub Copilot Workspace) can now write and deploy complete applications. The missing piece? Someone to actually use those apps and verify they work.
 >
-> AgentQA connects AI agents and developers with vetted human testers who run live end-to-end sessions on your application — capturing every network request, console error, and UX issue — then deliver a structured feedback report.
+> BetaWindow connects AI agents and developers with vetted human testers who run live end-to-end sessions on your application — capturing every network request, console error, and UX issue — then deliver a structured feedback report.
 >
 > **How it works:**
 > 1. Post a test job via dashboard or REST API
@@ -141,13 +141,13 @@ https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/do
 
 - **Industry:** Internet, Software Development
 - **Company size:** 1-10 employees
-- **Website:** https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_bio
+- **Website:** https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_bio
 - **Logo:** /public/assets/logo.svg
 
 ### Steps to Create
 1. Sign in to LinkedIn at linkedin.com
 2. Go to linkedin.com/company/setup/new
-3. Fill in company name: AgentQA
+3. Fill in company name: BetaWindow
 4. Industry: Internet
 5. Company size: 1-10 employees
 6. Company type: Self-employed / Startup
@@ -162,13 +162,13 @@ https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/do
 ### 📝 LinkedIn Post 1 — Launch Post
 
 ```
-🚀 We just launched AgentQA.
+🚀 We just launched BetaWindow.
 
 The problem: AI coding agents (Cursor, Devin, Claude Code) are shipping real apps every day. But they have no way to verify the UX actually works.
 
 Automated tests miss what humans catch.
 
-AgentQA is the testing marketplace for the agentic era:
+BetaWindow is the testing marketplace for the agentic era:
 
 → Post a test job from your AI agent (REST API) or dashboard
 → A vetted human tester claims it in minutes
@@ -179,7 +179,7 @@ Starting at $5/test.
 
 It's QA designed for how software is built in 2025: by AI, verified by humans.
 
-🔗 Try it: https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_launch
+🔗 Try it: https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_launch
 
 #AI #QualityAssurance #DevTools #AIAgents #Startups #SoftwareDevelopment
 ```
@@ -189,11 +189,11 @@ It's QA designed for how software is built in 2025: by AI, verified by humans.
 ### 📝 LinkedIn Post 2 — How It Works
 
 ```
-How does AgentQA work, exactly?
+How does BetaWindow work, exactly?
 
 I've been building in the AI-assisted development space and kept hitting the same wall: the agent writes code that looks right, compiles, and passes tests — but breaks in ways that only a human would notice.
 
-AgentQA closes that loop:
+BetaWindow closes that loop:
 
 1️⃣ Submit a URL (your agent can call our API directly)
 2️⃣ A human tester picks up the job within minutes
@@ -206,7 +206,7 @@ Pricing starts at $5 for a 10-minute Quick session.
 
 For teams building with AI assistance, this replaces hours of manual QA with an automated workflow. Your agent ships → human validates → agent iterates.
 
-See it live: https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/docs/how-it-works?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_howto
+See it live: https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app/docs/how-it-works?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_howto
 
 #ProductDevelopment #AITools #SoftwareTesting #StartupLife
 ```
@@ -216,7 +216,7 @@ See it live: https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.
 ### 📝 LinkedIn Post 3 — YC / Founder Story
 
 ```
-Why I built AgentQA.
+Why I built BetaWindow.
 
 I've spent the last year building apps with AI coding agents. They're genuinely remarkable — Claude Code, Cursor, Devin can take a spec and produce working software.
 
@@ -229,13 +229,13 @@ Automated Playwright tests tell you the happy path passes. They don't tell you:
 • Why signup fails for users with + in their email
 • Why the checkout flow confuses every first-time user
 
-I built AgentQA to answer that question cheaply and quickly.
+I built BetaWindow to answer that question cheaply and quickly.
 
 $5, 10 minutes, real human, real feedback.
 
 It's the validation layer that's been missing from AI-assisted development.
 
-→ https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_story
+→ https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_story
 
 What are you building with AI agents? I'd love to know if this solves a real pain point for you.
 

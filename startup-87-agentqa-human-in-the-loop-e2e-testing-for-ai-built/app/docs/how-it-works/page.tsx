@@ -1,23 +1,23 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'How It Works — AgentQA Docs',
-  description: 'Learn how AgentQA connects AI builders with human testers for live E2E testing in under 4 hours.',
+  title: 'How It Works — BetaWindow Docs',
+  description: 'Learn how BetaWindow connects AI builders with human testers for live E2E testing in under 4 hours.',
 }
 
 export default function HowItWorksPage() {
   return (
     <article data-testid="docs-how-it-works">
-      <h1>How AgentQA Works</h1>
+      <h1>How BetaWindow Works</h1>
       <p className="lead text-xl text-gray-600 mb-8">
-        AgentQA connects AI-built apps with real human testers who run live end-to-end test sessions —
+        BetaWindow connects AI-built apps with real human testers who run live end-to-end test sessions —
         complete with network logs, console captures, and structured feedback — in under 4 hours.
       </p>
 
       <h2>Overview</h2>
       <p>
         When you ship an AI-built app, you need confidence that it actually works for a real person
-        clicking through it, not just unit tests or synthetic checks. AgentQA gives you that confidence
+        clicking through it, not just unit tests or synthetic checks. BetaWindow gives you that confidence
         at a fraction of the cost of a traditional QA team.
       </p>
 
@@ -81,7 +81,7 @@ export default function HowItWorksPage() {
 
       <h2>Who are the testers?</h2>
       <p>
-        AgentQA testers are vetted freelancers — designers, developers, and QA professionals — who
+        BetaWindow testers are vetted freelancers — designers, developers, and QA professionals — who
         have completed an onboarding qualification test. Each tester has a quality score based on
         accepted submissions. Low-quality submitters are automatically removed from the platform.
       </p>

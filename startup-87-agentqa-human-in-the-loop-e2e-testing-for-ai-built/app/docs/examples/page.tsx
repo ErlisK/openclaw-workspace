@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
-const REPO_BASE = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const REPO_BASE = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples'
 
 export const metadata: Metadata = {
-  title: 'Developer Examples — AgentQA Docs',
-  description: 'Runnable Node.js and TypeScript examples for integrating AgentQA into your CI/CD pipeline or AI agent build loop.',
+  title: 'Developer Examples — BetaWindow Docs',
+  description: 'Runnable Node.js and TypeScript examples for integrating BetaWindow into your CI/CD pipeline or AI agent build loop.',
   alternates: { canonical: `${BASE_URL}/docs/examples` },
 }
 
@@ -24,7 +24,7 @@ export default function ExamplesIndexPage() {
     {
       title: 'TypeScript Pipeline',
       slug: 'typescript-pipeline',
-      description: 'Full typed pipeline with AgentQAClient class and quality gate assertions. Exits 1 on failed gates.',
+      description: 'Full typed pipeline with BetaWindowClient class and quality gate assertions. Exits 1 on failed gates.',
       language: 'TypeScript',
       time: '5 min',
       ghPath: 'typescript-pipeline',
@@ -91,7 +91,7 @@ export default function ExamplesIndexPage() {
       <h2>Prerequisites</h2>
       <ul>
         <li>Node.js 18 or newer</li>
-        <li>An AgentQA account — <Link href="/signup">sign up free</Link></li>
+        <li>An BetaWindow account — <Link href="/signup">sign up free</Link></li>
         <li>Your API token from <strong>Settings → API Token</strong></li>
       </ul>
 
@@ -99,7 +99,7 @@ export default function ExamplesIndexPage() {
       <div className="not-prose bg-gray-900 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto mb-6">
         <pre>{`# Clone the repo
 git clone https://github.com/ErlisK/openclaw-workspace
-cd openclaw-workspace/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples
+cd openclaw-workspace/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples
 
 # Export credentials
 export AGENTQA_TOKEN="eyJ..."

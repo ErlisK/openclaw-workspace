@@ -1,17 +1,17 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples/node-quickstart'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples/node-quickstart'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Node.js Quickstart Example — AgentQA Docs',
-  description: 'Create an AgentQA job, poll for completion, and print the structured bug report in ~30 lines of JavaScript.',
+  title: 'Node.js Quickstart Example — BetaWindow Docs',
+  description: 'Create an BetaWindow job, poll for completion, and print the structured bug report in ~30 lines of JavaScript.',
   alternates: { canonical: `${BASE_URL}/docs/examples/node-quickstart` },
 }
 
 const CODE = `/**
- * AgentQA — Node.js Quickstart
+ * BetaWindow — Node.js Quickstart
  * Create a job, poll until done, print the report.
  *
  * export AGENTQA_TOKEN="eyJ..."
@@ -19,7 +19,7 @@ const CODE = `/**
  * node index.js
  */
 const BASE_URL = process.env.AGENTQA_BASE_URL
-  || 'https://agentqa.vercel.app'
+  || 'https://betawindow.vercel.app'
 const TOKEN = process.env.AGENTQA_TOKEN
 const headers = { 'Authorization': \`Bearer \${TOKEN}\`, 'Content-Type': 'application/json' }
 
@@ -94,7 +94,7 @@ export default function NodeQuickstartPage() {
       <div className="not-prose bg-gray-900 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto mb-6">
         <pre>{`# Clone
 git clone https://github.com/ErlisK/openclaw-workspace
-cd openclaw-workspace/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples/node-quickstart
+cd openclaw-workspace/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples/node-quickstart
 
 # No dependencies to install (uses native fetch)
 export AGENTQA_TOKEN="eyJ..."

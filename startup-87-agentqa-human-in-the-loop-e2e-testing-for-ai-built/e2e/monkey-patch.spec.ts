@@ -133,14 +133,14 @@ test.describe('Logger Script — /api/proxy/logger', () => {
     expect(js).toContain(sessId)
   })
 
-  test('script exposes window.__agentqa__ public API', async ({ request }) => {
+  test('script exposes window.__betawindow__ public API', async ({ request }) => {
     if (!token) { test.skip(true, 'Auth unavailable'); return }
 
     const res = await request.get(url('/api/proxy/logger?session=s5'), {
       headers: bearer(token),
     })
     const js = await res.text()
-    expect(js).toContain('window.__agentqa__')
+    expect(js).toContain('window.__betawindow__')
     expect(js).toContain('getBuffer')
     expect(js).toContain('flush')
   })
@@ -165,7 +165,7 @@ test.describe('Proxy HTML — Script Injection Quality', () => {
     token = await signUp(request, `mpatch.proxy.${RUN_ID}@mailinator.com`, PASSWORD)
   })
 
-  test('proxied HTML contains agentqa-logger script tag', async ({ request }) => {
+  test('proxied HTML contains betawindow-logger script tag', async ({ request }) => {
     if (!token) { test.skip(true, 'Auth unavailable'); return }
 
     const res = await request.get(url('/api/proxy?url=https://example.com&session=inj-test'), {
@@ -173,7 +173,7 @@ test.describe('Proxy HTML — Script Injection Quality', () => {
     })
     expect(res.status()).toBe(200)
     const html = await res.text()
-    expect(html).toContain('<script id="agentqa-logger">')
+    expect(html).toContain('<script id="betawindow-logger">')
     expect(html).toContain('window.fetch')
     expect(html).toContain('XMLHttpRequest')
     expect(html).toContain('console_log')
@@ -186,7 +186,7 @@ test.describe('Proxy HTML — Script Injection Quality', () => {
       headers: bearer(token),
     })
     const html = await res.text()
-    const scriptPos = html.indexOf('<script id="agentqa-logger">')
+    const scriptPos = html.indexOf('<script id="betawindow-logger">')
     const headClosePos = html.indexOf('</head>')
     // Script should be injected before </head>
     if (headClosePos > -1 && scriptPos > -1) {
@@ -255,8 +255,8 @@ test.describe('Monkey-patch — Browser Execution', () => {
       log_message: Array.prototype.slice.call(arguments).map(String).join(' ') });
   };
 
-  window.__agentqa__ = { getBuffer: function() { return buf.slice(); } };
-  window.__agentqa_report_url__ = REPORT_URL;
+  window.__betawindow__ = { getBuffer: function() { return buf.slice(); } };
+  window.__betawindow_report_url__ = REPORT_URL;
 })("test-session", "https://example.com", "https://fake-report-url.example.com/events");
 `
 
@@ -269,14 +269,14 @@ test.describe('Monkey-patch — Browser Execution', () => {
 
     // Fire some fetch requests
     await page.evaluate(async () => {
-      console.log('AgentQA test log message')
+      console.log('BetaWindow test log message')
       // Fetch a known URL
       try { await fetch('/api/health') } catch(e) { /* ok */ }
     })
 
     // Check buffer
     const buf = await page.evaluate(() => {
-      const aq = (window as unknown as Record<string, unknown>).__agentqa__ as { getBuffer?: () => unknown[] } | undefined
+      const aq = (window as unknown as Record<string, unknown>).__betawindow__ as { getBuffer?: () => unknown[] } | undefined
       return aq?.getBuffer?.() ?? []
     })
 

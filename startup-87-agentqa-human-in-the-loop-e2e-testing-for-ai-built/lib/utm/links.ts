@@ -13,12 +13,12 @@
  *   utm_content → optional variant / creative ID
  *
  * Live base URL (canonical production):
- *   https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app
+ *   https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app
  */
 
 export const BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ||
-  'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export interface UTMLink {
   slug: string

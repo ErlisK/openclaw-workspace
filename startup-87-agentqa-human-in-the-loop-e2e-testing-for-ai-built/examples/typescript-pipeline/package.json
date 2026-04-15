@@ -1,7 +1,7 @@
 {
-  "name": "agentqa-typescript-pipeline",
+  "name": "betawindow-typescript-pipeline",
   "version": "1.0.0",
-  "description": "Fully typed AgentQA pipeline: submit → poll → assert quality gates",
+  "description": "Fully typed BetaWindow pipeline: submit → poll → assert quality gates",
   "main": "dist/pipeline.js",
   "scripts": {
     "start": "ts-node pipeline.ts",
@@ -16,6 +16,6 @@
     "ts-node": "^10.9.0",
     "@types/node": "^20.0.0"
   },
-  "keywords": ["agentqa", "typescript", "qa", "pipeline", "ci"],
+  "keywords": ["betawindow", "typescript", "qa", "pipeline", "ci"],
   "license": "MIT"
 }

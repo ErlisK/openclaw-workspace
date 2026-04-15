@@ -1,7 +1,7 @@
 /**
  * postmessage.spec.ts — postMessage event relay tests
  *
- * Tests the agentqa_event_batch postMessage protocol:
+ * Tests the betawindow_event_batch postMessage protocol:
  * - Message format (type, session, events fields)
  * - Events contain correct event_type, ts, and payload fields
  * - console.log / fetch / navigation events are captured and relayed
@@ -45,7 +45,7 @@ function loggerScript(sessionId: string, reportUrl = 'https://null.example.com/e
     var events = buf.splice(0);
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'agentqa_event_batch', events: events, session: SESSION_ID }, '*');
+        window.parent.postMessage({ type: 'betawindow_event_batch', events: events, session: SESSION_ID }, '*');
       }
     } catch(e) {}
   }
@@ -110,7 +110,7 @@ function loggerScript(sessionId: string, reportUrl = 'https://null.example.com/e
   // Navigation event on load
   queue({ event_type: 'navigation', ts: now(), request_url: APP_URL, log_message: 'Logger ready' });
 
-  window.__agentqa__ = { flush: flush, session: SESSION_ID };
+  window.__betawindow__ = { flush: flush, session: SESSION_ID };
 })(${JSON.stringify(sessionId)}, 'https://example.com', ${JSON.stringify(reportUrl)});
 `
 }
@@ -128,7 +128,7 @@ function buildParentHtml(sessionId: string, iframeScript: string) {
 <script>
 window.__received = [];
 window.addEventListener('message', function(e) {
-  if (e.data && e.data.type === 'agentqa_event_batch') {
+  if (e.data && e.data.type === 'betawindow_event_batch') {
     window.__received.push(e.data);
   }
 });
@@ -154,7 +154,7 @@ ${iframeScript.replace(/<\/script>/g, '<\\/script>')}
 // ─── Tests ───────────────────────────────────────────────────
 
 test.describe('postMessage — event relay format', () => {
-  test('message type is agentqa_event_batch', async ({ page }) => {
+  test('message type is betawindow_event_batch', async ({ page }) => {
     await page.context().addCookies(bypassCookies())
     await page.goto(appUrl('/'))
 
@@ -163,7 +163,7 @@ test.describe('postMessage — event relay format', () => {
       return new Promise<{ type: string; session: string; events: unknown[] }>((resolve, reject) => {
         const timer = setTimeout(() => reject(new Error('timeout')), 8000)
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             clearTimeout(timer)
             window.removeEventListener('message', handler)
             resolve(e.data)
@@ -173,13 +173,13 @@ test.describe('postMessage — event relay format', () => {
         Object.defineProperty(window, 'parent', { get: function() { return null; }, configurable: true })
         // Now inject script — with parent===null, the condition fails.
         // Instead directly run the postMessage call to test the format
-        window.postMessage({ type: 'agentqa_event_batch', session: 'fmt-test', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 'fmt-test', events: [
           { event_type: 'navigation', ts: new Date().toISOString(), request_url: 'https://example.com' }
         ]}, '*')
       })
     }, loggerScript('fmt-test'))
 
-    expect(msg.type).toBe('agentqa_event_batch')
+    expect(msg.type).toBe('betawindow_event_batch')
     expect(msg.session).toBe('fmt-test')
     expect(Array.isArray(msg.events)).toBe(true)
     expect(msg.events.length).toBeGreaterThanOrEqual(1)
@@ -197,12 +197,12 @@ test.describe('postMessage — event relay format', () => {
           { event_type: 'network_request', ts: new Date().toISOString(), method: 'GET', request_url: '/api/x' },
         ]
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             window.removeEventListener('message', handler)
             resolve(e.data.events)
           }
         })
-        window.postMessage({ type: 'agentqa_event_batch', session: 's', events: batch }, '*')
+        window.postMessage({ type: 'betawindow_event_batch', session: 's', events: batch }, '*')
       })
     })
 
@@ -219,13 +219,13 @@ test.describe('postMessage — event relay format', () => {
     const event = await page.evaluate(() => {
       return new Promise<{ event_type: string; log_level: string; log_message: string }>((resolve) => {
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             window.removeEventListener('message', handler)
             const ev = e.data.events.find((x: { event_type: string }) => x.event_type === 'console_log')
             resolve(ev)
           }
         })
-        window.postMessage({ type: 'agentqa_event_batch', session: 's', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 's', events: [
           { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'error', log_message: 'oops something failed' }
         ]}, '*')
       })
@@ -243,13 +243,13 @@ test.describe('postMessage — event relay format', () => {
     const event = await page.evaluate(() => {
       return new Promise<{ event_type: string; method: string; request_url: string }>((resolve) => {
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             window.removeEventListener('message', handler)
             const ev = e.data.events.find((x: { event_type: string }) => x.event_type === 'network_request')
             resolve(ev)
           }
         })
-        window.postMessage({ type: 'agentqa_event_batch', session: 's', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 's', events: [
           { event_type: 'network_request', ts: new Date().toISOString(), method: 'POST', request_url: 'https://api.example.com/data' }
         ]}, '*')
       })
@@ -267,13 +267,13 @@ test.describe('postMessage — event relay format', () => {
     const event = await page.evaluate(() => {
       return new Promise<{ event_type: string; status_code: number; response_time_ms: number }>((resolve) => {
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             window.removeEventListener('message', handler)
             const ev = e.data.events.find((x: { event_type: string }) => x.event_type === 'network_response')
             resolve(ev)
           }
         })
-        window.postMessage({ type: 'agentqa_event_batch', session: 's', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 's', events: [
           { event_type: 'network_response', ts: new Date().toISOString(),
             method: 'GET', request_url: '/api/x', status_code: 200, response_time_ms: 42 }
         ]}, '*')
@@ -292,13 +292,13 @@ test.describe('postMessage — event relay format', () => {
     const event = await page.evaluate(() => {
       return new Promise<{ event_type: string; request_url: string }>((resolve) => {
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             window.removeEventListener('message', handler)
             const ev = e.data.events.find((x: { event_type: string }) => x.event_type === 'navigation')
             resolve(ev)
           }
         })
-        window.postMessage({ type: 'agentqa_event_batch', session: 's', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 's', events: [
           { event_type: 'navigation', ts: new Date().toISOString(), request_url: 'https://example.com/page' }
         ]}, '*')
       })
@@ -308,19 +308,19 @@ test.describe('postMessage — event relay format', () => {
     expect(event.request_url).toContain('example.com')
   })
 
-  test('RunLogger processes agentqa_event_batch messages', async ({ page }) => {
+  test('RunLogger processes betawindow_event_batch messages', async ({ page }) => {
     await page.context().addCookies(bypassCookies())
     // Visit the app homepage which loads Next.js
     await page.goto(appUrl('/'))
 
-    // Simulate what RunLogger does: listen for agentqa_event_batch and process events
+    // Simulate what RunLogger does: listen for betawindow_event_batch and process events
     const processed = await page.evaluate(() => {
       return new Promise<Array<{ event_type: string }>>((resolve) => {
         const log: Array<{ event_type: string }> = []
 
         // Replicate RunLogger's message handler logic
         function onMessage(e: MessageEvent) {
-          if (e.data?.type === 'agentqa_event_batch' && Array.isArray(e.data?.events)) {
+          if (e.data?.type === 'betawindow_event_batch' && Array.isArray(e.data?.events)) {
             for (const ev of e.data.events) {
               log.push({ event_type: ev.event_type })
             }
@@ -333,7 +333,7 @@ test.describe('postMessage — event relay format', () => {
         window.addEventListener('message', onMessage)
 
         // Send test batch
-        window.postMessage({ type: 'agentqa_event_batch', session: 'rl-test', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 'rl-test', events: [
           { event_type: 'navigation', ts: new Date().toISOString(), request_url: 'https://example.com' },
           { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'log', log_message: 'hi' },
           { event_type: 'network_request', ts: new Date().toISOString(), method: 'GET', request_url: '/api/data' },
@@ -358,7 +358,7 @@ test.describe('postMessage — event relay format', () => {
         let batchCount = 0
 
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             batchCount++
             for (const ev of e.data.events) {
               all.push({ ...ev, batch: batchCount })
@@ -371,13 +371,13 @@ test.describe('postMessage — event relay format', () => {
         })
 
         // Send 3 separate batches
-        window.postMessage({ type: 'agentqa_event_batch', session: 'multi', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 'multi', events: [
           { event_type: 'navigation', ts: new Date().toISOString(), request_url: 'https://example.com' }
         ]}, '*')
-        window.postMessage({ type: 'agentqa_event_batch', session: 'multi', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 'multi', events: [
           { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'warn', log_message: 'batch 2' }
         ]}, '*')
-        window.postMessage({ type: 'agentqa_event_batch', session: 'multi', events: [
+        window.postMessage({ type: 'betawindow_event_batch', session: 'multi', events: [
           { event_type: 'network_request', ts: new Date().toISOString(), method: 'GET', request_url: '/api/x' }
         ]}, '*')
       })
@@ -403,7 +403,7 @@ test.describe('postMessage — logger script live injection', () => {
         const timer = setTimeout(() => resolve(null), 6000)
 
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             const nav = e.data.events.find((ev: { event_type: string }) => ev.event_type === 'navigation')
             if (nav) {
               clearTimeout(timer)
@@ -434,7 +434,7 @@ test.describe('postMessage — logger script live injection', () => {
         const timer = setTimeout(() => resolve(null), 8000)
 
         window.addEventListener('message', function handler(e) {
-          if (e.data && e.data.type === 'agentqa_event_batch') {
+          if (e.data && e.data.type === 'betawindow_event_batch') {
             const ev = e.data.events.find(
               (x: { event_type: string; log_message?: string }) =>
                 x.event_type === 'console_log' && x.log_message?.includes('iframe-console-test')

@@ -14,7 +14,7 @@ export default function DocsLayout({ children }: { children: React.ReactNode }) 
     <div className="min-h-screen bg-white">
       {/* Top nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-gray-900">AgentQA</Link>
+        <Link href="/" className="text-lg font-bold text-gray-900">BetaWindow</Link>
         <div className="flex items-center gap-4 text-sm text-gray-500">
           <Link href="/docs/how-it-works" className="hover:text-gray-900">Docs</Link>
           <Link href="/pricing" className="hover:text-gray-900">Pricing</Link>

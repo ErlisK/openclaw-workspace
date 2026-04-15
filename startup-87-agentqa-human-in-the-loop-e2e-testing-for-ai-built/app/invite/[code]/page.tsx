@@ -9,7 +9,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { code } = await params
   return {
-    title: `You've been invited to AgentQA — claim your 3 free credits`,
+    title: `You've been invited to BetaWindow — claim your 3 free credits`,
     description: `Use invite code ${code.toUpperCase()} at signup to get 3 bonus credits on your first test purchase.`,
   }
 }

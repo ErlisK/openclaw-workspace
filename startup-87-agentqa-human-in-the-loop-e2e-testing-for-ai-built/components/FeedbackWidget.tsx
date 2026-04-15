@@ -123,7 +123,7 @@ export default function FeedbackWidget({ token, page }: FeedbackWidgetProps) {
             <div className="px-5 py-8 text-center" data-testid="feedback-success">
               <div className="text-4xl mb-3">🎉</div>
               <p className="text-sm font-medium text-gray-900 mb-1">Thanks for your feedback!</p>
-              <p className="text-xs text-gray-500">We read every submission and use it to improve AgentQA.</p>
+              <p className="text-xs text-gray-500">We read every submission and use it to improve BetaWindow.</p>
               <button
                 onClick={handleClose}
                 className="mt-5 text-xs text-indigo-600 hover:text-indigo-700 font-medium"

@@ -1,5 +1,5 @@
 /**
- * AgentQA — TypeScript Pipeline Example
+ * BetaWindow — TypeScript Pipeline Example
  *
  * Fully typed pipeline: submit → wait → parse → assert
  *
@@ -13,7 +13,7 @@
  */
 
 const BASE_URL = process.env.AGENTQA_BASE_URL
-  ?? 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  ?? 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 const TOKEN = process.env.AGENTQA_TOKEN
 if (!TOKEN) throw new Error('AGENTQA_TOKEN is required')
@@ -64,9 +64,9 @@ interface PollOptions {
   onProgress?: (job: Job) => void
 }
 
-// ── AgentQA client ────────────────────────────────────────────────────────────
+// ── BetaWindow client ────────────────────────────────────────────────────────────
 
-class AgentQAClient {
+class BetaWindowClient {
   private headers: Record<string, string>
 
   constructor(token: string, private baseUrl = BASE_URL) {
@@ -165,10 +165,10 @@ function assertJobQuality(
 // ── Main pipeline ─────────────────────────────────────────────────────────────
 
 async function runQAPipeline() {
-  const client = new AgentQAClient(TOKEN!)
+  const client = new BetaWindowClient(TOKEN!)
   const appUrl = process.env.APP_URL ?? 'https://your-app.vercel.app'
 
-  console.log(`\n🤖 AgentQA TypeScript Pipeline`)
+  console.log(`\n🤖 BetaWindow TypeScript Pipeline`)
   console.log(`   Target: ${appUrl}`)
   console.log(`   Time:   ${new Date().toISOString()}\n`)
 

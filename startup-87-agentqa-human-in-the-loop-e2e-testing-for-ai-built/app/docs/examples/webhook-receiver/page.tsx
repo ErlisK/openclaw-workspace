@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples/webhook-receiver'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples/webhook-receiver'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Webhook Receiver Example — AgentQA Docs',
-  description: 'Minimal Express server that receives AgentQA job completion webhooks and verifies HMAC signatures.',
+  title: 'Webhook Receiver Example — BetaWindow Docs',
+  description: 'Minimal Express server that receives BetaWindow job completion webhooks and verifies HMAC signatures.',
   alternates: { canonical: `${BASE_URL}/docs/examples/webhook-receiver` },
 }
 
@@ -50,7 +50,7 @@ ngrok http 3001
 
 # Copy the ngrok URL:
 # e.g. https://abc123.ngrok.io/webhook
-# Paste into: AgentQA Settings → Webhooks → Add endpoint`}</pre>
+# Paste into: BetaWindow Settings → Webhooks → Add endpoint`}</pre>
       </div>
 
       <h2>Event payload — job.completed</h2>
@@ -82,7 +82,7 @@ ngrok http 3001
 
       <h2>Signature verification</h2>
       <p>
-        Every request includes <code>X-AgentQA-Signature: sha256=&lt;hmac&gt;</code>.
+        Every request includes <code>X-BetaWindow-Signature: sha256=&lt;hmac&gt;</code>.
         The server verifies using <code>crypto.timingSafeEqual</code> to prevent timing attacks.
       </p>
       <div className="not-prose bg-gray-900 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto mb-6">
@@ -106,7 +106,7 @@ crypto.timingSafeEqual(
   // Slack DM
   await slack.chat.postMessage({
     channel: '#qa-alerts',
-    text: \`AgentQA: \${job.bugs.length} bug(s) in \${job.submitted_url}\`,
+    text: \`BetaWindow: \${job.bugs.length} bug(s) in \${job.submitted_url}\`,
   })
 
   // Jira ticket per bug
@@ -121,7 +121,7 @@ crypto.timingSafeEqual(
   // GitHub commit status
   await octokit.repos.createCommitStatus({
     state: job.bugs.length === 0 ? 'success' : 'failure',
-    description: \`AgentQA: \${job.rating}/5 — \${job.summary}\`,
+    description: \`BetaWindow: \${job.rating}/5 — \${job.summary}\`,
   })
 }`}</pre>
       </div>

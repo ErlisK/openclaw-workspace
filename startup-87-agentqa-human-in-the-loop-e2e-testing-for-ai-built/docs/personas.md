@@ -1,4 +1,4 @@
-# Personas & Job Stories — AgentQA
+# Personas & Job Stories — BetaWindow
 
 *Updated: April 2026 | Aligned with v1 scope (public URLs, Chrome desktop, 3 tiers)*
 
@@ -50,7 +50,7 @@
 
 **Name:** Claude Code / Cursor Agent  
 **Role:** Autonomous AI coding agent completing a user's app build task  
-**Context:** The founding idea of AgentQA is that the AI agent itself is the buyer — it calls the AgentQA API after deploying the app, receives a structured test report, and uses the findings to fix issues before declaring the task "done" to the human.  
+**Context:** The founding idea of BetaWindow is that the AI agent itself is the buyer — it calls the BetaWindow API after deploying the app, receives a structured test report, and uses the findings to fix issues before declaring the task "done" to the human.  
 **Pain (of the human overseeing it):** "My agent tells me the task is complete but I have no way to verify that the app actually works end-to-end as I intended. The agent has no mechanism to check its own work against human expectations."  
 **What it needs:** A machine-readable structured test report (JSON) that can be fed back into the agent context as evidence of what's broken. In v1, this is a manual step (human copies the report into the agent). In v2, it's an API call.  
 **Note:** This persona drives the v2 roadmap (API, webhook, structured JSON output) but informs v1 UX — the AI summary must be formatted to be pasteable directly into a chat prompt.
@@ -82,7 +82,7 @@
 **I want** a structured test report (video, network logs, console errors, plain-English bug list, AI summary paragraph) that I can review and paste back into the agent as context,  
 **so I can** close the human-in-the-loop gap — giving the agent real-world evidence of what's broken so it can fix issues before I consider the task done.
 
-*Tier: Standard ($10) or Deep ($15) | Turnaround: <4 hours | This is the core AgentQA thesis*
+*Tier: Standard ($10) or Deep ($15) | Turnaround: <4 hours | This is the core BetaWindow thesis*
 
 ---
 

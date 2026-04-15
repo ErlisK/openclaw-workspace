@@ -60,11 +60,11 @@ test.describe('/playground/target — static page', () => {
     await expect(page.getByTestId('page-title')).toBeAttached()
   })
 
-  test('page title contains "AgentQA"', async ({ page }) => {
+  test('page title contains "BetaWindow"', async ({ page }) => {
     await page.context().addCookies(bypassCookies())
     await page.goto(url('/playground/target'))
     const title = await page.getByTestId('page-title').textContent()
-    expect(title).toContain('AgentQA')
+    expect(title).toContain('BetaWindow')
   })
 
   test('status-card testid present', async ({ page }) => {
@@ -165,7 +165,7 @@ test.describe('/api/playground/ping — API', () => {
   test('response has service, ts, message fields', async ({ request }) => {
     const res = await request.get(url('/api/playground/ping'))
     const body = await res.json()
-    expect(body.service).toBe('agentqa-playground')
+    expect(body.service).toBe('betawindow-playground')
     expect(body.ts).toBeTruthy()
     expect(body.message).toBeTruthy()
   })
@@ -182,9 +182,9 @@ test.describe('/api/playground/ping — API', () => {
     expect(cc).toContain('no-store')
   })
 
-  test('X-AgentQA-Test header present', async ({ request }) => {
+  test('X-BetaWindow-Test header present', async ({ request }) => {
     const res = await request.get(url('/api/playground/ping'))
-    expect(res.headers()['x-agentqa-test']).toBe('true')
+    expect(res.headers()['x-betawindow-test']).toBe('true')
   })
 })
 
@@ -258,19 +258,19 @@ test.describe('Sandbox flow — /playground/target as job target', () => {
           event_type: 'console_log',
           ts: new Date().toISOString(),
           log_level: 'log',
-          log_message: '[AgentQA Target] Page mounted — console.log OK',
+          log_message: '[BetaWindow Target] Page mounted — console.log OK',
         },
         {
           event_type: 'console_log',
           ts: new Date().toISOString(),
           log_level: 'warn',
-          log_message: '[AgentQA Target] Sample warning — console.warn OK',
+          log_message: '[BetaWindow Target] Sample warning — console.warn OK',
         },
         {
           event_type: 'console_log',
           ts: new Date().toISOString(),
           log_level: 'error',
-          log_message: '[AgentQA Target] Sample error — console.error OK (intentional)',
+          log_message: '[BetaWindow Target] Sample error — console.error OK (intentional)',
         },
         {
           event_type: 'network_request',
@@ -285,7 +285,7 @@ test.describe('Sandbox flow — /playground/target as job target', () => {
           request_url: `${BASE_URL}/api/playground/ping?source=autoload`,
           status_code: 200,
           duration_ms: 42,
-          response_body: '{"status":"ok","service":"agentqa-playground"}',
+          response_body: '{"status":"ok","service":"betawindow-playground"}',
         },
         {
           event_type: 'click',
@@ -296,7 +296,7 @@ test.describe('Sandbox flow — /playground/target as job target', () => {
           event_type: 'console_log',
           ts: new Date().toISOString(),
           log_level: 'log',
-          log_message: '[AgentQA Target] fetch /api/playground/ping → {"status":"ok"}',
+          log_message: '[BetaWindow Target] fetch /api/playground/ping → {"status":"ok"}',
         },
       ],
       headers: bearer(tt),
@@ -350,7 +350,7 @@ test.describe('Sandbox flow — /playground/target as job target', () => {
     const res = await request.get(url(`/api/sessions/${sessionId}/events`), { headers: bearer(testerToken) })
     const { events } = await res.json()
     const consoleLog = events.find((e: { event_type: string; log_message?: string }) =>
-      e.event_type === 'console_log' && e.log_message?.includes('[AgentQA Target]')
+      e.event_type === 'console_log' && e.log_message?.includes('[BetaWindow Target]')
     )
     expect(consoleLog).toBeTruthy()
   })
@@ -484,7 +484,7 @@ test.describe('Proxy — /playground/target via /api/proxy', () => {
     expect(res.headers()['content-type']).toContain('text/html')
   })
 
-  test('proxy response contains AgentQA logging script injection', async ({ request }) => {
+  test('proxy response contains BetaWindow logging script injection', async ({ request }) => {
     if (!sessionId) { test.skip(true, 'No session'); return }
     const targetUrl = encodeURIComponent(`${BASE_URL}/playground/target`)
     const res = await request.get(
@@ -504,7 +504,7 @@ test.describe('Proxy — /playground/target via /api/proxy', () => {
       { headers: { Authorization: `Bearer ${testerToken}`, Cookie: BYPASS ? `x-vercel-protection-bypass=${BYPASS}` : '' } }
     )
     const html = await res.text()
-    expect(html.toLowerCase()).toContain('agentqa')
+    expect(html.toLowerCase()).toContain('betawindow')
   })
 
   test('proxy rejects unauthenticated requests → 401', async ({ request }) => {

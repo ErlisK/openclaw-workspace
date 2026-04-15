@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import TesterOnboardingClient from './TesterOnboardingClient'
 
 export const metadata = {
-  title: 'Tester Onboarding — AgentQA',
+  title: 'Tester Onboarding — BetaWindow',
   description: 'Set up your tester profile, payouts, and read the guidelines.',
 }
 

@@ -84,7 +84,7 @@ function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessio
 
 function buildInjectedScript(sessionId: string, appUrl: string, reportUrl: string): string {
   // Delegate to the shared logger builder (same script, wrapped in <script> tags)
-  return `<script id="agentqa-logger">\n${buildLoggerScript(sessionId, appUrl, reportUrl)}\n</script>`
+  return `<script id="betawindow-logger">\n${buildLoggerScript(sessionId, appUrl, reportUrl)}\n</script>`
 }
 
 export async function GET(req: NextRequest) {
@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
 
   // Fetch the target URL
   const forwardHeaders: Record<string, string> = {
-    'User-Agent': 'AgentQA-Proxy/1.0 (testing-platform)',
+    'User-Agent': 'BetaWindow-Proxy/1.0 (testing-platform)',
     Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
   }

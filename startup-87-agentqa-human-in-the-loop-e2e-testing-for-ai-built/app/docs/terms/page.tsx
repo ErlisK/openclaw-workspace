@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — AgentQA',
-  description: 'AgentQA terms of service governing use of the platform for job creators and testers.',
+  title: 'Terms of Service — BetaWindow',
+  description: 'BetaWindow terms of service governing use of the platform for job creators and testers.',
 }
 
 const EFFECTIVE = 'June 1, 2025'
@@ -14,14 +14,14 @@ export default function TermsPage() {
       <p className="text-sm text-gray-500 mb-8">Effective date: {EFFECTIVE}</p>
 
       <p>
-        These Terms of Service ("<strong>Terms</strong>") govern your access to and use of AgentQA
-        ("<strong>AgentQA</strong>", "<strong>we</strong>", "<strong>us</strong>"). By creating an
+        These Terms of Service ("<strong>Terms</strong>") govern your access to and use of BetaWindow
+        ("<strong>BetaWindow</strong>", "<strong>we</strong>", "<strong>us</strong>"). By creating an
         account or using the platform you agree to these Terms.
       </p>
 
       <h2>1. Description of service</h2>
       <p>
-        AgentQA is a marketplace that connects software developers ("Job Creators") with freelance
+        BetaWindow is a marketplace that connects software developers ("Job Creators") with freelance
         software testers ("Testers"). Job Creators publish test jobs; Testers claim and complete them
         in exchange for compensation.
       </p>
@@ -29,13 +29,13 @@ export default function TermsPage() {
       <h2>2. Eligibility</h2>
       <p>
         You must be at least 18 years old and legally able to enter into contracts in your jurisdiction.
-        By using AgentQA you represent that you meet these requirements.
+        By using BetaWindow you represent that you meet these requirements.
       </p>
 
       <h2>3. Accounts</h2>
       <p>
         You are responsible for maintaining the security of your credentials. You must notify us
-        immediately at <a href="mailto:support@agentqa.io">support@agentqa.io</a> if you suspect
+        immediately at <a href="mailto:support@betawindow.com">support@betawindow.com</a> if you suspect
         unauthorised access. We are not liable for losses resulting from compromised credentials.
       </p>
 
@@ -74,18 +74,18 @@ export default function TermsPage() {
       <h2>8. Intellectual property</h2>
       <p>
         Job Creators retain all rights to their applications. Feedback reports are owned by the Job
-        Creator. AgentQA retains the right to use aggregated, anonymised data to improve the platform.
+        Creator. BetaWindow retains the right to use aggregated, anonymised data to improve the platform.
       </p>
 
       <h2>9. Disclaimers</h2>
       <p>
-        The platform is provided "as is". AgentQA makes no warranty that testing sessions will catch
+        The platform is provided "as is". BetaWindow makes no warranty that testing sessions will catch
         all bugs or that tester feedback is professional-grade QA. Use alongside automated testing.
       </p>
 
       <h2>10. Limitation of liability</h2>
       <p>
-        To the maximum extent permitted by law, AgentQA's aggregate liability for any claim is
+        To the maximum extent permitted by law, BetaWindow's aggregate liability for any claim is
         limited to the credits you paid in the 30 days preceding the claim.
       </p>
 
@@ -109,7 +109,7 @@ export default function TermsPage() {
 
       <h2>14. Contact</h2>
       <p>
-        Questions? Email <a href="mailto:legal@agentqa.io">legal@agentqa.io</a>.
+        Questions? Email <a href="mailto:legal@betawindow.com">legal@betawindow.com</a>.
       </p>
     </article>
   )

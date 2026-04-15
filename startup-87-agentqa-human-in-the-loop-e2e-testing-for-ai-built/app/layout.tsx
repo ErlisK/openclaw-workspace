@@ -3,8 +3,8 @@ import './globals.css'
 import { PHProvider } from '@/lib/analytics/provider'
 import FeedbackWidget from '@/components/FeedbackWidget'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://agentqa.vercel.app'
-const TITLE = 'AgentQA — Human QA Testing for AI-Built Apps'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.vercel.app'
+const TITLE = 'BetaWindow — Human QA Testing for AI-Built Apps'
 const DESCRIPTION =
   'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Feedback delivered in under 4 hours. From $5 per test.'
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
     default: TITLE,
-    template: '%s | AgentQA',
+    template: '%s | BetaWindow',
   },
   description: DESCRIPTION,
   keywords: [
@@ -25,9 +25,14 @@ export const metadata: Metadata = {
     'software testing platform',
     'manual testing service',
   ],
-  authors: [{ name: 'AgentQA' }],
-  creator: 'AgentQA',
-  publisher: 'AgentQA',
+  authors: [{ name: 'BetaWindow' }],
+  creator: 'BetaWindow',
+  publisher: 'BetaWindow',
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
   robots: {
     index: true,
     follow: true,
@@ -43,7 +48,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: APP_URL,
-    siteName: 'AgentQA',
+    siteName: 'BetaWindow',
     title: TITLE,
     description: DESCRIPTION,
     images: [
@@ -51,7 +56,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'AgentQA — Human QA Testing for AI-Built Apps',
+        alt: 'BetaWindow — Human QA Testing for AI-Built Apps',
       },
     ],
   },
@@ -60,7 +65,7 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     images: ['/og-image.png'],
-    creator: '@agentqa',
+    creator: '@betawindow',
   },
   alternates: {
     canonical: APP_URL,
@@ -78,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'SoftwareApplication',
-              name: 'AgentQA',
+              name: 'BetaWindow',
               applicationCategory: 'DeveloperApplication',
               operatingSystem: 'Web',
               url: APP_URL,
@@ -128,7 +133,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@type': 'Organization',
-              name: 'AgentQA',
+              name: 'BetaWindow',
               url: APP_URL,
               logo: `${APP_URL}/logo.png`,
               sameAs: [],

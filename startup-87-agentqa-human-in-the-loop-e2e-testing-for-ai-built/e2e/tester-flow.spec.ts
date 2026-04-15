@@ -244,7 +244,7 @@ test.describe('Tester flow — events + complete + feedback', () => {
     // Simulates what the injected monkey-patch script sends via postMessage → RunLogger → API
     const res = await request.post(url(`/api/sessions/${sessionId}/events`), {
       data: [
-        { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'log', log_message: '[AgentQA injected] Page initialized: {"title":"Example Domain","readyState":"complete"}' },
+        { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'log', log_message: '[BetaWindow injected] Page initialized: {"title":"Example Domain","readyState":"complete"}' },
         { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'error', log_message: 'TypeError: Cannot read properties of undefined (reading "map")' },
         { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'warn', log_message: 'Deprecated API usage detected' },
       ],
@@ -506,7 +506,7 @@ test.describe('Tester flow — full E2E (core flow)', () => {
     const evRes = await request.post(url(`/api/sessions/${session.id}/events`), {
       data: [
         { event_type: 'navigation', ts: new Date().toISOString(), url: 'https://example.com', log_message: 'Navigated to https://example.com' },
-        { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'log', log_message: 'console.log intercepted by AgentQA: App mounted' },
+        { event_type: 'console_log', ts: new Date().toISOString(), log_level: 'log', log_message: 'console.log intercepted by BetaWindow: App mounted' },
         { event_type: 'network_request', ts: new Date().toISOString(), method: 'GET', request_url: 'https://example.com/api/config' },
         { event_type: 'network_response', ts: new Date().toISOString(), method: 'GET', request_url: 'https://example.com/api/config', status_code: 200, duration_ms: 32 },
         { event_type: 'click', ts: new Date().toISOString(), log_message: 'a[Get Started]' },
@@ -584,7 +584,7 @@ test.describe('Tester flow — UI pages', () => {
     const body = await page.content()
     expect(body.length).toBeGreaterThan(100)
     // Page should have navigation structure
-    expect(body.toLowerCase()).toMatch(/marketplace|agentqa|job/i)
+    expect(body.toLowerCase()).toMatch(/marketplace|betawindow|job/i)
   })
 
   test('/run/[sessionId] page renders (requires valid session)', async ({ page }) => {
@@ -600,6 +600,6 @@ test.describe('Tester flow — UI pages', () => {
     await page.goto(url('/marketplace'))
     const content = await page.content()
     // The marketplace should exist and have some content
-    expect(content).toContain('AgentQA')
+    expect(content).toContain('BetaWindow')
   })
 })

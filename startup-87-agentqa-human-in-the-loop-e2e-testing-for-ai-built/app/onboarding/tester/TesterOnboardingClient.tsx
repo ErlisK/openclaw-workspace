@@ -122,7 +122,7 @@ export default function TesterOnboardingClient() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <Link href="/" className="text-xl font-bold text-gray-900">AgentQA</Link>
+        <Link href="/" className="text-xl font-bold text-gray-900">BetaWindow</Link>
         <span className="ml-3 text-sm text-gray-500">Tester Onboarding</span>
       </header>
 
@@ -161,20 +161,20 @@ export default function TesterOnboardingClient() {
           <div className="bg-white border border-gray-200 rounded-2xl p-8">
             <h3 className="text-xl font-bold text-gray-900 mb-2">Set Up Payouts</h3>
             <p className="text-gray-600 mb-6">
-              Connect your bank account via Stripe to receive payments. AgentQA keeps 20% and you keep 80% of each job.
+              Connect your bank account via Stripe to receive payments. BetaWindow keeps 20% and you keep 80% of each job.
             </p>
 
             <div className="grid grid-cols-3 gap-4 mb-8 text-center">
               <div className="bg-indigo-50 rounded-xl p-4">
-                <div className="text-2xl font-bold text-indigo-600">$4</div>
+                <div className="text-2xl font-bold text-indigo-600">$5</div>
                 <div className="text-xs text-gray-500 mt-1">Quick test (10 min)</div>
               </div>
               <div className="bg-indigo-50 rounded-xl p-4">
-                <div className="text-2xl font-bold text-indigo-600">$8</div>
+                <div className="text-2xl font-bold text-indigo-600">$10</div>
                 <div className="text-xs text-gray-500 mt-1">Standard (20 min)</div>
               </div>
               <div className="bg-indigo-50 rounded-xl p-4">
-                <div className="text-2xl font-bold text-indigo-600">$12</div>
+                <div className="text-2xl font-bold text-indigo-600">$15</div>
                 <div className="text-xs text-gray-500 mt-1">Deep test (30 min)</div>
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function TesterOnboardingClient() {
             )}
 
             <p className="text-xs text-gray-400 mt-4 text-center">
-              Powered by Stripe. AgentQA never stores your banking information.
+              Powered by Stripe. BetaWindow never stores your banking information.
             </p>
           </div>
         )}
@@ -280,7 +280,7 @@ export default function TesterOnboardingClient() {
                 className="mt-0.5 w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
               />
               <span className="text-sm text-gray-700">
-                I have read and agree to the AgentQA Tester Guidelines. I understand that violations may result in account suspension or withheld payments.
+                I have read and agree to the BetaWindow Tester Guidelines. I understand that violations may result in account suspension or withheld payments.
               </span>
             </label>
 

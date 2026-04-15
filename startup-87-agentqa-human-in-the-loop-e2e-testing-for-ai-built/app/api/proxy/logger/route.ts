@@ -4,7 +4,7 @@ import { getSupabaseClient } from '@/lib/supabase/get-client'
 /**
  * GET /api/proxy/logger?session=<id>&report_url=<url>
  *
- * Serves the agentqa-logger JavaScript as a standalone file.
+ * Serves the betawindow-logger JavaScript as a standalone file.
  * This is the same script that gets injected by /api/proxy,
  * but served as a <script src="..."> reference for:
  *   - Cached delivery (max-age=60)
@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
 
 export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: string): string {
   return `
-// AgentQA Logger v1.0 — auto-injected by proxy
+// BetaWindow Logger v1.0 — auto-injected by proxy
 // Captures fetch, XHR, and console events and reports them to the session events API.
 (function(SESSION_ID, APP_URL, REPORT_URL) {
   'use strict';
@@ -76,7 +76,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     // 1) postMessage to parent (RunLogger picks this up)
     try {
       if (typeof window !== 'undefined' && window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'agentqa_event_batch', events: events, session: SESSION_ID }, '*');
+        window.parent.postMessage({ type: 'betawindow_event_batch', events: events, session: SESSION_ID }, '*');
       }
     } catch(e) {}
     // 2) POST directly to API using raw fetch (no recursion)
@@ -220,7 +220,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     event_type: 'navigation',
     ts: now(),
     request_url: APP_URL || (typeof location !== 'undefined' ? location.href : ''),
-    log_message: 'AgentQA logger initialized',
+    log_message: 'BetaWindow logger initialized',
     payload: { session_id: SESSION_ID, started: started },
   });
 
@@ -329,7 +329,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
 
   // ─── Public API ──────────────────────────────────────────────
   if (typeof window !== 'undefined') {
-    window.__agentqa__ = {
+    window.__betawindow__ = {
       session: SESSION_ID,
       flush: flush,
       queue: queue,

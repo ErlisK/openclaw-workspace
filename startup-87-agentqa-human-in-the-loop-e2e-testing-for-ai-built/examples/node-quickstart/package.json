@@ -1,7 +1,7 @@
 {
-  "name": "agentqa-node-quickstart",
+  "name": "betawindow-node-quickstart",
   "version": "1.0.0",
-  "description": "Minimal Node.js example: create an AgentQA job, poll, print report",
+  "description": "Minimal Node.js example: create an BetaWindow job, poll, print report",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -10,6 +10,6 @@
   "engines": {
     "node": ">=18"
   },
-  "keywords": ["agentqa", "qa", "testing", "ai", "human-in-the-loop"],
+  "keywords": ["betawindow", "qa", "testing", "ai", "human-in-the-loop"],
   "license": "MIT"
 }

@@ -52,7 +52,7 @@ async function gotoHydrated(page: import('@playwright/test').Page, path: string)
 // ==========================================================================
 
 const DOCS_PAGES = [
-  { path: '/docs/how-it-works', h1Pattern: /how agentqa works/i, bodyWord: 'tester' },
+  { path: '/docs/how-it-works', h1Pattern: /how betawindow works/i, bodyWord: 'tester' },
   { path: '/docs/pricing',      h1Pattern: /pricing/i,           bodyWord: 'credits' },
   { path: '/docs/security',     h1Pattern: /security/i,          bodyWord: 'block' },
   { path: '/docs/terms',        h1Pattern: /terms/i,             bodyWord: 'service' },
@@ -91,13 +91,13 @@ test.describe('Docs pages — smoke 200', () => {
     expect(html).toContain('api-quickstart')
   })
 
-  test('all docs pages have AgentQA in <title>', async ({ request }) => {
+  test('all docs pages have BetaWindow in <title>', async ({ request }) => {
     for (const { path } of DOCS_PAGES) {
       const res = await request.get(url(path), { headers: bypassHeaders() })
       const html = await res.text()
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
       if (titleMatch) {
-        expect(titleMatch[1].toLowerCase()).toContain('agentqa')
+        expect(titleMatch[1].toLowerCase()).toContain('betawindow')
       }
     }
   })

@@ -36,7 +36,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
         <div className="mb-8">
-          <Link href="/" className="text-indigo-600 font-bold text-lg">AgentQA</Link>
+          <Link href="/" className="text-indigo-600 font-bold text-lg">BetaWindow</Link>
           <h1 className="text-2xl font-bold text-gray-900 mt-4">Sign in</h1>
           <p className="text-gray-500 mt-1">Welcome back</p>
         </div>

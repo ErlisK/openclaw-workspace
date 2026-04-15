@@ -11,7 +11,7 @@
  * 7.  /docs/api-quickstart → 200, h1, code examples
  * 8.  Docs sidebar is present on all pages
  * 9.  Nav link from homepage → docs
- * 10. All docs pages have correct <title> with AgentQA
+ * 10. All docs pages have correct <title> with BetaWindow
  * 11. /docs/api-quickstart shows job creation endpoint
  * 12. /docs/security mentions file:// block
  * 13. /docs/security mentions private IP block
@@ -38,7 +38,7 @@ function byCookie() {
 }
 
 const DOC_PAGES = [
-  { path: '/docs/how-it-works', testId: 'docs-how-it-works', h1: 'How AgentQA Works' },
+  { path: '/docs/how-it-works', testId: 'docs-how-it-works', h1: 'How BetaWindow Works' },
   { path: '/docs/pricing', testId: 'docs-pricing', h1: 'Pricing' },
   { path: '/docs/security', testId: 'docs-security', h1: 'Security' },
   { path: '/docs/terms', testId: 'docs-terms', h1: 'Terms of Service' },
@@ -67,11 +67,11 @@ test.describe('Docs — HTTP status', () => {
 // ── Page content ───────────────────────────────────────────────────────────
 
 test.describe('Docs — content: how-it-works', () => {
-  test('has h1 "How AgentQA Works"', async ({ page }) => {
+  test('has h1 "How BetaWindow Works"', async ({ page }) => {
     await page.context().addCookies(byCookie())
     await page.goto(url('/docs/how-it-works'))
     const h1 = await page.locator('h1').first().textContent()
-    expect(h1).toContain('How AgentQA')
+    expect(h1).toContain('How BetaWindow')
   })
 
   test('has sidebar', async ({ page }) => {
@@ -93,10 +93,10 @@ test.describe('Docs — content: how-it-works', () => {
     expect(body?.toLowerCase()).toContain('credit')
   })
 
-  test('title contains AgentQA', async ({ page }) => {
+  test('title contains BetaWindow', async ({ page }) => {
     await page.context().addCookies(byCookie())
     await page.goto(url('/docs/how-it-works'))
-    expect(await page.title()).toContain('AgentQA')
+    expect(await page.title()).toContain('BetaWindow')
   })
 })
 

@@ -1,4 +1,4 @@
-# Pain Points Research — AgentQA
+# Pain Points Research — BetaWindow
 
 *Sources: Reddit (r/LLM, r/vibecoding, r/ExperiencedDevs, r/QualityAssurance, r/reactjs, r/SideProject), Hacker News, blog/research reports from Autonoma, qtrl.ai, Databricks, Forbes, Escape.tech, Veracode, cuckoo.network. 150+ posts/comments processed.*
 

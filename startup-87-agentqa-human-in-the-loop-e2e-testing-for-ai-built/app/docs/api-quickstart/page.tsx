@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'API Quickstart — AgentQA Docs',
-  description: 'Create and manage AgentQA test jobs via the REST API. Includes authentication, job creation, polling, and webhook examples.',
+  title: 'API Quickstart — BetaWindow Docs',
+  description: 'Create and manage BetaWindow test jobs via the REST API. Includes authentication, job creation, polling, and webhook examples.',
 }
 
 export default function ApiQuickstartPage() {
@@ -11,7 +11,7 @@ export default function ApiQuickstartPage() {
     <article data-testid="docs-api-quickstart">
       <h1>API Quickstart</h1>
       <p className="lead text-xl text-gray-600 mb-8">
-        AgentQA has a REST API for programmatic job creation, status polling, and webhook delivery.
+        BetaWindow has a REST API for programmatic job creation, status polling, and webhook delivery.
         This is ideal for CI/CD pipelines where you want to trigger a human test after every deployment.
       </p>
 
@@ -150,19 +150,19 @@ Authorization: Bearer <token>
       <p>Post a test job after every Vercel deployment in GitHub Actions:</p>
       <div className="not-prose bg-gray-900 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto mb-6">
         <pre>{`# .github/workflows/e2e.yml
-- name: Submit AgentQA test job
+- name: Submit BetaWindow test job
   env:
     AGENTQA_TOKEN: \${{ secrets.AGENTQA_TOKEN }}
     DEPLOY_URL: \${{ steps.deploy.outputs.url }}
   run: |
-    JOB=$(curl -sf -X POST https://agentqa.vercel.app/api/jobs \\
+    JOB=$(curl -sf -X POST https://betawindow.vercel.app/api/jobs \\
       -H "Authorization: Bearer $AGENTQA_TOKEN" \\
       -H "Content-Type: application/json" \\
       -d "{\"title\":\"CI deploy test\",\"url\":\"$DEPLOY_URL\",\"tier\":\"quick\"}")
     JOB_ID=$(echo $JOB | jq -r '.job.id')
     
     # Publish the job
-    curl -sf -X POST https://agentqa.vercel.app/api/jobs/$JOB_ID/transition \\
+    curl -sf -X POST https://betawindow.vercel.app/api/jobs/$JOB_ID/transition \\
       -H "Authorization: Bearer $AGENTQA_TOKEN" \\
       -H "Content-Type: application/json" \\
       -d '{"to":"published"}'

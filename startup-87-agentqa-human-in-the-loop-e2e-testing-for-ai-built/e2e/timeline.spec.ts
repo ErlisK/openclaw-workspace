@@ -236,7 +236,7 @@ test.describe('Timeline UI — filter tabs', () => {
 // ─── postMessage → UI update flow ─────────────────────────────
 
 test.describe('Timeline UI — event reception', () => {
-  test('postMessage agentqa_event_batch updates log in parent window', async ({ page }) => {
+  test('postMessage betawindow_event_batch updates log in parent window', async ({ page }) => {
     await page.context().addCookies(bypassCookies())
     await page.goto(url('/'))
 
@@ -244,13 +244,13 @@ test.describe('Timeline UI — event reception', () => {
     const receivedEvents = await page.evaluate(() => {
       const log: unknown[] = []
       window.addEventListener('message', function handler(e) {
-        if (e.data?.type === 'agentqa_event_batch' && Array.isArray(e.data?.events)) {
+        if (e.data?.type === 'betawindow_event_batch' && Array.isArray(e.data?.events)) {
           log.push(...e.data.events)
           if (log.length >= 3) window.removeEventListener('message', handler)
         }
       })
       window.postMessage({
-        type: 'agentqa_event_batch',
+        type: 'betawindow_event_batch',
         session: 'test',
         events: [
           { event_type: 'network_request', ts: new Date().toISOString(), method: 'GET', request_url: '/api/data' },

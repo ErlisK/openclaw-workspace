@@ -42,7 +42,7 @@ export default function InviteLanding({ code, valid, creditsBonus }: Props) {
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold text-indigo-600">AgentQA</Link>
+          <Link href="/" className="text-2xl font-bold text-indigo-600">BetaWindow</Link>
           <p className="text-gray-500 text-sm mt-1">Human-in-the-loop QA for AI-built apps</p>
         </div>
 
@@ -122,7 +122,7 @@ export default function InviteLanding({ code, valid, creditsBonus }: Props) {
                     {applying ? 'Applying…' : `Claim ${creditsBonus} free credits →`}
                   </button>
                   <p className="text-xs text-gray-400 text-center mt-3">
-                    New to AgentQA?{' '}
+                    New to BetaWindow?{' '}
                     <Link href={`/signup?ref=${code}`} className="text-indigo-600 hover:underline">
                       Create a free account
                     </Link>

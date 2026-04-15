@@ -7,7 +7,7 @@
  * - snapshot payload has a structural tree with tag/attrs/children
  * - both event types are relayed via postMessage with correct event_type
  * - both can be persisted to the session_events API
- * - window.__agentqa__.snapshot() can trigger a manual snapshot
+ * - window.__betawindow__.snapshot() can trigger a manual snapshot
  */
 
 import { test, expect, APIRequestContext } from '@playwright/test'
@@ -56,7 +56,7 @@ function loggerScript(sessionId: string) {
     var events = buf.splice(0);
     try {
       if (window.parent && window.parent !== window) {
-        window.parent.postMessage({ type: 'agentqa_event_batch', events: events, session: SESSION_ID }, '*');
+        window.parent.postMessage({ type: 'betawindow_event_batch', events: events, session: SESSION_ID }, '*');
       }
     } catch(e) {}
   }
@@ -135,7 +135,7 @@ function loggerScript(sessionId: string) {
     } catch(e) {}
   }
 
-  window.__agentqa__ = {
+  window.__betawindow__ = {
     session: SESSION_ID,
     flush: flush,
     queue: queue,
@@ -170,7 +170,7 @@ test.describe('Click capture — event shape', () => {
         const timer = setTimeout(() => resolve(null), 6000)
 
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const click = e.data.events.find(
               (ev: { event_type: string }) => ev.event_type === 'click'
             )
@@ -221,7 +221,7 @@ test.describe('Click capture — event shape', () => {
       return new Promise<{ log_message: string } | null>((resolve) => {
         const timer = setTimeout(() => resolve(null), 6000)
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const click = e.data.events.find((ev: { event_type: string }) => ev.event_type === 'click')
             if (click) { clearTimeout(timer); window.removeEventListener('message', handler); resolve(click) }
           }
@@ -248,7 +248,7 @@ test.describe('Click capture — event shape', () => {
       return new Promise<{ payload: { id: string | null } } | null>((resolve) => {
         const timer = setTimeout(() => resolve(null), 6000)
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const click = e.data.events.find((ev: { event_type: string }) => ev.event_type === 'click')
             if (click) { clearTimeout(timer); window.removeEventListener('message', handler); resolve(click) }
           }
@@ -283,7 +283,7 @@ test.describe('DOM snapshot — event shape', () => {
       } | null>((resolve) => {
         const timer = setTimeout(() => resolve(null), 6000)
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const snap = e.data.events.find(
               (ev: { event_type: string }) => ev.event_type === 'dom_snapshot'
             )
@@ -314,7 +314,7 @@ test.describe('DOM snapshot — event shape', () => {
       return new Promise<{ payload: { snapshot: { tag: string; children?: unknown[] } } } | null>((resolve) => {
         const timer = setTimeout(() => resolve(null), 6000)
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const snap = e.data.events.find((ev: { event_type: string }) => ev.event_type === 'dom_snapshot')
             if (snap) { clearTimeout(timer); window.removeEventListener('message', handler); resolve(snap) }
           }
@@ -349,7 +349,7 @@ test.describe('DOM snapshot — event shape', () => {
       return new Promise<{ payload: { snapshot: unknown } } | null>((resolve) => {
         const timer = setTimeout(() => resolve(null), 6000)
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const snap = e.data.events.find((ev: { event_type: string }) => ev.event_type === 'dom_snapshot')
             if (snap) { clearTimeout(timer); window.removeEventListener('message', handler); resolve(snap) }
           }
@@ -376,7 +376,7 @@ test.describe('DOM snapshot — event shape', () => {
     expect(findNode(snapEvent?.payload.snapshot, 'container')).toBe(true)
   })
 
-  test('manual snapshot via window.__agentqa__.snapshot()', async ({ page }) => {
+  test('manual snapshot via window.__betawindow__.snapshot()', async ({ page }) => {
     await page.context().addCookies(bypassCookies())
     await page.goto(url('/'))
 
@@ -386,7 +386,7 @@ test.describe('DOM snapshot — event shape', () => {
 
         // Collect all messages and look for manual trigger
         window.addEventListener('message', function handler(e) {
-          if (e.data?.type === 'agentqa_event_batch') {
+          if (e.data?.type === 'betawindow_event_batch') {
             const snap = e.data.events.find(
               (ev: { event_type: string; payload?: { trigger?: string } }) =>
                 ev.event_type === 'dom_snapshot' && ev.payload?.trigger === 'manual'
@@ -403,7 +403,7 @@ test.describe('DOM snapshot — event shape', () => {
 <script>
   // Trigger manual snapshot after a short delay
   setTimeout(function() {
-    if (window.__agentqa__) window.__agentqa__.snapshot('manual');
+    if (window.__betawindow__) window.__betawindow__.snapshot('manual');
   }, 200);
 <\/script>
 </body></html>`

@@ -62,7 +62,7 @@ export interface SampleReport {
 export const REPORT_DEMO: SampleReport = {
   id: 'rpt_demo_001',
   slug: 'demo',
-  title: 'AgentQA Sample Report — SaaS Checkout Flow',
+  title: 'BetaWindow Sample Report — SaaS Checkout Flow',
   scenario: 'Standard 20-min session on a Stripe-powered SaaS signup',
   app_name: 'AcmeSaaS (demo)',
   app_url: 'https://acme-saas-demo.vercel.app',
@@ -135,9 +135,9 @@ export const REPORT_DEMO: SampleReport = {
     { level: 'warn',  msg: 'Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Use priority prop.', time: '00:03', source: 'next/image' },
   ],
   completed_at: '2025-04-15T14:32:10Z',
-  seo_title: 'Sample AgentQA Report — SaaS Checkout Bug Found',
+  seo_title: 'Sample BetaWindow Report — SaaS Checkout Bug Found',
   seo_description:
-    'See a real AgentQA test session output: 4 bugs found in a SaaS checkout flow, with network logs, console errors, and step-by-step reproduction.',
+    'See a real BetaWindow test session output: 4 bugs found in a SaaS checkout flow, with network logs, console errors, and step-by-step reproduction.',
   og_headline: '4 bugs found in 19 minutes — including a silent payment failure',
 }
 
@@ -147,7 +147,7 @@ export const REPORT_DEMO: SampleReport = {
 export const REPORT_DEMO_MOBILE: SampleReport = {
   id: 'rpt_demo_002',
   slug: 'demo-mobile',
-  title: 'AgentQA Sample Report — Mobile UX Issues',
+  title: 'BetaWindow Sample Report — Mobile UX Issues',
   scenario: 'Quick 10-min session focused on mobile viewport (375px)',
   app_name: 'TodoFlow (demo)',
   app_url: 'https://todoflow-demo.vercel.app',
@@ -201,9 +201,9 @@ export const REPORT_DEMO_MOBILE: SampleReport = {
     { level: 'log',   msg: 'Viewport: 375×667 (iPhone SE)', time: '00:00', source: 'debug.ts' },
   ],
   completed_at: '2025-04-15T10:15:44Z',
-  seo_title: 'Sample AgentQA Report — 3 Mobile Bugs in 10 Minutes',
+  seo_title: 'Sample BetaWindow Report — 3 Mobile Bugs in 10 Minutes',
   seo_description:
-    'AgentQA found 3 mobile-specific bugs in a quick 10-minute test session: nav overflow, hidden submit button, and inaccessible modal close.',
+    'BetaWindow found 3 mobile-specific bugs in a quick 10-minute test session: nav overflow, hidden submit button, and inaccessible modal close.',
   og_headline: '3 mobile bugs in 10 minutes — nav overflow, hidden button, tiny touch target',
 }
 
@@ -213,7 +213,7 @@ export const REPORT_DEMO_MOBILE: SampleReport = {
 export const REPORT_DEMO_CLEAN: SampleReport = {
   id: 'rpt_demo_003',
   slug: 'demo-clean',
-  title: 'AgentQA Sample Report — Clean Pass, 5/5 Rating',
+  title: 'BetaWindow Sample Report — Clean Pass, 5/5 Rating',
   scenario: 'Deep 30-min session, no bugs found — shows what a clean report looks like',
   app_name: 'ShipFast (demo)',
   app_url: 'https://shipfast-demo.vercel.app',
@@ -239,9 +239,9 @@ export const REPORT_DEMO_CLEAN: SampleReport = {
     { level: 'log', msg: 'PostHog initialized', time: '00:01', source: 'analytics.ts' },
   ],
   completed_at: '2025-04-14T09:22:31Z',
-  seo_title: 'Sample AgentQA Report — 5/5 Clean Pass, No Bugs',
+  seo_title: 'Sample BetaWindow Report — 5/5 Clean Pass, No Bugs',
   seo_description:
-    'See what a perfect AgentQA test report looks like: 5/5 rating, 0 bugs across a 30-minute deep session covering all major user flows.',
+    'See what a perfect BetaWindow test report looks like: 5/5 rating, 0 bugs across a 30-minute deep session covering all major user flows.',
   og_headline: '5/5 — zero bugs across 30 minutes of deep testing',
 }
 

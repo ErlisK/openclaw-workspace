@@ -1,15 +1,15 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://agentqa.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Pricing — AgentQA Human QA Testing',
+  title: 'Pricing — BetaWindow Human QA Testing',
   description:
     'Simple, transparent pricing. Quick test $5 (10 min), Standard $10 (20 min), Deep $15 (30 min). No subscription. Pay per test.',
   alternates: { canonical: `${APP_URL}/pricing` },
   openGraph: {
-    title: 'Pricing — AgentQA Human QA Testing',
+    title: 'Pricing — BetaWindow Human QA Testing',
     description: 'Simple, transparent pricing. Quick $5, Standard $10, Deep $15. No subscription.',
     url: `${APP_URL}/pricing`,
   },
@@ -75,7 +75,7 @@ export default function PricingPage() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'PriceSpecification',
-    name: 'AgentQA Testing Tiers',
+    name: 'BetaWindow Testing Tiers',
     url: `${APP_URL}/pricing`,
     offers: TIERS.map(t => ({
       '@type': 'Offer',
@@ -96,7 +96,7 @@ export default function PricingPage() {
 
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-lg font-bold text-gray-900">AgentQA</Link>
+        <Link href="/" className="text-lg font-bold text-gray-900">BetaWindow</Link>
         <div className="flex items-center gap-4 text-sm">
           <Link href="/marketplace" className="text-gray-600 hover:text-gray-900">Find jobs</Link>
           <Link href="/login" className="text-gray-600 hover:text-gray-900">Sign in</Link>
@@ -197,7 +197,7 @@ export default function PricingPage() {
 
       {/* Footer */}
       <footer className="border-t border-gray-100 mt-16 py-8 text-center text-sm text-gray-400">
-        <p>© {new Date().getFullYear()} AgentQA. Human QA for AI-built apps.</p>
+        <p>© {new Date().getFullYear()} BetaWindow. Human QA for AI-built apps.</p>
         <div className="flex justify-center gap-6 mt-2">
           <Link href="/" className="hover:text-gray-600">Home</Link>
           <Link href="/marketplace" className="hover:text-gray-600">Jobs</Link>

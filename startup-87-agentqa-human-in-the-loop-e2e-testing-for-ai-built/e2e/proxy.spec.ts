@@ -4,7 +4,7 @@
  * Tests:
  * - Auth guard: 401 without auth
  * - Validation: 400 for missing/invalid URL
- * - HTML fetch + injection: returns HTML with agentqa-logger script
+ * - HTML fetch + injection: returns HTML with betawindow-logger script
  * - URL rewriting: relative links are proxied
  * - Non-HTML pass-through: CSS/JS/images served directly
  * - postMessage integration: injected script sends events to parent
@@ -105,7 +105,7 @@ test.describe('Proxy API — HTML Injection', () => {
     expect(ct).toContain('text/html')
   })
 
-  test('injected HTML contains agentqa-logger script', async ({ request }) => {
+  test('injected HTML contains betawindow-logger script', async ({ request }) => {
     if (!token) { test.skip(true, 'Auth unavailable'); return }
 
     const res = await request.get(url('/api/proxy?url=https://example.com&session=test-session-id'), {
@@ -113,7 +113,7 @@ test.describe('Proxy API — HTML Injection', () => {
     })
     expect(res.status()).toBe(200)
     const html = await res.text()
-    expect(html).toContain('agentqa-logger')
+    expect(html).toContain('betawindow-logger')
     expect(html).toContain('SESSION_ID')
     expect(html).toContain('network_request')
     expect(html).toContain('console_log')
@@ -168,7 +168,7 @@ test.describe('Proxy API — HTML Injection', () => {
     expect([200, 502, 504]).toContain(res.status())
     if (res.status() === 200) {
       const html = await res.text()
-      expect(html).toContain('agentqa-logger')
+      expect(html).toContain('betawindow-logger')
     }
   })
 
@@ -211,14 +211,14 @@ test.describe('Proxy — Browser Integration', () => {
     const proxyUrl = url('/api/proxy?url=https://example.com&session=browser-test-session')
 
     const messages: string[] = []
-    await page.exposeFunction('onAgentQAMessage', (type: string) => {
+    await page.exposeFunction('onBetaWindowMessage', (type: string) => {
       messages.push(type)
     })
 
     await page.evaluate(() => {
       window.addEventListener('message', (e) => {
-        if (e.data?.type === 'agentqa_event_batch' || e.data?.type === 'agentqa_event') {
-          const fn = (window as unknown as Record<string, unknown>).onAgentQAMessage
+        if (e.data?.type === 'betawindow_event_batch' || e.data?.type === 'betawindow_event') {
+          const fn = (window as unknown as Record<string, unknown>).onBetaWindowMessage
           if (typeof fn === 'function') fn(e.data.type as string)
         }
       })

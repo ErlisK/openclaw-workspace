@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       status: 200,
       headers: {
         'Content-Type': 'text/csv',
-        'Content-Disposition': `attachment; filename="agentqa-users-${new Date().toISOString().slice(0,10)}.csv"`,
+        'Content-Disposition': `attachment; filename="betawindow-users-${new Date().toISOString().slice(0,10)}.csv"`,
       },
     })
   }

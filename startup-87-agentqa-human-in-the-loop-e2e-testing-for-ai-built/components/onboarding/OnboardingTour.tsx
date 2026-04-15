@@ -8,14 +8,14 @@
  * Activated by:
  *   1. Auto-start on first visit (localStorage flag)
  *   2. "Restart tour" button in OnboardingChecklist
- *   3. window.dispatchEvent(new CustomEvent('agentqa:start_tour'))
+ *   3. window.dispatchEvent(new CustomEvent('betawindow:start_tour'))
  */
 import { useEffect, useState, useCallback } from 'react'
 import { ONBOARDING_STEPS } from '@/lib/onboarding/steps'
 import OnboardingTooltip from './OnboardingTooltip'
 
 const TOUR_STEPS = ONBOARDING_STEPS.filter(s => s.tooltip)
-const TOUR_KEY = 'agentqa_tour_seen'
+const TOUR_KEY = 'betawindow_tour_seen'
 
 interface TourProps {
   autoStart?: boolean
@@ -53,8 +53,8 @@ export default function OnboardingTour({ autoStart = true }: TourProps) {
 
   useEffect(() => {
     const handler = () => startTour()
-    window.addEventListener('agentqa:start_tour', handler)
-    return () => window.removeEventListener('agentqa:start_tour', handler)
+    window.addEventListener('betawindow:start_tour', handler)
+    return () => window.removeEventListener('betawindow:start_tour', handler)
   }, [startTour])
 
   if (!active || TOUR_STEPS.length === 0) return null

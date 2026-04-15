@@ -1,4 +1,4 @@
-# AgentQA — MVP Scope & Acceptance Criteria
+# BetaWindow — MVP Scope & Acceptance Criteria
 
 *Status: READY FOR BUILD | Derived from: scope.md, personas.md, competitor-grid.md*  
 *Last updated: April 2026*
@@ -20,7 +20,7 @@ A web platform where a founder submits a public URL + description of what their 
 Buyer (founder)
   → Submit form (URL + flows + tier + payment)
   → Wait for tester assignment (<15 min)
-  → Tester runs session in AgentQA Chrome environment
+  → Tester runs session in BetaWindow Chrome environment
       → network requests captured (proxy)
       → console errors captured (CDP)
       → screen recorded
@@ -43,7 +43,7 @@ The buyer-facing intake form. Must be completable by a non-technical user in und
 - [ ] System validates URL is publicly reachable (HTTP 200 response within 10 seconds)
 - [ ] Rejects localhost, private IPs (10.x, 192.168.x, 127.x)
 - [ ] Rejects URLs returning 4xx/5xx
-- [ ] Shows clear error: "This URL isn't publicly accessible. AgentQA requires a live deployed URL."
+- [ ] Shows clear error: "This URL isn't publicly accessible. BetaWindow requires a live deployed URL."
 
 **AC-1.2 — Flow description**
 - [ ] Textarea accepts plain-English description of what to test
@@ -58,7 +58,7 @@ The buyer-facing intake form. Must be completable by a non-technical user in und
 - [ ] Tier selection required before proceeding to payment
 
 **AC-1.4 — Payment (Stripe)**
-- [ ] Stripe Checkout integration (no card data stored on AgentQA servers)
+- [ ] Stripe Checkout integration (no card data stored on BetaWindow servers)
 - [ ] Payment must complete before test is queued
 - [ ] On successful payment: redirect to "Test Submitted" confirmation page with job ID
 - [ ] On failed payment: stay on form, show error, do not queue test
@@ -173,10 +173,10 @@ The buyer-facing report page. Must communicate findings clearly to a non-technic
 **AC-4.5 — AI summary block**
 - [ ] Displayed prominently at top of report
 - [ ] One-click copy of "paste into your AI agent" block
-- [ ] Block formatted as: "AgentQA test report for [URL]. Tester found [N] issues. [Summary]. Bug list: [formatted list]."
+- [ ] Block formatted as: "BetaWindow test report for [URL]. Tester found [N] issues. [Summary]. Bug list: [formatted list]."
 
 **AC-4.6 — Delivery notification**
-- [ ] Buyer receives email when report is ready: "Your AgentQA report is ready" + link to report page
+- [ ] Buyer receives email when report is ready: "Your BetaWindow report is ready" + link to report page
 - [ ] Email sent within 5 minutes of AI summary completion
 - [ ] Report link uses signed token (expires 30 days)
 

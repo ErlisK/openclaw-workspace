@@ -133,7 +133,7 @@ export default function DashboardPage() {
       const d = await res.json()
       setJobs(prev => prev.map(j => j.id === id ? d.job : j))
       // Mark onboarding step complete
-      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'publish_job' } }))
+      window.dispatchEvent(new CustomEvent('betawindow:step_complete', { detail: { step: 'publish_job' } }))
     }
   }
 
@@ -141,11 +141,11 @@ export default function DashboardPage() {
     if (action === 'open_new_project') {
       setActiveTab('projects')
       setShowNewProject(true)
-      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'create_project' } }))
+      window.dispatchEvent(new CustomEvent('betawindow:step_complete', { detail: { step: 'create_project' } }))
     } else if (action === 'open_new_job') {
       setActiveTab('jobs')
       setShowNewJob(true)
-      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'draft_job' } }))
+      window.dispatchEvent(new CustomEvent('betawindow:step_complete', { detail: { step: 'draft_job' } }))
     }
   }
 
@@ -158,7 +158,7 @@ export default function DashboardPage() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-bold text-gray-900">AgentQA</span>
+          <span className="text-xl font-bold text-gray-900">BetaWindow</span>
           <span className="text-sm text-gray-400">Dashboard</span>
           <a href="/marketplace" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium ml-2">🧪 Find Test Jobs</a>
         </div>

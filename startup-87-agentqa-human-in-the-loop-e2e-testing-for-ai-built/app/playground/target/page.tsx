@@ -14,7 +14,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'AgentQA Playground Target',
+  title: 'BetaWindow Playground Target',
   description: 'Deterministic test target page for E2E sandbox verification',
 }
 
@@ -24,7 +24,7 @@ export default function PlaygroundTargetPage() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>AgentQA Playground Target</title>
+        <title>BetaWindow Playground Target</title>
         <style>{`
           * { box-sizing: border-box; margin: 0; padding: 0; }
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; color: #1e293b; }
@@ -54,7 +54,7 @@ export default function PlaygroundTargetPage() {
       <body>
         <div className="container">
           <div className="header">
-            <h1 data-testid="page-title">🎯 AgentQA Test Target</h1>
+            <h1 data-testid="page-title">🎯 BetaWindow Test Target</h1>
             <p>Deterministic playground page for E2E sandbox verification</p>
           </div>
 
@@ -127,9 +127,9 @@ export default function PlaygroundTargetPage() {
         <script dangerouslySetInnerHTML={{ __html: `
 (function() {
   // ── On load: emit deterministic console events ───────────────────────────
-  console.log('[AgentQA Target] Page mounted — console.log OK');
-  console.warn('[AgentQA Target] Sample warning — console.warn OK');
-  console.error('[AgentQA Target] Sample error — console.error OK (intentional)');
+  console.log('[BetaWindow Target] Page mounted — console.log OK');
+  console.warn('[BetaWindow Target] Sample warning — console.warn OK');
+  console.error('[BetaWindow Target] Sample error — console.error OK (intentional)');
 
   // ── Update JS status badge ───────────────────────────────────────────────
   document.getElementById('js-status').textContent = 'Active';
@@ -155,30 +155,30 @@ export default function PlaygroundTargetPage() {
     .then(function(data) {
       document.getElementById('api-result').textContent = JSON.stringify(data, null, 2);
       appendLog('fetch /api/playground/ping → ' + data.status);
-      console.log('[AgentQA Target] fetch /api/playground/ping → ' + JSON.stringify(data));
+      console.log('[BetaWindow Target] fetch /api/playground/ping → ' + JSON.stringify(data));
     })
     .catch(function(e) {
       appendLog('fetch error: ' + e.message);
-      console.error('[AgentQA Target] fetch failed: ' + e.message);
+      console.error('[BetaWindow Target] fetch failed: ' + e.message);
     });
 
   // ── Button: emit console.log ─────────────────────────────────────────────
   document.getElementById('btn-log').addEventListener('click', function() {
-    var msg = '[AgentQA Target] User clicked btn-log at ' + Date.now();
+    var msg = '[BetaWindow Target] User clicked btn-log at ' + Date.now();
     console.log(msg);
     appendLog('console.log emitted');
   });
 
   // ── Button: emit console.warn ────────────────────────────────────────────
   document.getElementById('btn-warn').addEventListener('click', function() {
-    var msg = '[AgentQA Target] User clicked btn-warn at ' + Date.now();
+    var msg = '[BetaWindow Target] User clicked btn-warn at ' + Date.now();
     console.warn(msg);
     appendLog('console.warn emitted');
   });
 
   // ── Button: emit console.error ───────────────────────────────────────────
   document.getElementById('btn-error').addEventListener('click', function() {
-    var msg = '[AgentQA Target] User clicked btn-error at ' + Date.now();
+    var msg = '[BetaWindow Target] User clicked btn-error at ' + Date.now();
     console.error(msg);
     appendLog('console.error emitted');
   });
@@ -193,12 +193,12 @@ export default function PlaygroundTargetPage() {
       .then(function(r) { return r.json(); })
       .then(function(data) {
         appendLog('fetch → ' + data.status);
-        console.log('[AgentQA Target] manual fetch result: ' + JSON.stringify(data));
+        console.log('[BetaWindow Target] manual fetch result: ' + JSON.stringify(data));
         document.getElementById('api-result').textContent = JSON.stringify(data, null, 2);
       })
       .catch(function(e) {
         appendLog('fetch error: ' + e.message);
-        console.error('[AgentQA Target] manual fetch failed: ' + e.message);
+        console.error('[BetaWindow Target] manual fetch failed: ' + e.message);
       });
   });
 })();

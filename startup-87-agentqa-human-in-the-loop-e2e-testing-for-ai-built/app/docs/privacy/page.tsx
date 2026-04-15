@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — AgentQA',
-  description: 'How AgentQA collects, uses, and protects your personal data.',
+  title: 'Privacy Policy — BetaWindow',
+  description: 'How BetaWindow collects, uses, and protects your personal data.',
 }
 
 const EFFECTIVE = 'June 1, 2025'
@@ -14,8 +14,8 @@ export default function PrivacyPage() {
       <p className="text-sm text-gray-500 mb-8">Effective date: {EFFECTIVE}</p>
 
       <p>
-        This Privacy Policy describes how AgentQA ("<strong>we</strong>") collects, uses, and shares
-        information when you use our platform. By using AgentQA you consent to the practices described here.
+        This Privacy Policy describes how BetaWindow ("<strong>we</strong>") collects, uses, and shares
+        information when you use our platform. By using BetaWindow you consent to the practices described here.
       </p>
 
       <h2>1. Information we collect</h2>
@@ -87,7 +87,7 @@ export default function PrivacyPage() {
         <li>Withdraw consent for analytics</li>
       </ul>
       <p>
-        To exercise these rights, email <a href="mailto:privacy@agentqa.io">privacy@agentqa.io</a>.
+        To exercise these rights, email <a href="mailto:privacy@betawindow.com">privacy@betawindow.com</a>.
         We respond within 30 days.
       </p>
 
@@ -100,7 +100,7 @@ export default function PrivacyPage() {
 
       <h2>7. Children</h2>
       <p>
-        AgentQA is not directed at children under 18. We do not knowingly collect data from minors.
+        BetaWindow is not directed at children under 18. We do not knowingly collect data from minors.
       </p>
 
       <h2>8. Changes</h2>
@@ -110,7 +110,7 @@ export default function PrivacyPage() {
 
       <h2>9. Contact</h2>
       <p>
-        Privacy questions: <a href="mailto:privacy@agentqa.io">privacy@agentqa.io</a>
+        Privacy questions: <a href="mailto:privacy@betawindow.com">privacy@betawindow.com</a>
       </p>
     </article>
   )

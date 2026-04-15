@@ -141,7 +141,7 @@ test.describe('Requester — create project', () => {
 
     const res = await request.post(url('/api/projects'), {
       data: {
-        name: `AgentQA Demo App ${RUN_ID}`,
+        name: `BetaWindow Demo App ${RUN_ID}`,
         description: 'Test my AI-built web app',
         url: 'https://example.com',
       },
@@ -150,7 +150,7 @@ test.describe('Requester — create project', () => {
     expect(res.status()).toBe(201)
     const body = await res.json()
     expect(body.project).toBeDefined()
-    expect(body.project.name).toContain('AgentQA Demo App')
+    expect(body.project.name).toContain('BetaWindow Demo App')
     expect(body.project.url).toBe('https://example.com')
     projectId = body.project.id
   })

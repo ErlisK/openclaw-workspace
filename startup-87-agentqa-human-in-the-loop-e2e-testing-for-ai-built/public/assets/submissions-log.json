@@ -1,13 +1,13 @@
 {
   "generated_at": "2026-04-15T08:30:00Z",
-  "live_url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app",
-  "press_kit_url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
+  "live_url": "https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app",
+  "press_kit_url": "https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
   "submissions": [
     {
       "platform": "GitHub awesome-ai-tools fork",
       "status": "submitted",
       "url": "https://github.com/ErlisK/awesome-ai-tools",
-      "notes": "Fork of mahseema/awesome-ai-tools (4820 stars) with AgentQA added to line 584. Commit c0352dcf. PR requires cross-repo write access (PAT restriction).",
+      "notes": "Fork of mahseema/awesome-ai-tools (4820 stars) with BetaWindow added to line 584. Commit c0352dcf. PR requires cross-repo write access (PAT restriction).",
       "utm_link": "?utm_source=awesome-ai-tools&utm_medium=github&utm_campaign=awesome_list",
       "timestamp": "2026-04-15T08:15:00Z"
     },
@@ -55,7 +55,7 @@
       "platform": "Hacker News (Show HN)",
       "status": "needs-manual",
       "url": "https://news.ycombinator.com/submit",
-      "notes": "HN account creation disabled from this IP. Submission copy ready in LAUNCH-ASSETS.md under 'Hacker News'. Username 'agentqa_founder' prepared.",
+      "notes": "HN account creation disabled from this IP. Submission copy ready in LAUNCH-ASSETS.md under 'Hacker News'. Username 'betawindow_founder' prepared.",
       "utm_link": "?utm_source=hackernews&utm_medium=community&utm_campaign=hn_launch",
       "timestamp": "2026-04-15T08:20:00Z"
     },
@@ -94,7 +94,7 @@
     {
       "platform": "Press Kit Page",
       "status": "live",
-      "url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
+      "url": "https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
       "notes": "Full press kit deployed at /launch. Includes screenshots, pricing table, brand colors, UTM links, and contact info.",
       "timestamp": "2026-04-15T08:35:00Z"
     }

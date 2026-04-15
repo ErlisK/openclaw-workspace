@@ -82,7 +82,7 @@ test.describe('SEO — robots.txt and sitemap', () => {
     const res = await request.get(url('/sitemap.xml'), { headers: bypassHeaders() })
     const body = await res.text()
     // The canonical domain should appear in sitemap
-    expect(body).toMatch(/agentqa|localhost|vercel/)
+    expect(body).toMatch(/betawindow|localhost|vercel/)
   })
 
   test('sitemap.xml contains /pricing URL', async ({ request }) => {
@@ -101,11 +101,11 @@ test.describe('SEO — robots.txt and sitemap', () => {
 // ── Meta tags on homepage ──────────────────────────────────────────────────
 
 test.describe('SEO — homepage meta tags', () => {
-  test('homepage <title> contains AgentQA', async ({ page }) => {
+  test('homepage <title> contains BetaWindow', async ({ page }) => {
     if (BYPASS) await page.context().addCookies([{ name: 'x-vercel-protection-bypass', value: BYPASS, url: BASE_URL }])
     await page.goto(url('/'))
     const title = await page.title()
-    expect(title).toContain('AgentQA')
+    expect(title).toContain('BetaWindow')
   })
 
   test('homepage has meta description', async ({ page }) => {
@@ -121,7 +121,7 @@ test.describe('SEO — homepage meta tags', () => {
     await page.goto(url('/'))
     const og = await page.locator('meta[property="og:title"]').getAttribute('content')
     expect(og).toBeTruthy()
-    expect(og).toContain('AgentQA')
+    expect(og).toContain('BetaWindow')
   })
 
   test('homepage has og:description', async ({ page }) => {
@@ -250,11 +250,11 @@ test.describe('SEO — /pricing page', () => {
     expect(hasOffers).toBe(true)
   })
 
-  test('/pricing title tag contains AgentQA', async ({ page }) => {
+  test('/pricing title tag contains BetaWindow', async ({ page }) => {
     if (BYPASS) await page.context().addCookies([{ name: 'x-vercel-protection-bypass', value: BYPASS, url: BASE_URL }])
     await page.goto(url('/pricing'))
     const title = await page.title()
-    expect(title).toContain('AgentQA')
+    expect(title).toContain('BetaWindow')
   })
 })
 

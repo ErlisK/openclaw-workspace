@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import FounderDashboardClient from './FounderDashboardClient'
 
-export const metadata = { title: 'Founder Dashboard — AgentQA Admin' }
+export const metadata = { title: 'Founder Dashboard — BetaWindow Admin' }
 
 export default async function FounderDashboardPage({
   searchParams,

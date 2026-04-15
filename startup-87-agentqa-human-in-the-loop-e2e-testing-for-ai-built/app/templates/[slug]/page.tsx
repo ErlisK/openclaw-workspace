@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JOB_TEMPLATES, getTemplate } from '@/lib/templates/job-templates'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const tpl = getTemplate(slug)
   if (!tpl) return { title: 'Template not found' }
   return {
-    title: `${tpl.title} — AgentQA Templates`,
+    title: `${tpl.title} — BetaWindow Templates`,
     description: tpl.description,
     alternates: { canonical: `${BASE_URL}/templates/${tpl.slug}` },
     openGraph: {
@@ -64,7 +64,7 @@ export default async function TemplateDetailPage({ params }: Props) {
       value: tpl.tier === 'quick' ? '5' : tpl.tier === 'standard' ? '10' : '15',
     },
     totalTime: `PT${tpl.estimated_minutes}M`,
-    tool: [{ '@type': 'HowToTool', name: 'AgentQA — human tester' }],
+    tool: [{ '@type': 'HowToTool', name: 'BetaWindow — human tester' }],
   }
 
   // Parse instruction sections from markdown headers

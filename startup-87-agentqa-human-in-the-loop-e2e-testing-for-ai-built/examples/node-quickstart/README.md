@@ -1,4 +1,4 @@
-# AgentQA Node.js Quickstart
+# BetaWindow Node.js Quickstart
 
 Create a test job, wait for a human tester, and print the report — in ~30 lines of JavaScript.
 
@@ -33,6 +33,6 @@ node index.js
 
 ## Get Your Token
 
-1. Sign in at [AgentQA](https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app)
+1. Sign in at [BetaWindow](https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app)
 2. Go to **Settings → API Token**
 3. Copy and export as `AGENTQA_TOKEN`

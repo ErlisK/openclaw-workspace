@@ -42,7 +42,7 @@ export async function POST(
   })
 
   // Notify admin
-  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@agentqa.ai'
+  const adminEmail = process.env.ADMIN_EMAIL ?? 'admin@betawindow.com'
   await emailNotifications.disputeOpened(adminEmail, job.title, jobId, reason)
 
   return NextResponse.json({ ok: true })

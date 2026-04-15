@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test'
 
-const BASE_URL = process.env.BASE_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ctl5eo3rx.vercel.app'
+const BASE_URL = process.env.BASE_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ctl5eo3rx.vercel.app'
 const BYPASS = process.env.VERCEL_BYPASS_TOKEN || '6QxulLdZOqxuUMLF9vZ7pW2MevpMdn1W'
 
-test.describe('AgentQA API', () => {
+test.describe('BetaWindow API', () => {
   test('homepage loads', async ({ page }) => {
     const res = await page.goto(`${BASE_URL}/?x-vercel-protection-bypass=${BYPASS}`)
     expect(res?.status()).toBe(200)
-    await expect(page.locator('h1')).toContainText('AgentQA')
+    await expect(page.locator('h1')).toContainText('BetaWindow')
   })
 
   test('cluster API returns themed analysis', async ({ request }) => {

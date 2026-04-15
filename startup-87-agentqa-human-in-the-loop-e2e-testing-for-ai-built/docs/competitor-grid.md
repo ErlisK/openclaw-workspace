@@ -1,4 +1,4 @@
-# Competitor Grid — AgentQA
+# Competitor Grid — BetaWindow
 
 *Full landscape: manual crowdtesting · automated E2E · feedback/session tools*  
 *Last updated: April 2026*
@@ -7,7 +7,7 @@
 
 ## Category Overview
 
-AgentQA sits at the intersection of three existing product categories, and is served poorly by all of them:
+BetaWindow sits at the intersection of three existing product categories, and is served poorly by all of them:
 
 | Category | Examples | What they do well | Why they fail for AI-builder users |
 |----------|----------|------------------|------------------------------------|
@@ -55,7 +55,7 @@ AgentQA sits at the intersection of three existing product categories, and is se
 
 ---
 
-## Gap Matrix — The Three Critical Gaps AgentQA Fills
+## Gap Matrix — The Three Critical Gaps BetaWindow Fills
 
 ### Gap 1: Instant Self-Serve Test Jobs (No Sales, No Contract, No Spec)
 All enterprise crowdtesting platforms require:
@@ -65,7 +65,7 @@ All enterprise crowdtesting platforms require:
 
 **No platform today lets you submit a URL, describe what the app does in plain English, and get a human tester assigned within 15 minutes** — without writing test specs, without a sales call, and without a minimum commitment.
 
-*AgentQA wedge:* PAYG per-test pricing ($9–$39), URL + plain-English brief, tester assigned in <15 min, results in <4 hours.
+*BetaWindow wedge:* PAYG per-test pricing ($9–$39), URL + plain-English brief, tester assigned in <15 min, results in <4 hours.
 
 ---
 
@@ -77,7 +77,7 @@ Every tool that captures network requests or console logs requires either:
 
 **No crowdtesting platform captures network + console logs during a human test session without requiring the app owner to install anything** — a hard blocker when AI-builder users are testing Lovable/Bolt apps they barely understand.
 
-*AgentQA wedge:* Browser proxy built into the testing environment — captures all XHR/fetch requests, response codes, headers, and console output automatically during the tester's session. Zero SDK install on the tested app.
+*BetaWindow wedge:* Browser proxy built into the testing environment — captures all XHR/fetch requests, response codes, headers, and console output automatically during the tester's session. Zero SDK install on the tested app.
 
 ---
 
@@ -88,13 +88,13 @@ Every tool that captures network requests or console logs requires either:
 
 **No product today takes a human E2E test session (video + network logs + console errors) and generates a plain-English AI summary** that tells a non-technical founder: "3 bugs found — auth flow broken on mobile, payment form shows wrong error, dashboard crashes after login with Google."
 
-*AgentQA wedge:* Post-session AI synthesis via Vercel AI Gateway: structured bug report with severity, repro steps, and a one-paragraph plain-English summary the founder can paste directly into their AI coding agent.
+*BetaWindow wedge:* Post-session AI synthesis via Vercel AI Gateway: structured bug report with severity, repro steps, and a one-paragraph plain-English summary the founder can paste directly into their AI coding agent.
 
 ---
 
-## Feature Gap Table — AgentQA vs. Best Alternatives
+## Feature Gap Table — BetaWindow vs. Best Alternatives
 
-| Feature | AgentQA (v1) | uTest | UserTesting | LogRocket | Playwright | Rainforest QA |
+| Feature | BetaWindow (v1) | uTest | UserTesting | LogRocket | Playwright | Rainforest QA |
 |---------|-------------|-------|-------------|-----------|------------|---------------|
 | Real human tester | ✅ | ✅ | ✅ | ❌ | ❌ | Partial |
 | Self-serve (no sales) | ✅ | ❌ | ❌ | ✅ | ✅ | ✅ (limited) |
@@ -112,7 +112,7 @@ Every tool that captures network requests or console logs requires either:
 
 ## Competitive Positioning Summary
 
-AgentQA is not competing head-to-head with any of these categories. It's creating a new category:
+BetaWindow is not competing head-to-head with any of these categories. It's creating a new category:
 
 > **"Human-validated E2E testing as a service — for AI-built apps — with zero setup, built-in observability, and AI-readable output."**
 

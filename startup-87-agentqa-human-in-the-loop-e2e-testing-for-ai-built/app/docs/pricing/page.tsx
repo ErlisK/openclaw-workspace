@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Pricing & Tiers — AgentQA Docs',
-  description: 'Compare AgentQA testing tiers: Quick ($5 / 10 min), Standard ($10 / 20 min), Deep ($15 / 30 min). Understand credits, holds, and refund policy.',
+  title: 'Pricing & Tiers — BetaWindow Docs',
+  description: 'Compare BetaWindow testing tiers: Quick ($5 / 10 min), Standard ($10 / 20 min), Deep ($15 / 30 min). Understand credits, holds, and refund policy.',
 }
 
 const TIERS = [
@@ -60,7 +60,7 @@ export default function PricingDocsPage() {
     <article data-testid="docs-pricing">
       <h1>Pricing &amp; Tiers</h1>
       <p className="lead text-xl text-gray-600 mb-8">
-        AgentQA charges per test. No subscription, no seat fees. Buy credits and spend them on tests.
+        BetaWindow charges per test. No subscription, no seat fees. Buy credits and spend them on tests.
         Credits never expire.
       </p>
 
@@ -162,7 +162,7 @@ export default function PricingDocsPage() {
       <div className="not-prose mt-10 p-6 bg-indigo-50 border border-indigo-200 rounded-xl">
         <p className="text-indigo-700 text-sm">
           See the full pricing page for a side-by-side comparison →{' '}
-          <Link href="/pricing" className="font-semibold underline">agentqa.vercel.app/pricing</Link>
+          <Link href="/pricing" className="font-semibold underline">betawindow.vercel.app/pricing</Link>
         </p>
       </div>
     </article>

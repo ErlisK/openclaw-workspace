@@ -1,7 +1,7 @@
-# AI-Clustered Pain Point Themes — AgentQA
+# AI-Clustered Pain Point Themes — BetaWindow
 
 *Generated via Vercel AI Gateway (claude-sonnet-4.5) from 35 scraped pain points.*  
-*Endpoint: `/api/ai/cluster` | Deployed: https://startup-87-agentqa-human-in-the-loop-e2e-testing-ctl5eo3rx.vercel.app*
+*Endpoint: `/api/ai/cluster` | Deployed: https://startup-87-betawindow-human-in-the-loop-e2e-testing-ctl5eo3rx.vercel.app*
 
 ---
 

@@ -47,7 +47,7 @@ function rewriteUrls(html: string, targetBase: string, origin: string, sessionId
 }
 
 function buildCaptureScript(sessionId: string, eventsUrl: string): string {
-  return `<script id="agentqa-capture">(function(){
+  return `<script id="betawindow-capture">(function(){
 var SID="${sessionId}";
 var REPORT="${eventsUrl}";
 var buf=[];
@@ -126,7 +126,7 @@ export async function GET(req: NextRequest) {
   }
 
   const forwardHeaders: Record<string, string> = {
-    'User-Agent': 'AgentQA-Sandbox/1.0 (testing-platform)',
+    'User-Agent': 'BetaWindow-Sandbox/1.0 (testing-platform)',
     Accept: 'text/html,application/xhtml+xml,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
   }

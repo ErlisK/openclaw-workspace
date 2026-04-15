@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'Sample Test Report — AgentQA',
-  description: 'See exactly what a completed AgentQA test session looks like: star rating, bug reports, network log, console captures.',
+  title: 'Sample Test Report — BetaWindow',
+  description: 'See exactly what a completed BetaWindow test session looks like: star rating, bug reports, network log, console captures.',
   alternates: { canonical: `${BASE_URL}/examples/sample-report` },
   openGraph: {
-    title: 'Sample AgentQA Test Report',
+    title: 'Sample BetaWindow Test Report',
     description: 'A real-format example of what your AI agent receives after a human QA session.',
     type: 'website',
   },
@@ -67,8 +67,8 @@ export default function SampleReportPage() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'AgentQA Test Session',
-    description: 'Sample output from an AgentQA human QA test session',
+    name: 'BetaWindow Test Session',
+    description: 'Sample output from an BetaWindow human QA test session',
     url: `${BASE_URL}/examples/sample-report`,
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Web',

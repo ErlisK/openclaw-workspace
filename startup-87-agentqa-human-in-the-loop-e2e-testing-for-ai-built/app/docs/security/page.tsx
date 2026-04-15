@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Security & Sandbox Limitations — AgentQA Docs',
-  description: 'Learn how AgentQA secures the testing sandbox, what URLs are allowed, proxy restrictions, and data handling policies.',
+  title: 'Security & Sandbox Limitations — BetaWindow Docs',
+  description: 'Learn how BetaWindow secures the testing sandbox, what URLs are allowed, proxy restrictions, and data handling policies.',
 }
 
 export default function SecurityPage() {
@@ -10,7 +10,7 @@ export default function SecurityPage() {
     <article data-testid="docs-security">
       <h1>Security &amp; Sandbox Limitations</h1>
       <p className="lead text-xl text-gray-600 mb-8">
-        AgentQA captures sensitive data (network logs, console output) on behalf of job creators.
+        BetaWindow captures sensitive data (network logs, console output) on behalf of job creators.
         This page explains how we handle that data, what protections are in place, and what
         the sandbox cannot do.
       </p>
@@ -34,7 +34,7 @@ export default function SecurityPage() {
 
       <h2>URL allowlist policy</h2>
       <p>
-        The AgentQA proxy only forwards requests to publicly reachable HTTPS URLs. The following
+        The BetaWindow proxy only forwards requests to publicly reachable HTTPS URLs. The following
         are <strong>blocked</strong>:
       </p>
       <ul>
@@ -97,7 +97,7 @@ export default function SecurityPage() {
       <h2>Responsible disclosure</h2>
       <p>
         To report a security vulnerability, email{' '}
-        <a href="mailto:security@agentqa.io">security@agentqa.io</a>.
+        <a href="mailto:security@betawindow.com">security@betawindow.com</a>.
         We aim to acknowledge within 24 hours and resolve critical issues within 72 hours.
       </p>
     </article>

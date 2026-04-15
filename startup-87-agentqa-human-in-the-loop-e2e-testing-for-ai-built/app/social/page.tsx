@@ -1,18 +1,18 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'AgentQA — Follow Us',
-  description: 'Connect with AgentQA on Twitter, LinkedIn, and other platforms.',
+  title: 'BetaWindow — Follow Us',
+  description: 'Connect with BetaWindow on Twitter, LinkedIn, and other platforms.',
 }
 
-const DEPLOYED = 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-nargzynwo.vercel.app'
+const DEPLOYED = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app'
 
 export default function SocialPage() {
   const profiles = [
     {
       platform: 'X / Twitter',
-      handle: '@AgentQA_io',
-      url: 'https://twitter.com/AgentQA_io',
+      handle: '@BetaWindow_io',
+      url: 'https://twitter.com/BetaWindow_io',
       setupUrl: 'https://twitter.com/i/flow/signup',
       icon: '🐦',
       color: 'bg-black',
@@ -22,8 +22,8 @@ export default function SocialPage() {
     },
     {
       platform: 'LinkedIn',
-      handle: 'AgentQA',
-      url: 'https://www.linkedin.com/company/agentqa',
+      handle: 'BetaWindow',
+      url: 'https://www.linkedin.com/company/betawindow',
       setupUrl: 'https://www.linkedin.com/company/setup/new',
       icon: '💼',
       color: 'bg-blue-700',
@@ -40,11 +40,11 @@ export default function SocialPage() {
       color: 'bg-gray-900',
       textColor: 'text-white',
       status: 'live',
-      bio: 'Open source code in the AgentQA workspace.',
+      bio: 'Open source code in the BetaWindow workspace.',
     },
     {
       platform: 'Product Hunt',
-      handle: 'AgentQA',
+      handle: 'BetaWindow',
       url: `https://www.producthunt.com/?utm_source=producthunt&utm_medium=launch&utm_campaign=ph_launch`,
       setupUrl: 'https://www.producthunt.com/posts/new',
       icon: '🚀',
@@ -61,7 +61,7 @@ export default function SocialPage() {
       icon: '🐦',
       content: `🤖 + 👤 = ✅
 
-We just launched AgentQA — a testing marketplace for the AI agent era.
+We just launched BetaWindow — a testing marketplace for the AI agent era.
 
 AI agents can write code. They can't tell if it *works*.
 
@@ -75,11 +75,11 @@ Real human testers. Network logs. Console captures. From $5.
     {
       platform: 'LinkedIn',
       icon: '💼',
-      content: `🚀 We just launched AgentQA.
+      content: `🚀 We just launched BetaWindow.
 
 AI coding agents are shipping real apps every day. The missing piece? Human validation.
 
-AgentQA is a testing marketplace where AI agents hire real testers:
+BetaWindow is a testing marketplace where AI agents hire real testers:
 → Post a job via API or dashboard
 → Human tester claims it in minutes
 → Get back: network logs + console captures + bug report
@@ -97,7 +97,7 @@ ${DEPLOYED}?utm_source=linkedin&utm_medium=social&utm_campaign=linkedin_launch
     <div className="max-w-4xl mx-auto px-4 py-12">
       <div className="mb-10">
         <span className="text-xs font-semibold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full">Social Presence</span>
-        <h1 className="text-4xl font-bold mt-4 mb-2">Follow AgentQA</h1>
+        <h1 className="text-4xl font-bold mt-4 mb-2">Follow BetaWindow</h1>
         <p className="text-xl text-gray-600">Stay up to date with launches, product updates, and build-in-public content.</p>
       </div>
 

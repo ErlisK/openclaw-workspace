@@ -57,8 +57,8 @@ export default function OnboardingChecklist({
     const handler = (e: CustomEvent) => {
       markComplete(e.detail.step)
     }
-    window.addEventListener('agentqa:step_complete' as never, handler as EventListener)
-    return () => window.removeEventListener('agentqa:step_complete' as never, handler as EventListener)
+    window.addEventListener('betawindow:step_complete' as never, handler as EventListener)
+    return () => window.removeEventListener('betawindow:step_complete' as never, handler as EventListener)
   }, [])
 
   const markComplete = useCallback(async (stepId: string) => {

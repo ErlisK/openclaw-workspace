@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { UTM_LINKS, BASE_URL, buildRedirectUrl } from '@/lib/utm/links'
 
 export const metadata: Metadata = {
-  title: 'UTM Link Registry | AgentQA',
+  title: 'UTM Link Registry | BetaWindow',
   description: 'All UTM-tagged short links for attribution tracking.',
   robots: { index: false },  // don't index admin/internal page
 }

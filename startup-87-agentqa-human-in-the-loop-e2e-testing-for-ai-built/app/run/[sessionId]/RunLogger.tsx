@@ -26,7 +26,7 @@ interface Props {
 /**
  * RunLogger — parent-frame listener that:
  *
- * 1. Receives postMessage events from the sandbox iframe (agentqa_event_batch)
+ * 1. Receives postMessage events from the sandbox iframe (betawindow_event_batch)
  * 2. Batches them locally and POSTs to /api/sessions/[id]/events every 1s
  * 3. Subscribes to Supabase Realtime on the session_events table so events
  *    inserted by the injected script (direct API calls) appear live too
@@ -90,15 +90,15 @@ export default function RunLogger({ sessionId, targetUrl, onEvent, onFlush }: Pr
     // ─── postMessage listener (from injected logger in iframe) ──
     function onMessage(e: MessageEvent) {
       // Single event
-      if (e.data?.type === 'agentqa_event' && e.data?.event) {
+      if (e.data?.type === 'betawindow_event' && e.data?.event) {
         logEvent(e.data.event as LogEvent)
       }
       // Batch events (proxy injector standard format)
-      if (e.data?.type === 'agentqa_event_batch' && Array.isArray(e.data?.events)) {
+      if (e.data?.type === 'betawindow_event_batch' && Array.isArray(e.data?.events)) {
         ;(e.data.events as LogEvent[]).forEach(ev => logEvent(ev))
       }
       // Legacy console-only format
-      if (e.data?.type === 'agentqa_console') {
+      if (e.data?.type === 'betawindow_console') {
         logEvent({
           event_type: 'console_log',
           ts: new Date().toISOString(),

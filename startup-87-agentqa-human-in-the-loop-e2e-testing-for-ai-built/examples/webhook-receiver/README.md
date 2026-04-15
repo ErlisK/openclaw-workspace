@@ -1,6 +1,6 @@
-# AgentQA Webhook Receiver
+# BetaWindow Webhook Receiver
 
-Minimal Express server that receives `job.completed`, `job.failed`, and `job.claimed` webhook events from AgentQA.
+Minimal Express server that receives `job.completed`, `job.failed`, and `job.claimed` webhook events from BetaWindow.
 
 ## Setup
 
@@ -20,7 +20,7 @@ node server.js
 # 2. Expose it publicly
 ngrok http 3001
 
-# 3. Copy the ngrok URL → paste into AgentQA Settings → Webhooks
+# 3. Copy the ngrok URL → paste into BetaWindow Settings → Webhooks
 #    e.g. https://abc123.ngrok.io/webhook
 ```
 
@@ -34,7 +34,7 @@ ngrok http 3001
 
 ## Signature verification
 
-Every webhook POST includes `X-AgentQA-Signature: sha256=<hmac>`.
+Every webhook POST includes `X-BetaWindow-Signature: sha256=<hmac>`.
 The server verifies this using `crypto.timingSafeEqual`. Set `AGENTQA_WEBHOOK_SECRET` in production.
 
 ## Integrations to add
@@ -43,7 +43,7 @@ In `server.js`, the `case 'job.completed'` block is where you'd add:
 
 ```javascript
 // Slack notification
-await postToSlack(`AgentQA: ${job.bugs.length} bugs found in ${job.submitted_url}`)
+await postToSlack(`BetaWindow: ${job.bugs.length} bugs found in ${job.submitted_url}`)
 
 // Create Jira tickets for each bug
 for (const bug of job.bugs) {

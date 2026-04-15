@@ -19,7 +19,7 @@ export async function GET() {
         }}
       >
         <div style={{ fontSize: 48, fontWeight: 700, color: 'white', marginBottom: 16 }}>
-          AgentQA
+          BetaWindow
         </div>
         <div style={{ fontSize: 28, color: 'rgba(255,255,255,0.9)', textAlign: 'center', maxWidth: 800 }}>
           Human QA Testing for AI-Built Apps
@@ -42,7 +42,7 @@ export async function GET() {
           ))}
         </div>
         <div style={{ marginTop: 24, color: 'rgba(255,255,255,0.7)', fontSize: 16 }}>
-          agentqa.vercel.app
+          betawindow.vercel.app
         </div>
       </div>
     ),

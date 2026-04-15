@@ -1,12 +1,12 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples/typescript-pipeline'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples/typescript-pipeline'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
 
 export const metadata: Metadata = {
-  title: 'TypeScript Pipeline Example — AgentQA Docs',
-  description: 'Fully typed AgentQA pipeline with AgentQAClient class, quality gate assertions, and CI exit codes.',
+  title: 'TypeScript Pipeline Example — BetaWindow Docs',
+  description: 'Fully typed BetaWindow pipeline with BetaWindowClient class, quality gate assertions, and CI exit codes.',
   alternates: { canonical: `${BASE_URL}/docs/examples/typescript-pipeline` },
 }
 
@@ -15,7 +15,7 @@ export default function TypeScriptPipelinePage() {
     <article data-testid="docs-examples-typescript-pipeline">
       <h1>TypeScript Pipeline</h1>
       <p className="lead text-xl text-gray-600 mb-6">
-        A production-ready typed pipeline with an <code>AgentQAClient</code> class, quality gate
+        A production-ready typed pipeline with an <code>BetaWindowClient</code> class, quality gate
         assertions, and CI-friendly exit codes.
       </p>
 
@@ -68,9 +68,9 @@ interface Job {
 }`}</pre>
       </div>
 
-      <h2>AgentQAClient</h2>
+      <h2>BetaWindowClient</h2>
       <div className="not-prose bg-gray-900 text-gray-100 rounded-lg p-4 text-sm overflow-x-auto mb-6">
-        <pre>{`const client = new AgentQAClient(process.env.AGENTQA_TOKEN!)
+        <pre>{`const client = new BetaWindowClient(process.env.AGENTQA_TOKEN!)
 
 // Create a job
 const job = await client.createJob({

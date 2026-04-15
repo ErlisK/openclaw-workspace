@@ -4,7 +4,7 @@
  */
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY ?? ''
-const FROM = 'AgentQA <notifications@agentqa.ai>'
+const FROM = 'BetaWindow <notifications@betawindow.com>'
 
 async function send(to: string, subject: string, html: string) {
   if (!RESEND_API_KEY) {
@@ -33,7 +33,7 @@ export const emailNotifications = {
   async jobPublished(requesterEmail: string, jobTitle: string, jobId: string) {
     await send(
       requesterEmail,
-      `Your job "${jobTitle}" is live on AgentQA`,
+      `Your job "${jobTitle}" is live on BetaWindow`,
       `<p>Your test job <strong>${jobTitle}</strong> has been published to the marketplace.</p>
        <p>Testers can now claim it. You'll receive an email when it's assigned.</p>
        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/jobs/${jobId}">View Job</a></p>`
@@ -65,7 +65,7 @@ export const emailNotifications = {
   async payoutSent(testerEmail: string, amountCents: number) {
     await send(
       testerEmail,
-      `Your AgentQA payout of $${(amountCents / 100).toFixed(2)} has been processed`,
+      `Your BetaWindow payout of $${(amountCents / 100).toFixed(2)} has been processed`,
       `<p>Your payout of <strong>$${(amountCents / 100).toFixed(2)}</strong> has been sent.</p>
        <p>It typically arrives within 1–3 business days depending on your bank.</p>
        <p><a href="${process.env.NEXT_PUBLIC_APP_URL}/tester/payouts">View Payouts</a></p>`

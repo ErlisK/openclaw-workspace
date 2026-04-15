@@ -41,7 +41,7 @@ export default async function MarketplacePage({ searchParams }: Props) {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-xl font-bold text-gray-900">AgentQA</Link>
+          <Link href="/" className="text-xl font-bold text-gray-900">BetaWindow</Link>
           <nav className="flex items-center gap-4 text-sm">
             <Link href="/marketplace" className="text-indigo-600 font-medium">Marketplace</Link>
             {user && <Link href="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</Link>}
@@ -68,7 +68,7 @@ export default async function MarketplacePage({ searchParams }: Props) {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Tester Marketplace</h1>
           <p className="text-gray-500">
-            Browse open testing jobs. Pick one up and earn $4–$12 per completed test.
+            Browse open testing jobs. Pick one up and earn $5–$15 per completed test.
           </p>
           <p className="text-xs text-amber-600 mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 inline-block">
             🖥️ Tests must be completed on <strong>desktop Chrome</strong>. Mobile browsing is fine but test execution requires desktop.

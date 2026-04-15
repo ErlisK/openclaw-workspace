@@ -1,6 +1,6 @@
-# AgentQA — Developer Examples
+# BetaWindow — Developer Examples
 
-This folder contains runnable examples for integrating AgentQA into your CI/CD pipeline, AI agent build loop, or standalone Node.js project.
+This folder contains runnable examples for integrating BetaWindow into your CI/CD pipeline, AI agent build loop, or standalone Node.js project.
 
 ## Examples
 
@@ -8,12 +8,12 @@ This folder contains runnable examples for integrating AgentQA into your CI/CD p
 |--------|-------------|----------|
 | [`node-quickstart/`](./node-quickstart/) | Create a job, poll for completion, print report | Node.js (CommonJS) |
 | [`typescript-pipeline/`](./typescript-pipeline/) | Full typed pipeline: submit → wait → parse → assert | TypeScript |
-| [`webhook-receiver/`](./webhook-receiver/) | Minimal Express server to receive AgentQA webhooks | Node.js + Express |
+| [`webhook-receiver/`](./webhook-receiver/) | Minimal Express server to receive BetaWindow webhooks | Node.js + Express |
 
 ## Prerequisites
 
 - Node.js 18+
-- An AgentQA account — [sign up free](https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/signup)
+- An BetaWindow account — [sign up free](https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/signup)
 - Your API token from **Settings → API Token**
 
 ## Quick Start
@@ -21,7 +21,7 @@ This folder contains runnable examples for integrating AgentQA into your CI/CD p
 ```bash
 # 1. Clone this repo
 git clone https://github.com/ErlisK/openclaw-workspace
-cd openclaw-workspace/startup-87-agentqa-human-in-the-loop-e2e-testing-for-ai-built/examples
+cd openclaw-workspace/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples
 
 # 2. Pick an example
 cd node-quickstart
@@ -29,7 +29,7 @@ npm install
 
 # 3. Set your token
 export AGENTQA_TOKEN="eyJ..."
-export AGENTQA_BASE_URL="https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app"
+export AGENTQA_BASE_URL="https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app"
 
 # 4. Run it
 node index.js
@@ -37,11 +37,11 @@ node index.js
 
 ## API Reference
 
-Full API docs: [/docs/api-quickstart](https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/docs/api-quickstart)
+Full API docs: [/docs/api-quickstart](https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/docs/api-quickstart)
 
 ### Base URL
 ```
-https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app
+https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app
 ```
 
 ### Create a Job
