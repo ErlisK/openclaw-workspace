@@ -27,7 +27,7 @@ const DEPLOYMENT_ID =
   'local'
 
 const APP_VERSION =
-  process.env.npm_package_version || 'unknown'
+  process.env.npm_package_version || '1.0.0'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
