@@ -51,22 +51,26 @@ async function gotoWithHydration(page: import('@playwright/test').Page, path: st
 
       const method = route.request().method().toUpperCase()
       if (method === 'GET') {
-        // For GET: inject bypass as a header (body irrelevant)
+        // GET: add bypass header (safe, no body)
         const hdrs = await route.request().allHeaders()
-        await route.continue({ headers: { ...hdrs, 'x-vercel-protection-bypass': BYPASS } })
-      } else {
-        // For non-GET: add bypass as URL param AND preserve body + headers explicitly
-        const sep = reqUrl.includes('?') ? '&' : '?'
-        const newUrl = reqUrl.includes('x-vercel-protection-bypass')
-          ? reqUrl
-          : `${reqUrl}${sep}x-vercel-protection-bypass=${BYPASS}`
-        const hdrs = await route.request().allHeaders()
-        const body = route.request().postDataBuffer()
-        await route.continue({
-          url: newUrl,
-          headers: hdrs,
-          ...(body ? { postData: body } : {}),
+        return route.continue({ headers: { ...hdrs, 'x-vercel-protection-bypass': BYPASS } })
+      }
+
+      // POST/PUT/etc: re-fetch via node fetch with bypass header so body is preserved
+      const hdrs = await route.request().allHeaders()
+      const body = route.request().postDataBuffer()
+      try {
+        const resp = await fetch(reqUrl, {
+          method,
+          headers: { ...hdrs, 'x-vercel-protection-bypass': BYPASS },
+          body: body ?? undefined,
         })
+        const respBody = Buffer.from(await resp.arrayBuffer())
+        const respHeaders: Record<string, string> = {}
+        resp.headers.forEach((v, k) => { respHeaders[k] = v })
+        return route.fulfill({ status: resp.status, headers: respHeaders, body: respBody })
+      } catch {
+        return route.continue()
       }
     })
   }
@@ -154,17 +158,10 @@ test.describe('Feedback Widget — submission', () => {
   test('submitting comment shows success state', async ({ page }) => {
     await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
-    // Use type() not fill() — simulates real keystrokes to trigger React onChange
-    await page.locator('[data-testid="feedback-comment"]').click()
-    await page.keyboard.type(`E2E test comment ${Date.now()}`)
+    await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
     await page.waitForTimeout(300)
     await page.locator('[data-testid="feedback-submit"]').click()
-    // May show success or error depending on API; either way widget responded
-    await expect(
-      page.locator('[data-testid="feedback-success"], [data-testid="feedback-error"]').first()
-    ).toBeVisible({ timeout: 15000 })
-    // Verify it's specifically success
-    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 2000 })
+    await expect(page.locator('[data-testid="feedback-success"]')).toBeVisible({ timeout: 15000 })
   })
 
   test('submitting star + category shows success', async ({ page }) => {
