@@ -1,5 +1,13 @@
 import { test, expect } from '@playwright/test';
 
+const BYPASS = process.env.VERCEL_BYPASS_TOKEN || ''
+function apiUrl(path: string) {
+  return BYPASS ? `${path}?x-vercel-protection-bypass=${BYPASS}` : path
+}
+function bypassHeaders(): Record<string, string> {
+  return BYPASS ? { Cookie: `x-vercel-protection-bypass=${BYPASS}` } : {}
+}
+
 test.describe('Deployment Health', () => {
   test('homepage loads without errors', async ({ page }) => {
     const response = await page.goto('/');
@@ -25,7 +33,7 @@ test.describe('Deployment Health', () => {
   });
 
   test('/api/version returns 200 with build_hash', async ({ request }) => {
-    const response = await request.get('/api/version');
+    const response = await request.get(apiUrl('/api/version'), { headers: bypassHeaders() });
     expect(response.status()).toBe(200);
     const body = await response.json();
     expect(body.status).toBe('ok');
