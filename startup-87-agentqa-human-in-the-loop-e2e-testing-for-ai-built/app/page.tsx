@@ -1,4 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'AgentQA — Human QA Testing for AI-Built Apps',
+  description: 'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Results in under 4 hours.',
+  alternates: { canonical: '/' },
+}
 
 export default function HomePage() {
   return (

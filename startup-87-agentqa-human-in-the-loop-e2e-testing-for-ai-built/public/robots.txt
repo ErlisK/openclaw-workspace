@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /(auth)/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /run/
+Disallow: /submit/
+
+Sitemap: https://agentqa.vercel.app/sitemap.xml
