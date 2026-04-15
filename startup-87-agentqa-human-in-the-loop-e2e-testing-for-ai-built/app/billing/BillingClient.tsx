@@ -468,7 +468,7 @@ export default function BillingClient({
                     { tier: 'Deep', duration: '~30 min', key: 'deep' },
                   ].map((row, i) => {
                     const cost = tierCosts[row.key] ?? 0
-                    const usd = ((cost / 130) * 15).toFixed(2)  // scale price per credit
+                    const usd = cost.toFixed(2)  // 1 credit = $1 USD
                     return (
                       <tr key={row.key} style={{ borderBottom: i < 2 ? '1px solid #f1f5f9' : 'none' }}>
                         <td style={{ padding: '14px 24px', fontWeight: 600 }}>{row.tier}</td>

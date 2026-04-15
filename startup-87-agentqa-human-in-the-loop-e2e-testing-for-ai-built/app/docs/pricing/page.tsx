@@ -98,7 +98,7 @@ export default function PricingDocsPage() {
 
       <h2>How credits work</h2>
       <p>
-        1 credit = $1 USD. Credits are purchased from the{' '}
+        1 credit = $1 USD (volume discounts available). Credits are purchased from the{' '}
         <Link href="/billing">Billing page</Link> via Stripe Checkout (cards, Apple Pay, Google Pay).
         Credits are non-refundable but never expire.
       </p>
@@ -138,9 +138,8 @@ export default function PricingDocsPage() {
           <tbody>
             {[
               { name: 'Starter', credits: 10, price: 10, unit: '$1.00' },
-              { name: 'Builder', credits: 25, price: 24, unit: '$0.96' },
-              { name: 'Team', credits: 60, price: 54, unit: '$0.90' },
-              { name: 'Studio', credits: 150, price: 120, unit: '$0.80' },
+              { name: 'Growth', credits: 40, price: 36, unit: '$0.90' },
+              { name: 'Scale', credits: 100, price: 80, unit: '$0.80' },
             ].map(p => (
               <tr key={p.name}>
                 <td className="px-4 py-3 border border-gray-200 font-medium">{p.name}</td>
