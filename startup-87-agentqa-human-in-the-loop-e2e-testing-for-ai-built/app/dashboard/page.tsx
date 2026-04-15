@@ -51,15 +51,18 @@ export default function DashboardPage() {
   const [jobSaving, setJobSaving] = useState(false)
 
   const [error, setError] = useState('')
+  const [credits, setCredits] = useState<number | null>(null)
 
   const loadData = useCallback(async () => {
     setLoading(true)
-    const [pRes, jRes] = await Promise.all([
+    const [pRes, jRes, cRes] = await Promise.all([
       fetch('/api/projects'),
       fetch('/api/jobs'),
+      fetch('/api/credits'),
     ])
     if (pRes.ok) { const d = await pRes.json(); setProjects(d.projects ?? []) }
     if (jRes.ok) { const d = await jRes.json(); setJobs(d.jobs ?? []) }
+    if (cRes.ok) { const d = await cRes.json(); setCredits(d.available ?? d.balance ?? 0) }
     setLoading(false)
   }, [])
 
@@ -163,6 +166,12 @@ export default function DashboardPage() {
           <a href="/marketplace" className="text-sm text-indigo-600 hover:text-indigo-800 font-medium ml-2">🧪 Find Test Jobs</a>
         </div>
         <div className="flex items-center gap-4">
+          <a href="/billing"
+            data-testid="billing-link"
+            className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+            <span>💳</span>
+            <span>{credits === null ? '…' : credits} credits</span>
+          </a>
           <span className="text-sm text-gray-600">{userEmail}</span>
           <button onClick={handleSignOut} className="text-sm text-gray-500 hover:text-gray-900">Sign out</button>
         </div>
