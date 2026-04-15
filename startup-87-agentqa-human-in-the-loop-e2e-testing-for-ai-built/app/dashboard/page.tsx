@@ -5,6 +5,16 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { TestJob, Project } from '@/lib/types'
 import { TIER_CONFIG } from '@/lib/types'
+import dynamic from 'next/dynamic'
+
+const OnboardingChecklist = dynamic(
+  () => import('@/components/onboarding/OnboardingChecklist'),
+  { ssr: false }
+)
+const OnboardingTour = dynamic(
+  () => import('@/components/onboarding/OnboardingTour'),
+  { ssr: false }
+)
 
 const STATUS_COLORS: Record<string, string> = {
   draft: 'bg-gray-100 text-gray-700',
@@ -121,11 +131,29 @@ export default function DashboardPage() {
     if (res.ok) {
       const d = await res.json()
       setJobs(prev => prev.map(j => j.id === id ? d.job : j))
+      // Mark onboarding step complete
+      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'publish_job' } }))
+    }
+  }
+
+  function handleOnboardingAction(action: string) {
+    if (action === 'open_new_project') {
+      setActiveTab('projects')
+      setShowNewProject(true)
+      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'create_project' } }))
+    } else if (action === 'open_new_job') {
+      setActiveTab('jobs')
+      setShowNewJob(true)
+      window.dispatchEvent(new CustomEvent('agentqa:step_complete', { detail: { step: 'draft_job' } }))
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Onboarding */}
+      <OnboardingChecklist onAction={handleOnboardingAction} />
+      <OnboardingTour autoStart={true} />
+
       {/* Header */}
       <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -162,6 +190,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Test Jobs</h2>
               <button onClick={() => setShowNewJob(true)} data-testid="new-job-button"
+                data-onboarding-target="new-job-btn"
                 className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
                 + New Job
               </button>
@@ -235,6 +264,7 @@ export default function DashboardPage() {
                         <>
                           <button onClick={() => publishJob(job.id)}
                             className="text-xs px-3 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-md font-medium"
+                            data-onboarding-target="publish-job-btn"
                             data-testid={`publish-job-${job.id}`}>
                             Publish
                           </button>
@@ -259,6 +289,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Projects</h2>
               <button onClick={() => setShowNewProject(true)} data-testid="new-project-button"
+                data-onboarding-target="new-project-btn"
                 className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700">
                 + New Project
               </button>
