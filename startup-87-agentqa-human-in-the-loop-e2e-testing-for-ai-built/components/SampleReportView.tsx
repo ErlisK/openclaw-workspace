@@ -5,6 +5,7 @@
  * Used by /report/demo, /report/demo-mobile, /report/demo-clean
  */
 import Link from 'next/link'
+import { useState, useCallback, useRef } from 'react'
 import type { SampleReport, Bug, BugSeverity } from '@/lib/sample-reports/data'
 
 const SEV_STYLES: Record<BugSeverity, { badge: string; border: string; icon: string }> = {
@@ -70,6 +71,165 @@ function BugCard({ bug }: { bug: Bug }) {
     </div>
   )
 }
+
+// ─── Agent-Ready Section (for sample report demo) ─────────────────────────────────
+
+type ExportFmt = 'cursor' | 'claude' | 'gpt' | 'json'
+
+const FMT_CFG: Record<ExportFmt, { label: string; icon: string; desc: string }> = {
+  cursor: { label: 'Cursor', icon: '⌨️', desc: 'Paste into Cursor Composer chat' },
+  claude: { label: 'Claude', icon: '✦', desc: 'XML prompt for Claude' },
+  gpt:    { label: 'GPT-4', icon: '🤖', desc: 'System prompt for ChatGPT' },
+  json:   { label: 'JSON', icon: '{ }', desc: 'Structured for API / scripts' },
+}
+
+function buildSampleCursor(r: SampleReport): string {
+  const bugs = r.bugs.map((b, i) =>
+    `### Bug ${i + 1}: ${b.title} [${b.severity.toUpperCase()}]
+Steps to reproduce:
+${b.steps}
+Expected: ${b.expected}
+Actual: ${b.actual}`
+  ).join('\n\n')
+  return `# BetaWindow QA Report — ${r.app_name}
+
+## Tester Summary
+${r.summary}
+
+## Bugs Found
+${bugs}
+
+Please fix the bugs above in order of severity. Start with the highest-severity issues.`
+}
+
+function buildSampleClaude(r: SampleReport): string {
+  const bugs = r.bugs.map(b =>
+    `  <bug severity="${b.severity}">
+    <title>${b.title}</title>
+    <steps>${b.steps}</steps>
+    <expected>${b.expected}</expected>
+    <actual>${b.actual}</actual>
+  </bug>`
+  ).join('\n')
+  return `<qa_report app="${r.app_name}" tier="${r.tier}">
+  <summary>${r.summary}</summary>
+  <bugs>
+${bugs}
+  </bugs>
+</qa_report>
+
+Please fix each bug above. Explain your changes for each fix.`
+}
+
+function buildSampleGpt(r: SampleReport): string {
+  return `You are a software engineer reviewing a QA test report for ${r.app_name}.
+
+Tester summary: ${r.summary}
+
+Bugs found:
+${r.bugs.map((b, i) => `${i + 1}. [${b.severity.toUpperCase()}] ${b.title}\n   Steps: ${b.steps}\n   Expected: ${b.expected}\n   Actual: ${b.actual}`).join('\n\n')}
+
+Please analyze these issues and provide specific code fixes, starting with the most critical bugs.`
+}
+
+function buildSampleJson(r: SampleReport): string {
+  return JSON.stringify({
+    report_id: r.id,
+    app: r.app_name,
+    tier: r.tier,
+    summary: r.summary,
+    rating: r.rating,
+    bugs: r.bugs.map(b => ({
+      id: b.id, severity: b.severity, title: b.title,
+      steps: b.steps, expected: b.expected, actual: b.actual,
+    })),
+    network_log: r.network_log,
+    console_log: r.console_log,
+  }, null, 2)
+}
+
+const SAMPLE_BUILDERS: Record<ExportFmt, (r: SampleReport) => string> = {
+  cursor: buildSampleCursor,
+  claude: buildSampleClaude,
+  gpt: buildSampleGpt,
+  json: buildSampleJson,
+}
+
+function AgentReadySection({ report }: { report: SampleReport }) {
+  const [active, setActive] = useState<ExportFmt>('cursor')
+  const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const content = SAMPLE_BUILDERS[active](report)
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopied(true)
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch { /* ignore */ }
+  }, [content])
+
+  return (
+    <div className="border-2 border-indigo-200 rounded-2xl overflow-hidden mb-8 bg-white print:hidden" data-testid="agent-ready-section">
+      <div className="bg-indigo-50 px-6 py-4 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-indigo-600 font-bold text-lg">⬡</span>
+            <h2 className="text-lg font-bold text-indigo-900">Agent-Ready Format</h2>
+            <span className="text-xs px-2 py-0.5 bg-indigo-100 border border-indigo-300 text-indigo-700 rounded-full font-semibold">
+              Killer feature
+            </span>
+          </div>
+          <p className="text-sm text-indigo-700">
+            Every report ships as a structured prompt you can paste directly into Cursor, Claude, or GPT-4.
+            No copy-pasting bugs manually — your agent gets the full context instantly.
+          </p>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold rounded-lg transition-colors text-sm"
+          data-testid="btn-copy-sample-agent"
+        >
+          {copied ? '✓ Copied!' : '⎘ Copy to clipboard'}
+        </button>
+      </div>
+
+      {/* Format tabs */}
+      <div className="flex border-b border-gray-200 bg-gray-50">
+        {(Object.keys(FMT_CFG) as ExportFmt[]).map(fmt => {
+          const cfg = FMT_CFG[fmt]
+          return (
+            <button
+              key={fmt}
+              onClick={() => { setActive(fmt); setCopied(false) }}
+              title={cfg.desc}
+              className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                active === fmt
+                  ? 'border-indigo-500 text-indigo-700 bg-white'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              <span>{cfg.icon}</span>
+              {cfg.label}
+            </button>
+          )
+        })}
+      </div>
+
+      <pre className="p-5 text-[12px] leading-relaxed text-gray-700 font-mono overflow-x-auto max-h-72 whitespace-pre-wrap bg-gray-950 text-green-300">
+        {content}
+      </pre>
+
+      <div className="px-6 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-500">
+        💡 This output is auto-generated from the tester’s feedback, network log, and console data — no manual formatting needed.
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Component ─────────────────────────────────────────────────────────────────────
 
 export default function SampleReportView({ report }: { report: SampleReport }) {
   const BASE_URL = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
@@ -252,6 +412,9 @@ export default function SampleReportView({ report }: { report: SampleReport }) {
           ))}
         </div>
       </div>
+
+      {/* Agent-Ready Format Section */}
+      <AgentReadySection report={report} />
 
       {/* Other demos */}
       <div className="border border-gray-200 rounded-xl p-5 mb-8 bg-white print:hidden">

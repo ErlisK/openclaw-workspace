@@ -46,6 +46,12 @@ export default function HomePage() {
           >
             Sign in
           </Link>
+          <Link
+            href="/report/demo"
+            className="px-8 py-4 bg-white text-indigo-600 font-semibold rounded-lg border border-indigo-200 hover:border-indigo-400 transition-colors text-lg"
+          >
+            See a sample report →
+          </Link>
         </div>
 
         {/* Tiers */}
@@ -84,6 +90,7 @@ export default function HomePage() {
 
       <footer className="bg-gray-900 text-gray-400 py-8 px-6 text-center text-sm">
         <div className="flex flex-wrap justify-center gap-6 mb-4">
+          <Link href="/report/demo" className="hover:text-white">Sample Report</Link>
           <Link href="/pricing" className="hover:text-white">Pricing</Link>
           <Link href="/marketplace" className="hover:text-white">Marketplace</Link>
           <Link href="/become-a-tester" className="hover:text-white">Become a Tester</Link>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 interface Issue {
   title: string
@@ -171,6 +171,176 @@ function BulletList({
     </div>
   )
 }
+
+// ─── Agent-Ready Export ────────────────────────────────────────────────────
+
+type ExportFormat = 'cursor' | 'claude' | 'gpt' | 'json'
+
+const FORMAT_CONFIG: Record<ExportFormat, { label: string; icon: string; title: string }> = {
+  cursor: { label: 'Cursor', icon: '⌨️', title: 'Paste into Cursor chat' },
+  claude: { label: 'Claude', icon: '✦', title: 'Paste into Claude prompt' },
+  gpt:    { label: 'GPT-4', icon: '🤖', title: 'Paste into ChatGPT' },
+  json:   { label: 'JSON', icon: '{ }', title: 'Structured JSON for API / code' },
+}
+
+function buildCursorPrompt(s: SummaryData): string {
+  const bugs = s.key_issues.map((issue, i) =>
+    `### Bug ${i + 1}: ${issue.title} [${issue.severity.toUpperCase()}]
+${issue.description}
+
+Steps to reproduce:
+${issue.repro_steps.map((st, j) => `${j + 1}. ${st}`).join('\n')}
+
+Expected: ${issue.expected}
+Actual: ${issue.actual}${issue.evidence ? `\nEvidence: ${issue.evidence}` : ''}`
+  ).join('\n\n')
+
+  const fixes = s.priority_fixes.map((f, i) => `${i + 1}. ${f}`).join('\n')
+  return `# BetaWindow QA Report — Action Items for Cursor
+
+## Overall Assessment
+${s.overall_assessment}
+
+## Priority Fixes (address in order)
+${fixes || 'None identified'}
+
+## Bugs Found
+${bugs || 'No key bugs'}
+
+## What Worked
+${s.what_worked.map(w => `- ${w}`).join('\n') || 'Nothing noted'}
+
+Please fix the priority issues listed above. Start with the highest-severity bugs.`
+}
+
+function buildClaudePrompt(s: SummaryData): string {
+  const issues = s.issues_found.map(i => `- ${i}`).join('\n')
+  const fixes = s.priority_fixes.map((f, i) => `${i + 1}. ${f}`).join('\n')
+  return `<qa_report>
+  <overall_assessment>${s.overall_assessment}</overall_assessment>
+  <sentiment>${s.tester_sentiment}</sentiment>
+  <confidence>${s.confidence}</confidence>
+  <issues_found>
+${issues}
+  </issues_found>
+  <priority_fixes>
+${fixes}
+  </priority_fixes>
+  <what_worked>
+${s.what_worked.map(w => `    - ${w}`).join('\n')}
+  </what_worked>
+</qa_report>
+
+Based on the QA report above, please help me fix the listed issues in order of priority. For each fix, explain what you changed and why.`
+}
+
+function buildGptPrompt(s: SummaryData): string {
+  return `You are a software engineer reviewing a human QA test report.
+
+Test result: ${s.tester_sentiment} (${s.confidence} confidence)
+Overall: ${s.overall_assessment}
+
+Issues found:
+${s.issues_found.map(i => `• ${i}`).join('\n')}
+
+Priority fixes:
+${s.priority_fixes.map((f, i) => `${i + 1}. ${f}`).join('\n')}
+
+What worked:
+${s.what_worked.map(w => `✓ ${w}`).join('\n')}
+
+Please analyze these issues and provide specific code fixes, starting with the most critical problems.`
+}
+
+function buildJson(s: SummaryData): string {
+  return JSON.stringify(s, null, 2)
+}
+
+const BUILDERS: Record<ExportFormat, (s: SummaryData) => string> = {
+  cursor: buildCursorPrompt,
+  claude: buildClaudePrompt,
+  gpt: buildGptPrompt,
+  json: buildJson,
+}
+
+function AgentReadyExport({ summary }: { summary: SummaryData }) {
+  const [active, setActive] = useState<ExportFormat>('cursor')
+  const [copied, setCopied] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const content = BUILDERS[active](summary)
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopied(true)
+      if (timerRef.current) clearTimeout(timerRef.current)
+      timerRef.current = setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback
+    }
+  }, [content])
+
+  return (
+    <div
+      className="mt-6 border border-indigo-800/50 rounded-xl overflow-hidden"
+      data-testid="agent-ready-export"
+    >
+      {/* Header */}
+      <div className="px-4 py-3 bg-indigo-950/60 border-b border-indigo-800/40 flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-indigo-400 text-sm">⬡</span>
+          <h4 className="text-sm font-semibold text-white">Agent-Ready Format</h4>
+          <span className="text-[10px] px-1.5 py-0.5 bg-indigo-900 border border-indigo-700 text-indigo-300 rounded">
+            paste directly into your AI workflow
+          </span>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-800 text-white rounded-lg transition-colors font-medium"
+          data-testid="btn-copy-agent-format"
+        >
+          {copied ? '✓ Copied!' : '⎘ Copy'}
+        </button>
+      </div>
+
+      {/* Format tabs */}
+      <div className="flex border-b border-gray-800 bg-gray-900">
+        {(Object.keys(FORMAT_CONFIG) as ExportFormat[]).map(fmt => {
+          const cfg = FORMAT_CONFIG[fmt]
+          return (
+            <button
+              key={fmt}
+              onClick={() => { setActive(fmt); setCopied(false) }}
+              title={cfg.title}
+              className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+                active === fmt
+                  ? 'border-indigo-500 text-indigo-300 bg-indigo-950/40'
+                  : 'border-transparent text-gray-500 hover:text-gray-300'
+              }`}
+              data-testid={`agent-format-tab-${fmt}`}
+            >
+              <span>{cfg.icon}</span>
+              {cfg.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Preview */}
+      <div className="relative bg-gray-950">
+        <pre
+          className="p-4 text-[11px] leading-relaxed text-gray-300 font-mono overflow-x-auto max-h-64 whitespace-pre-wrap"
+          data-testid="agent-format-preview"
+        >
+          {content}
+        </pre>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function AISummary({ sessionId, autoLoad = false }: Props) {
   const [summary, setSummary] = useState<SummaryData | null>(null)
@@ -414,6 +584,9 @@ export default function AISummary({ sessionId, autoLoad = false }: Props) {
                 testId="summary-console"
               />
             )}
+
+            {/* Agent-Ready Export */}
+            <AgentReadyExport summary={summary} />
           </div>
         )}
       </div>
