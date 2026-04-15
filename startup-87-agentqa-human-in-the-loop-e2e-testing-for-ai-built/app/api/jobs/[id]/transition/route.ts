@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
+import { createAdminClient } from '@/lib/supabase/server'
 import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
 import { holdCredits, spendCredits, releaseCredits } from '@/lib/credits'
 import type { JobStatus } from '@/lib/types'
@@ -39,9 +40,10 @@ export async function POST(
   const isClient = job.client_id === user.id
 
   // For tester actions, verify assignment
+  const admin = createAdminClient()
   let isTester = false
   if (!isClient && assignment_id) {
-    const { data: asgn } = await supabase
+    const { data: asgn } = await admin
       .from('job_assignments')
       .select('id, status')
       .eq('id', assignment_id)

@@ -329,6 +329,7 @@ test.describe('Billing — spend on complete', () => {
   let clientId = ''
   let jobId = ''
   let sessionId = ''
+  let assignmentId = ''
 
   test.beforeAll(async ({ request }) => {
     test.setTimeout(120000)
@@ -356,6 +357,7 @@ test.describe('Billing — spend on complete', () => {
     })
     const asg = await ar.json()
     if (!Array.isArray(asg) || !asg[0]?.id) return
+    assignmentId = asg[0].id
 
     // Transition job to assigned state so tester can complete it
     await request.patch(`${SUPABASE_URL}/rest/v1/test_jobs?id=eq.${job.id}`, {
@@ -384,16 +386,19 @@ test.describe('Billing — spend on complete', () => {
   test('complete job → spends 5 credits', async ({ request }) => {
     if (!sessionId || !jobId || !clientToken || !testerToken) { test.skip(true, 'No fixture'); return }
     // Mark session complete as tester
-    await request.patch(url(`/api/sessions/${sessionId}`), {
+    const sr = await request.patch(url(`/api/sessions/${sessionId}`), {
       data: { status: 'complete' }, headers: bearer(testerToken),
     })
-    // Tester marks job complete (only tester can complete)
-    await request.post(url(`/api/jobs/${jobId}/transition`), {
-      data: { to: 'complete' }, headers: bearer(testerToken),
+    // Tester marks job complete with assignment_id (required for isTester check)
+    const tr = await request.post(url(`/api/jobs/${jobId}/transition`), {
+      data: { to: 'complete', assignment_id: assignmentId }, headers: bearer(testerToken),
     })
-    // Spending happens in the transition — check client credits
+    const trBody = await tr.json()
+    console.log(`transition response: ${tr.status()} ${JSON.stringify(trBody)}`)
+    // Spending happens from job.client_id account
     const credits = await request.get(url('/api/credits'), { headers: bearer(clientToken) })
     const body = await credits.json()
+    console.log(`credits after complete: held=${body.held} balance=${body.balance} available=${body.available}`)
     // After complete: held=0 (spent or released)
     expect(body.held).toBe(0)
     expect(body.available).toBeGreaterThanOrEqual(15)
