@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { buildLoggerScript } from './logger/route'
+import { validateProxyUrl, checkRateLimit } from '@/lib/proxy-security'
 
 /**
  * GET /api/proxy?url=<target>&session=<sessionId>
@@ -91,20 +92,21 @@ export async function GET(req: NextRequest) {
   const targetUrl = searchParams.get('url')
   const sessionId = searchParams.get('session') ?? ''
 
-  if (!targetUrl) {
-    return new NextResponse('Missing ?url= parameter', { status: 400 })
+  // Rate limit check (before any expensive work)
+  const rateCheck = checkRateLimit(req)
+  if (!rateCheck.allowed) {
+    return new NextResponse('Too Many Requests', {
+      status: 429,
+      headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': '0' },
+    })
   }
 
-  // Validate URL
-  let parsedTarget: URL
-  try {
-    parsedTarget = new URL(targetUrl)
-    if (!['http:', 'https:'].includes(parsedTarget.protocol)) {
-      return new NextResponse('Only http/https URLs are allowed', { status: 400 })
-    }
-  } catch {
-    return new NextResponse('Invalid URL', { status: 400 })
+  // URL validation + SSRF protection (async DNS check)
+  const urlCheck = await validateProxyUrl(targetUrl)
+  if (!urlCheck.ok) {
+    return new NextResponse(urlCheck.reason, { status: urlCheck.status })
   }
+  const parsedTarget = urlCheck.url
 
   // Auth check — only authenticated users can use the proxy
   const supabase = await getSupabaseClient(req)
