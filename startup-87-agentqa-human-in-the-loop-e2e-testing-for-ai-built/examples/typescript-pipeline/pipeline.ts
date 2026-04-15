@@ -13,7 +13,7 @@
  */
 
 const BASE_URL = process.env.AGENTQA_BASE_URL
-  ?? 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  ?? 'https://betawindow.com'
 
 const TOKEN = process.env.AGENTQA_TOKEN
 if (!TOKEN) throw new Error('AGENTQA_TOKEN is required')

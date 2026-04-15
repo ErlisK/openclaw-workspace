@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 const REPO = 'https://github.com/ErlisK/openclaw-workspace/tree/main/startup-87-betawindow-human-in-the-loop-e2e-testing-for-ai-built/examples/node-quickstart'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
 export const metadata: Metadata = {
   title: 'Node.js Quickstart Example — BetaWindow Docs',
@@ -19,7 +19,7 @@ const CODE = `/**
  * node index.js
  */
 const BASE_URL = process.env.AGENTQA_BASE_URL
-  || 'https://betawindow.vercel.app'
+  || 'https://betawindow.com'
 const TOKEN = process.env.AGENTQA_TOKEN
 const headers = { 'Authorization': \`Bearer \${TOKEN}\`, 'Content-Type': 'application/json' }
 

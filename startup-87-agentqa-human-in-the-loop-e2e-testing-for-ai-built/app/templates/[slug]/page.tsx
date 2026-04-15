@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { JOB_TEMPLATES, getTemplate } from '@/lib/templates/job-templates'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
 interface Props {
   params: Promise<{ slug: string }>

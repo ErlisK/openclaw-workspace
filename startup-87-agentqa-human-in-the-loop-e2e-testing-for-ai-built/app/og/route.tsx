@@ -42,7 +42,7 @@ export async function GET() {
           ))}
         </div>
         <div style={{ marginTop: 24, color: 'rgba(255,255,255,0.7)', fontSize: 16 }}>
-          betawindow.vercel.app
+          betawindow.com
         </div>
       </div>
     ),

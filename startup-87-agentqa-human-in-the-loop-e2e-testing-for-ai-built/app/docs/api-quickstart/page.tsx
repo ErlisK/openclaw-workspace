@@ -155,14 +155,14 @@ Authorization: Bearer <token>
     AGENTQA_TOKEN: \${{ secrets.AGENTQA_TOKEN }}
     DEPLOY_URL: \${{ steps.deploy.outputs.url }}
   run: |
-    JOB=$(curl -sf -X POST https://betawindow.vercel.app/api/jobs \\
+    JOB=$(curl -sf -X POST https://betawindow.com/api/jobs \\
       -H "Authorization: Bearer $AGENTQA_TOKEN" \\
       -H "Content-Type: application/json" \\
       -d "{\"title\":\"CI deploy test\",\"url\":\"$DEPLOY_URL\",\"tier\":\"quick\"}")
     JOB_ID=$(echo $JOB | jq -r '.job.id')
     
     # Publish the job
-    curl -sf -X POST https://betawindow.vercel.app/api/jobs/$JOB_ID/transition \\
+    curl -sf -X POST https://betawindow.com/api/jobs/$JOB_ID/transition \\
       -H "Authorization: Bearer $AGENTQA_TOKEN" \\
       -H "Content-Type: application/json" \\
       -d '{"to":"published"}'

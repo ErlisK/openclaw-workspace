@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { JOB_TEMPLATES, TEMPLATE_CATEGORIES } from '@/lib/templates/job-templates'
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
 export const metadata: Metadata = {
   title: 'Testing Instruction Templates — BetaWindow',
@@ -142,7 +142,7 @@ export default function TemplatesPage() {
 }
 
 function TemplateCard({ tpl, featured }: { tpl: ReturnType<typeof JOB_TEMPLATES[0]['id'] extends string ? () => (typeof JOB_TEMPLATES)[0] : never> | (typeof JOB_TEMPLATES)[0]; featured?: boolean }) {
-  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app'
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
   const tierColors: Record<string, string> = {
     quick: 'bg-green-100 text-green-800',

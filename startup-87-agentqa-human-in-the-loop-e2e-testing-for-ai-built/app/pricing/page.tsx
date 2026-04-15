@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 
 export const metadata: Metadata = {
   title: 'Pricing — BetaWindow Human QA Testing',

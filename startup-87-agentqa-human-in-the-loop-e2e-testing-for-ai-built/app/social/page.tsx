@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Connect with BetaWindow on Twitter, LinkedIn, and other platforms.',
 }
 
-const DEPLOYED = 'https://startup-87-betawindow-human-in-the-loop-e2e-testing-nargzynwo.vercel.app'
+const DEPLOYED = 'https://betawindow.com'
 
 export default function SocialPage() {
   const profiles = [

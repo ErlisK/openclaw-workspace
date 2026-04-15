@@ -3,7 +3,7 @@ import './globals.css'
 import { PHProvider } from '@/lib/analytics/provider'
 import FeedbackWidget from '@/components/FeedbackWidget'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 const TITLE = 'BetaWindow — Human QA Testing for AI-Built Apps'
 const DESCRIPTION =
   'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Feedback typically delivered in under 4 hours (subject to tester availability). From $5 per test.'

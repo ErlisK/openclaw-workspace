@@ -13,7 +13,7 @@
  *   utm_content → optional variant / creative ID
  *
  * Live base URL (canonical production):
- *   https://startup-87-betawindow-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app
+ *   https://betawindow.com
  */
 
 export const BASE_URL =

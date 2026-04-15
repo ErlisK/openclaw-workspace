@@ -162,7 +162,7 @@ export default function PricingDocsPage() {
       <div className="not-prose mt-10 p-6 bg-indigo-50 border border-indigo-200 rounded-xl">
         <p className="text-indigo-700 text-sm">
           See the full pricing page for a side-by-side comparison →{' '}
-          <Link href="/pricing" className="font-semibold underline">betawindow.vercel.app/pricing</Link>
+          <Link href="/pricing" className="font-semibold underline">betawindow.com/pricing</Link>
         </p>
       </div>
     </article>
