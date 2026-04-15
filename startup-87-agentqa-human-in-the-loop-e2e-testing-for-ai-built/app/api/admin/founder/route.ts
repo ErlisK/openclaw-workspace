@@ -49,7 +49,8 @@ export async function GET(req: NextRequest) {
     const headers = Object.keys(rows[0] ?? {})
     const csvLines = [
       headers.join(','),
-      ...rows.map(row =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ...rows.map((row: any) =>
         headers.map(h => {
           const v = (row as Record<string, unknown>)[h]
           const s = v == null ? '' : String(v)
