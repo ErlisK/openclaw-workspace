@@ -104,6 +104,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.8,
     },
+    // Templates
+    {
+      url: `${BASE_URL}/templates`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+    },
+    ...[
+      'signup-auth-smoke-test',
+      'checkout-payment-flow',
+      'core-app-flow',
+      'mobile-ux-responsive',
+      'deep-ux-audit-edge-cases',
+    ].map(slug => ({
+      url: `${BASE_URL}/templates/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
     {
       url: `${BASE_URL}/marketplace`,
       lastModified: now,

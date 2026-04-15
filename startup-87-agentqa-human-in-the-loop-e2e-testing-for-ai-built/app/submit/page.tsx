@@ -1,7 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { getTemplate } from '@/lib/templates/job-templates'
 
 const TIERS = [
   {
@@ -40,7 +41,29 @@ export default function SubmitPage() {
   const [tier, setTier] = useState('standard')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [templateLabel, setTemplateLabel] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // Pre-fill from template query params
+  useEffect(() => {
+    const templateId = searchParams.get('template')
+    const tierParam = searchParams.get('tier')
+    if (templateId) {
+      const tpl = getTemplate(templateId)
+      if (tpl) {
+        setFlows(tpl.instructions)
+        setTemplateLabel(tpl.title)
+        if (tierParam && ['quick','standard','deep'].includes(tierParam)) {
+          setTier(tierParam)
+        } else {
+          setTier(tpl.tier)
+        }
+      }
+    } else if (tierParam && ['quick','standard','deep'].includes(tierParam)) {
+      setTier(tierParam)
+    }
+  }, [searchParams])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -95,6 +118,23 @@ export default function SubmitPage() {
           <h1 className="text-2xl font-bold text-gray-900">Submit a test</h1>
           <p className="text-gray-500 mt-1">A real human will test your app and deliver a report with logs.</p>
         </div>
+
+        {/* Template pre-fill banner */}
+        {templateLabel && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 flex items-center justify-between gap-3" data-testid="template-banner">
+            <div className="text-sm text-indigo-800">
+              <span className="font-semibold">Template loaded:</span> {templateLabel}
+              <span className="text-indigo-500 ml-2">— instructions pre-filled below</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => { setFlows(''); setTemplateLabel('') }}
+              className="text-indigo-400 hover:text-indigo-700 text-xs"
+            >
+              Clear
+            </button>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* URL */}
