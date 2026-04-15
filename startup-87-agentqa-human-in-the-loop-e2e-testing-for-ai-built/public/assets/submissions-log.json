@@ -1,0 +1,129 @@
+{
+  "generated_at": "2026-04-15T08:30:00Z",
+  "live_url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app",
+  "press_kit_url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
+  "submissions": [
+    {
+      "platform": "GitHub awesome-ai-tools fork",
+      "status": "submitted",
+      "url": "https://github.com/ErlisK/awesome-ai-tools",
+      "notes": "Fork of mahseema/awesome-ai-tools (4820 stars) with AgentQA added to line 584. Commit c0352dcf. PR requires cross-repo write access (PAT restriction).",
+      "utm_link": "?utm_source=awesome-ai-tools&utm_medium=github&utm_campaign=awesome_list",
+      "timestamp": "2026-04-15T08:15:00Z"
+    },
+    {
+      "platform": "BetaList",
+      "status": "email-submitted",
+      "url": "https://betalist.com",
+      "notes": "Submission email sent to hello@betalist.com. BetaList signup requires reCAPTCHA (manual completion needed for account creation). Email submitted for editorial review.",
+      "utm_link": "?utm_source=betalist&utm_medium=launch&utm_campaign=betalist_launch",
+      "timestamp": "2026-04-15T08:28:00Z"
+    },
+    {
+      "platform": "Microlaunch",
+      "status": "email-submitted",
+      "url": "https://microlaunch.net",
+      "notes": "Submission email sent to hello@microlaunch.net",
+      "utm_link": "?utm_source=microlaunch&utm_medium=launch&utm_campaign=microlaunch_launch",
+      "timestamp": "2026-04-15T08:29:00Z"
+    },
+    {
+      "platform": "Fazier",
+      "status": "email-submitted",
+      "url": "https://fazier.com",
+      "notes": "Submission email sent to team@fazier.com. Fazier signup form found but requires Cloudflare CAPTCHA.",
+      "utm_link": "?utm_source=fazier&utm_medium=launch&utm_campaign=fazier_launch",
+      "timestamp": "2026-04-15T08:29:00Z"
+    },
+    {
+      "platform": "Uneed",
+      "status": "email-submitted",
+      "url": "https://www.uneed.best",
+      "notes": "Submission email sent to hello@uneed.best. Uneed form visible but requires account creation with CAPTCHA.",
+      "utm_link": "?utm_source=uneed&utm_medium=launch&utm_campaign=uneed_launch",
+      "timestamp": "2026-04-15T08:29:00Z"
+    },
+    {
+      "platform": "StartupBuffer",
+      "status": "email-submitted",
+      "url": "https://www.startupbuffer.com",
+      "notes": "Submission email sent to info@startupbuffer.com",
+      "utm_link": "?utm_source=startupbuffer&utm_medium=launch&utm_campaign=startupbuffer_launch",
+      "timestamp": "2026-04-15T08:29:00Z"
+    },
+    {
+      "platform": "Hacker News (Show HN)",
+      "status": "needs-manual",
+      "url": "https://news.ycombinator.com/submit",
+      "notes": "HN account creation disabled from this IP. Submission copy ready in LAUNCH-ASSETS.md under 'Hacker News'. Username 'agentqa_founder' prepared.",
+      "utm_link": "?utm_source=hackernews&utm_medium=community&utm_campaign=hn_launch",
+      "timestamp": "2026-04-15T08:20:00Z"
+    },
+    {
+      "platform": "Product Hunt",
+      "status": "needs-manual",
+      "url": "https://www.producthunt.com/posts/new",
+      "notes": "Cloudflare blocking automated browser. Submission copy ready in LAUNCH-ASSETS.md. Requires manual PH account + submission.",
+      "utm_link": "?utm_source=producthunt&utm_medium=launch&utm_campaign=ph_launch",
+      "timestamp": "2026-04-15T08:20:00Z"
+    },
+    {
+      "platform": "DEV.to",
+      "status": "needs-manual",
+      "url": "https://dev.to",
+      "notes": "Signup form found at dev.to/enter?state=new-user. reCAPTCHA blocks automated signup. Article copy ready in LAUNCH-ASSETS.md.",
+      "utm_link": "?utm_source=devto&utm_medium=article&utm_campaign=devto_launch",
+      "timestamp": "2026-04-15T08:25:00Z"
+    },
+    {
+      "platform": "Indie Hackers",
+      "status": "needs-manual",
+      "url": "https://www.indiehackers.com",
+      "notes": "Requires Google/Twitter/email OAuth signup. Post copy ready in LAUNCH-ASSETS.md. Go to indiehackers.com/products/new after signup.",
+      "utm_link": "?utm_source=indiehackers&utm_medium=community&utm_campaign=ih_launch",
+      "timestamp": "2026-04-15T08:20:00Z"
+    },
+    {
+      "platform": "AlternativeTo",
+      "status": "needs-manual",
+      "url": "https://alternativeto.net/suggest/",
+      "notes": "Submit form returns 404. Must use main site search + 'Suggest an alternative' form.",
+      "utm_link": "?utm_source=alternativeto&utm_medium=directory&utm_campaign=alternativeto_launch",
+      "timestamp": "2026-04-15T08:15:00Z"
+    },
+    {
+      "platform": "Press Kit Page",
+      "status": "live",
+      "url": "https://startup-87-agentqa-human-in-the-loop-e2e-testing-ouwi0qsjw.vercel.app/launch",
+      "notes": "Full press kit deployed at /launch. Includes screenshots, pricing table, brand colors, UTM links, and contact info.",
+      "timestamp": "2026-04-15T08:35:00Z"
+    }
+  ],
+  "manual_actions_needed": [
+    {
+      "platform": "Product Hunt",
+      "action": "Create PH account, go to producthunt.com/posts/new, fill form with copy from LAUNCH-ASSETS.md",
+      "utm": "?utm_source=producthunt&utm_medium=launch&utm_campaign=ph_launch"
+    },
+    {
+      "platform": "Hacker News",
+      "action": "Create HN account from non-blocked IP, go to news.ycombinator.com/submit, use 'Show HN' title from LAUNCH-ASSETS.md",
+      "utm": "?utm_source=hackernews&utm_medium=community&utm_campaign=hn_launch"
+    },
+    {
+      "platform": "Indie Hackers",
+      "action": "Sign up with email/OAuth at indiehackers.com, go to /products/new, use IH copy from LAUNCH-ASSETS.md",
+      "utm": "?utm_source=indiehackers&utm_medium=community&utm_campaign=ih_launch"
+    },
+    {
+      "platform": "DEV.to",
+      "action": "Sign up at dev.to/enter?state=new-user (click 'Email' button), create article with copy from LAUNCH-ASSETS.md",
+      "utm": "?utm_source=devto&utm_medium=article&utm_campaign=devto_launch"
+    },
+    {
+      "platform": "BetaList",
+      "action": "Sign up at betalist.com/sign_up (complete reCAPTCHA), then submit at betalist.com/submit",
+      "utm": "?utm_source=betalist&utm_medium=launch&utm_campaign=betalist_launch"
+    }
+  ]
+}
