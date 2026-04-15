@@ -28,8 +28,10 @@ export async function POST(
 
   if (!to) return NextResponse.json({ error: 'to (target status) is required' }, { status: 400 })
 
-  // Fetch the job — include tier for credit calculation
-  const { data: job, error: jobError } = await supabase
+  const admin = createAdminClient()
+
+  // Fetch the job with admin client (ensures client_id visible regardless of RLS)
+  const { data: job, error: jobError } = await admin
     .from('test_jobs')
     .select('id, status, client_id, published_at, tier')
     .eq('id', jobId)
@@ -40,7 +42,6 @@ export async function POST(
   const isClient = job.client_id === user.id
 
   // For tester actions, verify assignment
-  const admin = createAdminClient()
   let isTester = false
   if (!isClient && assignment_id) {
     const { data: asgn } = await admin
@@ -108,7 +109,7 @@ export async function POST(
     updates.completed_at = now
   }
 
-  const { data: updated, error: updateError } = await supabase
+  const { data: updated, error: updateError } = await admin
     .from('test_jobs')
     .update(updates)
     .eq('id', jobId)

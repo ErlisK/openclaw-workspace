@@ -337,7 +337,7 @@ test.describe('Billing — spend on complete', () => {
     const id = rid()
     const ct = await signUp(request, `bi.sp.c.${id}@mailinator.com`, PW)
     const tt = await signUp(request, `bi.sp.t.${id}@mailinator.com`, PW)
-    if (!ct || !tt) return
+    if (!ct || !tt) { console.log(`spend beforeAll: signup failed ct=${!!ct} tt=${!!tt}`); return }
     clientToken = ct; testerToken = tt
     clientId = uid(ct)
     await setBalance(request, clientId, 20)
@@ -346,17 +346,21 @@ test.describe('Billing — spend on complete', () => {
       data: { title: `Spend Test ${id}`, url: 'https://example.com', tier: 'quick' },
       headers: bearer(ct),
     })
-    const { job } = await jr.json()
-    if (!job?.id) return
+    const jrBody = await jr.json()
+    console.log(`spend beforeAll: job create ${jr.status()} id=${jrBody.job?.id}`)
+    const { job } = jrBody
+    if (!job?.id) { console.log('spend beforeAll: no job'); return }
     jobId = job.id
-    await request.post(url(`/api/jobs/${job.id}/transition`), { data: { to: 'published' }, headers: bearer(ct) })
+    const pubRes = await request.post(url(`/api/jobs/${job.id}/transition`), { data: { to: 'published' }, headers: bearer(ct) })
+    console.log(`spend beforeAll: publish ${pubRes.status()}`)
 
     const ar = await request.post(`${SUPABASE_URL}/rest/v1/job_assignments`, {
       data: { job_id: job.id, tester_id: uid(tt), status: 'active', assigned_at: new Date().toISOString() },
       headers: { apikey: SERVICE_ROLE_KEY, Authorization: `Bearer ${SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
     })
     const asg = await ar.json()
-    if (!Array.isArray(asg) || !asg[0]?.id) return
+    console.log(`spend beforeAll: assignment ${ar.status()} id=${Array.isArray(asg) ? asg[0]?.id : JSON.stringify(asg)}`)
+    if (!Array.isArray(asg) || !asg[0]?.id) { console.log('spend beforeAll: no assignment'); return }
     assignmentId = asg[0].id
 
     // Transition job to assigned state so tester can complete it
@@ -369,9 +373,12 @@ test.describe('Billing — spend on complete', () => {
       data: { assignment_id: asg[0].id, job_id: job.id },
       headers: bearer(tt),
     })
-    if (sr.status() !== 201) return
-    const { session } = await sr.json()
+    const srBody = await sr.json()
+    console.log(`spend beforeAll: session create ${sr.status()} ${JSON.stringify(srBody).slice(0,100)}`)
+    if (sr.status() !== 201) { console.log('spend beforeAll: session create failed'); return }
+    const { session } = srBody
     sessionId = session?.id ?? ''
+    console.log(`spend beforeAll: done sessionId=${sessionId} jobId=${jobId} assignmentId=${assignmentId}`)
   })
 
   test('after publish: balance=20, held=5, available=15', async ({ request }) => {
