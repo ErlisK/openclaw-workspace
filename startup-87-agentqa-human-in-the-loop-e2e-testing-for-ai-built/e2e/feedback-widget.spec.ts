@@ -45,11 +45,17 @@ function byCookie() {
 /** Set up bypass routing for /_next/ assets and navigate */
 async function gotoWithHydration(page: import('@playwright/test').Page, path: string) {
   if (BYPASS) {
+    // Add bypass token as a REQUEST HEADER (not query param) so POST bodies are never touched
     await page.route('**', async route => {
       const reqUrl = route.request().url()
-      if (reqUrl.startsWith(BASE_URL) && !reqUrl.includes('x-vercel-protection-bypass')) {
-        const sep = reqUrl.includes('?') ? '&' : '?'
-        await route.continue({ url: `${reqUrl}${sep}x-vercel-protection-bypass=${BYPASS}` })
+      if (reqUrl.startsWith(BASE_URL)) {
+        const originalHeaders = await route.request().allHeaders()
+        await route.continue({
+          headers: {
+            ...originalHeaders,
+            'x-vercel-protection-bypass': BYPASS,
+          },
+        })
       } else {
         await route.continue()
       }
