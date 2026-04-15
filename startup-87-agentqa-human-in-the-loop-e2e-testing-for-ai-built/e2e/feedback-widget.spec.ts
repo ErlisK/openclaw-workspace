@@ -42,12 +42,24 @@ function byCookie() {
   return []
 }
 
-/** Wait for React hydration before clicking interactive elements */
-async function waitForHydration(page: import('@playwright/test').Page) {
+/** Set up bypass routing for /_next/ assets and navigate */
+async function gotoWithHydration(page: import('@playwright/test').Page, path: string) {
+  // Intercept /_next/ requests to add bypass token so React hydrates properly
+  if (BYPASS) {
+    await page.route('**/_next/**', async route => {
+      const originalUrl = route.request().url()
+      const sep = originalUrl.includes('?') ? '&' : '?'
+      await route.continue({ url: `${originalUrl}${sep}x-vercel-protection-bypass=${BYPASS}` })
+    })
+  }
+  await page.goto(url(path))
   await page.waitForLoadState('load')
-  // Wait for React hydration to complete (client bundle to execute)
-  // Using a 3s wait since the fiber key detection varies by React version
-  await page.waitForTimeout(3000)
+  await page.waitForTimeout(1500)
+}
+
+/** Wait for React hydration before clicking interactive elements (call AFTER gotoWithHydration) */
+async function waitForHydration(_page: import('@playwright/test').Page) {
+  // No-op: routing already set up by gotoWithHydration
 }
 function apiHeaders(extra?: Record<string, string>): Record<string, string> {
   return { 'Content-Type': 'application/json', ...bypassHeaders(), ...(extra ?? {}) }
@@ -57,24 +69,18 @@ function apiHeaders(extra?: Record<string, string>): Record<string, string> {
 
 test.describe('Feedback Widget — UI', () => {
   test('trigger button is visible on homepage', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await expect(page.locator('[data-testid="feedback-trigger"]')).toBeVisible({ timeout: 10000 })
   })
 
   test('clicking trigger opens the widget', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await expect(page.locator('[data-testid="feedback-widget"]')).toBeVisible({ timeout: 5000 })
   })
 
   test('widget has 5 star rating buttons', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     for (let i = 1; i <= 5; i++) {
       await expect(page.locator(`[data-testid="feedback-star-${i}"]`)).toBeVisible()
@@ -82,9 +88,7 @@ test.describe('Feedback Widget — UI', () => {
   })
 
   test('widget has 4 category pills', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     for (const cat of ['bug', 'feature', 'general', 'praise']) {
       await expect(page.locator(`[data-testid="feedback-category-${cat}"]`)).toBeVisible()
@@ -92,44 +96,34 @@ test.describe('Feedback Widget — UI', () => {
   })
 
   test('widget has comment textarea', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await expect(page.locator('[data-testid="feedback-comment"]')).toBeVisible()
   })
 
   test('submit button is disabled with no rating and no comment', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     const submit = page.locator('[data-testid="feedback-submit"]')
     await expect(submit).toBeDisabled()
   })
 
   test('submit button enables after entering a comment', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-comment"]').fill('This is great!')
     await expect(page.locator('[data-testid="feedback-submit"]')).toBeEnabled()
   })
 
   test('submit button enables after clicking a star', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-star-4"]').click()
     await expect(page.locator('[data-testid="feedback-submit"]')).toBeEnabled()
   })
 
   test('widget closes on X button click', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-close"]').click()
     await expect(page.locator('[data-testid="feedback-widget"]')).not.toBeVisible()
@@ -140,9 +134,7 @@ test.describe('Feedback Widget — UI', () => {
 
 test.describe('Feedback Widget — submission', () => {
   test('submitting comment shows success state', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-comment"]').fill(`E2E test comment ${Date.now()}`)
     await page.locator('[data-testid="feedback-submit"]').click()
@@ -150,9 +142,7 @@ test.describe('Feedback Widget — submission', () => {
   })
 
   test('submitting star + category shows success', async ({ page }) => {
-    await page.context().addCookies(byCookie())
-    await page.goto(url('/'))
-    await waitForHydration(page)
+    await gotoWithHydration(page, '/')
     await page.locator('[data-testid="feedback-trigger"]').click()
     await page.locator('[data-testid="feedback-star-5"]').click()
     await page.locator('[data-testid="feedback-category-praise"]').click()
