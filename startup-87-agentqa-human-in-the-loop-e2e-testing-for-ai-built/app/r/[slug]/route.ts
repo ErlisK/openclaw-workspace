@@ -1,4 +1,5 @@
-import { redirect, notFound } from 'next/navigation'
+import { notFound } from 'next/navigation'
+import { NextResponse } from 'next/server'
 import { getLinkBySlug, buildRedirectUrl } from '@/lib/utm/links'
 import { headers } from 'next/headers'
 
@@ -58,5 +59,5 @@ export async function GET(_req: Request, { params }: Props) {
   }
 
   // 307 preserves request method; client-side PostHog picks up the utm_* on landing
-  return redirect(destination, 307)
+  return NextResponse.redirect(destination, 307)
 }
