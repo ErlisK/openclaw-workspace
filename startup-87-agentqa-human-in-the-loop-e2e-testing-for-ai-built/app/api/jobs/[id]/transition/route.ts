@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
 import { holdCredits, spendCredits, releaseCredits } from '@/lib/credits'
 import { captureServerEvent } from '@/lib/analytics/events'
+import { emailNotifications } from '@/lib/email/resend'
 import type { JobStatus } from '@/lib/types'
 
 /**
@@ -153,6 +154,20 @@ export async function POST(
       .eq('id', assignment_id)
       .eq('tester_id', user.id)
   }
+
+  // ── Email notifications ───────────────────────────────────────────────────
+  // Fetch requester email for notifications
+  const notifyEmail = async () => {
+    const { data: requester } = await admin.from('users').select('email').eq('id', job.client_id).single()
+    const email = requester?.email
+    const title = (updated as { title?: string })?.title ?? 'your job'
+    if (!email) return
+    if (to === 'published') await emailNotifications.jobPublished(email, title, jobId)
+    if (to === 'assigned') await emailNotifications.jobAssigned(email, title, jobId)
+    if (to === 'complete') await emailNotifications.testComplete(email, title, jobId)
+    if (to === 'expired') await emailNotifications.jobExpired(email, title, jobId)
+  }
+  notifyEmail().catch(() => {})
 
   return NextResponse.json({
     job: updated,

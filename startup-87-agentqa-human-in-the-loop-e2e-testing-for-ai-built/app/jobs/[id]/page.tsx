@@ -133,6 +133,17 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         </div>
 
         {/* Feedback */}
+        {j.status === 'complete' && (
+          <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex items-center justify-between">
+            <div>
+              <p className="font-semibold text-indigo-900 text-sm">Test complete!</p>
+              <p className="text-xs text-indigo-700 mt-0.5">View session replay, console logs, and detailed feedback.</p>
+            </div>
+            <Link href={`/jobs/${j.id}/results`} className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 flex-shrink-0">
+              View Results →
+            </Link>
+          </div>
+        )}
         {feedback && feedback.length > 0 && (
           <div className="space-y-4">
             {feedback.map((fb) => (

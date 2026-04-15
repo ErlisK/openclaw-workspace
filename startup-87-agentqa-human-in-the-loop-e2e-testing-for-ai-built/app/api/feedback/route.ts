@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { createAdminClient } from '@/lib/supabase/server'
 import { captureServerEvent } from '@/lib/analytics/events'
+import { emailNotifications } from '@/lib/email/resend'
 
 /**
  *
@@ -194,6 +195,17 @@ export async function POST(req: NextRequest) {
     has_bugs: insertedBugs.length > 0,
     bug_count: insertedBugs.length,
   }).catch(() => {})
+
+  // Notify requester that test is complete
+  const notifyRequester = async () => {
+    const { data: jobRow } = await admin.from('test_jobs').select('title, client_id').eq('id', feedback.job_id).single()
+    if (!jobRow) return
+    const { data: requester } = await admin.from('users').select('email').eq('id', jobRow.client_id).single()
+    if (requester?.email) {
+      await emailNotifications.testComplete(requester.email, jobRow.title, feedback.job_id, feedback.session_id)
+    }
+  }
+  notifyRequester().catch(() => {})
 
   return NextResponse.json({ feedback, bugs: insertedBugs }, { status: 201 })
 }

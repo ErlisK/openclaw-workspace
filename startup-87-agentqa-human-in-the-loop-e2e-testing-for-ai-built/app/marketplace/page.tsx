@@ -2,21 +2,38 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import type { TestJob } from '@/lib/types'
 import { TIER_CONFIG } from '@/lib/types'
+import { Suspense } from 'react'
+import MarketplaceFilters from './MarketplaceFilters'
 
 export const revalidate = 30 // revalidate every 30s
 
-export default async function MarketplacePage() {
+interface Props {
+  searchParams: Promise<{ tier?: string; sort?: string }>
+}
+
+export default async function MarketplacePage({ searchParams }: Props) {
+  const { tier: tierFilter, sort = 'newest' } = await searchParams
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch published jobs — RLS policy allows authenticated users to see them
-  const { data: jobs, error } = await supabase
+  let query = supabase
     .from('test_jobs')
     .select('id, title, url, tier, price_cents, instructions, status, published_at, created_at')
     .in('status', ['published'])
-    .order('published_at', { ascending: false })
-    .limit(50)
 
+  if (tierFilter && ['quick', 'standard', 'deep'].includes(tierFilter)) {
+    query = query.eq('tier', tierFilter)
+  }
+
+  if (sort === 'highest_pay') {
+    query = query.order('price_cents', { ascending: false })
+  } else {
+    query = query.order('published_at', { ascending: false })
+  }
+
+  query = query.limit(50)
+
+  const { data: jobs, error } = await query
   const jobList = (jobs ?? []) as TestJob[]
 
   return (
@@ -51,18 +68,17 @@ export default async function MarketplacePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Tester Marketplace</h1>
           <p className="text-gray-500">
-            Browse open testing jobs. Pick one up and earn ${5}–${15} per completed test.
+            Browse open testing jobs. Pick one up and earn $4–$12 per completed test.
+          </p>
+          <p className="text-xs text-amber-600 mt-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-1.5 inline-block">
+            🖥️ Tests must be completed on <strong>desktop Chrome</strong>. Mobile browsing is fine but test execution requires desktop.
           </p>
         </div>
 
-        {/* Stats bar */}
-        <div className="flex items-center gap-6 mb-8 text-sm text-gray-500">
-          <span data-testid="marketplace-job-count">
-            <strong className="text-gray-900">{jobList.length}</strong> open job{jobList.length !== 1 ? 's' : ''}
-          </span>
-          <span>Avg payout <strong className="text-gray-900">$9</strong></span>
-          <span>Avg time <strong className="text-gray-900">20 min</strong></span>
-        </div>
+        {/* Filters */}
+        <Suspense fallback={null}>
+          <MarketplaceFilters currentTier={tierFilter} currentSort={sort} totalJobs={jobList.length} />
+        </Suspense>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
@@ -86,7 +102,9 @@ export default async function MarketplacePage() {
           <div className="text-center py-20 text-gray-400" data-testid="marketplace-empty">
             <div className="text-5xl mb-4">🧪</div>
             <p className="text-lg font-medium mb-1">No open jobs right now</p>
-            <p className="text-sm">Check back soon — new jobs are posted regularly.</p>
+            <p className="text-sm">
+              {tierFilter ? `No ${tierFilter} tier jobs available. Try removing the filter.` : 'Check back soon — new jobs are posted regularly.'}
+            </p>
             {user && (
               <Link href="/jobs/new" className="inline-block mt-6 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700">
                 Post a test job
