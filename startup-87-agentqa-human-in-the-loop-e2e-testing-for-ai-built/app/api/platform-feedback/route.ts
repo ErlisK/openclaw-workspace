@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const { rating, comment, category = 'general', page, url, metadata } = body
 
     // Validate
-    if (rating !== undefined && (typeof rating !== 'number' || rating < 1 || rating > 5)) {
+    if (rating != null && (typeof rating !== 'number' || rating < 1 || rating > 5)) {
       return NextResponse.json({ error: 'rating must be 1–5' }, { status: 400 })
     }
     if (!comment && !rating) {
