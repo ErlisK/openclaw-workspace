@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'BetaWindow — Human QA Testing for AI-Built Apps',
-  description: 'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Results in under 4 hours.',
+  description: 'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Results typically in under 4 hours (subject to tester availability).',
   alternates: { canonical: '/' },
 }
 
@@ -30,7 +30,7 @@ export default function HomePage() {
           <span className="text-indigo-600">AI-built app</span>
         </h1>
         <p className="text-xl text-gray-500 mb-10 max-w-xl mx-auto">
-          Submit your public URL. A real human tests your app in Chrome, with network logs and console errors captured automatically. Report delivered in under 4 hours.
+          Submit your public URL. A real human tests your app in Chrome, with network logs and console errors captured automatically. Report typically delivered in under 4 hours (subject to tester availability).
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -81,6 +81,17 @@ export default function HomePage() {
         </p>
       </div>
       </main>
+
+      <footer className="bg-gray-900 text-gray-400 py-8 px-6 text-center text-sm">
+        <div className="flex flex-wrap justify-center gap-6 mb-4">
+          <Link href="/pricing" className="hover:text-white">Pricing</Link>
+          <Link href="/marketplace" className="hover:text-white">Marketplace</Link>
+          <Link href="/become-a-tester" className="hover:text-white">Become a Tester</Link>
+          <Link href="/faq" className="hover:text-white">FAQ</Link>
+          <a href="mailto:hello@betawindow.com" className="hover:text-white">Contact</a>
+        </div>
+        <p>© {new Date().getFullYear()} BetaWindow · <a href="mailto:hello@betawindow.com" className="hover:text-white">hello@betawindow.com</a></p>
+      </footer>
     </div>
   )
 }

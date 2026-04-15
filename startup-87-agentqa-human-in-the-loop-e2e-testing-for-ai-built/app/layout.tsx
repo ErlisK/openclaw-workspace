@@ -6,7 +6,7 @@ import FeedbackWidget from '@/components/FeedbackWidget'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.vercel.app'
 const TITLE = 'BetaWindow — Human QA Testing for AI-Built Apps'
 const DESCRIPTION =
-  'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Feedback delivered in under 4 hours. From $5 per test.'
+  'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture. Feedback typically delivered in under 4 hours (subject to tester availability). From $5 per test.'
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -117,12 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     priceCurrency: 'USD',
                   },
                 ],
-              },
-              aggregateRating: {
-                '@type': 'AggregateRating',
-                ratingValue: '4.8',
-                reviewCount: '42',
-              },
+              }
             }),
           }}
         />

@@ -4,6 +4,7 @@ import type { TestJob } from '@/lib/types'
 import { TIER_CONFIG } from '@/lib/types'
 import { Suspense } from 'react'
 import MarketplaceFilters from './MarketplaceFilters'
+import MarketplaceEmptyState from './EmptyState'
 
 export const revalidate = 30 // revalidate every 30s
 
@@ -99,18 +100,7 @@ export default async function MarketplacePage({ searchParams }: Props) {
 
         {/* Job Grid */}
         {jobList.length === 0 ? (
-          <div className="text-center py-20 text-gray-400" data-testid="marketplace-empty">
-            <div className="text-5xl mb-4">🧪</div>
-            <p className="text-lg font-medium mb-1">No open jobs right now</p>
-            <p className="text-sm">
-              {tierFilter ? `No ${tierFilter} tier jobs available. Try removing the filter.` : 'Check back soon — new jobs are posted regularly.'}
-            </p>
-            {user && (
-              <Link href="/jobs/new" className="inline-block mt-6 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700">
-                Post a test job
-              </Link>
-            )}
-          </div>
+          <MarketplaceEmptyState tierFilter={tierFilter} user={!!user} />
         ) : (
           <div className="space-y-4" data-testid="marketplace-jobs">
             {jobList.map((job) => {
