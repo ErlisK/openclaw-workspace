@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'API Quickstart — AgentQA Docs',
@@ -205,6 +206,17 @@ Authorization: Bearer <token>
           </tbody>
         </table>
       </div>
+
+      <h2>Code examples</h2>
+      <p>
+        Ready-to-run examples in Node.js and TypeScript:
+      </p>
+      <ul>
+        <li><Link href="/docs/examples/node-quickstart">Node.js Quickstart</Link> — create a job, poll, print report (no deps)</li>
+        <li><Link href="/docs/examples/typescript-pipeline">TypeScript Pipeline</Link> — typed client with quality gate assertions</li>
+        <li><Link href="/docs/examples/webhook-receiver">Webhook Receiver</Link> — Express server for async job notifications</li>
+        <li><Link href="/examples/sample-report">Sample Report</Link> — see a completed job output with bugs, network log, console</li>
+      </ul>
     </article>
   )
 }

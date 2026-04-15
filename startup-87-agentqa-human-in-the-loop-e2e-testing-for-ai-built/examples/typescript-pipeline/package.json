@@ -1,0 +1,21 @@
+{
+  "name": "agentqa-typescript-pipeline",
+  "version": "1.0.0",
+  "description": "Fully typed AgentQA pipeline: submit → poll → assert quality gates",
+  "main": "dist/pipeline.js",
+  "scripts": {
+    "start": "ts-node pipeline.ts",
+    "build": "tsc",
+    "run:compiled": "node dist/pipeline.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "ts-node": "^10.9.0",
+    "@types/node": "^20.0.0"
+  },
+  "keywords": ["agentqa", "typescript", "qa", "pipeline", "ci"],
+  "license": "MIT"
+}
