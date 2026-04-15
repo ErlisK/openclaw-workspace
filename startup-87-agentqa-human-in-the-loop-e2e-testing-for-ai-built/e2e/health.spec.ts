@@ -23,4 +23,13 @@ test.describe('Deployment Health', () => {
     const response = await request.get('/api/health');
     expect(response.status()).toBeLessThan(500);
   });
+
+  test('/api/version returns 200 with build_hash', async ({ request }) => {
+    const response = await request.get('/api/version');
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.status).toBe('ok');
+    expect(typeof body.build_hash).toBe('string');
+    expect(body.build_hash.length).toBeGreaterThan(0);
+  });
 });
