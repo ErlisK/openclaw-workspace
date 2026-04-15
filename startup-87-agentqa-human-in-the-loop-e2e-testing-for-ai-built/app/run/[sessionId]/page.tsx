@@ -17,11 +17,13 @@ export default async function RunPage({ params }: Props) {
   const admin = createAdminClient()
 
   // Fetch session with job details
+  // Use !job_id hint so PostgREST unambiguously picks the correct FK
+  // and returns a single object (not an array)
   const { data: session, error } = await admin
     .from('test_sessions')
     .select(`
       id, status, tester_id, assignment_id, job_id,
-      test_jobs (
+      test_jobs!job_id (
         id, title, url, tier, instructions, client_id
       )
     `)
@@ -31,11 +33,13 @@ export default async function RunPage({ params }: Props) {
   if (error || !session) notFound()
 
   // Verify access
-  const job = session.test_jobs as {
+  // Guard against the rare case where Supabase returns the relation as an array
+  const rawJob = session.test_jobs
+  const job = (Array.isArray(rawJob) ? (rawJob[0] ?? null) : rawJob) as {
     id: string; title: string; url: string; tier: string; instructions: string; client_id: string
   } | null
 
-  if (!job) notFound()
+  if (!job || !job.url) notFound()
 
   const isOwner = session.tester_id === user.id
   const isClient = job.client_id === user.id

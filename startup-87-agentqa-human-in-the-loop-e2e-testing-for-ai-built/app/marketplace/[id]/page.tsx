@@ -105,7 +105,7 @@ export default async function AcceptJobPage({ params }: { params: Promise<{ id: 
                 You already have an active assignment for this job.
               </p>
               {existing.status === 'active' && (
-                <Link href={`/tester/assignments/${existing.id}`}
+                <Link href={`/tester/sessions/new?assignment=${existing.id}`}
                   className="inline-block mt-2 text-sm text-indigo-600 hover:underline">
                   Continue testing →
                 </Link>

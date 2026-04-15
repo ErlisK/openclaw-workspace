@@ -48,8 +48,23 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
   const logsEndRef = useRef<HTMLDivElement>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
+  // Ensure the job URL is a fully-qualified HTTP(S) URL before proxying.
+  // If the value is somehow empty/malformed, show a graceful error rather than
+  // passing "undefined" to the proxy which would display a confusing error page.
+  const safeJobUrl = (() => {
+    if (!job.url) return ''
+    try {
+      const p = new URL(job.url)
+      return ['http:', 'https:'].includes(p.protocol) ? p.toString() : ''
+    } catch {
+      return ''
+    }
+  })()
+
   // Route the iframe through our proxy so the injected logger can capture events
-  const iframeSrc = `/api/proxy?url=${encodeURIComponent(job.url)}&session=${sessionId}`
+  const iframeSrc = safeJobUrl
+    ? `/api/proxy?url=${encodeURIComponent(safeJobUrl)}&session=${sessionId}`
+    : ''
 
   const handleEvent = useCallback((ev: LogEvent) => {
     setLogs(prev => {
@@ -143,6 +158,20 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-white overflow-hidden" data-testid="sandbox-runner">
+      {/* Fatal: bad URL stored on the job */}
+      {!safeJobUrl && (
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center px-6">
+            <div className="text-5xl mb-4">⚠️</div>
+            <h2 className="text-lg font-semibold mb-2">Invalid app URL</h2>
+            <p className="text-sm text-gray-400 mb-1">
+              The URL stored for this job is missing or not a valid http(s) address.
+            </p>
+            <p className="text-xs text-gray-600 font-mono break-all">{job.url || '(empty)'}</p>
+          </div>
+        </div>
+      )}
+      {safeJobUrl && (<>
       {/* Toolbar */}
       <div className="flex items-center gap-3 px-4 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-2 min-w-0 flex-1">
@@ -420,6 +449,7 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
           ✓ Feedback submitted
         </div>
       )}
+    </>)}
     </div>
   )
 }
