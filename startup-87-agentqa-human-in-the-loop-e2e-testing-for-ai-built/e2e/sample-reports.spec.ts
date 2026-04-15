@@ -79,9 +79,19 @@ for (const r of REPORTS) {
 
     test('has schema.org JSON-LD', async ({ page }) => {
       await page.goto(`${BASE}/report/${r.slug}`)
-      const ld = await page.locator('script[type="application/ld+json"]').first().textContent()
-      expect(ld).toContain('schema.org')
-      expect(ld).toContain('WebPage')
+      // The layout injects a global SoftwareApplication LD+JSON;
+      // our page-level script is the last one — check it contains WebPage.
+      const scripts = page.locator('script[type="application/ld+json"]')
+      const count = await scripts.count()
+      // At least one page-level LD+JSON exists
+      expect(count).toBeGreaterThanOrEqual(1)
+      // Find the one with WebPage type
+      let foundWebPage = false
+      for (let i = 0; i < count; i++) {
+        const text = await scripts.nth(i).textContent() ?? ''
+        if (text.includes('WebPage')) { foundWebPage = true; break }
+      }
+      expect(foundWebPage).toBe(true)
     })
 
     test('returns 200', async ({ request }) => {
