@@ -10,9 +10,9 @@ test.describe('Developer Examples — /docs/examples', () => {
   test('index page loads with all 3 examples', async ({ page }) => {
     await page.goto(`${BASE}/docs/examples`, { waitUntil: 'domcontentloaded' })
     await expect(page.locator('h1')).toContainText('Developer Examples')
-    await expect(page.locator('text=Node.js Quickstart')).toBeVisible()
-    await expect(page.locator('text=TypeScript Pipeline')).toBeVisible()
-    await expect(page.locator('text=Webhook Receiver')).toBeVisible()
+    await expect(page.locator('text=Node.js Quickstart').first()).toBeVisible()
+    await expect(page.locator('text=TypeScript Pipeline').first()).toBeVisible()
+    await expect(page.locator('text=Webhook Receiver').first()).toBeVisible()
   })
 
   test('node-quickstart page loads with code', async ({ page }) => {
@@ -26,15 +26,15 @@ test.describe('Developer Examples — /docs/examples', () => {
   test('typescript-pipeline page loads', async ({ page }) => {
     await page.goto(`${BASE}/docs/examples/typescript-pipeline`)
     await expect(page.locator('h1')).toContainText('TypeScript Pipeline')
-    await expect(page.locator('text=AgentQAClient')).toBeVisible()
-    await expect(page.locator('text=assertJobQuality')).toBeVisible()
+    await expect(page.locator('text=AgentQAClient').first()).toBeVisible()
+    await expect(page.locator('text=assertJobQuality').first()).toBeVisible()
   })
 
   test('webhook-receiver page loads', async ({ page }) => {
     await page.goto(`${BASE}/docs/examples/webhook-receiver`)
     await expect(page.locator('h1')).toContainText('Webhook Receiver')
-    await expect(page.locator('text=job.completed')).toBeVisible()
-    await expect(page.locator('text=X-AgentQA-Signature')).toBeVisible()
+    await expect(page.locator('text=job.completed').first()).toBeVisible()
+    await expect(page.locator('text=X-AgentQA-Signature').first()).toBeVisible()
   })
 })
 
@@ -51,10 +51,10 @@ test.describe('Sample Report — /examples/sample-report', () => {
     await expect(page.locator('text=high').first()).toBeVisible()
 
     // Network log
-    await expect(page.locator('text=Network Log')).toBeVisible()
+    await expect(page.locator('text=Network Log').first()).toBeVisible()
 
     // Console log
-    await expect(page.locator('text=Console Log')).toBeVisible()
+    await expect(page.locator('text=Console Log').first()).toBeVisible()
 
     // Raw JSON
     await expect(page.locator('text=Raw JSON')).toBeVisible()
