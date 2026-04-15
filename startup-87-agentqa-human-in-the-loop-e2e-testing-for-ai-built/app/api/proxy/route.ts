@@ -92,6 +92,13 @@ export async function GET(req: NextRequest) {
   const targetUrl = searchParams.get('url')
   const sessionId = searchParams.get('session') ?? ''
 
+  // URL validation + SSRF protection (async DNS check) — must run before auth
+  // so private IP blocking returns 403 regardless of auth state
+  const urlCheck = await validateProxyUrl(targetUrl)
+  if (!urlCheck.ok) {
+    return new NextResponse(urlCheck.reason, { status: urlCheck.status })
+  }
+
   // Auth check — only authenticated users can use the proxy
   const supabase = await getSupabaseClient(req)
   const { data: { user: earlyUser } } = await supabase.auth.getUser()
@@ -106,12 +113,6 @@ export async function GET(req: NextRequest) {
       status: 429,
       headers: { 'Retry-After': '60', 'X-RateLimit-Remaining': '0' },
     })
-  }
-
-  // URL validation + SSRF protection (async DNS check)
-  const urlCheck = await validateProxyUrl(targetUrl)
-  if (!urlCheck.ok) {
-    return new NextResponse(urlCheck.reason, { status: urlCheck.status })
   }
   const parsedTarget = urlCheck.url
 
