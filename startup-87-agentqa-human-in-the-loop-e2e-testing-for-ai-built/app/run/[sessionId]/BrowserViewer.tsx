@@ -60,34 +60,77 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
   //  log a synthetic event when the user clicks on the overlay border)
   function handleIframeLoad() {
     updateStatus('running')
-    // Try to inject a minimal logger into same-origin iframes
+    // Try to read the iframe's current URL (works when proxied = same-origin betawindow.com)
     try {
       const iwin = iframeRef.current?.contentWindow
       if (!iwin) return
-      // Notify the parent about navigation
-      const url = iframeRef.current?.contentWindow?.location?.href ?? currentUrl
-      if (url && url !== currentUrl) {
-        setCurrentUrl(url)
-        setAddressBar(url)
-        onUrlChange?.(url)
+
+      const iframeHref = iwin.location?.href ?? ''
+
+      // ── Proxy-escape detection ──────────────────────────────────────────────
+      // If the iframe navigated to a URL that is NOT a proxy route and NOT
+      // about:blank/about:srcdoc, it has escaped the proxy.  Re-proxy it.
+      const isProxied =
+        iframeHref.includes('/api/proxy?url=') ||
+        iframeHref.includes('/api/proxy-static/') ||
+        iframeHref.startsWith('about:') ||
+        iframeHref === ''
+
+      if (iframeHref && !isProxied) {
+        // iframe escaped the proxy — force re-navigation through proxy
+        const reProxied = toProxyUrl(iframeHref, sessionId)
+        setProxyUrl(reProxied)
+        setCurrentUrl(iframeHref)
+        setAddressBar(iframeHref)
+        onUrlChange?.(iframeHref)
+        onEvent({
+          id: `ev-reproxy-${Date.now()}`,
+          session_id: sessionId,
+          event_type: 'navigation',
+          ts: new Date().toISOString(),
+          request_url: iframeHref,
+          log_message: `[proxy-escape] Re-routing ${iframeHref} through proxy`,
+        })
+        return
+      }
+      // ────────────────────────────────────────────────────────────────────────
+
+      // Extract the real target URL from the proxy URL's ?url= param
+      let displayUrl = iframeHref
+      try {
+        const u = new URL(iframeHref)
+        const targetParam = u.searchParams.get('url')
+        if (targetParam) displayUrl = targetParam
+      } catch { /* ignore */ }
+
+      if (displayUrl && displayUrl !== currentUrl) {
+        setCurrentUrl(displayUrl)
+        setAddressBar(displayUrl)
+        onUrlChange?.(displayUrl)
       }
       onEvent({
         id: `ev-nav-${Date.now()}`,
         session_id: sessionId,
         event_type: 'navigation',
         ts: new Date().toISOString(),
-        request_url: url,
-        log_message: `Navigated to ${url}`,
+        request_url: displayUrl,
+        log_message: `Navigated to ${displayUrl}`,
       })
     } catch {
-      // cross-origin — expected, ignore
+      // SecurityError — iframe is cross-origin (escaped proxy to a different origin)
+      // We cannot read the URL, but we know it escaped.  Force back to the last
+      // known proxy URL so the next load will be proxied again.
+      const safeFallback = proxyUrl || toProxyUrl(currentUrl, sessionId)
+      if (iframeRef.current && iframeRef.current.src !== safeFallback) {
+        setProxyUrl(safeFallback)
+      }
       onEvent({
         id: `ev-nav-${Date.now()}`,
         session_id: sessionId,
         event_type: 'navigation',
         ts: new Date().toISOString(),
         request_url: currentUrl,
-        log_message: `Page loaded (cross-origin)`,
+        log_message: `Page loaded (cross-origin — possible proxy escape, re-routing)`,
       })
     }
   }
