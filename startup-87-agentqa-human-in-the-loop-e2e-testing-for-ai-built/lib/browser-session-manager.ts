@@ -64,19 +64,13 @@ async function getBrowser(): Promise<Browser> {
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const sparticuz = require('@sparticuz/chromium')
-    executablePath = await sparticuz.default.executablePath()
-    launchArgs = sparticuz.default.args
-  } catch {
-    executablePath = undefined
-    launchArgs = [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-dev-shm-usage',
-      '--disable-gpu',
-      '--no-first-run',
-      '--no-zygote',
-      '--single-process',
-    ]
+    // @sparticuz/chromium exports a function directly (no .default wrapper)
+    const chromiumModule = sparticuz.default ?? sparticuz
+    executablePath = await chromiumModule.executablePath()
+    launchArgs = chromiumModule.args
+  } catch (sparticuzErr) {
+    console.error('[browser] @sparticuz/chromium failed:', sparticuzErr)
+    throw new Error('Chromium unavailable. @sparticuz/chromium setup failed: ' + String(sparticuzErr))
   }
 
   browserSingleton = await chromium.launch({
