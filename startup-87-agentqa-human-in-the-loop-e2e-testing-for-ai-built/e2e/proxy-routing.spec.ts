@@ -562,3 +562,60 @@ test.describe('Frame navigation — all frames stay within proxy', () => {
     expect(intercepted[0]).toContain('example.com')
   })
 })
+
+// ─── New injection features ────────────────────────────────────
+
+test.describe('Injected script — new proxy hardening features', () => {
+  let token: string | null = null
+
+  test.beforeAll(async ({ request }) => {
+    token = await signUp(request, `pr.new.${RUN}@mailinator.com`, PW)
+  })
+
+  test('service worker registration is blocked in injected script', async ({ request }) => {
+    if (!token) { test.skip(true, 'Auth unavailable'); return }
+    const res = await request.get(
+      url(`/api/proxy?url=${encodeURIComponent('https://example.com')}&session=sw-test`),
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const html = await res.text()
+    // The injected script must neutralise navigator.serviceWorker.register
+    expect(html).toContain('serviceWorker')
+    expect(html).toMatch(/serviceWorker\.register\s*=\s*function/)
+  })
+
+  test('MutationObserver is present in injected script for dynamic DOM rewriting', async ({ request }) => {
+    if (!token) { test.skip(true, 'Auth unavailable'); return }
+    const res = await request.get(
+      url(`/api/proxy?url=${encodeURIComponent('https://example.com')}&session=mo-test`),
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const html = await res.text()
+    expect(html).toContain('MutationObserver')
+  })
+
+  test('window.open is intercepted in injected script', async ({ request }) => {
+    if (!token) { test.skip(true, 'Auth unavailable'); return }
+    const res = await request.get(
+      url(`/api/proxy?url=${encodeURIComponent('https://example.com')}&session=open-test`),
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const html = await res.text()
+    expect(html).toContain('window.open')
+    // The override must be present
+    expect(html).toMatch(/_origOpen/)
+  })
+
+  test('service worker registration code is stripped from proxied HTML', async ({ request }) => {
+    if (!token) { test.skip(true, 'Auth unavailable'); return }
+    const res = await request.get(
+      url(`/api/proxy?url=${encodeURIComponent('https://example.com')}&session=sw-strip-test`),
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const html = await res.text()
+    // Any SW registration in the proxied page source must be neutralised
+    // (replaced with comment — the target's HTML should not have live serviceWorker.register calls)
+    const rawRegistrations = [...html.matchAll(/navigator\.serviceWorker\.register\s*\(/g)]
+    expect(rawRegistrations.length).toBe(0)
+  })
+})

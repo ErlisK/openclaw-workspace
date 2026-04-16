@@ -215,6 +215,102 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     };
   }
 
+  // ─── MutationObserver: rewrite dynamically inserted DOM nodes ──────────────
+  // Handles JS frameworks that insert <a>, <script>, <img>, <form> after load.
+  if (typeof window !== 'undefined' && APP_URL && typeof MutationObserver !== 'undefined') {
+    var _proxyOriginMO = window.location.origin;
+    var _proxyBaseMO = _proxyOriginMO + '/api/proxy';
+
+    function rewriteAttr(el, attr, base) {
+      try {
+        var raw = el.getAttribute(attr);
+        if (!raw) return;
+        if (raw.indexOf('/api/proxy') !== -1) return;
+        if (raw.charAt(0) === '#' || raw.indexOf('javascript:') === 0 || raw.indexOf('data:') === 0) return;
+        var abs;
+        try { abs = new URL(raw, base).toString(); } catch(e) { return; }
+        // Only rewrite same-origin target links
+        try {
+          var absU = new URL(abs);
+          var appU = new URL(APP_URL);
+          if (absU.origin !== appU.origin) return;
+          el.setAttribute(attr, _proxyBaseMO + '?url=' + encodeURIComponent(abs) + '&session=' + SESSION_ID);
+        } catch(e) { return; }
+      } catch(e) {}
+    }
+
+    function rewriteElement(el) {
+      if (!el || typeof el.tagName !== 'string') return;
+      var tag = el.tagName.toUpperCase();
+      if (tag === 'A' || tag === 'LINK' || tag === 'AREA') rewriteAttr(el, 'href', APP_URL);
+      if (tag === 'SCRIPT' || tag === 'IMG' || tag === 'IFRAME' || tag === 'EMBED' || tag === 'AUDIO' || tag === 'VIDEO' || tag === 'SOURCE') rewriteAttr(el, 'src', APP_URL);
+      if (tag === 'FORM') rewriteAttr(el, 'action', APP_URL);
+    }
+
+    function walkTree(node) {
+      if (!node) return;
+      rewriteElement(node);
+      var children = node.querySelectorAll ? node.querySelectorAll('a[href],link[href],area[href],script[src],img[src],iframe[src],embed[src],audio[src],video[src],source[src],form[action]') : [];
+      for (var i = 0; i < children.length; i++) rewriteElement(children[i]);
+    }
+
+    try {
+      var _mo = new MutationObserver(function(mutations) {
+        for (var m = 0; m < mutations.length; m++) {
+          var added = mutations[m].addedNodes;
+          for (var n = 0; n < added.length; n++) walkTree(added[n]);
+          // Also handle attribute changes on existing nodes
+          if (mutations[m].type === 'attributes') rewriteElement(mutations[m].target);
+        }
+      });
+      if (typeof document !== 'undefined' && document.body) {
+        _mo.observe(document.documentElement || document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['href', 'src', 'action']
+        });
+      } else if (typeof document !== 'undefined') {
+        document.addEventListener('DOMContentLoaded', function() {
+          _mo.observe(document.documentElement || document.body, {
+            childList: true, subtree: true, attributes: true,
+            attributeFilter: ['href', 'src', 'action']
+          });
+        });
+      }
+    } catch(e) {}
+  }
+
+  // ─── window.open interception ─────────────────────────────────────────────
+  if (typeof window !== 'undefined' && APP_URL) {
+    try {
+      var _origOpen = window.open;
+      window.open = function(url, target, features) {
+        if (url && typeof url === 'string') {
+          try {
+            var abs;
+            try { abs = new URL(url, APP_URL).toString(); } catch(e) { abs = url; }
+            var appOrigin = new URL(APP_URL).origin;
+            if (new URL(abs).origin === appOrigin) {
+              var proxied = window.location.origin + '/api/proxy?url=' + encodeURIComponent(abs) + '&session=' + SESSION_ID;
+              return _origOpen.call(window, proxied, target, features);
+            }
+          } catch(e) {}
+        }
+        return _origOpen.apply(window, arguments);
+      };
+    } catch(e) {}
+  }
+
+  // ─── Block service worker registration ──────────────────────────────────
+  if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
+    try {
+      navigator.serviceWorker.register = function() {
+        return Promise.reject(new Error('[betawindow] service worker registration blocked'));
+      };
+    } catch(e) {}
+  }
+
   // ─── Link + navigation interception ──────────────────────────
   // Handles dynamically-set hrefs and JS-driven navigation (history.pushState,
   // window.location.assign, etc.) that the server-side HTML rewriter cannot see.

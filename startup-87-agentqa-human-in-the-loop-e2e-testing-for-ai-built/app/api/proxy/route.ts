@@ -73,6 +73,31 @@ const STRIP_REQUEST_HEADERS = new Set([
   'x-forwarded-for', 'x-real-ip',
 ])
 
+/**
+ * Rewrite absolute target-origin URLs inside an inline <script> block.
+ * Handles JSON blobs (like __NEXT_DATA__), string literals, and
+ * common JS config patterns like apiBase: "https://site.com/api".
+ */
+function rewriteInlineScript(js: string, targetOrigin: string, proxyBase: string, sessionId: string): string {
+  // Replace any occurrence of the target origin followed by a path inside a quoted string
+  // e.g. "https://site.com/api" → "/api/proxy?url=..."
+  // We match both double and single quoted strings containing the target origin
+  return js.replace(
+    /(["\'`])(https?:\/\/)(?:[^\/"'`\s]+)(\/[^"'`]*)?\1/g,
+    (match, quote, _scheme, rest) => {
+      const fullUrl = match.slice(1, -1) // strip quotes
+      try {
+        const u = new URL(fullUrl)
+        if (u.origin === targetOrigin) {
+          const proxied = `${proxyBase}?url=${encodeURIComponent(fullUrl)}&session=${sessionId}`
+          return `${quote}${proxied}${quote}`
+        }
+      } catch { /* ignore */ }
+      return match
+    }
+  )
+}
+
 function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessionId: string): string {
   const base = new URL(targetBase)
 
@@ -115,6 +140,16 @@ function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessio
     })
     // <base href="..."> — remove it (we handle base resolution ourselves)
     .replace(/<base\s[^>]*>/gi, '')
+    // Rewrite inline <script> blocks that contain target-origin URLs
+    // (covers __NEXT_DATA__, window.__CONFIG__, etc.)
+    .replace(/<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/gi, (scriptTag, contents) => {
+      if (!contents.trim()) return scriptTag
+      const rewritten = rewriteInlineScript(contents, base.origin, proxyBase, sessionId)
+      return scriptTag.replace(contents, rewritten)
+    })
+    // Remove service-worker registration code (prevents SW from hijacking the proxied page)
+    .replace(/navigator\.serviceWorker\.register\s*\([^)]+\)/gi, '/* [betawindow: service worker blocked] */')
+    .replace(/<link[^>]+\brel\s*=\s*["']?serviceworker["']?[^>]*>/gi, '')
 }
 
 function buildInjectedScript(sessionId: string, appUrl: string, reportUrl: string): string {
