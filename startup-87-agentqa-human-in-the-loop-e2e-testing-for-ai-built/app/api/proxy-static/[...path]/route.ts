@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateProxyUrl } from '@/lib/proxy-security'
+import { getSupabaseClient } from '@/lib/supabase/get-client'
 
 /**
  * GET /api/proxy-static/:sessionId/:protocol/:host/...assetPath
@@ -67,6 +68,13 @@ export async function GET(
     return new NextResponse(urlCheck.reason, { status: urlCheck.status })
   }
 
+  // Auth check — only authenticated users can use the proxy
+  const supabase = await getSupabaseClient(req)
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+
   let upstreamRes: Response
   try {
     upstreamRes = await fetch(urlCheck.url.toString(), {
@@ -84,6 +92,7 @@ export async function GET(
   const upstreamCT = upstreamRes.headers.get('content-type') ?? ''
   const correctedType = inferMimeType(targetUrl, upstreamCT)
   const isJavascript = correctedType.includes('javascript')
+  const isCSS = correctedType.includes('css')
 
   const respHeaders = new Headers()
   respHeaders.set('content-type', correctedType)
@@ -113,8 +122,48 @@ export async function GET(
     return new NextResponse(patchedJs, { status: upstreamRes.status, headers: respHeaders })
   }
 
+  // For CSS: rewrite url() and @import references to go through proxy
+  if (isCSS) {
+    const text = await upstreamRes.text()
+    if (text.length > MAX_SIZE) return new NextResponse('Too large', { status: 413 })
+
+    const reqUrl = new URL(req.url)
+    const proxyBase = `${reqUrl.origin}/api/proxy`
+    const sessionId = _sessionId
+
+    const rewrittenCss = rewriteCssUrls(text, targetUrl, proxyBase, sessionId)
+    return new NextResponse(rewrittenCss, { status: upstreamRes.status, headers: respHeaders })
+  }
+
   const body = await upstreamRes.arrayBuffer()
   if (body.byteLength > MAX_SIZE) return new NextResponse('Too large', { status: 413 })
 
   return new NextResponse(body, { status: upstreamRes.status, headers: respHeaders })
+}
+
+/**
+ * Rewrite url() references inside CSS to go through the proxy.
+ */
+function rewriteCssUrls(css: string, cssFileUrl: string, proxyBase: string, sessionId: string): string {
+  let baseUrl: URL
+  try { baseUrl = new URL(cssFileUrl) } catch { return css }
+
+  function resolveAndProxy(rawPath: string): string {
+    if (!rawPath) return rawPath
+    const trimmed = rawPath.trim()
+    if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('#') || trimmed.startsWith('javascript:')) return rawPath
+    if (trimmed.includes('/api/proxy')) return rawPath
+    try {
+      const abs = new URL(trimmed, baseUrl).toString()
+      return `${proxyBase}?url=${encodeURIComponent(abs)}&session=${sessionId}`
+    } catch { return rawPath }
+  }
+
+  return css
+    .replace(/url\(\s*(['"]?)([^)'"]+?)\1\s*\)/g, (_match, quote, path) => {
+      return `url(${quote}${resolveAndProxy(path)}${quote})`
+    })
+    .replace(/@import\s+(['"])([^'"]+)\1/g, (_match, quote, path) => {
+      return `@import ${quote}${resolveAndProxy(path)}${quote}`
+    })
 }

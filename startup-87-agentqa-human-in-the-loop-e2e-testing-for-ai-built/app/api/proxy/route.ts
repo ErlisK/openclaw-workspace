@@ -98,6 +98,37 @@ function rewriteInlineScript(js: string, targetOrigin: string, proxyBase: string
   )
 }
 
+/**
+ * Rewrite url() references inside CSS to go through the proxy.
+ * Handles: url(path), url("path"), url('path'), @import "path", @import url(...)
+ */
+function rewriteCssUrls(css: string, cssFileUrl: string, proxyBase: string, sessionId: string): string {
+  let baseUrl: URL
+  try { baseUrl = new URL(cssFileUrl) } catch { return css }
+
+  function resolveAndProxy(rawPath: string): string {
+    if (!rawPath) return rawPath
+    const trimmed = rawPath.trim()
+    if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('#') || trimmed.startsWith('javascript:')) return rawPath
+    // Already proxied
+    if (trimmed.includes('/api/proxy')) return rawPath
+    try {
+      const abs = new URL(trimmed, baseUrl).toString()
+      return `${proxyBase}?url=${encodeURIComponent(abs)}&session=${sessionId}`
+    } catch { return rawPath }
+  }
+
+  return css
+    // url(...) — quoted and unquoted forms
+    .replace(/url\(\s*(['"]?)([^)'"]+?)\1\s*\)/g, (_match, quote, path) => {
+      return `url(${quote}${resolveAndProxy(path)}${quote})`
+    })
+    // @import "..." or @import '...' (without url())
+    .replace(/@import\s+(['"])([^'"]+)\1/g, (_match, quote, path) => {
+      return `@import ${quote}${resolveAndProxy(path)}${quote}`
+    })
+}
+
 function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessionId: string): string {
   const base = new URL(targetBase)
 
@@ -116,36 +147,41 @@ function rewriteUrls(html: string, targetBase: string, proxyBase: string, sessio
   }
 
   return html
-    // href="..." on <a> and <link>
-    .replace(/(<(?:a|link|area)\s[^>]*\s*href\s*=\s*)("([^"]*)"|'([^']*)')/gi, (match, prefix, quoted, dq, sq) => {
+    // ── Resource-loading tags only ──────────────────────────────────────────
+    // IMPORTANT: We only rewrite <link href> and <script src> — these are
+    // resource loads that MUST go through the proxy. We do NOT rewrite
+    // <a href>, <img src>, <form action>, srcset, etc. because those appear
+    // in the React component tree and the RSC hydration data still has the
+    // original URLs. Rewriting them causes a hydration mismatch that makes
+    // React unmount everything → blank page. Instead, the client-side logger
+    // script handles navigation (click handler, pushState) and resource
+    // loading (fetch/XHR interceptor, MutationObserver, image error handler).
+
+    // href="..." on <link> only (stylesheets, preloads, icons — NOT <a> tags)
+    .replace(/(<link\s[^>]*\s*href\s*=\s*)("([^"]*)"|'([^']*)')/gi, (match, prefix, quoted, dq, sq) => {
       const href = dq ?? sq
       return `${prefix}"${toProxied(href)}"`
     })
-    // src="..." on script, img, iframe, embed, source
-    .replace(/(<(?:script|img|iframe|embed|source|input|audio|video)\s[^>]*\s*src\s*=\s*)("([^"]*)"|'([^']*)')/gi, (match, prefix, quoted, dq, sq) => {
+    // src="..." on <script> only (JS bundles — NOT <img>, <iframe>, etc.)
+    .replace(/(<script\s[^>]*\s*src\s*=\s*)("([^"]*)"|'([^']*)')/gi, (match, prefix, quoted, dq, sq) => {
       const src = dq ?? sq
       return `${prefix}"${toProxied(src)}"`
     })
-    // action="..." on <form>
-    .replace(/(<form\s[^>]*\s*action\s*=\s*)("([^"]*)"|'([^']*)')/gi, (match, prefix, quoted, dq, sq) => {
-      const action = dq ?? sq
-      return `${prefix}"${toProxied(action)}"`
-    })
-    // srcset="..." (responsive images)
-    .replace(/\bsrcset\s*=\s*"([^"]*)"/gi, (match, srcset) => {
-      const rewritten = srcset.replace(/([^\s,]+)(\s+[^,]*)?/g, (m: string, src: string, descriptor: string = '') => {
-        return `${toProxied(src)}${descriptor}`
-      })
-      return `srcset="${rewritten}"`
-    })
     // <base href="..."> — remove it (we handle base resolution ourselves)
     .replace(/<base\s[^>]*>/gi, '')
-    // Rewrite inline <script> blocks that contain target-origin URLs
-    // (covers __NEXT_DATA__, window.__CONFIG__, etc.)
-    .replace(/<script(?![^>]*\bsrc\b)[^>]*>([\s\S]*?)<\/script>/gi, (scriptTag, contents) => {
-      if (!contents.trim()) return scriptTag
-      const rewritten = rewriteInlineScript(contents, base.origin, proxyBase, sessionId)
-      return scriptTag.replace(contents, rewritten)
+    // Strip <meta> CSP / X-Frame-Options tags — the proxy sets its own headers
+    .replace(/<meta\s[^>]*http-equiv\s*=\s*["']?\s*(?:Content-Security-Policy|X-Frame-Options)\s*["']?[^>]*>/gi, '')
+    // <meta http-equiv="refresh" content="N; url=..."> — rewrite the URL
+    .replace(/<meta\s[^>]*http-equiv\s*=\s*["']?refresh["']?[^>]*>/gi, (tag) => {
+      return tag.replace(/content\s*=\s*["'](\d+;\s*url\s*=\s*)([^"']+)["']/gi, (_m, prefix, url) => {
+        return `content="${prefix}${toProxied(url.trim())}"`
+      })
+    })
+    // Rewrite url() references inside <style> blocks
+    .replace(/<style[^>]*>([\s\S]*?)<\/style>/gi, (styleTag, contents) => {
+      if (!contents.trim()) return styleTag
+      const rewritten = rewriteCssUrls(contents, base.toString(), proxyBase, sessionId)
+      return styleTag.replace(contents, rewritten)
     })
     // Remove service-worker registration code (prevents SW from hijacking the proxied page)
     .replace(/navigator\.serviceWorker\.register\s*\([^)]+\)/gi, '/* [betawindow: service worker blocked] */')
@@ -274,6 +310,21 @@ export async function GET(req: NextRequest) {
         }
       )
       return new NextResponse(patchedJs, {
+        status: upstreamRes.status,
+        headers: respHeaders,
+      })
+    }
+
+    // For CSS files: rewrite url() and @import references to go through proxy
+    if (isCSS && sessionId) {
+      const text = await upstreamRes.text()
+      if (text.length > MAX_RESPONSE_SIZE) {
+        return new NextResponse('Response too large', { status: 413 })
+      }
+      const reqUrl2 = new URL(req.url)
+      const cssProxyBase = `${reqUrl2.origin}/api/proxy`
+      const rewrittenCss = rewriteCssUrls(text, currentTarget.toString(), cssProxyBase, sessionId)
+      return new NextResponse(rewrittenCss, {
         status: upstreamRes.status,
         headers: respHeaders,
       })

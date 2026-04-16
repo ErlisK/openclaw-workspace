@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { BrowserEvent } from '@/lib/browser-session-manager'
+import { encodeProxySubdomain, getProxySuffix } from '@/lib/proxy-subdomain'
 
 interface Props {
   sessionId: string
@@ -11,32 +12,73 @@ interface Props {
   onUrlChange?: (url: string) => void
 }
 
-/** Wrap a target URL through our server-side proxy so X-Frame-Options / CSP frame-ancestors are stripped. */
+/**
+ * Build the proxy subdomain URL for a target URL.
+ * Dev:  http://snippetci-com.proxy.localhost:3000/
+ * Prod: https://snippetci-com.proxy.betawindow.com/
+ */
 function toProxyUrl(targetUrl: string, sessionId: string): string {
   if (!targetUrl) return ''
-  return `/api/proxy?url=${encodeURIComponent(targetUrl)}&session=${encodeURIComponent(sessionId)}`
+  try {
+    const parsed = new URL(targetUrl)
+    const encoded = encodeProxySubdomain(parsed.hostname)
+    const suffix = getProxySuffix()
+    // Use the current page's protocol and port for the proxy subdomain
+    const proto = window.location.protocol
+    const port = window.location.port ? `:${window.location.port}` : ''
+    const path = parsed.pathname + parsed.search
+    const sep = parsed.search ? '&' : '?'
+    return `${proto}//${encoded}.${suffix}${port}${path}${sep}_bw_session=${encodeURIComponent(sessionId)}`
+  } catch {
+    return ''
+  }
+}
+
+/** Extract the real target URL from the iframe's proxy subdomain URL. */
+function extractTargetUrl(iframeHref: string, jobUrl: string): string {
+  try {
+    const iframe = new URL(iframeHref)
+    const suffix = getProxySuffix()
+    const hostOnly = iframe.hostname
+    if (hostOnly.endsWith(`.${suffix}`)) {
+      // Decode subdomain back to target hostname
+      const sub = hostOnly.slice(0, -(suffix.length + 1))
+      // Reverse: single hyphens → dots, double hyphens → single hyphens
+      const placeholder = '\x00'
+      const targetHost = sub.replace(/--/g, placeholder).replace(/-/g, '.').replace(new RegExp(placeholder, 'g'), '-')
+      const targetProto = new URL(jobUrl).protocol
+      const path = iframe.pathname + iframe.search.replace(/[?&]_bw_session=[^&]*/, '')
+      return `${targetProto}//${targetHost}${path}`
+    }
+  } catch { /* ignore */ }
+  return iframeHref
 }
 
 export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChange, onUrlChange }: Props) {
   const [status, setStatus] = useState<'starting' | 'running' | 'error' | 'stopped'>('starting')
   const [addressBar, setAddressBar] = useState(jobUrl)
   const [currentUrl, setCurrentUrl] = useState(jobUrl)
-  const [proxyUrl, setProxyUrl] = useState(() => toProxyUrl(jobUrl, sessionId))
+  const [proxyUrl, setProxyUrl] = useState('')  // empty on server, set on client
   const [isNavigating, setIsNavigating] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const startedRef = useRef(false)
-  const reproxyingRef = useRef(false) // guard against re-proxy reload loop
+
+  // Compute proxy URL on client only (needs window.location for protocol/port)
+  useEffect(() => {
+    if (!proxyUrl && jobUrl) {
+      setProxyUrl(toProxyUrl(jobUrl, sessionId))
+    }
+  }, [jobUrl, sessionId, proxyUrl])
 
   const updateStatus = useCallback((s: typeof status) => {
     setStatus(s)
     onStatusChange?.(s)
   }, [onStatusChange])
 
-  // Signal running as soon as we mount (iframe loads itself)
+  // Signal running as soon as we mount
   useEffect(() => {
     if (startedRef.current) return
     startedRef.current = true
-    // Small delay so the iframe has a moment to begin loading
     const t = setTimeout(() => updateStatus('running'), 800)
     return () => clearTimeout(t)
   }, [updateStatus])
@@ -48,67 +90,23 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
         const url = e.data.url as string
         setCurrentUrl(url)
         setAddressBar(url)
-        setProxyUrl(toProxyUrl(url, sessionId))
         onUrlChange?.(url)
       }
     }
     window.addEventListener('message', onMsg)
     return () => window.removeEventListener('message', onMsg)
-  }, [onUrlChange, sessionId])
+  }, [onUrlChange])
 
-  // Emit a click event when the tester clicks in the iframe area
-  // (we can't capture actual clicks inside a cross-origin iframe, so we
-  //  log a synthetic event when the user clicks on the overlay border)
   function handleIframeLoad() {
     updateStatus('running')
-    // Try to read the iframe's current URL (works when proxied = same-origin betawindow.com)
     try {
       const iwin = iframeRef.current?.contentWindow
       if (!iwin) return
-
       const iframeHref = iwin.location?.href ?? ''
+      if (!iframeHref || iframeHref === 'about:blank') return
 
-      // ── Proxy-escape detection ──────────────────────────────────────────────
-      // If the iframe navigated to a URL that is NOT a proxy route and NOT
-      // about:blank/about:srcdoc, it has escaped the proxy.  Re-proxy it.
-      const isProxied =
-        iframeHref.includes('/api/proxy?url=') ||
-        iframeHref.includes('/api/proxy-static/') ||
-        iframeHref.startsWith('about:') ||
-        iframeHref === ''
-
-      if (iframeHref && !isProxied) {
-        // iframe escaped the proxy — force re-navigation through proxy
-        // Guard: don't re-proxy if we already just did (prevents load-loop)
-        if (reproxyingRef.current) {
-          reproxyingRef.current = false
-          return
-        }
-        reproxyingRef.current = true
-        const reProxied = toProxyUrl(iframeHref, sessionId)
-        setProxyUrl(reProxied)
-        setCurrentUrl(iframeHref)
-        setAddressBar(iframeHref)
-        onUrlChange?.(iframeHref)
-        onEvent({
-          id: `ev-reproxy-${Date.now()}`,
-          session_id: sessionId,
-          event_type: 'navigation',
-          ts: new Date().toISOString(),
-          request_url: iframeHref,
-          log_message: `[proxy-escape] Re-routing ${iframeHref} through proxy`,
-        })
-        return
-      }
-      // ────────────────────────────────────────────────────────────────────────
-
-      // Extract the real target URL from the proxy URL's ?url= param
-      let displayUrl = iframeHref
-      try {
-        const u = new URL(iframeHref)
-        const targetParam = u.searchParams.get('url')
-        if (targetParam) displayUrl = targetParam
-      } catch { /* ignore */ }
+      // Extract the real target URL from the proxy subdomain URL
+      const displayUrl = extractTargetUrl(iframeHref, jobUrl)
 
       if (displayUrl && displayUrl !== currentUrl) {
         setCurrentUrl(displayUrl)
@@ -124,20 +122,14 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
         log_message: `Navigated to ${displayUrl}`,
       })
     } catch {
-      // SecurityError — iframe is cross-origin (escaped proxy to a different origin)
-      // We cannot read the URL, but we know it escaped.  Force back to the last
-      // known proxy URL so the next load will be proxied again.
-      const safeFallback = proxyUrl || toProxyUrl(currentUrl, sessionId)
-      if (iframeRef.current && iframeRef.current.src !== safeFallback) {
-        setProxyUrl(safeFallback)
-      }
+      // Cross-origin — can't read iframe URL (shouldn't happen with subdomain proxy)
       onEvent({
         id: `ev-nav-${Date.now()}`,
         session_id: sessionId,
         event_type: 'navigation',
         ts: new Date().toISOString(),
         request_url: currentUrl,
-        log_message: `Page loaded (cross-origin — possible proxy escape, re-routing)`,
+        log_message: 'Page loaded (cross-origin)',
       })
     }
   }
@@ -162,7 +154,6 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
       request_url: safe,
       log_message: `Navigating to ${safe}`,
     })
-    // Update iframe src by changing state (re-render)
     setIsNavigating(false)
   }
 
@@ -171,16 +162,16 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
     await navigateTo(addressBar)
   }
 
-  function handleBack() {
-    try { iframeRef.current?.contentWindow?.history.back() } catch { /* cross-origin */ }
+  function sendCommand(command: 'back' | 'forward' | 'reload') {
+    try {
+      iframeRef.current?.contentWindow?.postMessage({ type: 'betawindow_command', command }, '*')
+    } catch { /* cross-origin fallback — shouldn't happen with postMessage */ }
   }
 
-  function handleForward() {
-    try { iframeRef.current?.contentWindow?.history.forward() } catch { /* cross-origin */ }
-  }
-
+  function handleBack() { sendCommand('back') }
+  function handleForward() { sendCommand('forward') }
   function handleReload() {
-    try { iframeRef.current?.contentWindow?.location.reload() } catch { /* cross-origin */ }
+    sendCommand('reload')
     onEvent({
       id: `ev-reload-${Date.now()}`,
       session_id: sessionId,
@@ -196,35 +187,14 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
       {/* Browser chrome bar */}
       <div className="flex items-center gap-2 px-3 py-2 bg-gray-800 border-b border-gray-700 shrink-0">
         <div className="flex items-center gap-1">
-          <button
-            onClick={handleBack}
-            className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-            title="Back"
-            aria-label="Navigate back"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+          <button onClick={handleBack} className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors" title="Back" aria-label="Navigate back">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <button
-            onClick={handleForward}
-            className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-            title="Forward"
-            aria-label="Navigate forward"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+          <button onClick={handleForward} className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors" title="Forward" aria-label="Navigate forward">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
-          <button
-            onClick={handleReload}
-            className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors"
-            title="Reload"
-            aria-label="Reload page"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+          <button onClick={handleReload} className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors" title="Reload" aria-label="Reload page">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
           </button>
         </div>
 
@@ -242,34 +212,13 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
               aria-label="URL address bar"
             />
           </div>
-          <button
-            type="submit"
-            disabled={isNavigating}
-            className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors disabled:opacity-50"
-          >
-            Go
-          </button>
+          <button type="submit" disabled={isNavigating} className="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors disabled:opacity-50">Go</button>
         </form>
 
         <div className="shrink-0 flex items-center gap-1.5">
-          {status === 'starting' && (
-            <span className="flex items-center gap-1 text-xs text-yellow-400">
-              <span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-              Starting…
-            </span>
-          )}
-          {status === 'running' && (
-            <span className="flex items-center gap-1 text-xs text-green-400">
-              <span className="w-2 h-2 bg-green-400 rounded-full" />
-              Live
-            </span>
-          )}
-          {status === 'error' && (
-            <span className="flex items-center gap-1 text-xs text-red-400">
-              <span className="w-2 h-2 bg-red-400 rounded-full" />
-              Error
-            </span>
-          )}
+          {status === 'starting' && <span className="flex items-center gap-1 text-xs text-yellow-400"><span className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />Starting...</span>}
+          {status === 'running' && <span className="flex items-center gap-1 text-xs text-green-400"><span className="w-2 h-2 bg-green-400 rounded-full" />Live</span>}
+          {status === 'error' && <span className="flex items-center gap-1 text-xs text-red-400"><span className="w-2 h-2 bg-red-400 rounded-full" />Error</span>}
         </div>
       </div>
 
@@ -278,30 +227,19 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
         {status === 'starting' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 z-20">
             <div className="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4" />
-            <p className="text-sm text-gray-400">Loading browser…</p>
+            <p className="text-sm text-gray-400">Loading browser...</p>
             <p className="text-xs text-gray-600 mt-1">{jobUrl}</p>
           </div>
         )}
-
         {status === 'error' && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 z-20 px-6 text-center">
-            <div className="text-4xl mb-3">🚫</div>
             <p className="text-sm font-semibold text-red-300 mb-1">Could not load the app</p>
-            <p className="text-xs text-gray-400">The app URL may be refusing to embed. Try opening it in a new tab.</p>
-            <a
-              href={currentUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors"
-            >
-              Open in new tab ↗
-            </a>
+            <a href={currentUrl} target="_blank" rel="noopener noreferrer" className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs rounded-md transition-colors">Open in new tab</a>
           </div>
         )}
-
         <iframe
           ref={iframeRef}
-          src={proxyUrl || currentUrl}
+          src={proxyUrl || undefined}
           className="w-full h-full border-0"
           title="App under test"
           data-testid="browser-viewport"

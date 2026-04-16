@@ -43,6 +43,19 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
 (function(SESSION_ID, APP_URL, REPORT_URL) {
   'use strict';
 
+  // ─── URL masking ────────────────────────────────────────────
+  // MUST run before any framework scripts (Next.js, React Router, etc.)
+  // so they read the correct pathname from window.location.
+  // The iframe URL is /api/proxy?url=TARGET&session=..., but frameworks
+  // need to see the TARGET path (e.g. "/" or "/about") to match routes.
+  if (typeof window !== 'undefined' && typeof history !== 'undefined' && APP_URL) {
+    try {
+      var _appUrlParsed = new URL(APP_URL);
+      var _targetPath = _appUrlParsed.pathname + _appUrlParsed.search + _appUrlParsed.hash;
+      history.replaceState(history.state, '', _targetPath || '/');
+    } catch(e) {}
+  }
+
   // ─── State ──────────────────────────────────────────────────
   var buf = [];
   var flushTimer = null;
@@ -112,6 +125,48 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     });
   }
 
+  // ─── URL rewriting helper for fetch/XHR ──────────────────────
+  // Rewrites URLs that resolve to the proxy host (but should go to
+  // the target app) so they route through /api/proxy instead.
+  var _proxyOriginFetch = (typeof window !== 'undefined') ? window.location.origin : '';
+  var _proxyBaseFetch = _proxyOriginFetch + '/api/proxy';
+
+  function rewriteFetchUrl(rawUrl) {
+    if (!rawUrl || !APP_URL || !_proxyOriginFetch) return null;
+    var s = String(rawUrl);
+    // Already routed through proxy — leave alone
+    if (s.indexOf('/api/proxy') === 0 || s.indexOf(_proxyOriginFetch + '/api/proxy') === 0) return null;
+    // Skip our own session event reporting endpoints
+    if (s.indexOf('/api/sessions') === 0 || s.indexOf(_proxyOriginFetch + '/api/sessions') === 0) return null;
+    // Skip data: / blob: / javascript: URLs
+    if (s.indexOf('data:') === 0 || s.indexOf('blob:') === 0 || s.indexOf('javascript:') === 0) return null;
+
+    var resolved;
+    try { resolved = new URL(s, document.baseURI || window.location.href); } catch(e) { return null; }
+
+    // If the resolved URL points to the proxy host (not already a proxy route),
+    // it was a relative URL that the browser resolved against the wrong origin.
+    // Re-resolve the path against the target app URL.
+    if (resolved.origin === _proxyOriginFetch) {
+      var pathWithQuery = resolved.pathname + resolved.search + resolved.hash;
+      try {
+        var targetResolved = new URL(pathWithQuery, APP_URL);
+        return _proxyBaseFetch + '?url=' + encodeURIComponent(targetResolved.toString()) + '&session=' + SESSION_ID;
+      } catch(e) { return null; }
+    }
+
+    // If the resolved URL points to the target app origin directly, proxy it
+    try {
+      var appOrigin = new URL(APP_URL).origin;
+      if (resolved.origin === appOrigin) {
+        return _proxyBaseFetch + '?url=' + encodeURIComponent(resolved.toString()) + '&session=' + SESSION_ID;
+      }
+    } catch(e) {}
+
+    // External URL — leave alone (third-party APIs, CDNs, etc.)
+    return null;
+  }
+
   // ─── window.fetch patching ───────────────────────────────────
   if (typeof window !== 'undefined' && typeof window.fetch === 'function') {
     var _origFetch = window.fetch;
@@ -123,6 +178,19 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
       // Skip the reporting URL itself to prevent infinite loops
       if (REPORT_URL && (reqUrl === REPORT_URL || reqUrl.indexOf(REPORT_URL) === 0)) {
         return _origFetch.call(this, input, init);
+      }
+
+      // Rewrite URL to go through proxy if needed
+      var rewritten = rewriteFetchUrl(reqUrl);
+      if (rewritten) {
+        if (typeof input === 'string') {
+          input = rewritten;
+        } else if (typeof Request !== 'undefined' && input instanceof Request) {
+          input = new Request(rewritten, input);
+        } else {
+          input = rewritten;
+        }
+        reqUrl = rewritten;
       }
 
       var method = (init && init.method) ? init.method.toUpperCase() : 'GET';
@@ -172,6 +240,15 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     XMLHttpRequest.prototype.open = function(method, url) {
       this._aqMethod = (method || 'GET').toUpperCase();
       this._aqUrl = String(url || '');
+      // Rewrite URL to go through proxy if needed
+      var rewritten = rewriteFetchUrl(this._aqUrl);
+      if (rewritten) {
+        this._aqUrl = rewritten;
+        var args = Array.prototype.slice.call(arguments);
+        args[1] = rewritten;
+        this._aqHeaders = {};
+        return _XHROpen.apply(this, args);
+      }
       this._aqHeaders = {};
       return _XHROpen.apply(this, arguments);
     };
@@ -215,8 +292,12 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     };
   }
 
-  // ─── MutationObserver: rewrite dynamically inserted DOM nodes ──────────────
-  // Handles JS frameworks that insert <a>, <script>, <img>, <form> after load.
+  // ─── Proactive DOM rewriting ─────────────────────────────────────────────
+  // After React hydration, rewrite all <a href> and <link href> in the DOM
+  // so that native link-following goes through the proxy. Also patch
+  // Element.prototype.setAttribute so dynamically set href/src values are
+  // rewritten BEFORE the browser acts on them (MutationObserver is too late
+  // for <link rel="prefetch">).
   if (typeof window !== 'undefined' && APP_URL && typeof MutationObserver !== 'undefined') {
     var _proxyOriginMO = window.location.origin;
     var _proxyBaseMO = _proxyOriginMO + '/api/proxy';
@@ -386,7 +467,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
           if (!proxied) return;
 
           evt.preventDefault();
-          evt.stopPropagation();
+          evt.stopImmediatePropagation();
           window.location.href = proxied;
         } catch(e) {}
       }, true /* capture phase — fires before framework handlers */);
@@ -395,6 +476,23 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     // 2. history.pushState / replaceState interception.
     //    SPAs (Next.js, React Router) call these for soft navigation.
     //    We detect same-origin target paths and do a full proxy reload instead.
+
+    // Check if the page is already showing the same target URL.
+    // After the early replaceState, location.pathname is the target path
+    // (e.g. "/"), not "/api/proxy?url=...". So we compare the target path
+    // from the new proxy URL against location.pathname.
+    function isAlreadyProxying(newProxyUrl) {
+      try {
+        var u = new URL(newProxyUrl, location.href);
+        var targetParam = u.searchParams.get('url');
+        if (!targetParam) return false;
+        var targetPath = new URL(decodeURIComponent(targetParam)).pathname.replace(/\/$/, '') || '/';
+        var currentPath = location.pathname.replace(/\/$/, '') || '/';
+        if (targetPath === currentPath) return true;
+      } catch(e) {}
+      return false;
+    }
+
     try {
       var _origPushState = history.pushState.bind(history);
       var _origReplaceState = history.replaceState.bind(history);
@@ -403,13 +501,10 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
         if (url) {
           var proxied2 = makeProxyHref(String(url));
           if (proxied2) {
-            // Avoid reload loop: if the proxied destination is already the current
-            // URL, calling window.location.href would trigger a full reload and
-            // re-initialize this logger, causing an infinite loop.  In that case
-            // just passthrough to the real pushState so the browser state updates
-            // without a navigation.
-            var currentHref = (typeof location !== 'undefined') ? location.href : '';
-            if (proxied2 === currentHref) {
+            // Avoid reload loop: if we're already proxying this same target,
+            // just pass through to real pushState without triggering a full
+            // page reload (which would re-initialize the logger and loop).
+            if (isAlreadyProxying(proxied2)) {
               return _origPushState(state, title, url);
             }
             window.location.href = proxied2;
@@ -423,8 +518,7 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
         if (url) {
           var proxied3 = makeProxyHref(String(url));
           if (proxied3) {
-            var currentHref2 = (typeof location !== 'undefined') ? location.href : '';
-            if (proxied3 === currentHref2) {
+            if (isAlreadyProxying(proxied3)) {
               return _origReplaceState(state, title, url);
             }
             window.location.replace(proxied3);
@@ -452,6 +546,47 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
         _origReplace(url);
       };
     } catch(e) {}
+
+    // 4. popstate interception — handles browser back/forward buttons.
+    //    When the user navigates back/forward, the SPA may try to render
+    //    a page based on the (non-proxied) URL in the history stack.
+    //    Re-route through the proxy to load the correct target page.
+    try {
+      window.addEventListener('popstate', function() {
+        var currentPath = location.pathname + location.search + location.hash;
+        var proxied6 = makeProxyHref(currentPath);
+        if (proxied6) {
+          window.location.href = proxied6;
+        }
+      });
+    } catch(e) {}
+  }
+
+  // ─── Image/resource error recovery ──────────────────────────
+  // Since we no longer rewrite <img src>, <source src>, etc. in the HTML
+  // (to avoid React hydration mismatches), images with relative paths load
+  // from the proxy host and fail. This handler retries them through the proxy.
+  if (typeof document !== 'undefined' && APP_URL) {
+    document.addEventListener('error', function(evt) {
+      try {
+        var el = evt.target;
+        if (!el || !(el instanceof Element)) return;
+        var tag = el.tagName.toUpperCase();
+        if (tag !== 'IMG' && tag !== 'SOURCE' && tag !== 'VIDEO' && tag !== 'AUDIO') return;
+        var src = el.getAttribute('src');
+        if (!src) return;
+        // Already proxied or data/blob URL — don't retry
+        if (src.indexOf('/api/proxy') !== -1 || src.indexOf('data:') === 0 || src.indexOf('blob:') === 0) return;
+        // Resolve against target app and proxy it
+        try {
+          var abs = new URL(src, APP_URL).toString();
+          var appOrigin = new URL(APP_URL).origin;
+          if (new URL(abs).origin === appOrigin || new URL(src, location.href).origin === _proxyOriginFetch) {
+            el.setAttribute('src', _proxyBaseFetch + '?url=' + encodeURIComponent(abs) + '&session=' + SESSION_ID);
+          }
+        } catch(e2) {}
+      } catch(e) {}
+    }, true);
   }
 
   // ─── Navigation / page load event ────────────────────────────
