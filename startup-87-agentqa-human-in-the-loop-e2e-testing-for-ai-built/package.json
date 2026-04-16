@@ -12,6 +12,7 @@
   "dependencies": {
     "@ai-sdk/gateway": "^1.0.0",
     "@ai-sdk/react": "^1.2.12",
+    "@sparticuz/chromium": "^147.0.0",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.8",
     "ai": "^5.0.0",
@@ -19,6 +20,7 @@
     "nanoid": "^5.1.7",
     "next": "^16.2.3",
     "playwright": "^1.59.1",
+    "playwright-core": "^1.59.1",
     "posthog-js": "^1.369.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

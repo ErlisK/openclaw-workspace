@@ -50,6 +50,10 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // Treat heavy serverless packages as externals — don't bundle them with webpack.
+  // @sparticuz/chromium ships its own binary; webpack must not try to bundle it.
+  serverExternalPackages: ['@sparticuz/chromium', 'playwright-core'],
+
   async headers() {
     return [
       {

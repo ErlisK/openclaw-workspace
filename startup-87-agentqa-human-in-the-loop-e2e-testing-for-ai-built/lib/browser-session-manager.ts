@@ -10,7 +10,7 @@
  * production, migrate to a dedicated browser server (e.g. Browserbase, Fly.io).
  */
 
-import { chromium, Browser, BrowserContext, Page } from 'playwright'
+import { chromium, Browser, BrowserContext, Page } from 'playwright-core'
 
 export interface BrowserEvent {
   id: string
@@ -55,9 +55,20 @@ async function getBrowser(): Promise<Browser> {
   if (browserSingleton && browserSingleton.isConnected()) {
     return browserSingleton
   }
-  browserSingleton = await chromium.launch({
-    headless: true,
-    args: [
+
+  // Use @sparticuz/chromium for serverless environments (Vercel/Lambda)
+  // Falls back to system chromium for local dev
+  let executablePath: string | undefined
+  let launchArgs: string[]
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const sparticuz = require('@sparticuz/chromium')
+    executablePath = await sparticuz.default.executablePath()
+    launchArgs = sparticuz.default.args
+  } catch {
+    executablePath = undefined
+    launchArgs = [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
@@ -65,7 +76,13 @@ async function getBrowser(): Promise<Browser> {
       '--no-first-run',
       '--no-zygote',
       '--single-process',
-    ],
+    ]
+  }
+
+  browserSingleton = await chromium.launch({
+    headless: true,
+    executablePath,
+    args: launchArgs,
   })
   return browserSingleton
 }
