@@ -40,7 +40,7 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.posthog.com https://us.i.posthog.com https://internal-j.posthog.com",
-      "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
+      "frame-src * data: blob:",
       "worker-src 'self' blob:",
       "base-uri 'self'",
       "form-action 'self'",
