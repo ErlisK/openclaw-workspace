@@ -402,7 +402,19 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
       history.pushState = function(state, title, url) {
         if (url) {
           var proxied2 = makeProxyHref(String(url));
-          if (proxied2) { window.location.href = proxied2; return; }
+          if (proxied2) {
+            // Avoid reload loop: if the proxied destination is already the current
+            // URL, calling window.location.href would trigger a full reload and
+            // re-initialize this logger, causing an infinite loop.  In that case
+            // just passthrough to the real pushState so the browser state updates
+            // without a navigation.
+            var currentHref = (typeof location !== 'undefined') ? location.href : '';
+            if (proxied2 === currentHref) {
+              return _origPushState(state, title, url);
+            }
+            window.location.href = proxied2;
+            return;
+          }
         }
         return _origPushState(state, title, url);
       };
@@ -410,7 +422,14 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
       history.replaceState = function(state, title, url) {
         if (url) {
           var proxied3 = makeProxyHref(String(url));
-          if (proxied3) { window.location.replace(proxied3); return; }
+          if (proxied3) {
+            var currentHref2 = (typeof location !== 'undefined') ? location.href : '';
+            if (proxied3 === currentHref2) {
+              return _origReplaceState(state, title, url);
+            }
+            window.location.replace(proxied3);
+            return;
+          }
         }
         return _origReplaceState(state, title, url);
       };

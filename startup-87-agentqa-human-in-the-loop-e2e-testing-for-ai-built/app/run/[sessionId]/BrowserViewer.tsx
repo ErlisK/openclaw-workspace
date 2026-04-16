@@ -25,6 +25,7 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
   const [isNavigating, setIsNavigating] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const startedRef = useRef(false)
+  const reproxyingRef = useRef(false) // guard against re-proxy reload loop
 
   const updateStatus = useCallback((s: typeof status) => {
     setStatus(s)
@@ -78,6 +79,12 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
 
       if (iframeHref && !isProxied) {
         // iframe escaped the proxy — force re-navigation through proxy
+        // Guard: don't re-proxy if we already just did (prevents load-loop)
+        if (reproxyingRef.current) {
+          reproxyingRef.current = false
+          return
+        }
+        reproxyingRef.current = true
         const reProxied = toProxyUrl(iframeHref, sessionId)
         setProxyUrl(reProxied)
         setCurrentUrl(iframeHref)
