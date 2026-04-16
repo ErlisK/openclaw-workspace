@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   alternates: { canonical: '/' },
 }
 
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
