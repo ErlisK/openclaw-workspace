@@ -215,6 +215,119 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
     };
   }
 
+  // ─── Link + navigation interception ──────────────────────────
+  // Handles dynamically-set hrefs and JS-driven navigation (history.pushState,
+  // window.location.assign, etc.) that the server-side HTML rewriter cannot see.
+  if (typeof window !== 'undefined' && APP_URL) {
+    var _proxyOrigin = window.location.origin;
+    var _proxyBase = _proxyOrigin + '/api/proxy';
+
+    // Resolve any href to its absolute form relative to APP_URL, then
+    // return a proxy URL if the resolved destination belongs to the same
+    // target origin.  Returns null when no proxying is needed.
+    function makeProxyHref(rawHref) {
+      if (!rawHref) return null;
+      var s = String(rawHref);
+      if (!s || s.charAt(0) === '#') return null;
+      if (s.indexOf('javascript:') === 0 || s.indexOf('mailto:') === 0 || s.indexOf('tel:') === 0) return null;
+      // Already routed through the proxy?
+      if (s.indexOf('/api/proxy?url=') !== -1 || s.indexOf('/api/proxy-static/') !== -1) return null;
+      // Resolve relative href against APP_URL so '/pricing' → 'https://snippetci.com/pricing'
+      var abs;
+      try { abs = new URL(s, APP_URL).toString(); } catch(e) { return null; }
+      // Only intercept same-origin target links (let external links open normally)
+      try {
+        if (new URL(abs).origin !== new URL(APP_URL).origin) return null;
+      } catch(e) { return null; }
+      return _proxyBase + '?url=' + encodeURIComponent(abs) + '&session=' + SESSION_ID;
+    }
+
+    // 1. Click interception — fires BEFORE the browser follows the href.
+    //    Handles both static and dynamically-added <a> tags.
+    if (typeof document !== 'undefined') {
+      document.addEventListener('click', function(evt) {
+        try {
+          var el = evt.target;
+          // Walk up the DOM to find the nearest anchor element
+          for (var _i = 0; _i < 6; _i++) {
+            if (!el) break;
+            if (el.tagName === 'A') break;
+            el = el.parentElement;
+          }
+          if (!el || el.tagName !== 'A') return;
+
+          // el.href is already fully resolved by the browser (against current page origin),
+          // so use getAttribute('href') to get the raw value for correct re-resolution.
+          var rawHref = el.getAttribute('href');
+          if (!rawHref) return;
+
+          // If the raw href is already an absolute betawindow URL (e.g. rewritten on the
+          // server but the JS framework then over-wrote it), check el.href directly too.
+          var proxied = makeProxyHref(rawHref);
+          if (!proxied) {
+            // Try resolving el.href directly (covers cases where React set href to a full URL)
+            try {
+              var elHref = el.href;
+              if (elHref && new URL(elHref).origin === _proxyOrigin) {
+                // The browser has already resolved a relative path to betawindow.com —
+                // extract the pathname and re-resolve against the target app.
+                var pathname = new URL(elHref).pathname + new URL(elHref).search;
+                proxied = makeProxyHref(pathname);
+              }
+            } catch(e2) {}
+          }
+          if (!proxied) return;
+
+          evt.preventDefault();
+          evt.stopPropagation();
+          window.location.href = proxied;
+        } catch(e) {}
+      }, true /* capture phase — fires before framework handlers */);
+    }
+
+    // 2. history.pushState / replaceState interception.
+    //    SPAs (Next.js, React Router) call these for soft navigation.
+    //    We detect same-origin target paths and do a full proxy reload instead.
+    try {
+      var _origPushState = history.pushState.bind(history);
+      var _origReplaceState = history.replaceState.bind(history);
+
+      history.pushState = function(state, title, url) {
+        if (url) {
+          var proxied2 = makeProxyHref(String(url));
+          if (proxied2) { window.location.href = proxied2; return; }
+        }
+        return _origPushState(state, title, url);
+      };
+
+      history.replaceState = function(state, title, url) {
+        if (url) {
+          var proxied3 = makeProxyHref(String(url));
+          if (proxied3) { window.location.replace(proxied3); return; }
+        }
+        return _origReplaceState(state, title, url);
+      };
+    } catch(e) {}
+
+    // 3. window.location.assign / replace interception via defineProperty.
+    //    Covers direct 'window.location.href = ...' assignments from JS.
+    try {
+      var _origAssign = window.location.assign.bind(window.location);
+      var _origReplace = window.location.replace.bind(window.location);
+
+      window.location.assign = function(url) {
+        var proxied4 = makeProxyHref(String(url));
+        if (proxied4) { _origAssign(proxied4); return; }
+        _origAssign(url);
+      };
+      window.location.replace = function(url) {
+        var proxied5 = makeProxyHref(String(url));
+        if (proxied5) { _origReplace(proxied5); return; }
+        _origReplace(url);
+      };
+    } catch(e) {}
+  }
+
   // ─── Navigation / page load event ────────────────────────────
   queue({
     event_type: 'navigation',
