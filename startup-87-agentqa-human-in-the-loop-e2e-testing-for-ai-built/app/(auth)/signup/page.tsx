@@ -3,6 +3,8 @@ import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { trackRedditEvent } from '@/components/RedditPixel'
+import { getStoredUTM } from '@/components/UTMCapture'
 
 export default function SignupPage() {
   return <Suspense><SignupForm /></Suspense>
@@ -34,6 +36,14 @@ function SignupForm() {
       setLoading(false)
     } else if (data.session) {
       // autoconfirm is on — session returned immediately
+      // Track Reddit SignUp conversion
+      try {
+        trackRedditEvent('SignUp')
+        const utm = getStoredUTM()
+        if (utm.lastTouch?.utm_source === 'reddit') {
+          trackRedditEvent('Lead', { value: 5, currency: 'USD' })
+        }
+      } catch {}
       // Apply referral code if present
       if (referralCode) {
         await fetch('/api/referrals/apply', {

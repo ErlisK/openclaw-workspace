@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TIER_CONFIG } from '@/lib/types'
 import type { JobTier } from '@/lib/types'
+import { trackRedditEvent } from '@/components/RedditPixel'
 
 export default function NewJobPage() {
   const supabase = createClient()
@@ -39,6 +40,7 @@ export default function NewJobPage() {
       return
     }
     router.push(`/jobs/${data.job.id}`)
+    try { trackRedditEvent('Lead', { value: TIER_CONFIG[tier].price_cents / 100, currency: 'USD' }) } catch {}
   }
 
   const tierCfg = TIER_CONFIG[tier]
