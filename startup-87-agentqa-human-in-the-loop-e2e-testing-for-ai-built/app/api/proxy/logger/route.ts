@@ -235,6 +235,17 @@ export function buildLoggerScript(sessionId: string, appUrl: string, reportUrl: 
       // Resolve relative href against APP_URL so '/pricing' → 'https://snippetci.com/pricing'
       var abs;
       try { abs = new URL(s, APP_URL).toString(); } catch(e) { return null; }
+      // Key fix: if the resolved URL points back to our proxy origin (e.g. Next.js resolves
+      // '/blog' → 'https://www.betawindow.com/blog'), extract the path and re-resolve it
+      // against the target app URL instead.
+      try {
+        var absUrl = new URL(abs);
+        if (absUrl.origin === _proxyOrigin) {
+          var pathWithQuery = absUrl.pathname + absUrl.search + absUrl.hash;
+          // Re-resolve against target app
+          try { abs = new URL(pathWithQuery, APP_URL).toString(); } catch(e2) { return null; }
+        }
+      } catch(e) { return null; }
       // Only intercept same-origin target links (let external links open normally)
       try {
         if (new URL(abs).origin !== new URL(APP_URL).origin) return null;

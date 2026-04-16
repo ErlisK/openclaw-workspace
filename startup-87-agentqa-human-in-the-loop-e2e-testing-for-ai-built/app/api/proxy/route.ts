@@ -274,11 +274,16 @@ export async function GET(req: NextRequest) {
   // Rewrite URLs
   const rewrittenHtml = rewriteUrls(rawHtml, parsedTarget.toString(), proxyBase, sessionId)
 
-  // Inject logger snippet before </head> or at start of <body>
+  // Inject logger snippet as early as possible — at start of <head> so our
+  // history.pushState override runs BEFORE any framework scripts (Next.js, React Router, etc.)
+  // grab a reference to the native pushState.
   const snippet = buildInjectedScript(sessionId, parsedTarget.toString(), eventsUrl)
   let finalHtml: string
 
-  if (rewrittenHtml.includes('</head>')) {
+  if (rewrittenHtml.match(/<head[^>]*>/i)) {
+    // Inject immediately after <head> opening tag
+    finalHtml = rewrittenHtml.replace(/(<head[^>]*>)/i, `$1${snippet}`)
+  } else if (rewrittenHtml.includes('</head>')) {
     finalHtml = rewrittenHtml.replace('</head>', `${snippet}</head>`)
   } else if (rewrittenHtml.includes('<body')) {
     finalHtml = rewrittenHtml.replace('<body', `${snippet}<body`)
