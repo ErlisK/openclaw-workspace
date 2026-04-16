@@ -5,6 +5,8 @@ import RunLogger, { LogEvent } from './RunLogger'
 import SessionControls, { SessionPhase } from './SessionControls'
 import FeedbackForm from './FeedbackForm'
 import AISummary from './AISummary'
+import BrowserViewer from './BrowserViewer'
+import { BrowserEvent } from '@/lib/browser-session-manager'
 
 interface Job {
   id: string
@@ -14,8 +16,17 @@ interface Job {
   instructions: string
 }
 
-interface LogEntry extends LogEvent {
+interface LogEntry {
   id: string
+  event_type: string
+  ts: string
+  request_url?: string
+  method?: string
+  status_code?: number
+  response_time_ms?: number
+  log_level?: string
+  log_message?: string
+  payload?: Record<string, unknown>
 }
 
 interface Props {
@@ -39,21 +50,17 @@ function tabOf(et: string): FilterTab {
 
 export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
   const [logs, setLogs] = useState<LogEntry[]>([])
-  const [iframeLoaded, setIframeLoaded] = useState(false)
+  const [browserStatus, setBrowserStatus] = useState<'starting' | 'running' | 'error' | 'stopped'>('starting')
   const [panelTab, setPanelTab] = useState<FilterTab>('all')
   const [flushedCount, setFlushedCount] = useState(0)
   const [sessionPhase, setSessionPhase] = useState<SessionPhase>('idle')
   const [showFeedback, setShowFeedback] = useState(false)
   const [feedbackDone, setFeedbackDone] = useState(false)
   const logsEndRef = useRef<HTMLDivElement>(null)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
 
-  // Ensure the job URL is a fully-qualified HTTP(S) URL before proxying.
-  // If the value is somehow empty/malformed, show a graceful error rather than
-  // passing "undefined" to the proxy which would display a confusing error page.
+  // Ensure the job URL is a fully-qualified HTTP(S) URL.
   const safeJobUrl = (() => {
     if (!job.url) return ''
-    // Normalize bare domains like "snippetci.com" → "https://snippetci.com"
     const raw = /^https?:\/\//i.test(job.url) ? job.url : `https://${job.url}`
     try {
       const p = new URL(raw)
@@ -63,36 +70,18 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
     }
   })()
 
-  // Route the iframe through our proxy so the injected logger can capture events
-  const iframeSrc = safeJobUrl
-    ? `/api/proxy?url=${encodeURIComponent(safeJobUrl)}&session=${sessionId}`
-    : ''
-
-  const handleEvent = useCallback((ev: LogEvent) => {
+  // Accepts both LogEvent and BrowserEvent shapes
+  const handleEvent = useCallback((ev: LogEvent | BrowserEvent) => {
     setLogs(prev => {
-      const next = [...prev, { id: makeId(), ...ev }].slice(-1000) // keep last 1000
+      const next = [...prev, { id: makeId(), ...ev } as LogEntry].slice(-1000)
       return next
     })
-    // Auto-scroll to bottom
     setTimeout(() => logsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
   }, [])
 
   const handleFlush = useCallback((count: number) => {
     setFlushedCount(prev => prev + count)
   }, [])
-
-  function handleIframeLoad() {
-    setIframeLoaded(true)
-    const ga = (window as unknown as Record<string, unknown>).agentQA as
-      { log?: (ev: object) => void } | undefined
-    ga?.log?.({
-      event_type: 'network_response',
-      ts: new Date().toISOString(),
-      request_url: job.url,
-      status_code: 200,
-      log_message: 'iframe loaded',
-    })
-  }
 
   // ─── Derived counts ────────────────────────────────────────
   const counts = logs.reduce(
@@ -122,6 +111,7 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
       case 'navigation': return 'text-blue-400'
       case 'click': return 'text-purple-400'
       case 'dom_snapshot': return 'text-indigo-400'
+      case 'page_error': return 'text-red-400'
       case 'network_request': return 'text-gray-300'
       case 'network_response':
         if (entry.status_code && entry.status_code >= 400) return 'text-red-400'
@@ -138,15 +128,17 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
       case 'network_response': return '↓'
       case 'click': return '✓'
       case 'dom_snapshot': return '▦'
+      case 'page_error': return '!'
       default: return '·'
     }
   }
 
   function getEntryLabel(entry: LogEntry): string {
     if (entry.event_type === 'console_log') return entry.log_message ?? ''
+    if (entry.event_type === 'page_error') return entry.log_message ?? 'Page error'
     if (entry.event_type === 'click') return entry.log_message ?? `click ${entry.payload?.tag ?? ''}`
     if (entry.event_type === 'dom_snapshot') return entry.log_message ?? 'DOM snapshot'
-    if (entry.event_type === 'navigation') return entry.request_url ?? ''
+    if (entry.event_type === 'navigation') return entry.request_url ?? entry.log_message ?? ''
     return [entry.method, entry.request_url].filter(Boolean).join(' ')
   }
 
@@ -179,7 +171,9 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <span
             className={`w-2 h-2 rounded-full shrink-0 transition-colors ${
-              iframeLoaded ? 'bg-green-400' : 'bg-yellow-400 animate-pulse'
+              browserStatus === 'running' ? 'bg-green-400' :
+              browserStatus === 'error' ? 'bg-red-400' :
+              'bg-yellow-400 animate-pulse'
             }`}
             data-testid="iframe-status-dot"
           />
@@ -204,13 +198,11 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
           tier={job.tier}
           onPhaseChange={(phase) => {
             setSessionPhase(phase)
-            // Auto-open feedback form when session ends
             if (['complete', 'abandoned', 'timed_out'].includes(phase)) {
               setShowFeedback(true)
             }
           }}
           onComplete={(notes, reason) => {
-            // Log end event
             const ga = (window as unknown as Record<string, unknown>).agentQA as
               { log?: (ev: object) => void } | undefined
             ga?.log?.({
@@ -231,26 +223,15 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
         </div>
       )}
 
-      {/* Main: iframe + log panel side-by-side */}
+      {/* Main: browser viewer + log panel side-by-side */}
       <div className="flex flex-1 min-h-0">
-        {/* Iframe panel */}
+        {/* Remote browser panel — Playwright-powered */}
         <div className="flex-1 relative min-w-0 border-r border-gray-700">
-          {!iframeLoaded && (
-            <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-10">
-              <div className="text-center">
-                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                <p className="text-sm text-gray-400">Loading {job.url}…</p>
-              </div>
-            </div>
-          )}
-          <iframe
-            ref={iframeRef}
-            src={iframeSrc}
-            className="w-full h-full border-none"
-            onLoad={handleIframeLoad}
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            title={`Sandbox: ${job.title}`}
-            data-testid="sandbox-iframe"
+          <BrowserViewer
+            sessionId={sessionId}
+            jobUrl={safeJobUrl}
+            onEvent={handleEvent}
+            onStatusChange={setBrowserStatus}
           />
         </div>
 
@@ -307,7 +288,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                   data-event-type={entry.event_type}
                 >
                   <div className="flex items-start gap-2">
-                    {/* Icon */}
                     <span
                       className="shrink-0 opacity-70 w-3 text-center"
                       title={entry.event_type}
@@ -315,10 +295,8 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                       {getLogIcon(entry)}
                     </span>
 
-                    {/* Content */}
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1 flex-wrap">
-                        {/* Type pill */}
                         <span
                           className="inline-block text-[9px] px-1 rounded bg-gray-800 text-gray-400 shrink-0"
                           data-testid="event-type-pill"
@@ -326,7 +304,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                           {entry.event_type.replace('_', ' ')}
                         </span>
 
-                        {/* Status badge for network */}
                         {entry.status_code != null && (
                           <span
                             className={`shrink-0 font-bold ${
@@ -338,7 +315,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                           </span>
                         )}
 
-                        {/* Response time */}
                         {entry.response_time_ms != null && (
                           <span className="text-gray-600 shrink-0">
                             {entry.response_time_ms}ms
@@ -346,12 +322,10 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                         )}
                       </div>
 
-                      {/* Primary label */}
                       <div className="truncate opacity-90 mt-0.5" title={getEntryLabel(entry)}>
                         {getEntryLabel(entry)}
                       </div>
 
-                      {/* Timestamp */}
                       <div className="text-gray-600 text-[10px] mt-0.5">
                         {new Date(entry.ts).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -400,7 +374,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
             className="w-full max-w-2xl max-h-[90vh] bg-gray-900 border border-gray-700 rounded-t-xl sm:rounded-xl shadow-2xl flex flex-col overflow-hidden"
             data-testid="feedback-drawer"
           >
-            {/* Drawer header */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-700 shrink-0">
               <h2 className="text-sm font-semibold text-white">
                 Submit feedback
@@ -417,7 +390,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                 ✕
               </button>
             </div>
-            {/* Drawer body */}
             <div className="flex-1 overflow-y-auto px-5 py-4">
               <FeedbackForm
                 sessionId={sessionId}
@@ -426,7 +398,6 @@ export default function SandboxRunner({ sessionId, job, assignmentId }: Props) {
                 onSubmitted={(feedbackId) => {
                   setFeedbackDone(true)
                   setShowFeedback(false)
-                  // Log feedback event
                   const ga = (window as unknown as Record<string, unknown>).agentQA as
                     { log?: (ev: object) => void } | undefined
                   ga?.log?.({
