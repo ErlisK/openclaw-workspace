@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { BrowserEvent } from '@/lib/browser-session-manager'
-import { encodeProxySubdomain, getProxySuffix } from '@/lib/proxy-subdomain'
+import { encodeProxySubdomain, decodeProxySubdomain } from '@/lib/proxy-subdomain'
 
 interface Props {
   sessionId: string
@@ -12,8 +12,16 @@ interface Props {
   onUrlChange?: (url: string) => void
 }
 
+/** Derive the proxy suffix from the current page's hostname. */
+function getClientProxySuffix(): string {
+  if (process.env.NEXT_PUBLIC_PROXY_DOMAIN) return process.env.NEXT_PUBLIC_PROXY_DOMAIN
+  if (typeof window === 'undefined') return 'proxy.localhost'
+  return `proxy.${window.location.hostname}`
+}
+
 /**
  * Build the proxy subdomain URL for a target URL.
+ * Dynamically derives the proxy domain from the current page.
  * Dev:  http://snippetci-com.proxy.localhost:3000/
  * Prod: https://snippetci-com.proxy.betawindow.com/
  */
@@ -22,8 +30,7 @@ function toProxyUrl(targetUrl: string, sessionId: string): string {
   try {
     const parsed = new URL(targetUrl)
     const encoded = encodeProxySubdomain(parsed.hostname)
-    const suffix = getProxySuffix()
-    // Use the current page's protocol and port for the proxy subdomain
+    const suffix = getClientProxySuffix()
     const proto = window.location.protocol
     const port = window.location.port ? `:${window.location.port}` : ''
     const path = parsed.pathname + parsed.search
@@ -38,14 +45,11 @@ function toProxyUrl(targetUrl: string, sessionId: string): string {
 function extractTargetUrl(iframeHref: string, jobUrl: string): string {
   try {
     const iframe = new URL(iframeHref)
-    const suffix = getProxySuffix()
+    const suffix = getClientProxySuffix()
     const hostOnly = iframe.hostname
     if (hostOnly.endsWith(`.${suffix}`)) {
-      // Decode subdomain back to target hostname
       const sub = hostOnly.slice(0, -(suffix.length + 1))
-      // Reverse: single hyphens → dots, double hyphens → single hyphens
-      const placeholder = '\x00'
-      const targetHost = sub.replace(/--/g, placeholder).replace(/-/g, '.').replace(new RegExp(placeholder, 'g'), '-')
+      const targetHost = decodeProxySubdomain(sub)
       const targetProto = new URL(jobUrl).protocol
       const path = iframe.pathname + iframe.search.replace(/[?&]_bw_session=[^&]*/, '')
       return `${targetProto}//${targetHost}${path}`

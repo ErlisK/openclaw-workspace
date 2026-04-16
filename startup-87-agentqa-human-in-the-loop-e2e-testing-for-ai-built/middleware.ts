@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { parseProxyRequest, getProxySuffix } from '@/lib/proxy-subdomain'
+import { parseProxyRequest, extractAppHostname } from '@/lib/proxy-subdomain'
 
 // ─── Headers to strip from proxied responses ─────────────────────────────
 const STRIP_RESPONSE_HEADERS = new Set([
@@ -233,10 +233,12 @@ async function handleProxySubdomain(request: NextRequest, targetHost: string): P
 // ─── Main middleware ─────────────────────────────────────────────────────
 export async function middleware(request: NextRequest) {
   // ── Proxy subdomain requests ─────────────────────────────────────
-  // Requests to *.proxy.localhost (dev) or *.proxy.betawindow.com (prod)
-  // are proxied to the target host extracted from the subdomain.
+  // Detects *.proxy.<app-domain> dynamically from the Host header.
+  // E.g., snippetci-com.proxy.betawindow.com → proxy to snippetci.com
+  // E.g., snippetci-com.proxy.localhost:3000 → proxy to snippetci.com
   const hostname = request.headers.get('host') ?? request.nextUrl.hostname
-  const proxyInfo = parseProxyRequest(hostname, getProxySuffix())
+  const appHost = extractAppHostname(hostname)
+  const proxyInfo = parseProxyRequest(hostname, appHost)
   if (proxyInfo) {
     return handleProxySubdomain(request, proxyInfo.targetHost)
   }

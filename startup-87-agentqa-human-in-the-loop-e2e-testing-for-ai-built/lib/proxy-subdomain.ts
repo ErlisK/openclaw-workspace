@@ -12,8 +12,7 @@
  *   sub.domain.example.com → sub-domain-example-com
  */
 
-/** The proxy subdomain suffix (without leading dot). */
-export const PROXY_SUBDOMAIN_SUFFIX = 'proxy.localhost'
+const PROXY_PREFIX = 'proxy'
 
 /** Encode a hostname for use as a subdomain label. */
 export function encodeProxySubdomain(hostname: string): string {
@@ -24,9 +23,6 @@ export function encodeProxySubdomain(hostname: string): string {
 
 /** Decode a subdomain label back to the original hostname. */
 export function decodeProxySubdomain(subdomain: string): string {
-  // Strategy: replace single hyphens (not preceded/followed by hyphen) with dots,
-  // then replace double hyphens with single hyphens.
-  // We use a two-pass approach with a placeholder to avoid ambiguity.
   const placeholder = '\x00'
   return subdomain
     .replace(/--/g, placeholder)  // protect double hyphens
@@ -35,44 +31,52 @@ export function decodeProxySubdomain(subdomain: string): string {
 }
 
 /**
- * Build the full proxy URL for a target URL.
- * In dev:  http://snippetci-com.proxy.localhost:3000/path
- * In prod: https://snippetci-com.proxy.betawindow.com/path
+ * Derive the proxy suffix dynamically from the app's hostname.
+ *
+ * If the app runs at `betawindow.com`, the suffix is `proxy.betawindow.com`.
+ * If the app runs at `localhost`, the suffix is `proxy.localhost`.
+ * If the app runs at `my-app.vercel.app`, the suffix is `proxy.my-app.vercel.app`.
+ *
+ * Can be overridden with the NEXT_PUBLIC_PROXY_DOMAIN env var.
+ *
+ * @param appHostname - The app's hostname (e.g. from `window.location.hostname` or request Host header).
+ *                      If omitted on the client, uses window.location.hostname.
  */
-export function buildProxyUrl(targetUrl: string, sessionId: string, proxyHost?: string): string {
-  const parsed = new URL(targetUrl)
-  const encodedHost = encodeProxySubdomain(parsed.hostname)
-  const suffix = proxyHost ?? PROXY_SUBDOMAIN_SUFFIX
+export function getProxySuffix(appHostname?: string): string {
+  // Allow explicit override via env var
+  if (process.env.NEXT_PUBLIC_PROXY_DOMAIN) {
+    return process.env.NEXT_PUBLIC_PROXY_DOMAIN
+  }
 
-  // Use the target's protocol and the proxy subdomain
-  const protocol = parsed.protocol // 'https:' or 'http:'
-  const port = parsed.port ? `:${parsed.port}` : ''
+  // Derive from the provided hostname or window.location
+  let host = appHostname
+  if (!host && typeof window !== 'undefined') {
+    host = window.location.hostname
+  }
+  if (!host) return `${PROXY_PREFIX}.localhost`
 
-  // In development, the proxy subdomain resolves on the dev server's port
-  const proxyOrigin = `${protocol}//${encodedHost}.${suffix}`
-  const path = parsed.pathname + parsed.search + parsed.hash
-
-  // Pass session ID as a query parameter (won't collide with target params
-  // because it uses a unique prefix)
-  const separator = parsed.search ? '&' : '?'
-  return `${proxyOrigin}${path}${separator}_bw_session=${encodeURIComponent(sessionId)}`
+  return `${PROXY_PREFIX}.${host}`
 }
 
 /**
- * Extract the target hostname and session from a proxy subdomain request.
- * Returns null if the request is not a proxy subdomain request.
+ * Parse a request hostname to check if it's a proxy subdomain request.
+ * Detects the pattern: `<encoded-target>.proxy.<app-domain>`
+ *
+ * @param hostname - Full hostname from the request (may include port)
+ * @param appHostname - The app's own hostname for comparison
  */
 export function parseProxyRequest(
   hostname: string,
-  proxySuffix?: string
+  appHostname?: string
 ): { targetHost: string; proxySubdomain: string } | null {
-  const suffix = proxySuffix ?? PROXY_SUBDOMAIN_SUFFIX
-  // hostname might include port (e.g., "snippetci-com.proxy.localhost:3000")
   const hostOnly = hostname.split(':')[0]
+
+  // Determine the suffix to look for
+  const suffix = getProxySuffix(appHostname)
 
   if (!hostOnly.endsWith(`.${suffix}`)) return null
 
-  const proxySubdomain = hostOnly.slice(0, -(suffix.length + 1)) // strip ".proxy.localhost"
+  const proxySubdomain = hostOnly.slice(0, -(suffix.length + 1))
   if (!proxySubdomain) return null
 
   const targetHost = decodeProxySubdomain(proxySubdomain)
@@ -80,10 +84,22 @@ export function parseProxyRequest(
 }
 
 /**
- * Get the proxy suffix for the current environment.
- * In dev: 'proxy.localhost' (browsers resolve *.localhost to 127.0.0.1)
- * In prod: configured via NEXT_PUBLIC_PROXY_DOMAIN env var or default
+ * Get the app's own hostname from a request Host header.
+ * Strips port and any proxy subdomain prefix to get the base app domain.
+ *
+ * For `snippetci-com.proxy.betawindow.com` → `betawindow.com`
+ * For `betawindow.com` → `betawindow.com`
+ * For `localhost:3000` → `localhost`
  */
-export function getProxySuffix(): string {
-  return process.env.NEXT_PUBLIC_PROXY_DOMAIN ?? PROXY_SUBDOMAIN_SUFFIX
+export function extractAppHostname(requestHost: string): string {
+  const hostOnly = requestHost.split(':')[0]
+
+  // Check if this IS a proxy subdomain request — if so, extract the app domain
+  // Pattern: <encoded>.proxy.<app-domain>
+  const proxyIdx = hostOnly.indexOf(`.${PROXY_PREFIX}.`)
+  if (proxyIdx !== -1) {
+    return hostOnly.slice(proxyIdx + `.${PROXY_PREFIX}.`.length)
+  }
+
+  return hostOnly
 }
