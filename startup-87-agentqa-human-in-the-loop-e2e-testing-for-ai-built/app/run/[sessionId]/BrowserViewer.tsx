@@ -11,10 +11,17 @@ interface Props {
   onUrlChange?: (url: string) => void
 }
 
+/** Wrap a target URL through our server-side proxy so X-Frame-Options / CSP frame-ancestors are stripped. */
+function toProxyUrl(targetUrl: string, sessionId: string): string {
+  if (!targetUrl) return ''
+  return `/api/proxy?url=${encodeURIComponent(targetUrl)}&session=${encodeURIComponent(sessionId)}`
+}
+
 export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChange, onUrlChange }: Props) {
   const [status, setStatus] = useState<'starting' | 'running' | 'error' | 'stopped'>('starting')
   const [addressBar, setAddressBar] = useState(jobUrl)
   const [currentUrl, setCurrentUrl] = useState(jobUrl)
+  const [proxyUrl, setProxyUrl] = useState(() => toProxyUrl(jobUrl, sessionId))
   const [isNavigating, setIsNavigating] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const startedRef = useRef(false)
@@ -40,12 +47,13 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
         const url = e.data.url as string
         setCurrentUrl(url)
         setAddressBar(url)
+        setProxyUrl(toProxyUrl(url, sessionId))
         onUrlChange?.(url)
       }
     }
     window.addEventListener('message', onMsg)
     return () => window.removeEventListener('message', onMsg)
-  }, [onUrlChange])
+  }, [onUrlChange, sessionId])
 
   // Emit a click event when the tester clicks in the iframe area
   // (we can't capture actual clicks inside a cross-origin iframe, so we
@@ -94,6 +102,7 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
     setIsNavigating(true)
     setCurrentUrl(safe)
     setAddressBar(safe)
+    setProxyUrl(toProxyUrl(safe, sessionId))
     onUrlChange?.(safe)
     onEvent({
       id: `ev-nav-${Date.now()}`,
@@ -242,7 +251,7 @@ export default function BrowserViewer({ sessionId, jobUrl, onEvent, onStatusChan
 
         <iframe
           ref={iframeRef}
-          src={currentUrl}
+          src={proxyUrl || currentUrl}
           className="w-full h-full border-0"
           title="App under test"
           data-testid="browser-viewport"
