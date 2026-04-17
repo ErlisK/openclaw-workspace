@@ -254,9 +254,17 @@ export default function DashboardPage() {
             {loading ? (
               <div className="text-sm text-gray-400 py-8 text-center">Loading…</div>
             ) : jobs.length === 0 ? (
-              <div className="text-center py-16 text-gray-400" data-testid="jobs-empty">
-                <p className="text-lg mb-2">No test jobs yet</p>
-                <p className="text-sm">Create your first job to get started</p>
+              <div className="text-center py-16" data-testid="jobs-empty">
+                <div className="text-5xl mb-4">🧪</div>
+                <p className="text-lg font-semibold text-gray-800 mb-2">No test jobs yet</p>
+                <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
+                  Submit your app URL and a real human will test it in a live Chrome session — network logs, console errors, and a plain-English bug report included.
+                </p>
+                <a href="/jobs/new"
+                  className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                  Start your first test — from $5
+                </a>
+                <p className="mt-3 text-xs text-gray-400">Use code <strong>LAUNCH</strong> for a free Quick test this week</p>
               </div>
             ) : (
               <div className="space-y-3" data-testid="jobs-list">

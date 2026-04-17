@@ -57,6 +57,36 @@ export default function CreditsContent() {
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [promoCode, setPromoCode] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+  const [promoMessage, setPromoMessage] = useState<string | null>(null)
+  const [promoError, setPromoError] = useState<string | null>(null)
+
+  async function redeemPromo() {
+    if (!promoCode.trim()) return
+    setPromoLoading(true)
+    setPromoMessage(null)
+    setPromoError(null)
+    try {
+      const res = await fetch('/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode.trim() }),
+      })
+      const json = await res.json()
+      if (res.ok) {
+        setPromoMessage(json.message ?? 'Credits applied!')
+        setPromoCode('')
+        load() // refresh balance
+      } else {
+        setPromoError(json.error ?? 'Failed to redeem code')
+      }
+    } catch {
+      setPromoError('Network error. Please try again.')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
 
   async function load() {
     setLoading(true)
@@ -206,6 +236,31 @@ export default function CreditsContent() {
                 </button>
               </div>
             ))}
+          </div>
+
+          {/* Promo code */}
+          <div style={{ marginBottom: 32, background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 12, padding: 20 }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 4, color: '#15803d' }}>🎁 Have a promo code?</h2>
+            <p style={{ fontSize: 13, color: '#166534', marginBottom: 12 }}>Enter your code to get free credits instantly.</p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input
+                data-testid="promo-code-input"
+                value={promoCode}
+                onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                placeholder="e.g. LAUNCH"
+                style={{ flex: 1, padding: '10px 12px', border: '1px solid #86efac', borderRadius: 8, fontSize: 14, fontFamily: 'monospace', letterSpacing: 1 }}
+              />
+              <button
+                data-testid="promo-redeem-btn"
+                onClick={redeemPromo}
+                disabled={promoLoading || !promoCode.trim()}
+                style={{ padding: '10px 18px', background: '#16a34a', color: 'white', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: promoLoading ? 'wait' : 'pointer', opacity: promoLoading ? 0.7 : 1 }}
+              >
+                {promoLoading ? 'Applying…' : 'Apply'}
+              </button>
+            </div>
+            {promoMessage && <p data-testid="promo-success" style={{ marginTop: 10, fontSize: 14, color: '#15803d', fontWeight: 600 }}>{promoMessage}</p>}
+            {promoError && <p data-testid="promo-error" style={{ marginTop: 10, fontSize: 14, color: '#dc2626' }}>{promoError}</p>}
           </div>
 
           {/* Transaction history */}

@@ -23,6 +23,11 @@ export default function HomePage() {
 
       <main className="flex flex-col items-center justify-center px-4 py-16 text-center">
         <div className="max-w-3xl">
+          {/* Launch promo banner */}
+          <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 text-sm font-semibold bg-amber-50 border border-amber-200 text-amber-800 rounded-full">
+            <span>🎉</span>
+            <span>Launch week: first Quick test free — use code <strong>LAUNCH</strong> at checkout</span>
+          </div>
           <div className="inline-block mb-6 px-3 py-1 text-xs font-semibold tracking-wide uppercase bg-indigo-100 text-indigo-700 rounded-full">
             Built for vibe coders &amp; AI agent operators
           </div>
@@ -158,7 +163,26 @@ export default function HomePage() {
             ))}
           </div>
 
-          <p className="mt-12 text-sm text-gray-400">
+          {/* Social proof stats */}
+          <div className="mt-16 py-8 border-t border-gray-100">
+            <p className="text-center text-sm text-gray-400 mb-6">Trusted by developers shipping AI-built apps</p>
+            <div className="grid grid-cols-3 gap-6 text-center">
+              <div>
+                <div className="text-3xl font-bold text-gray-900">1,000+</div>
+                <div className="text-sm text-gray-500 mt-1">Developers signed up</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>
+                <div className="text-sm text-gray-500 mt-1">Avg. report turnaround</div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-gray-900">3 tiers</div>
+                <div className="text-sm text-gray-500 mt-1">$5 · $10 · $15 per test</div>
+              </div>
+            </div>
+          </div>
+
+          <p className="mt-6 text-sm text-gray-400">
             No SDK install required on your app · Chrome desktop · Public URLs only
           </p>
         </div>
