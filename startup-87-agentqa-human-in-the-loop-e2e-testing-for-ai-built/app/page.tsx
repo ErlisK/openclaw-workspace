@@ -91,7 +91,7 @@ export default function HomePage() {
                 {
                   icon: '🤖',
                   title: 'AI-ready summary',
-                  desc: 'Structured output you can paste straight into your AI coding agent. Close the loop without manual copy-pasting.',
+                  desc: 'Structured output you can paste straight into your AI coding agent. AI summaries are generated automatically and should be reviewed for accuracy.',
                 },
                 {
                   icon: '⚡',
@@ -117,7 +117,7 @@ export default function HomePage() {
             <ol className="space-y-6">
               {[
                 { step: '1', title: 'Submit your app URL', desc: 'Paste a public URL, pick a test tier, and describe what you want tested. Takes 60 seconds.' },
-                { step: '2', title: 'A real human tests it', desc: 'A vetted tester opens your app in a live Chrome session. Network logs and console output are captured automatically.' },
+                { step: '2', title: 'A real human tests it', desc: 'A registered tester opens your app in a live Chrome session. Network logs and console output are captured automatically.' },
                 { step: '3', title: 'Get your report', desc: 'You receive a structured report with bugs, a session recording, and an AI-ready summary to feed back into your agent.' },
               ].map((item) => (
                 <li key={item.step} className="flex gap-4 items-start">
@@ -147,7 +147,7 @@ export default function HomePage() {
                 className={`rounded-xl p-6 border ${tier.highlight ? 'border-indigo-500 ring-2 ring-indigo-200 bg-white' : 'border-gray-200 bg-white'}`}
               >
                 {tier.highlight && (
-                  <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Most popular</div>
+                  <div className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Most popular tier</div>
                 )}
                 <div className="text-2xl font-bold text-gray-900">{tier.price}</div>
                 <div className="font-semibold text-lg text-gray-800 mt-1">{tier.name}</div>
@@ -175,7 +175,7 @@ export default function HomePage() {
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>
-                <div className="text-sm text-gray-500 mt-1">Avg. report turnaround</div>
+                <div className="text-sm text-gray-500 mt-1">Avg. report turnaround*</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">3 tiers</div>
@@ -187,6 +187,7 @@ export default function HomePage() {
           <p className="mt-6 text-sm text-gray-400">
             No SDK install required on your app · Chrome desktop · Public URLs only
           </p>
+          <p className="mt-2 text-xs text-gray-400">* Subject to tester availability. During early access, completion may take up to 24 hours.</p>
         </div>
       </main>
 
@@ -197,9 +198,11 @@ export default function HomePage() {
           <Link href="/marketplace" className="hover:text-white">Marketplace</Link>
           <Link href="/become-a-tester" className="hover:text-white">Become a Tester</Link>
           <Link href="/faq" className="hover:text-white">FAQ</Link>
+          <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white">Terms of Service</Link>
           <a href="mailto:hello@betawindow.com" className="hover:text-white">Contact</a>
         </div>
-        <p>© {new Date().getFullYear()} BetaWindow · <a href="mailto:hello@betawindow.com" className="hover:text-white">hello@betawindow.com</a></p>
+        <p>© {new Date().getFullYear()} BetaWindow · 2298 Johanna Court, Pinole, CA 94564 · <a href="mailto:hello@betawindow.com" className="hover:text-white">hello@betawindow.com</a></p>
       </footer>
     </div>
   )

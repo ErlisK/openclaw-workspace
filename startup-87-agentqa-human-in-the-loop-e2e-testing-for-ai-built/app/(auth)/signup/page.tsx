@@ -124,13 +124,13 @@ function SignupForm() {
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input type="email" data-testid="email-input" value={email} onChange={e => setEmail(e.target.value)} required
+            <label htmlFor="signup-email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <input id="signup-email" type="email" data-testid="email-input" value={email} onChange={e => setEmail(e.target.value)} required
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="you@example.com"/>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input type="password" data-testid="password-input" value={password} onChange={e => setPassword(e.target.value)} required minLength={6}
+            <label htmlFor="signup-password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <input id="signup-password" type="password" data-testid="password-input" value={password} onChange={e => setPassword(e.target.value)} required minLength={6}
               className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Min 6 characters"/>
           </div>
           {error && <p className="text-red-500 text-sm" data-testid="error-message">{error}</p>}
@@ -151,6 +151,12 @@ function SignupForm() {
             className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50">
             {loading ? 'Creating account…' : 'Create account'}
           </button>
+          <p className="text-xs text-gray-400 mt-3 text-center">
+            By creating an account, you agree to our{' '}
+            <Link href="/terms" className="underline hover:text-gray-600">Terms of Service</Link>
+            {' '}and{' '}
+            <Link href="/privacy" className="underline hover:text-gray-600">Privacy Policy</Link>.
+          </p>
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-500">

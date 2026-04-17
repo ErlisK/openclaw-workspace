@@ -55,6 +55,12 @@ export default function BecomeATesterPage() {
             <p className="text-xl text-indigo-100 mb-8">Get paid $5–$15 per test. Each session is 10–30 minutes. Flexible schedule, no experience required.</p>
             <Link href="/signup" className="inline-block px-8 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 text-lg">Sign up free → Start earning</Link>
             <p className="text-sm text-indigo-200 mt-3">No commitments. No minimum hours. Pick up jobs when you want.</p>
+            <p className="text-xs text-indigo-300 mt-2">
+              By creating an account, you agree to our{' '}
+              <Link href="/terms" className="underline hover:text-white">Terms of Service</Link>
+              {' '}and{' '}
+              <Link href="/privacy" className="underline hover:text-white">Privacy Policy</Link>.
+            </p>
           </div>
         </section>
 
@@ -132,6 +138,9 @@ export default function BecomeATesterPage() {
                 <div key={i} className="flex gap-2 items-center text-sm text-gray-700"><span>{icon}</span><span>{text}</span></div>
               ))}
             </div>
+            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+              <strong>Tax Note:</strong> Earnings on BetaWindow are paid to independent contractors. You are responsible for reporting your earnings and paying all applicable taxes. BetaWindow will issue IRS Form 1099-NEC for US-based testers who earn $600 or more in a calendar year, and will comply with all applicable tax reporting requirements.
+            </div>
           </div>
         </section>
 
@@ -154,17 +163,25 @@ export default function BecomeATesterPage() {
           <div className="mt-4">
             <Link href="/marketplace" className="text-indigo-200 text-sm hover:text-white underline">Browse the marketplace first</Link>
           </div>
+          <p className="text-xs text-indigo-300 mt-4">
+            By creating an account, you agree to our{' '}
+            <Link href="/terms" className="underline hover:text-white">Terms of Service</Link>
+            {' '}and{' '}
+            <Link href="/privacy" className="underline hover:text-white">Privacy Policy</Link>.
+          </p>
         </section>
       </main>
 
       <footer className="bg-gray-900 text-gray-400 py-8 px-6 text-center text-sm">
-        <div className="flex justify-center gap-6 mb-4">
+        <div className="flex flex-wrap justify-center gap-6 mb-4">
           <Link href="/" className="hover:text-white">Home</Link>
           <Link href="/marketplace" className="hover:text-white">Marketplace</Link>
           <Link href="/pricing" className="hover:text-white">Pricing</Link>
           <Link href="/faq" className="hover:text-white">FAQ</Link>
+          <Link href="/privacy" className="hover:text-white">Privacy Policy</Link>
+          <Link href="/terms" className="hover:text-white">Terms of Service</Link>
         </div>
-        <p>© {new Date().getFullYear()} BetaWindow. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} BetaWindow · 2298 Johanna Court, Pinole, CA 94564 · <a href="mailto:hello@betawindow.com" className="hover:text-white">hello@betawindow.com</a></p>
       </footer>
     </div>
   )

@@ -8,7 +8,7 @@
  * from Reddit Ads → Tools → Reddit Pixel.
  */
 import Script from 'next/script'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 declare global {
@@ -22,14 +22,26 @@ const PIXEL_ID = process.env.NEXT_PUBLIC_REDDIT_PIXEL_ID
 export function RedditPixel() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const [consented, setConsented] = useState(false)
 
-  // Fire PageVisit on route changes
   useEffect(() => {
-    if (!PIXEL_ID || typeof window === 'undefined' || !window.rdt) return
-    window.rdt('track', 'PageVisit')
-  }, [pathname, searchParams])
+    // Check if already consented
+    if (localStorage.getItem('bw-cookie-consent') === 'accepted') {
+      setConsented(true)
+    }
+    // Listen for consent event
+    const handler = () => setConsented(true)
+    window.addEventListener('cookie-consent-granted', handler)
+    return () => window.removeEventListener('cookie-consent-granted', handler)
+  }, [])
 
-  if (!PIXEL_ID) return null
+  // Fire PageVisit on route changes (only after consent)
+  useEffect(() => {
+    if (!consented || !PIXEL_ID || typeof window === 'undefined' || !window.rdt) return
+    window.rdt('track', 'PageVisit')
+  }, [pathname, searchParams, consented])
+
+  if (!PIXEL_ID || !consented) return null
 
   return (
     <>

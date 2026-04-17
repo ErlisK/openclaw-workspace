@@ -5,6 +5,7 @@ import { PHProvider } from '@/lib/analytics/provider'
 import FeedbackWidget from '@/components/FeedbackWidget'
 import { RedditPixel } from '@/components/RedditPixel'
 import { UTMCapture } from '@/components/UTMCapture'
+import CookieConsent from '@/components/CookieConsent'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://betawindow.com'
 const TITLE = 'BetaWindow — Human QA Testing for AI-Built Apps'
@@ -147,6 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </Suspense>
           {children}
           <FeedbackWidget />
+          <CookieConsent />
         </PHProvider>
       </body>
     </html>

@@ -157,6 +157,7 @@ export default function ResultsClient({ job, feedback, sessionEvents, sessionId,
             </span>
           </div>
           <p className="text-gray-800 text-sm leading-relaxed">{aiSummary.summary_text}</p>
+          <p className="text-xs text-gray-400 italic mt-2">AI-generated summary — may contain inaccuracies. Review the full report and session recording for complete findings.</p>
         </div>
       ) : sessionId && (
         <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
