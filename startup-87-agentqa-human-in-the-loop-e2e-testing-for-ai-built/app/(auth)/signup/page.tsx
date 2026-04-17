@@ -7,7 +7,23 @@ import { trackRedditEvent } from '@/components/RedditPixel'
 import { getStoredUTM } from '@/components/UTMCapture'
 
 export default function SignupPage() {
-  return <Suspense><SignupForm /></Suspense>
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-100 p-8 animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-40 mb-6" />
+          <div className="h-4 bg-gray-100 rounded w-64 mb-8" />
+          <div className="space-y-4">
+            <div className="h-10 bg-gray-100 rounded" />
+            <div className="h-10 bg-gray-100 rounded" />
+            <div className="h-10 bg-indigo-100 rounded" />
+          </div>
+        </div>
+      </div>
+    }>
+      <SignupForm />
+    </Suspense>
+  )
 }
 
 function SignupForm() {

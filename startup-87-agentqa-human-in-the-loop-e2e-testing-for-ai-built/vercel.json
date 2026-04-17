@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.betawindow.com" }],
+      "destination": "https://betawindow.com/:path*",
+      "permanent": true
+    }
+  ],
   "functions": {
     "app/api/browser/start/route.ts": { "maxDuration": 60, "memory": 1024 },
     "app/api/browser/screenshot/route.ts": { "maxDuration": 30, "memory": 1024 },

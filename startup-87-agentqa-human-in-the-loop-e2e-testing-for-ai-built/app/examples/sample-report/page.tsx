@@ -114,7 +114,7 @@ export default function SampleReportPage() {
               ['URL', 'https://your-app.vercel.app'],
               ['Tier', 'Standard (20 min)'],
               ['Duration', '18m 34s'],
-              ['Completed', 'Apr 15, 2025 14:32 UTC'],
+              ['Completed', 'Apr 15, 2026 14:32 UTC'],
             ].map(([label, val]) => (
               <div key={label}>
                 <div className="text-xs text-gray-500">{label}</div>
@@ -243,7 +243,7 @@ export default function SampleReportPage() {
               network_log_url: '/report/job_demo_abc123/network',
               console_log_url: '/report/job_demo_abc123/console',
               duration_seconds: 1114,
-              completed_at: '2025-04-15T14:32:10Z',
+              completed_at: '2026-04-15T14:32:10Z',
             }, null, 2)}</pre>
           </div>
         </div>

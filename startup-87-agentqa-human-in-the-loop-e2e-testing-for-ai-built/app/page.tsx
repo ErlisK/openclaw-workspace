@@ -158,6 +158,8 @@ export default function HomePage() {
                   <li>✓ Console error capture</li>
                   <li>✓ Plain-English bug report</li>
                   {tier.highlight || tier.name === 'Deep' ? <li>✓ AI summary (paste into agent)</li> : null}
+                  {tier.name === 'Deep' ? <li>✓ Mobile responsiveness notes</li> : null}
+                  {tier.name === 'Deep' ? <li className="font-medium text-indigo-600">✓ Priority queue (1-hour SLA)</li> : null}
                 </ul>
               </div>
             ))}
@@ -165,11 +167,11 @@ export default function HomePage() {
 
           {/* Social proof stats */}
           <div className="mt-16 py-8 border-t border-gray-100">
-            <p className="text-center text-sm text-gray-400 mb-6">Trusted by developers shipping AI-built apps</p>
+            <p className="text-center text-sm text-gray-400 mb-6">Join early-access developers shipping AI-built apps</p>
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold text-gray-900">1,000+</div>
-                <div className="text-sm text-gray-500 mt-1">Developers signed up</div>
+                <div className="text-3xl font-bold text-gray-900">Early</div>
+                <div className="text-sm text-gray-500 mt-1">Access — sign up now</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>

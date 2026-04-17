@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    apple: '/apple-touch-icon.png',
   },
   robots: {
     index: true,
@@ -134,7 +134,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               name: 'BetaWindow',
               url: APP_URL,
               logo: `${APP_URL}/logo.png`,
-              sameAs: [],
+              sameAs: ['https://twitter.com/betawindow', 'https://github.com/betawindow'],
             }),
           }}
         />

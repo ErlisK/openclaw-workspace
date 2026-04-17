@@ -134,7 +134,7 @@ export const REPORT_DEMO: SampleReport = {
     { level: 'log',   msg: 'PostHog initialized — capturing enabled', time: '00:01', source: 'provider.tsx:18' },
     { level: 'warn',  msg: 'Image with src "/logo.png" was detected as the Largest Contentful Paint (LCP). Use priority prop.', time: '00:03', source: 'next/image' },
   ],
-  completed_at: '2025-04-15T14:32:10Z',
+  completed_at: '2026-04-15T14:32:10Z',
   seo_title: 'Sample BetaWindow Report — SaaS Checkout Bug Found',
   seo_description:
     'See a real BetaWindow test session output: 4 bugs found in a SaaS checkout flow, with network logs, console errors, and step-by-step reproduction.',
@@ -200,7 +200,7 @@ export const REPORT_DEMO_MOBILE: SampleReport = {
     { level: 'warn',  msg: 'Touch target size below recommended minimum (44×44px) for element: .modal-close', time: '04:18', source: 'a11y.ts' },
     { level: 'log',   msg: 'Viewport: 375×667 (iPhone SE)', time: '00:00', source: 'debug.ts' },
   ],
-  completed_at: '2025-04-15T10:15:44Z',
+  completed_at: '2026-04-15T10:15:44Z',
   seo_title: 'Sample BetaWindow Report — 3 Mobile Bugs in 10 Minutes',
   seo_description:
     'BetaWindow found 3 mobile-specific bugs in a quick 10-minute test session: nav overflow, hidden submit button, and inaccessible modal close.',
@@ -238,7 +238,7 @@ export const REPORT_DEMO_CLEAN: SampleReport = {
     { level: 'log', msg: 'App initialized — version 2.4.1', time: '00:00', source: 'app.ts' },
     { level: 'log', msg: 'PostHog initialized', time: '00:01', source: 'analytics.ts' },
   ],
-  completed_at: '2025-04-14T09:22:31Z',
+  completed_at: '2026-04-14T09:22:31Z',
   seo_title: 'Sample BetaWindow Report — 5/5 Clean Pass, No Bugs',
   seo_description:
     'See what a perfect BetaWindow test report looks like: 5/5 rating, 0 bugs across a 30-minute deep session covering all major user flows.',
