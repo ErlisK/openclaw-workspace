@@ -29,6 +29,8 @@ export const dynamic = "force-dynamic";
 // ─── Guard ────────────────────────────────────────────────────────────────────
 
 function isEnabled(req: NextRequest): boolean {
+  // Block entirely in production
+  if (process.env.NODE_ENV === 'production') return false;
   // Must have ENABLE_DEV_SIM=true
   if (process.env.ENABLE_DEV_SIM !== "true") return false;
 

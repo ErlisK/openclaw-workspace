@@ -19,6 +19,7 @@ function isTestMode() {
 }
 
 function isDevSimEnabled() {
+  if (process.env.NODE_ENV === 'production') return false
   return process.env.ENABLE_DEV_SIM === 'true' && isTestMode();
 }
 

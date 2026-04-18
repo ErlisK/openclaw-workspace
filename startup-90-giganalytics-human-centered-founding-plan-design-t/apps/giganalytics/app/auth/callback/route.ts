@@ -3,9 +3,12 @@ import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
+  const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/dashboard'
+
+  // Security: only allow safe same-origin relative paths
+  const safePath = next.startsWith('/') && !next.startsWith('//') ? next : '/dashboard'
 
   if (code) {
     const cookieStore = await cookies()
@@ -26,5 +29,5 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  return NextResponse.redirect(new URL(next, request.url))
+  return NextResponse.redirect(new URL(safePath, origin))
 }

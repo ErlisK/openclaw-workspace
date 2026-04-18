@@ -1,26 +1,14 @@
 'use client'
 
 import posthog from 'posthog-js'
-import { useEffect } from 'react'
+
+// PostHog is now initialized only after cookie consent (see CookieConsent component)
+// This file retains the capture helper functions for events
 
 let initialized = false
 
+// Legacy provider kept for compatibility but analytics init is gated by CookieConsent
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    if (initialized) return
-    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
-    const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com'
-    if (!key || key.startsWith('phc_placeholder')) return
-    posthog.init(key, {
-      api_host: host,
-      capture_pageview: true,
-      capture_pageleave: true,
-      autocapture: false,
-      persistence: 'localStorage',
-    })
-    initialized = true
-  }, [])
-
   return <>{children}</>
 }
 

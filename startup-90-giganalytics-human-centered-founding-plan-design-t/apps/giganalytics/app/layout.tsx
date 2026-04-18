@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { PostHogProvider } from "@/lib/posthog/provider";
+import { CookieConsent } from "@/components/CookieConsent";
 import Script from "next/script";
 
 const geistSans = localFont({
@@ -90,7 +90,7 @@ const schemaOrg = {
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description: APP_DESC,
-  url: APP_URL,
+  url: APP_URL.trim(),
   offers: [
     {
       "@type": "Offer",
@@ -140,9 +140,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <PostHogProvider>
-          {children}
-        </PostHogProvider>
+        <CookieConsent />
+        {children}
       </body>
     </html>
   );

@@ -55,9 +55,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <span className={`px-3 py-1 rounded-full text-sm font-medium ${accent.badge}`}>
             {variant.badge}
           </span>
-          <span className={`text-xs border rounded-full px-2 py-0.5 font-medium ${accent.border} text-gray-500`}>
-            variant {variant.id}
-          </span>
+
         </div>
 
         {/* Headline */}
@@ -85,6 +83,13 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
             className="px-8 py-4 rounded-xl text-base font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
           >
             {variant.cta_secondary}
+          </Link>
+          <Link
+            href="/demo"
+            onClick={() => trackCtaClick(variant.name, 'hero_demo')}
+            className="px-8 py-4 rounded-xl text-base font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            See a live demo
           </Link>
         </div>
 
@@ -119,31 +124,26 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <p className="text-sm text-gray-500 mb-4">
             Load sample data from our demo account and explore the full dashboard right now.
           </p>
-          <Link href="/signup"
+          <Link href="/demo"
             onClick={() => trackCtaClick(variant.name, 'demo_cta')}
             className={`inline-block px-6 py-3 rounded-xl text-sm font-semibold transition-colors ${accent.cta}`}>
             Try with sample data →
           </Link>
         </div>
 
-        {/* Variant switcher (for testing) */}
-        <div className="text-xs text-gray-300 flex justify-center gap-3 mb-4">
-          <span>View variant:</span>
-          {['1', '2', '3'].map(v => (
-            <a key={v} href={`/?v=${v}`}
-              className={`hover:text-gray-500 ${v === variant.id ? 'text-gray-500 font-bold' : ''}`}>
-              v{v}
-            </a>
-          ))}
-        </div>
+
       </main>
 
       {/* Footer */}
       <footer className="border-t border-gray-100 py-6 px-6 text-center text-xs text-gray-400">
         <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
           <span>© 2024 GigAnalytics</span>
+          <Link href="/pricing" className="hover:text-gray-600">Pricing</Link>
+          <Link href="/demo" className="hover:text-gray-600">Demo</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>
           <Link href="/signup" className="hover:text-gray-600">Sign up free</Link>
+          <Link href="/terms" className="hover:text-gray-600">Terms</Link>
+          <Link href="/privacy" className="hover:text-gray-600">Privacy</Link>
         </div>
       </footer>
     </div>

@@ -10,10 +10,11 @@ const navLinks = [
   { href: '/timer', label: 'Timer', icon: '⏱' },
   { href: '/heatmap', label: 'Heatmap', icon: '🔥' },
   { href: '/roi', label: 'ROI', icon: '💰' },
-  { href: '/pricing', label: 'Pricing Lab', icon: '🧪' },
+  { href: '/pricing-lab', label: 'Pricing Lab', icon: '🧪' },
   { href: '/billing', label: 'Pro', icon: '⭐' },
   { href: '/benchmark', label: 'Benchmarks', icon: '📈' },
   { href: '/insights', label: 'AI Insights', icon: '✨' },
+  { href: '/settings', label: 'Settings', icon: '⚙️' },
 ]
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -22,8 +23,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const headersList = await headers()
   const pathname = headersList.get('x-invoke-path') || headersList.get('x-pathname') || ''
 
-  // Allow public access to pricing page
-  const isPublicRoute = pathname === '/pricing' || pathname.startsWith('/pricing')
+  // Public routes don't require authentication
+  const isPublicRoute = false // pricing is now a standalone marketing page outside (app)
 
   if (!user && !isPublicRoute) {
     redirect('/login')

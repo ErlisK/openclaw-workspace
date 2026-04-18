@@ -11,10 +11,22 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
+  function passwordStrength(pw: string): { ok: boolean; message: string } {
+    if (pw.length < 8) return { ok: false, message: 'At least 8 characters required' }
+    if (!/[a-zA-Z]/.test(pw)) return { ok: false, message: 'Must include letters' }
+    if (!/[0-9]/.test(pw)) return { ok: false, message: 'Must include numbers' }
+    return { ok: true, message: '' }
+  }
+  const strength = passwordStrength(password)
+
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
     if (!acceptedTerms) {
       setError('You must accept the Terms of Service and Privacy Policy to continue.')
+      return
+    }
+    if (!strength.ok) {
+      setError(strength.message)
       return
     }
     setLoading(true)
@@ -79,6 +91,9 @@ export default function SignupPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="At least 8 characters"
             />
+            {password && !strength.ok && (
+              <p className="text-xs mt-1 text-red-500">{strength.message}</p>
+            )}
           </div>
 
           <div className="flex items-start gap-2">
@@ -108,7 +123,7 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || !acceptedTerms}
+            disabled={loading || !acceptedTerms || !strength.ok}
             className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Creating account…' : 'Create free account'}
