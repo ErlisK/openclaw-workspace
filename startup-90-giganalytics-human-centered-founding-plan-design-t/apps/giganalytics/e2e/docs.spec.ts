@@ -330,3 +330,33 @@ test('sitemap.xml includes all 3 new advanced docs', async ({ request }) => {
   expect(html).toContain('/docs/integration-roadmap')
   console.log('✓ sitemap: all 3 advanced docs present')
 })
+
+// ─── Animated SVG demos ───────────────────────────────────────────────────────
+
+test.describe('Animated SVG demos', () => {
+  const demos = [
+    { page: '/docs/csv-templates', svg: '/demos/csv-import.svg' },
+    { page: '/docs/roi-formulas', svg: '/demos/hourly-rate.svg' },
+    { page: '/docs/heatmap-guide', svg: '/demos/heatmap.svg' },
+    { page: '/docs/pricing-experiments', svg: '/demos/pricing-experiment.svg' },
+  ]
+
+  for (const { page, svg } of demos) {
+    test(`${svg} returns 200 and is under 1MB`, async ({ request }) => {
+      const res = await request.get(svg)
+      expect(res.status()).toBe(200)
+      const ct = res.headers()['content-type'] || ''
+      expect(ct).toContain('svg')
+      const body = await res.body()
+      expect(body.length).toBeLessThan(1024 * 1024) // < 1MB
+      console.log(`✓ ${svg} → 200, ${body.length} bytes (${Math.round(body.length/1024)}KB)`)
+    })
+
+    test(`${page} embeds the ${svg} demo`, async ({ request }) => {
+      const res = await request.get(page)
+      const html = await res.text()
+      expect(html).toContain(svg)
+      console.log(`✓ ${page}: demo img tag present`)
+    })
+  }
+})
