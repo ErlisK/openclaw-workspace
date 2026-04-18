@@ -1,24 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createServerClient } from '@/lib/supabase/server';
+import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
 
 /**
  * GET /api/affiliates
  *
- * Returns the authenticated user's affiliate stats and referral link base URL.
- * Creates an affiliate profile if one doesn't exist yet.
+ * Returns the authenticated user's affiliate stats and referral links
+ * for their published paid courses.
  */
-export async function GET(_req: NextRequest) {
-  const supabase = createServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+export async function GET(req: NextRequest) {
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const serviceSupa = createServiceClient();
 
-  // Fetch referral conversions for this user
+  // Fetch referral conversions where this user is the affiliate
   const { data: referrals } = await serviceSupa
     .from('referrals')
     .select(`
@@ -30,10 +29,10 @@ export async function GET(_req: NextRequest) {
   const totalConversions = referrals?.length ?? 0;
   const totalRevenueCents = referrals?.reduce((sum, r) => {
     const purchase = Array.isArray(r.purchases) ? r.purchases[0] : r.purchases;
-    return sum + (purchase?.amount_cents ?? 0);
+    return sum + ((purchase as { amount_cents?: number } | null)?.amount_cents ?? 0);
   }, 0) ?? 0;
 
-  // Get courses created by this user that have affiliate_pct set
+  // Get courses created by this user that have a price
   const { data: courses } = await serviceSupa
     .from('courses')
     .select('id, slug, title, affiliate_pct, price_cents')
@@ -41,9 +40,11 @@ export async function GET(_req: NextRequest) {
     .eq('published', true)
     .gt('price_cents', 0);
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com';
+
   return NextResponse.json({
     affiliateId: user.id,
-    referralBaseUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com'}/courses`,
+    referralBaseUrl: `${appUrl}/courses`,
     stats: {
       totalConversions,
       totalRevenueCents,
@@ -54,13 +55,13 @@ export async function GET(_req: NextRequest) {
       courseSlug: c.slug,
       title: c.title,
       affiliatePct: c.affiliate_pct ?? 0,
-      referralUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com'}/courses/${c.slug}?ref=${user.id}`,
+      referralUrl: `${appUrl}/courses/${c.slug}?ref=${user.id}`,
     })),
   });
 }
 
 /**
- * POST /api/affiliates/links
+ * POST /api/affiliates
  *
  * Generate a referral link for a specific course.
  * Any authenticated user can generate a referral link for any published paid course.
@@ -80,9 +81,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Validation error', details: parsed.error.errors }, { status: 400 });
   }
 
-  const supabase = createServerClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

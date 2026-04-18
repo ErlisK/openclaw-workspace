@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { stripe } from '@/lib/stripe/client';
-import { createServerClient } from '@/lib/supabase/server';
+import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
 
 // ─── GET /api/enroll?session_id=cs_xxx ───────────────────────────────────────
@@ -38,13 +38,8 @@ export async function GET(req: NextRequest) {
   }
 
   // 2. Auth
-  const supabase = createServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
