@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { computeStreamPricing, computeWhatIf } from '@/lib/pricing'
+import { getUserTier, proRequiredResponse } from '@/lib/pro/gate'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Pro gate — pricing experiments require Pro
+  const { isPro } = await getUserTier(supabase, user.id)
+  if (!isPro) return proRequiredResponse('pricing_experiments')
 
   const { searchParams } = new URL(request.url)
   const monthlyTarget = parseFloat(searchParams.get('target') ?? '0')

@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { computeROI } from '@/lib/roi'
 import { computeWhatIf } from '@/lib/pricing'
+import { getUserTier, proRequiredResponse } from '@/lib/pro/gate'
 
 // ─── Response schema ──────────────────────────────────────────────────────────
 
@@ -154,6 +155,10 @@ export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Pro gate — AI insights require a Pro subscription
+  const { isPro } = await getUserTier(supabase, user.id)
+  if (!isPro) return proRequiredResponse('ai_insights')
 
   const body = await request.json().catch(() => ({})) as {
     insightType?: 'all' | 'weekly_summary' | 'price_suggestion' | 'schedule_suggestion'

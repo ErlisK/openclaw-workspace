@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/heatmap', label: 'Heatmap', icon: '🔥' },
   { href: '/roi', label: 'ROI', icon: '💰' },
   { href: '/pricing', label: 'Pricing Lab', icon: '🧪' },
+  { href: '/billing', label: 'Pro', icon: '⭐' },
   { href: '/benchmark', label: 'Benchmarks', icon: '📈' },
   { href: '/insights', label: 'AI Insights', icon: '✨' },
 ]

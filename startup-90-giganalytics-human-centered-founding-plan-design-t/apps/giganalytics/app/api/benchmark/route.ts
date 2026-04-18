@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getUserTier, proRequiredResponse } from '@/lib/pro/gate'
 
 // GET /api/benchmark — fetch benchmark data + user opt-in status
 // Returns: synthetic + real aggregate snapshots visible to all users
@@ -7,6 +8,10 @@ export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  // Pro gate — benchmark access requires Pro
+  const { isPro } = await getUserTier(supabase, user.id)
+  if (!isPro) return proRequiredResponse('benchmark')
 
   const { searchParams } = new URL(request.url)
   const category = searchParams.get('category') ?? undefined
