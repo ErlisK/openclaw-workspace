@@ -42,6 +42,15 @@ export interface FetchedQuiz {
 export interface ImportPayload {
   repoRef: GitHubRepoRef;
   headSha: string;
+  /** Short commit SHA (7 chars) */
+  shortSha: string;
+  /** Resolved ref name (branch or tag name) */
+  ref: string;
+  refType: 'branch' | 'tag';
+  /** Default branch of the repo */
+  defaultBranch: string;
+  /** Computed version label: tag > SemVer > sha:xxxxxxx */
+  versionLabel: string;
   config: CourseYml;
   lessons: FetchedLesson[];
   quizzes: FetchedQuiz[];
@@ -281,29 +290,44 @@ export function slugFromPath(filePath: string): string {
 // Main import function
 // ============================================================
 
+export type { RefType, ResolvedRef, RepoRefs } from './refs';
+export { resolveRef, listRepoRefs, computeVersionLabel } from './refs';
+
 export interface ImportOptions {
   repoUrl: string;
+  /** Branch name, tag name, or undefined (→ default branch) */
+  ref?: string;
+  /** 'branch' | 'tag' — if omitted and ref is set, treated as branch */
+  refType?: 'branch' | 'tag';
+  /** @deprecated Use ref instead. Kept for backward compatibility. */
   branch?: string;
   token?: string;
 }
 
+import { resolveRef, computeVersionLabel } from './refs';
+
 /**
  * Full import pipeline:
- * 1. Resolve HEAD SHA
+ * 1. Resolve ref (branch/tag/default) → commitSha
  * 2. Fetch recursive tree
- * 3. Find + parse course.yml
+ * 3. Find + parse course config
  * 4. Fetch + parse all lessons
  * 5. Fetch + parse referenced quizzes
  * 6. Return ImportPayload for upsert into Supabase
  */
 export async function importFromGitHub(options: ImportOptions): Promise<ImportPayload> {
-  const { repoUrl, branch = 'main', token } = options;
+  const { repoUrl, ref, refType, token } = options;
+  // backward-compat: options.branch → ref
+  const resolvedRef = ref ?? options.branch;
+
   const { owner, repo } = parseRepoUrl(repoUrl);
   const errors: ImportError[] = [];
 
-  // 1. Resolve HEAD
-  const headSha = await resolveHeadSha(owner, repo, branch, token);
-  const repoRef: GitHubRepoRef = { owner, repo, branch };
+  // 1. Resolve ref → commitSha + metadata
+  const refResult = await resolveRef(owner, repo, resolvedRef, refType, token);
+  const { commitSha: headSha, ref: refName, refType: resolvedRefType, defaultBranch } = refResult;
+
+  const repoRef: GitHubRepoRef = { owner, repo, branch: refResult.refType === 'branch' ? refName : defaultBranch };
 
   // 2. Fetch tree
   const tree = await fetchTree(owner, repo, headSha, token);
@@ -360,5 +384,23 @@ export async function importFromGitHub(options: ImportOptions): Promise<ImportPa
     }
   }
 
-  return { repoRef, headSha, config, lessons, quizzes, errors };
+  const versionLabel = computeVersionLabel({
+    tagName: resolvedRefType === 'tag' ? refName : null,
+    configVersion: config.version,
+    commitSha: headSha,
+  });
+
+  return {
+    repoRef,
+    headSha,
+    shortSha: headSha.slice(0, 7),
+    ref: refName,
+    refType: resolvedRefType,
+    defaultBranch,
+    versionLabel,
+    config,
+    lessons,
+    quizzes,
+    errors,
+  };
 }

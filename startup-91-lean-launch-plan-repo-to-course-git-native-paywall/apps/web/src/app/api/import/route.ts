@@ -7,7 +7,10 @@ import { importFromGitHub, type ImportPayload } from '@teachrepo/importer';
 
 const ImportRequestSchema = z.object({
   repo_url: z.string().url('repo_url must be a valid URL'),
-  branch: z.string().default('main'),
+  /** Branch name — defaults to repo's default branch */
+  branch: z.string().optional(),
+  /** Tag name — mutually exclusive with branch */
+  tag: z.string().optional(),
   /** Optional GitHub PAT — allows private repos and raises rate limits */
   token: z.string().optional(),
 });
@@ -42,7 +45,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { repo_url, branch, token } = parsed.data;
+  const { repo_url, branch, tag, token } = parsed.data;
+
+  // Determine ref and refType
+  const ref = tag ?? branch ?? undefined;
+  const refType: 'branch' | 'tag' | undefined = tag ? 'tag' : branch ? 'branch' : undefined;
 
   // 3. Ensure creator record exists
   const { data: creator, error: creatorError } = await supabase
@@ -58,7 +65,7 @@ export async function POST(req: NextRequest) {
   // 4. Run the GitHub import pipeline
   let payload: ImportPayload;
   try {
-    payload = await importFromGitHub({ repoUrl: repo_url, branch, token });
+    payload = await importFromGitHub({ repoUrl: repo_url, ref, refType, token });
   } catch (err) {
     const message = (err as Error).message;
 
@@ -74,7 +81,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 422 });
   }
 
-  const { config, lessons, quizzes, errors, headSha } = payload;
+  const { config, lessons, quizzes, errors, headSha, shortSha, versionLabel, ref: resolvedRef, refType: resolvedRefType, defaultBranch } = payload;
 
   // 5. Upsert course
   const { data: course, error: courseError } = await supabase
@@ -108,16 +115,51 @@ export async function POST(req: NextRequest) {
   const courseId: string = course.id;
 
   // 6. Create course_version entry
-  await supabase.from('course_versions').insert({
-    course_id: courseId,
-    version: config.version,
-    commit_sha: headSha,
-    branch,
-    lesson_count: lessons.length,
-    is_current: true,
-  });
+  // Check if this SHA was already imported
+  const { data: existingVersion } = await supabase
+    .from('course_versions')
+    .select('id, is_current, version_label')
+    .eq('course_id', courseId)
+    .eq('commit_sha', headSha)
+    .maybeSingle();
 
-  // Reset previous is_current versions
+  if (existingVersion?.is_current) {
+    // Already the current version — return early
+    return NextResponse.json({
+      success: true,
+      courseId,
+      courseSlug: config.slug,
+      alreadyCurrent: true,
+      versionLabel: existingVersion.version_label,
+      commitSha: headSha,
+      shortSha,
+      imported: { lessons: lessons.length, quizzes: quizzes.length },
+    });
+  }
+
+  if (!existingVersion) {
+    // Insert new version row
+    await supabase.from('course_versions').insert({
+      course_id: courseId,
+      commit_sha: headSha,
+      branch: resolvedRefType === 'branch' ? resolvedRef : defaultBranch,
+      tag: resolvedRefType === 'tag' ? resolvedRef : null,
+      version_label: versionLabel,
+      lesson_count: lessons.length,
+      quiz_count: quizzes.length,
+      is_current: true,
+      published_at: new Date().toISOString(),
+      imported_by: user.id,
+    });
+  } else {
+    // Re-promote an older version to current
+    await supabase
+      .from('course_versions')
+      .update({ is_current: true, published_at: new Date().toISOString() })
+      .eq('id', existingVersion.id);
+  }
+
+  // Demote all other versions for this course
   await supabase
     .from('course_versions')
     .update({ is_current: false })
@@ -224,6 +266,11 @@ export async function POST(req: NextRequest) {
       success: true,
       courseId,
       courseSlug: config.slug,
+      versionLabel,
+      commitSha: headSha,
+      shortSha,
+      ref: resolvedRef,
+      refType: resolvedRefType,
       imported: {
         lessons: lessons.length,
         quizzes: quizzes.length,
