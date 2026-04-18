@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Store in Supabase (service role bypasses RLS)
     try {
-      const supabase = createServiceClient()
+      const supabase = await createServiceClient()
       await supabase.from('utm_events').insert({
         session_id: String(session_id).slice(0, 100),
         ...utmParams,
