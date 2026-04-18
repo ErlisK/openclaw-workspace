@@ -1,0 +1,49 @@
+# Course configuration for TeachRepo
+# Docs: https://teachrepo.com/docs/course-config
+
+course:
+  title: "My Engineering Course"
+  slug: "my-engineering-course"
+  description: "A concise, practical course for engineers who want to learn X."
+  author: "Your Name"
+  email: "you@example.com"
+  version: "1.0.0"
+  language: "en"
+  tags:
+    - engineering
+    - tutorial
+
+# Pricing
+pricing:
+  model: "one_time"        # one_time | subscription | free
+  amount_cents: 2900       # $29.00 USD
+  currency: "usd"
+  stripe_price_id: ""      # Fill in after creating price in Stripe
+
+# Free preview lessons (slugs of lessons accessible without purchase)
+preview_lessons:
+  - "01-introduction"
+
+# Affiliate / referral tracking
+affiliates:
+  enabled: true
+  default_commission_pct: 30   # 30% of sale price to affiliate
+  cookie_days: 30              # Affiliate attribution window
+
+# Course structure
+lessons_dir: "./lessons"
+lessons_order:
+  - "01-introduction"
+  - "02-getting-started"
+  - "03-advanced-topics"
+
+# Optional: gated code sandboxes (requires SaaS tier)
+sandboxes:
+  enabled: false
+  provider: "codesandbox"   # codesandbox | stackblitz | codepen
+
+# Optional: certificate of completion
+certificate:
+  enabled: true
+  template: "default"
+  pass_threshold: 70         # % quiz score required

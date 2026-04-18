@@ -1,0 +1,32 @@
+name: Publish Course to TeachRepo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  publish:
+    name: Publish Course
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install TeachRepo CLI
+        run: npm install -g @teachrepo/cli
+
+      - name: Validate course structure
+        run: teachrepo validate
+
+      - name: Publish to TeachRepo
+        env:
+          TEACHREPO_API_KEY: ${{ secrets.TEACHREPO_API_KEY }}
+        run: teachrepo publish --token $TEACHREPO_API_KEY
