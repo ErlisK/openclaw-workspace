@@ -298,12 +298,14 @@ Constraints:
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   return NextResponse.json({
     endpoint: '/api/ai/insights',
     description: 'AI-powered insights: weekly_summary, price_suggestion, schedule_suggestion',
     usage: 'POST with { insightType: "all" | "weekly_summary" | "price_suggestion" | "schedule_suggestion", days: 30 }',
     model: 'anthropic/claude-haiku-4-5 via Vercel AI Gateway',
-    fallback: 'Deterministic rule-based insights when data is sparse or AI unavailable',
   })
 }

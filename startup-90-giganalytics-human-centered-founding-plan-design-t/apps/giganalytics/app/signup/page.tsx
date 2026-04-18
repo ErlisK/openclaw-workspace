@@ -39,7 +39,7 @@ export default function SignupPage() {
       })
       const data = await res.json()
       if (res.status === 429) {
-        setError('Sign-ups are temporarily rate limited. Please try again later or use Google Sign-In.')
+        setError('Sign-ups are temporarily rate limited. Please try again later.')
       } else if (!res.ok) {
         if (data.error === 'password_min_length') {
           setError('Password must be at least 8 characters.')
@@ -86,6 +86,7 @@ export default function SignupPage() {
             <input
               type="email"
               required
+              data-testid="signup-email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -98,6 +99,7 @@ export default function SignupPage() {
               type="password"
               required
               minLength={8}
+              data-testid="signup-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -113,7 +115,7 @@ export default function SignupPage() {
             <input
               id="accept-terms"
               type="checkbox"
-              required
+              data-testid="accept-terms"
               checked={acceptedTerms}
               onChange={e => setAcceptedTerms(e.target.checked)}
               className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -145,7 +147,8 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading || !acceptedTerms}
+            data-testid="signup-submit"
+            disabled={loading}
             className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
           >
             {loading ? (
@@ -158,6 +161,9 @@ export default function SignupPage() {
               </>
             ) : 'Create free account'}
           </button>
+          {!acceptedTerms && !loading && (
+            <p className="text-xs text-center text-amber-600 mt-1">Please accept the Terms and Privacy Policy to continue.</p>
+          )}
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">

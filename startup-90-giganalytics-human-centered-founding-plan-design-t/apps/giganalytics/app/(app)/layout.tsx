@@ -87,6 +87,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       {/* Main */}
       <main className="sm:ml-52 mt-14 sm:mt-0 flex-1 min-h-screen">
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-800 text-center">
+          ⚠️ All calculations are estimates and not financial, tax, or investment advice.
+        </div>
         {children}
       </main>
     </div>
