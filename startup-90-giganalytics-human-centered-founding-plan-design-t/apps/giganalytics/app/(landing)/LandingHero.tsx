@@ -39,6 +39,8 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <div className="font-bold text-gray-900 text-lg">GigAnalytics</div>
         <div className="flex items-center gap-3">
+          <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+          <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
           <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</Link>
           <Link href="/signup"
             onClick={() => trackCtaClick(variant.name, 'nav_signup')}

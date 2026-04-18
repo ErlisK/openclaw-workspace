@@ -21,6 +21,7 @@ const plans = [
     ],
     mode: 'payment' as const,
     popular: false,
+    isFree: true,
   },
   {
     name: 'Pro',

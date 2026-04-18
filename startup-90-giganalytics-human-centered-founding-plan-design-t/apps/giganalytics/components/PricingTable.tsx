@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface PricingPlan {
   name: string;
@@ -11,6 +12,7 @@ interface PricingPlan {
   priceId: string;
   mode?: "subscription" | "payment";
   popular?: boolean;
+  isFree?: boolean;
 }
 
 interface PricingTableProps {
@@ -21,15 +23,24 @@ interface PricingTableProps {
 
 export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const router = useRouter();
 
-  async function handleCheckout(priceId: string, mode: string = "subscription") {
-    setLoadingId(priceId);
+  async function handlePlanClick(plan: PricingPlan) {
+    if (plan.isFree || plan.priceId === 'free') {
+      router.push('/signup');
+      return;
+    }
+    setLoadingId(plan.priceId);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, mode }),
+        body: JSON.stringify({ priceId: plan.priceId, mode: plan.mode || "subscription" }),
       });
+      if (res.status === 401) {
+        router.push('/login?next=/pricing&plan=pro');
+        return;
+      }
       const data = await res.json();
       if (data.url) {
         window.location.href = data.url;
@@ -96,7 +107,7 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
               ))}
             </ul>
             <button
-              onClick={() => handleCheckout(plan.priceId, plan.mode || "subscription")}
+              onClick={() => handlePlanClick(plan)}
               disabled={loadingId === plan.priceId}
               className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
                 plan.popular
