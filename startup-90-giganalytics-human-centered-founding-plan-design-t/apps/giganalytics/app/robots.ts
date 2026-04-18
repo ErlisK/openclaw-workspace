@@ -1,19 +1,18 @@
 import { MetadataRoute } from 'next'
+import { SAFE_APP_URL } from '@/lib/url'
 
 export default function robots(): MetadataRoute.Robots {
-  const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://giganalytics.app'
   return {
     rules: [
       {
         userAgent: '*',
-        allow: ['/', '/signup', '/login'],
+        allow: ['/', '/signup', '/login', '/pricing'],
         disallow: [
           '/dashboard',
           '/import',
           '/timer',
           '/heatmap',
           '/roi',
-          '/pricing',
           '/billing',
           '/insights',
           '/benchmark',
@@ -21,6 +20,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: `${APP_URL}/sitemap.xml`,
+    sitemap: `${SAFE_APP_URL}/sitemap.xml`,
   }
 }

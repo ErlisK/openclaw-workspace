@@ -4,10 +4,26 @@ import { createClient } from '@/lib/supabase/server'
 // POST /api/benchmark/aggregate?month=2024-01
 // Triggers the k-anonymized aggregation for a given month (admin/cron use)
 // Also callable from a scheduled Vercel Cron job
+// Protected: requires CRON_SECRET header or admin user
 export async function POST(request: NextRequest) {
+  // Check CRON_SECRET header (for Vercel Cron or internal calls)
+  const cronSecret = process.env.CRON_SECRET
+  const presentedSecret = request.headers.get('x-cron-secret')
+  const adminUserIds = (process.env.ADMIN_USER_IDS || '').split(',').map(s => s.trim()).filter(Boolean)
+
+  if (cronSecret && presentedSecret === cronSecret) {
+    // Cron job authenticated — skip user check
+  } else {
+    // Otherwise require an authenticated admin user
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (adminUserIds.length > 0 && !adminUserIds.includes(user.id)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+  }
+
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const monthParam = searchParams.get('month')
