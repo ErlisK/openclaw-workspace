@@ -1,0 +1,4 @@
+Date,Ref ID,Type,Description,Amount,Agency Amount,Bonus,Other
+Jan 15 2025,ref_001,Fixed Price,Website project,500.00,,,
+Jan 20 2025,ref_002,Hourly,Development - 10hrs,250.00,,,
+Feb 01 2025,ref_003,Bonus,Client bonus,100.00,,,

@@ -1,0 +1,4 @@
+id,created (UTC),amount,amount_refunded,currency,description,fee,net,status
+ch_example1,2025-01-15 14:30:00,50000,0,usd,Invoice #001,1455,48545,Paid
+ch_example2,2025-01-20 09:15:00,25000,0,usd,Invoice #002,1025,23975,Paid
+ch_example3,2025-02-01 16:00:00,75000,0,usd,Invoice #003,2175,72825,Paid
