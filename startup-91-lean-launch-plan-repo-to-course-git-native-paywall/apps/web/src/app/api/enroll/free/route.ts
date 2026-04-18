@@ -64,13 +64,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Idempotent upsert
+  // Idempotent upsert — set entitlement_granted_at so is_enrolled() returns true via RLS
+  const now = new Date().toISOString();
   await serviceSupa.from('enrollments').upsert(
     {
       user_id: user.id,
       course_id: courseId,
       purchase_id: null,
-      enrolled_at: new Date().toISOString(),
+      entitlement_granted_at: now,
+      enrolled_at: now,
     },
     { onConflict: 'user_id,course_id', ignoreDuplicates: true }
   );
