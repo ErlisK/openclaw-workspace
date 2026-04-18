@@ -26,7 +26,18 @@ export async function POST(req: Request) {
         email_confirmed: !!data.user.email_confirmed_at,
       }).catch(() => {})
     }
-    return NextResponse.json({ ok: true, user: data.user ? { id: data.user.id, email: data.user.email } : null })
+    // If autoconfirm is enabled (mailer_autoconfirm=true), also sign in immediately
+    // so the user gets a session cookie and can be redirected to onboarding.
+    let autoConfirmed = false
+    if (data.user && data.session) {
+      // Session already set by signUp (autoconfirm path)
+      autoConfirmed = true
+    } else if (data.user && !data.session) {
+      // Try signing in after signup (autoconfirm path without session)
+      const { data: loginData } = await supabase.auth.signInWithPassword({ email, password })
+      if (loginData?.session) autoConfirmed = true
+    }
+    return NextResponse.json({ ok: true, autoConfirmed, user: data.user ? { id: data.user.id, email: data.user.email } : null })
   } catch {
     return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
   }

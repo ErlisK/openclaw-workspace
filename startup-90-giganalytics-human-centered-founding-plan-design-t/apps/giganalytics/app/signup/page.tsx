@@ -1,8 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function SignupPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
@@ -49,7 +51,12 @@ export default function SignupPage() {
           setError(data.message ?? 'Could not create your account. Please try again.')
         }
       } else {
-        setSuccess(true)
+        if (data.autoConfirmed) {
+          // Auto-confirmed: redirect directly to onboarding
+          router.push('/onboarding')
+        } else {
+          setSuccess(true)
+        }
       }
     } catch {
       setError('Network error. Please check your connection and try again.')

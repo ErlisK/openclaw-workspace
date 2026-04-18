@@ -10,7 +10,6 @@
  * on cache hits.
  */
 
-import { unstable_cache } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 const CACHE_TTL = 30         // seconds — Next.js revalidate
@@ -64,14 +63,9 @@ export function getCachedDashboardData(userId: string, days = 30) {
   const from = fromDate.toISOString().split('T')[0]
   const to = new Date().toISOString().split('T')[0]
 
-  // unstable_cache: keyed by user + range, TTL 30s
-  const cachedFetch = unstable_cache(
-    async () => fetchDashboardData(userId, from, to, fromDate),
-    [`dashboard-${userId}-${from}-${to}`],
-    { revalidate: CACHE_TTL, tags: [`dashboard-user-${userId}`] }
-  )
-
-  return cachedFetch()
+  // Note: unstable_cache cannot be used here because createClient() reads
+  // cookies() which is a dynamic API. We call fetchDashboardData directly.
+  return fetchDashboardData(userId, from, to, fromDate)
 }
 
 /**
