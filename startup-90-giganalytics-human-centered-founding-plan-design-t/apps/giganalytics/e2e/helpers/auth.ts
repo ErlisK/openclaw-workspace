@@ -78,15 +78,24 @@ export async function deleteTestUser(request: APIRequestContext, userId: string)
 /**
  * Auth headers for Supabase-authenticated API requests.
  * Uses cookie format matching what Supabase SSR client reads.
+ * Optionally includes the E2E test secret header for dev-sim endpoints.
  */
-export function authHeaders(accessToken: string): Record<string, string> {
-  return {
+export function authHeaders(
+  accessToken: string,
+  opts: { includeE2ESecret?: boolean } = {}
+): Record<string, string> {
+  const headers: Record<string, string> = {
     Cookie: `sb-weofiforpfamjdtvvmgu-auth-token=${JSON.stringify({
       access_token: accessToken,
       token_type: 'bearer',
     })}`,
     'Content-Type': 'application/json',
   }
+  if (opts.includeE2ESecret) {
+    const secret = process.env.E2E_TEST_SECRET
+    if (secret) headers['x-e2e-secret'] = secret
+  }
+  return headers
 }
 
 /**
