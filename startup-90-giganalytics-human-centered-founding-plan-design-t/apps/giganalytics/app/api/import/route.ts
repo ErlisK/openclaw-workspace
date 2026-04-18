@@ -130,6 +130,16 @@ export async function POST(request: NextRequest) {
     platform: platform ?? 'custom',
     row_count: importedCount,
     stream_id: resolvedStreamId,
+    funnel: 'activation',
+    funnel_step: 7,
+  }).catch(() => {})
+
+  // Activation funnel: check if this is the user's first import
+  // and fire activation_complete if ROI data is now available
+  captureServerEvent(user.id, 'import_started', {
+    platform: platform ?? 'custom',
+    funnel: 'activation',
+    funnel_step: 6,
   }).catch(() => {})
 
   return NextResponse.json({

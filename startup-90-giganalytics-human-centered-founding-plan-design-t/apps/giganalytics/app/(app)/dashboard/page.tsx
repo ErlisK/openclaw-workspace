@@ -3,6 +3,7 @@ import { computeROI, fmt$, fmtRate } from '@/lib/roi'
 import Link from 'next/link'
 import OnboardingChecklist from './OnboardingChecklist'
 import FinancialDisclaimer from '@/components/FinancialDisclaimer'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 function StatCard({ label, value, sub, color = 'blue' }: {
   label: string; value: string; sub?: string; color?: string
@@ -28,6 +29,12 @@ export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+
+  // Fire activation funnel: onboarding_started (first dashboard visit)
+  captureServerEvent(user.id, 'onboarding_started', {
+    funnel: 'activation',
+    funnel_step: 5,
+  }).catch(() => {})
 
   const days = 90
   const fromDate = new Date()
@@ -67,6 +74,22 @@ export default async function DashboardPage() {
 
   const agg = roi.aggregate
   const hasData = roi.streams.length > 0 || (transactions?.length ?? 0) > 0
+
+  // Fire activation funnel events based on data state
+  if (hasData) {
+    captureServerEvent(user.id, 'roi_viewed', {
+      funnel: 'activation',
+      funnel_step: 8,
+      stream_count: roi.streams.length,
+      has_data: true,
+    }).catch(() => {})
+    // activation_complete = has imported data AND viewed ROI
+    captureServerEvent(user.id, 'activation_complete', {
+      funnel: 'activation',
+      funnel_step: 10,
+      stream_count: roi.streams.length,
+    }).catch(() => {})
+  }
 
   // Onboarding progress
   const [{ count: streamCount }, { count: txCount }, { count: teCount }, { data: settings }] = await Promise.all([
