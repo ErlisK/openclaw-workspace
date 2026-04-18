@@ -33,16 +33,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const body = await request.json()
-  const { rows, streamId, platform, streamName } = body as {
-    rows: ImportRow[]
-    streamId?: string
-    platform?: string
-    streamName?: string
+    let body: { rows?: ImportRow[]; streamId?: string; platform?: string; streamName?: string } = {}
+  try {
+    body = await request.json()
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
+  const { rows, streamId, platform, streamName } = body
 
   const MAX_IMPORT_ROWS = 5000
-  if (rows.length > MAX_IMPORT_ROWS) {
+  if ((rows?.length ?? 0) > MAX_IMPORT_ROWS) {
     return NextResponse.json({ error: "import_too_large", message: `Import limited to ${MAX_IMPORT_ROWS} rows per request.` }, { status: 400 })
   }
   if (!rows || !Array.isArray(rows) || rows.length === 0) {

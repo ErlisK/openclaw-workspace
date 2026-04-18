@@ -14,7 +14,7 @@ test.describe('home page', () => {
     // If landing page is rendered (not SSO), expect a CTA button or h1
     const isSso = page.url().includes('vercel.com/sso')
     if (!isSso) {
-      const signupLink = page.locator('a[href="/signup"]').first()
+      const signupLink = page.locator('a[href*="/signup"]').first()
       await expect(signupLink).toBeVisible({ timeout: 8000 })
     }
   })

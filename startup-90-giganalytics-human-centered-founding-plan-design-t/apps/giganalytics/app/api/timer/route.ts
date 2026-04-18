@@ -103,7 +103,6 @@ export async function POST(request: NextRequest) {
           duration_minutes: duration,
           entry_type: entryType ?? 'billable',
           note: note ?? null,
-          status: 'completed',
         })
         .select('id')
         .single()
