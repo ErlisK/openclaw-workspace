@@ -1,7 +1,8 @@
 import { getVariant } from '@/lib/landing/variants'
-import LandingHero from './(landing)/LandingHero'
+import LandingHero from './LandingHero'
 
-export default async function RootPage({
+// Server component: reads ?v= param, passes variant to client hero
+export default async function LandingPage({
   searchParams,
 }: {
   searchParams: Promise<{ v?: string }>
