@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { PricingTable } from '@/components/PricingTable'
+import { createClient } from '@/lib/supabase/server'
+import PricingProCheckout from './PricingProCheckout'
 
 const FREE_PRICE_ID = 'free'
 const PRO_PRICE_ID = process.env.PRICE_ID_PRO_MONTHLY ?? 'price_pro_monthly'
@@ -44,17 +46,32 @@ const plans = [
   },
 ]
 
-export default function PricingPage() {
+export default async function PricingPage({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const params = await searchParams
+  const isAuthenticated = !!user
+  const autoPro = params?.plan === 'pro' && isAuthenticated
+
   return (
     <div className="min-h-screen bg-white">
+      {/* Auto-checkout trigger for authenticated ?plan=pro */}
+      {autoPro && <PricingProCheckout priceId={PRO_PRICE_ID} />}
+
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <Link href="/" className="font-bold text-gray-900 text-lg">GigAnalytics</Link>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</Link>
-          <Link href="/signup" className="text-sm px-4 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700">
-            Get started free
-          </Link>
+          {isAuthenticated ? (
+            <Link href="/dashboard" className="text-sm text-gray-600 hover:text-gray-900">Dashboard</Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</Link>
+              <Link href="/signup" className="text-sm px-4 py-2 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700">
+                Get started free
+              </Link>
+            </>
+          )}
         </div>
       </nav>
 
@@ -66,12 +83,18 @@ export default function PricingPage() {
         </p>
       </div>
 
-      {/* Pricing table - always renders with static fallback */}
-      <PricingTable
-        plans={plans}
-        title=""
-        subtitle=""
-      />
+      {/* Upgrade CTA note for logged-out users */}
+      {!isAuthenticated && (
+        <div className="text-center mb-4">
+          <p className="text-sm text-gray-500">
+            <Link href="/login?next=/pricing&plan=pro" className="text-blue-600 hover:underline font-medium">Log in to upgrade</Link>{' '}
+            to Pro
+          </p>
+        </div>
+      )}
+
+      {/* Pricing table */}
+      <PricingTable plans={plans} title="" subtitle="" />
 
       {/* Financial disclaimer */}
       <div className="max-w-2xl mx-auto px-6 pb-4 text-center">
@@ -88,7 +111,7 @@ export default function PricingPage() {
             { q: 'Can I cancel anytime?', a: 'Yes. Cancel anytime from your billing settings. No questions asked.' },
             { q: 'What counts as an income stream?', a: 'Any income source — Upwork, Fiverr, Stripe, direct clients, consulting, etc. Free plan supports 2, Pro is unlimited.' },
             { q: 'Is my financial data secure?', a: 'Yes. All data is encrypted at rest and in transit. We never sell your data. See our Privacy Policy for details.' },
-            { q: 'Do you offer refunds?', a: 'If you\'re not satisfied within 14 days, contact us for a full refund.' },
+            { q: 'Do you offer refunds?', a: "If you're not satisfied within 14 days, contact us for a full refund." },
           ].map(({ q, a }, i) => (
             <div key={i} className="border border-gray-200 rounded-xl p-4">
               <div className="font-semibold text-gray-800 mb-1 text-sm">{q}</div>
@@ -96,7 +119,6 @@ export default function PricingPage() {
             </div>
           ))}
         </div>
-
         <div className="text-center mt-10">
           <p className="text-sm text-gray-400">
             Questions?{' '}

@@ -5,11 +5,17 @@ export async function POST(req: Request) {
   try {
     const { email, password } = await req.json()
     if (!email || !password) {
-      return NextResponse.json({ error: 'missing_params' }, { status: 400 })
+      return NextResponse.json({ error: 'missing_params', message: 'Email and password are required.' }, { status: 400 })
+    }
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'password_min_length', message: 'Password must be at least 8 characters.' }, { status: 400 })
     }
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) {
+      if (error.status === 429) {
+        return NextResponse.json({ error: 'rate_limited', message: 'Sign-ups are temporarily rate limited. Please try again later or use Google Sign-In.' }, { status: 429 })
+      }
       return NextResponse.json({ error: 'signup_failed', message: error.message }, { status: 400 })
     }
     return NextResponse.json({ ok: true, user: data.user ? { id: data.user.id, email: data.user.email } : null })
@@ -19,5 +25,5 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ error: 'method_not_allowed', hint: 'POST with { email, password }' }, { status: 405 })
+  return NextResponse.json({ error: 'method_not_allowed' }, { status: 405 })
 }

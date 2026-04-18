@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  poweredByHeader: false,
+  experimental: {
+    serverBodySizeLimit: '2mb',
+  },
   async headers() {
     return [
       {

@@ -8,9 +8,6 @@ function url(path: string): string {
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: url('/'), lastModified: new Date(), changeFrequency: 'weekly', priority: 1 },
-    { url: url('/?v=1'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: url('/?v=2'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: url('/?v=3'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: url('/signup'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.9 },
     { url: url('/login'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/pricing'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },

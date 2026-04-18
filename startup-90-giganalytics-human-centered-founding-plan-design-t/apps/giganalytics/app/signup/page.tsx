@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -32,38 +31,30 @@ export default function SignupPage() {
     }
     setLoading(true)
     setError('')
-    const supabase = createClient()
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
-    if (error) {
-      if (error.status === 429) {
-        setError('Too many attempts. Please wait a few minutes and try again.')
-      } else if (
-        error.message?.toLowerCase().includes('already registered') ||
-        error.message?.toLowerCase().includes('already in use') ||
-        error.message?.toLowerCase().includes('user already exists')
-      ) {
-        setError('That email is already in use. Try logging in instead.')
-      } else if (
-        error.message?.toLowerCase().includes('password') ||
-        error.message?.toLowerCase().includes('weak')
-      ) {
-        setError('Password is too weak. Use at least 8 characters with letters and numbers.')
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (res.status === 429) {
+        setError('Sign-ups are temporarily rate limited. Please try again later or use Google Sign-In.')
+      } else if (!res.ok) {
+        if (data.error === 'password_min_length') {
+          setError('Password must be at least 8 characters.')
+        } else if (data.message?.toLowerCase().includes('already')) {
+          setError('That email is already in use. Try logging in instead.')
+        } else {
+          setError(data.message ?? 'Could not create your account. Please try again.')
+        }
       } else {
-        setError('Could not create your account. Please try again.')
+        setSuccess(true)
       }
-      setLoading(false)
-      return
+    } catch {
+      setError('Network error. Please check your connection and try again.')
     }
-    if (data?.user && data.user?.identities?.length === 0) {
-      setError('That email is already in use. Try logging in instead.')
-      setLoading(false)
-      return
-    }
-    setSuccess(true)
+    setLoading(false)
   }
 
   if (success) {
@@ -112,8 +103,9 @@ export default function SignupPage() {
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="At least 8 characters"
             />
+            <p className="text-xs mt-1 text-gray-400">At least 8 characters with letters and numbers</p>
             {password && !strength.ok && (
-              <p className="text-xs mt-1 text-red-500">{strength.message}</p>
+              <p className="text-xs mt-0.5 text-red-500">{strength.message}</p>
             )}
           </div>
 
@@ -128,13 +120,9 @@ export default function SignupPage() {
             />
             <label htmlFor="accept-terms" className="text-sm text-gray-600">
               I agree to the{' '}
-              <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
-                Terms of Service
-              </a>{' '}
+              <a href="/terms" target="_blank" className="text-blue-600 hover:underline">Terms of Service</a>{' '}
               and{' '}
-              <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
-                Privacy Policy
-              </a>
+              <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">Privacy Policy</a>
             </label>
           </div>
           <div className="flex items-start gap-2">
@@ -147,13 +135,9 @@ export default function SignupPage() {
             />
             <label htmlFor="benchmark-opt-in" className="text-sm text-gray-600">
               Contribute my anonymized hourly rate to community benchmarks (optional — see{' '}
-              <a href="/privacy#benchmark" target="_blank" className="text-blue-600 hover:underline">
-                Privacy Policy
-              </a>
-              )
+              <a href="/privacy#benchmark" target="_blank" className="text-blue-600 hover:underline">Privacy Policy</a>)
             </label>
           </div>
-
 
           {error && (
             <div className="bg-red-50 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>
@@ -161,10 +145,18 @@ export default function SignupPage() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
+            disabled={loading || !acceptedTerms}
+            className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? 'Creating account…' : 'Create free account'}
+            {loading ? (
+              <>
+                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                </svg>
+                Creating account…
+              </>
+            ) : 'Create free account'}
           </button>
         </form>
 

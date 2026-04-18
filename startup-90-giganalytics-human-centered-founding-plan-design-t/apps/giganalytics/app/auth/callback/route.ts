@@ -26,7 +26,18 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    await supabase.auth.exchangeCodeForSession(code)
+    const { data } = await supabase.auth.exchangeCodeForSession(code)
+
+    // For new users (no existing streams), redirect to onboarding
+    if (data?.user && safePath === '/dashboard') {
+      const { count } = await supabase
+        .from('income_streams')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', data.user.id)
+      if ((count ?? 0) === 0) {
+        return NextResponse.redirect(new URL('/onboarding', origin))
+      }
+    }
   }
 
   return NextResponse.redirect(new URL(safePath, origin))
