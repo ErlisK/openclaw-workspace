@@ -165,21 +165,45 @@ export default function HomePage() {
             ))}
           </div>
 
+          {/* AI Agent Integration Snippet */}
+          <div className="mt-16 mb-8 text-left bg-gray-950 rounded-2xl p-6 border border-gray-800">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold text-indigo-400 uppercase tracking-widest">For AI Agents &amp; Developers — REST API</span>
+              <span className="text-xs text-gray-500">curl · Node · Python</span>
+            </div>
+            <pre className="text-sm text-green-300 overflow-x-auto whitespace-pre-wrap">{`# Submit a test job in one API call
+curl -X POST https://betawindow.com/api/v1/jobs \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "title": "Test the signup and core feature flow",
+    "url": "https://your-app.vercel.app",
+    "tier": "quick",
+    "instructions": "Sign up, complete onboarding, trigger main feature"
+  }'
+
+# Returns: { job_id, status: "published", estimated_completion: "<4h" }`}</pre>
+            <div className="mt-4 flex gap-3">
+              <Link href="/docs" className="text-xs text-indigo-400 hover:text-indigo-300 underline">View full API docs →</Link>
+              <Link href="/signup" className="text-xs text-indigo-400 hover:text-indigo-300 underline">Get your API key →</Link>
+            </div>
+          </div>
+
           {/* Social proof stats */}
-          <div className="mt-16 py-8 border-t border-gray-100">
-            <p className="text-center text-sm text-gray-400 mb-6">Join early-access developers shipping AI-built apps</p>
+          <div className="mt-8 py-8 border-t border-gray-100">
+            <p className="text-center text-sm text-gray-400 mb-6">Built for the agentic era — ship AI apps with confidence</p>
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
-                <div className="text-3xl font-bold text-gray-900">Early</div>
-                <div className="text-sm text-gray-500 mt-1">Access — sign up now</div>
+                <div className="text-3xl font-bold text-gray-900">$5</div>
+                <div className="text-sm text-gray-500 mt-1">First Quick test — use code <span className="font-semibold text-amber-600">LAUNCH</span></div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>
                 <div className="text-sm text-gray-500 mt-1">Avg. report turnaround*</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-gray-900">3 tiers</div>
-                <div className="text-sm text-gray-500 mt-1">$5 · $10 · $15 per test</div>
+                <div className="text-3xl font-bold text-indigo-600">Free</div>
+                <div className="text-sm text-gray-500 mt-1">to sign up · pay per test</div>
               </div>
             </div>
           </div>

@@ -51,6 +51,10 @@ export default function BecomeATesterPage() {
         <section className="bg-indigo-600 text-white py-20 px-6">
           <div className="max-w-3xl mx-auto text-center">
             <div className="text-5xl mb-4">💰</div>
+            <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 text-sm font-semibold bg-amber-400 text-amber-900 rounded-full">
+              <span>🎁</span>
+              <span>Early tester bonus: complete your first test and earn an extra <strong>$5 bonus</strong></span>
+            </div>
             <h1 className="text-4xl font-bold mb-4">Earn money testing AI-built apps</h1>
             <p className="text-xl text-indigo-100 mb-8">Get paid $5–$15 per test. Each session is 10–30 minutes. Flexible schedule, no experience required.</p>
             <Link href="/signup" className="inline-block px-8 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 text-lg">Sign up free → Start earning</Link>

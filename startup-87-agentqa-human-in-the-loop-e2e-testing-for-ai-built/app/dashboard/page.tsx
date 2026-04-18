@@ -265,6 +265,17 @@ export default function DashboardPage() {
                   Start your first test — from $5
                 </a>
                 <p className="mt-3 text-xs text-gray-400">Use code <strong>LAUNCH</strong> for a free Quick test this week</p>
+                {/* Referral nudge */}
+                <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl max-w-sm mx-auto">
+                  <p className="text-sm font-semibold text-amber-800 mb-1">🎁 Earn free test credits</p>
+                  <p className="text-xs text-amber-700">Invite a fellow developer — when they submit their first test, you both get <strong>$5 in credits</strong>.</p>
+                  <button
+                    onClick={() => { const el = document.querySelector('[data-testid="referral-share-button"]') as HTMLButtonElement; el?.click() }}
+                    className="mt-2 text-xs text-amber-800 font-semibold underline hover:no-underline"
+                  >
+                    Get your referral link →
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="space-y-3" data-testid="jobs-list">
