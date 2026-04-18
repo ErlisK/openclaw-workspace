@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { useState, useCallback } from 'react';
-import type { QuizFile, QuizQuestion } from '@teachrepo/types';
+import type { QuizFile, QuizQuestion } from '@/lib/types/quiz';
 
 interface QuizProps {
   quiz: QuizFile;
