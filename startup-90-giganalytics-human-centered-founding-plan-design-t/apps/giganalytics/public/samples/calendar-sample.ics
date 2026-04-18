@@ -1,0 +1,97 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//GigAnalytics//Sample Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:acme-design-review-20240103@giganalytics
+DTSTART:20240103T100000Z
+DTEND:20240103T120000Z
+SUMMARY:Acme Corp - UX Design Review
+DESCRIPTION:Design review session with Acme Corp stakeholders. Reviewing homepage wireframes and mobile flow.
+END:VEVENT
+BEGIN:VEVENT
+UID:coaching-sarah-20240104@giganalytics
+DTSTART:20240104T150000Z
+DTEND:20240104T160000Z
+SUMMARY:Coaching Session - Sarah M.
+DESCRIPTION:1-on-1 career coaching session
+END:VEVENT
+BEGIN:VEVENT
+UID:neff-strategy-20240108@giganalytics
+DTSTART:20240108T090000Z
+DTEND:20240108T115000Z
+SUMMARY:NEFF Brand Strategy Workshop
+DESCRIPTION:Brand identity workshop with NEFF team. Defining brand voice, color palette, and target audience.
+END:VEVENT
+BEGIN:VEVENT
+UID:acme-dev-sprint-20240109@giganalytics
+DTSTART:20240109T100000Z
+DTEND:20240109T180000Z
+SUMMARY:Acme Corp - Development Sprint
+DESCRIPTION:Frontend implementation of approved designs
+END:VEVENT
+BEGIN:VEVENT
+UID:proposal-startup-20240110@giganalytics
+DTSTART:20240110T140000Z
+DTEND:20240110T150000Z
+SUMMARY:Proposal Call - Startup.io
+DESCRIPTION:Discovery call and proposal discussion for new product design project
+END:VEVENT
+BEGIN:VEVENT
+UID:lunch-20240111@giganalytics
+DTSTART:20240111T120000Z
+DTEND:20240111T130000Z
+SUMMARY:Lunch with friends
+DESCRIPTION:Personal lunch
+END:VEVENT
+BEGIN:VEVENT
+UID:acme-revision-20240112@giganalytics
+DTSTART:20240112T110000Z
+DTEND:20240112T130000Z
+SUMMARY:Acme Corp - Revision Round 2
+DESCRIPTION:Incorporating stakeholder feedback and revisions to mobile screens
+END:VEVENT
+BEGIN:VEVENT
+UID:admin-invoicing-20240115@giganalytics
+DTSTART:20240115T090000Z
+DTEND:20240115T100000Z
+SUMMARY:Admin - Invoicing and follow-up emails
+DESCRIPTION:Send January invoices, follow up on outstanding payments
+END:VEVENT
+BEGIN:VEVENT
+UID:coaching-sarah-20240116@giganalytics
+DTSTART:20240116T150000Z
+DTEND:20240116T160000Z
+SUMMARY:Coaching Session - Sarah M.
+DESCRIPTION:Follow-up coaching session
+END:VEVENT
+BEGIN:VEVENT
+UID:neff-design-20240117@giganalytics
+DTSTART:20240117T100000Z
+DTEND:20240117T140000Z
+SUMMARY:NEFF - Design System Work
+DESCRIPTION:Building out brand design system components
+END:VEVENT
+BEGIN:VEVENT
+UID:standup-20240118@giganalytics
+DTSTART:20240118T093000Z
+DTEND:20240118T095000Z
+SUMMARY:Quick standup
+DESCRIPTION:Daily standup
+END:VEVENT
+BEGIN:VEVENT
+UID:acme-client-call-20240119@giganalytics
+DTSTART:20240119T100000Z
+DTEND:20240119T110000Z
+SUMMARY:Acme Corp - Weekly Client Call
+DESCRIPTION:Weekly check-in and project status update
+END:VEVENT
+BEGIN:VEVENT
+UID:dentist-20240120@giganalytics
+DTSTART:20240120T140000Z
+DTEND:20240120T160000Z
+SUMMARY:Dentist appointment
+DESCRIPTION:Personal - dental checkup
+END:VEVENT
+END:VCALENDAR
