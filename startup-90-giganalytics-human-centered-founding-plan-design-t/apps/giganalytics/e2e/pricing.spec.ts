@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test'
 
-test('pricing page redirects to login when unauthenticated', async ({ page }) => {
+test('pricing page loads publicly when unauthenticated', async ({ page }) => {
   await page.goto('/pricing')
-  await expect(page).toHaveURL(/\/login/)
+  await expect(page).toHaveURL(/\/pricing/)
 })
 
 test('pricing API returns 401 without auth', async ({ request }) => {

@@ -390,10 +390,9 @@ test('/dashboard redirects to login without auth', async ({ page }) => {
   expect(page.url()).toMatch(/login|vercel\.com/)
 })
 
-test('/pricing redirects to login without auth', async ({ page }) => {
+test('/pricing loads publicly without auth', async ({ page }) => {
   await page.goto('/pricing')
-  await page.waitForURL(/login|vercel\.com/, { timeout: 5000 })
-  expect(page.url()).toMatch(/login|vercel\.com/)
+  await expect(page).toHaveURL(/\/pricing/)
 })
 
 test('/insights redirects to login without auth', async ({ page }) => {
