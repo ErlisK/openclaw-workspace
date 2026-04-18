@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  return NextResponse.json({ status: 'coming_soon', message: 'Benchmark data is being compiled.' })
+/**
+ * GET /api/benchmarks (legacy route — redirects to /api/benchmark)
+ *
+ * The canonical benchmark endpoint is /api/benchmark (singular).
+ * This route is kept for backward compatibility but redirects to the live endpoint.
+ */
+export async function GET(request: NextRequest) {
+  const url = new URL(request.url)
+  const newPath = url.pathname.replace('/api/benchmarks', '/api/benchmark')
+  const redirectUrl = `${url.origin}${newPath}${url.search}`
+  return NextResponse.redirect(redirectUrl, { status: 308 })
 }

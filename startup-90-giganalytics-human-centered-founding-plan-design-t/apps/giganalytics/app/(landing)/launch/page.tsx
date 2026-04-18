@@ -33,9 +33,9 @@ const listings = [
     name: 'BetaList',
     icon: '🧪',
     status: 'submitted',
-    url: 'https://betalist.com/startups/giganalytics',
+    url: 'https://betalist.com/startups/giganalytics',  // Update with actual listing URL after submission
     utmUrl: `${PRODUCTION_URL}?utm_source=betalist&utm_medium=listing&utm_campaign=launch`,
-    description: 'Sign up for early access notifications on BetaList.',
+    description: 'Discover GigAnalytics on BetaList — the product is live and free to try.',
     action: 'View on BetaList →',
     color: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
   },
