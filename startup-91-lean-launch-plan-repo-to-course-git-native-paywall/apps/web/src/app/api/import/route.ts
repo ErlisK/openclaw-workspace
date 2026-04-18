@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { resolveUser } from '@/lib/auth/resolve-user';
 
 // ────────────────────────────────────────────────────────────────────────────
 // GitHub helpers
@@ -238,10 +238,9 @@ const ImportRequestSchema = z.object({
 // ────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
-  // 1. Auth
-  const supabase = createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+  // 1. Auth — supports SSR cookie session and Bearer token
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

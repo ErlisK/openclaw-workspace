@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { resolveUser } from '@/lib/auth/resolve-user';
 
 /**
  * GET /api/me
  * Returns the current user's profile from the creators table.
  */
-export async function GET() {
-  const supabase = createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+export async function GET(req: NextRequest) {
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -24,8 +23,8 @@ export async function GET() {
     user: {
       id: user.id,
       email: user.email,
-      provider: user.app_metadata?.provider ?? 'email',
-      email_confirmed: !!user.email_confirmed_at,
+      provider: (user as { app_metadata?: { provider?: string } }).app_metadata?.provider ?? 'email',
+      email_confirmed: !!(user as { email_confirmed_at?: string }).email_confirmed_at,
     },
     profile: creator ?? null,
   });
@@ -36,9 +35,8 @@ export async function GET() {
  * Updates the current user's profile.
  */
 export async function PATCH(req: NextRequest) {
-  const supabase = createServerClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) {
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -49,7 +47,6 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  // Only allow safe profile fields
   const allowed = ['display_name', 'bio', 'website_url', 'twitter_handle', 'github_handle', 'avatar_url'];
   const patch: Record<string, unknown> = {};
   for (const key of allowed) {
