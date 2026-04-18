@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import posthog from 'posthog-js'
 import Link from 'next/link'
+import { parseUTM, hasUTM } from '@/lib/utm'
 
 const CONSENT_KEY = 'ga_cookie_consent'
 
@@ -19,6 +20,18 @@ export function CookieConsent() {
     // if declined, posthog stays uninitialized
   }, [])
 
+  function captureUTMIfPresent() {
+    try {
+      const utmParams = parseUTM(new URLSearchParams(window.location.search))
+      if (!hasUTM(utmParams)) return
+      posthog.capture('utm_attribution', {
+        ...utmParams,
+        landing_path: window.location.pathname,
+        referrer: document.referrer || undefined,
+      })
+    } catch { /* best-effort */ }
+  }
+
   function initPosthog() {
     const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
     const host = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com'
@@ -30,6 +43,7 @@ export function CookieConsent() {
         capture_pageleave: true,
         autocapture: false,
         persistence: 'localStorage',
+        loaded: () => captureUTMIfPresent(),
       })
     } catch {}
   }
@@ -38,6 +52,8 @@ export function CookieConsent() {
     localStorage.setItem(CONSENT_KEY, 'accepted')
     setVisible(false)
     initPosthog()
+    // Also fire UTM capture now that PostHog is ready
+    setTimeout(captureUTMIfPresent, 100)
   }
 
   function decline() {

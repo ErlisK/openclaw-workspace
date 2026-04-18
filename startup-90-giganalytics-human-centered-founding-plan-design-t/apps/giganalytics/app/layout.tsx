@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { CookieConsent } from "@/components/CookieConsent";
+import { UTMTracker } from "@/components/UTMTracker";
 import Script from "next/script";
 
 const geistSans = localFont({
@@ -138,9 +139,17 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaOrg) }}
         />
+        {/* Plausible Analytics — privacy-first, no cookies required */}
+        <Script
+          defer
+          data-domain="startup-90-giganalytics-human-cente.vercel.app"
+          src="https://plausible.io/js/script.tagged-events.js"
+          strategy="afterInteractive"
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <CookieConsent />
+        <UTMTracker />
         {children}
       </body>
     </html>
