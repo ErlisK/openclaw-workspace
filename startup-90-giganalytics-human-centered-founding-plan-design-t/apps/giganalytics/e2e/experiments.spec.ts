@@ -180,7 +180,8 @@ test.describe('Landing page variants', () => {
     // v=1 has ROI-first headline
     expect(text.toLowerCase()).toMatch(/real hourly rate|roi|income stream/)
     // Variant debug bar shows v=1
-    expect(text).toContain('variant=1')
+    // JSX adds HTML comments in SSR, check variant name or href instead
+    expect(text).toContain('roi_first')
     console.log('✓ /?v=1 serves roi_first variant')
   })
 
@@ -188,7 +189,8 @@ test.describe('Landing page variants', () => {
     const res = await request.get('/?v=2')
     if (res.status() !== 200) return
     const text = await res.text()
-    expect(text).toContain('variant=2')
+    // JSX adds HTML comments in SSR, check variant name instead
+    expect(text).toContain('time_saver')
     expect(text.toLowerCase()).toMatch(/time|timer|friction|tracking/)
     console.log('✓ /?v=2 serves time_saver variant')
   })
@@ -197,7 +199,8 @@ test.describe('Landing page variants', () => {
     const res = await request.get('/?v=3')
     if (res.status() !== 200) return
     const text = await res.text()
-    expect(text).toContain('variant=3')
+    // JSX adds HTML comments in SSR, check variant name instead
+    expect(text).toContain('pricing_lab')
     expect(text.toLowerCase()).toMatch(/pric|rate|data/)
     console.log('✓ /?v=3 serves pricing_lab variant')
   })
@@ -238,8 +241,8 @@ test.describe('Landing page variants', () => {
     const res = await request.get('/')
     if (res.status() !== 200) return
     const text = await res.text()
-    // Should contain one of the 3 variant IDs in the debug bar
-    const hasVariant = text.includes('variant=1') || text.includes('variant=2') || text.includes('variant=3')
+    // Should contain one of the 3 variant names in the debug bar (JSX adds HTML comments around interpolated numbers)
+    const hasVariant = text.includes('roi_first') || text.includes('time_saver') || text.includes('pricing_lab')
     expect(hasVariant).toBe(true)
     console.log('✓ / (no ?v) serves a valid variant')
   })
