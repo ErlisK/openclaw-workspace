@@ -1,34 +1,37 @@
 // ============================================================
-// Affiliate domain types
+// Affiliate + Referral domain types (v2)
 // ============================================================
 
 export interface Affiliate {
   id: string;
-  userId: string;        // The affiliate (sharer)
-  courseId: string | null;
-  creatorId: string;     // The course creator
-  code: string;          // The ?ref= value
+  affiliateUserId: string;
+  creatorId: string;
+  courseId: string | null;           // NULL = applies to all creator courses
+  code: string;                      // The ?ref= value
   commissionPct: number;
+  cookieDays: number;
   isActive: boolean;
+  totalClicks: number;               // Denormalized for dashboard speed
+  totalConversions: number;
+  totalEarnedCents: number;
   createdAt: string;
 }
 
-export interface AffiliateClick {
+export type UserAgentType = 'human' | 'bot' | 'unknown';
+
+export interface Referral {
   id: string;
   affiliateId: string;
   courseId: string | null;
   referrerUrl: string | null;
+  landingUrl: string | null;
   ipHash: string | null;
-  userAgentType: 'human' | 'bot' | 'unknown';
-  clickedAt: string;
-}
-
-export interface AffiliateConversion {
-  id: string;
-  affiliateId: string;
-  enrollmentId: string | null;
-  commissionCents: number;
+  userAgentType: UserAgentType;
+  converted: boolean;
+  purchaseId: string | null;
+  commissionCents: number | null;
   paidAt: string | null;
   stripeTransferId: string | null;
-  createdAt: string;
+  clickedAt: string;
+  convertedAt: string | null;
 }

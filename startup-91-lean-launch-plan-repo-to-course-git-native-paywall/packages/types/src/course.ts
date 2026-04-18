@@ -1,9 +1,27 @@
 // ============================================================
-// Course domain types
+// Course domain types (v2 — aligned with schema.sql v2)
 // ============================================================
 
 export type PricingModel = 'free' | 'one_time' | 'subscription';
-export type CourseTier = 'free' | 'creator' | 'marketplace';
+export type SaasTier = 'free' | 'creator' | 'marketplace';
+
+export interface Creator {
+  id: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  websiteUrl: string | null;
+  twitterHandle: string | null;
+  githubHandle: string | null;
+  stripeCustomerId: string | null;
+  stripeConnectAccountId: string | null;
+  stripeConnectOnboarded: boolean;
+  saasTier: SaasTier;
+  saasSubscriptionId: string | null;
+  saasExpiresAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Course {
   id: string;
@@ -11,27 +29,36 @@ export interface Course {
   slug: string;
   title: string;
   description: string | null;
-  priceCents: number;
-  currency: string;
-  published: boolean;
-  repoUrl: string | null;
-  stripeProductId: string | null;
-  stripePriceId: string | null;
-  version: string;
+  shortDesc: string | null;
   thumbnailUrl: string | null;
   tags: string[];
+  priceCents: number;
+  currency: string;
+  pricingModel: PricingModel;
+  stripeProductId: string | null;
+  stripePriceId: string | null;
+  published: boolean;
+  publishedAt: string | null;
   passThreshold: number;
-  affiliatesEnabled: boolean;
-  affiliateCommissionPct: number;
-  affiliateCookieDays: number;
-  sandboxesEnabled: boolean;
+  certEnabled: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface CourseVersion {
+  id: string;
+  courseId: string;
+  version: string;
+  changelog: string | null;
+  lessonCount: number;
+  isLatest: boolean;
+  publishedAt: string;
 }
 
 export interface Lesson {
   id: string;
   courseId: string;
+  courseVersionId: string | null;
   slug: string;
   title: string;
   description: string | null;
@@ -39,8 +66,26 @@ export interface Lesson {
   orderIndex: number;
   isPreview: boolean;
   estimatedMinutes: number | null;
+  hasQuiz: boolean;
+  hasSandbox: boolean;
+  sandboxUrl: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export type RepoImportStatus = 'pending' | 'running' | 'completed' | 'failed';
+
+export interface RepoImport {
+  id: string;
+  creatorId: string;
+  courseId: string | null;
+  repoUrl: string;
+  repoRef: string;
+  status: RepoImportStatus;
+  detectedLessons: number | null;
+  errorMessage: string | null;
+  startedAt: string;
+  completedAt: string | null;
 }
 
 /** Parsed from course.config.yaml */
