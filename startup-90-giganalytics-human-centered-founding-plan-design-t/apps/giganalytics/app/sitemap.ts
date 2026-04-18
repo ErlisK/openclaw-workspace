@@ -32,6 +32,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url('/compare/giganalytics-vs-toggl'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/compare/giganalytics-vs-wave'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/compare/giganalytics-vs-spreadsheet'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/compare/giganalytics-vs-quickbooks'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/compare/giganalytics-vs-harvest'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     // Advanced docs
     { url: url('/docs/benchmark-data'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: url('/docs/heatmap-guide'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
