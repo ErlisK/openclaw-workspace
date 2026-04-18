@@ -15,6 +15,7 @@ const BLOG_POSTS = [
   { slug: 'true-hourly-rate', title: 'hourly rate', tag: 'ROI', utm: 'true_hourly_rate_post' },
   { slug: 'ab-pricing-gig-work', title: 'A/B', tag: 'Pricing', utm: 'ab_pricing_post' },
   { slug: 'five-income-streams', title: 'income stream', tag: 'Productivity', utm: 'five_streams_post' },
+  { slug: 'csv-import-guide', title: 'import', tag: 'CSV', utm: 'csv_import_post' },
 ]
 
 const DIRECTORIES = [
@@ -40,7 +41,7 @@ test.describe('/blog index', () => {
     console.log(`✓ GET /blog → ${res.status()}`)
   })
 
-  test('lists all 3 blog post titles', async ({ request }) => {
+  test('lists all 4 blog post titles', async ({ request }) => {
     const res = await request.get('/blog')
     if (res.status() !== 200) return
     const text = await res.text()
@@ -174,6 +175,7 @@ test.describe('sitemap includes new pages', () => {
     expect(text).toContain('/blog/true-hourly-rate')
     expect(text).toContain('/blog/ab-pricing-gig-work')
     expect(text).toContain('/blog/five-income-streams')
+    expect(text).toContain('/blog/csv-import-guide')
     console.log('✓ sitemap.xml includes all blog URLs')
   })
 

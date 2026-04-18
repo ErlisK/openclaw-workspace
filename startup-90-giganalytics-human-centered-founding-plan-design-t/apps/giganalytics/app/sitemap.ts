@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url('/blog/true-hourly-rate'), lastModified: new Date('2025-04-10'), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/blog/ab-pricing-gig-work'), lastModified: new Date('2025-04-03'), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/blog/five-income-streams'), lastModified: new Date('2025-03-27'), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/blog/csv-import-guide'), lastModified: new Date('2025-04-18'), changeFrequency: 'monthly', priority: 0.7 },
     // Launch
     { url: url('/launch'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     // Social

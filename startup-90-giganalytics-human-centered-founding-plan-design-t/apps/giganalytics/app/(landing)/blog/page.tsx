@@ -13,6 +13,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: 'csv-import-guide',
+    date: '2025-04-18',
+    title: 'How to Import Your Stripe & PayPal Payments into GigAnalytics (CSV Guide)',
+    excerpt:
+      'Step-by-step: export CSVs from Stripe, PayPal, Upwork, and Fiverr — then import into GigAnalytics to see your true income ROI across all platforms in minutes.',
+    readMin: 7,
+    tags: ['CSV', 'Stripe', 'PayPal', 'Import'],
+  },
+  {
     slug: 'true-hourly-rate',
     date: '2025-04-10',
     title: 'Why Your Real Hourly Rate Is Probably 40% Lower Than You Think',
