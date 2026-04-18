@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 export async function GET() {
   const supabase = await createClient()
@@ -27,5 +28,11 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  captureServerEvent(user.id, 'stream_created', {
+    stream_id: data.id,
+    platform: platform ?? null,
+    funnel: 'activation',
+    funnel_step: 4,
+  }).catch(() => {})
   return NextResponse.json({ stream: data }, { status: 201 })
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 export async function POST(req: Request) {
   try {
@@ -17,6 +18,13 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'rate_limited', message: 'Sign-ups are temporarily rate limited. Please try again later or use Google Sign-In.' }, { status: 429 })
       }
       return NextResponse.json({ error: 'signup_failed', message: error.message }, { status: 400 })
+    }
+    if (data.user) {
+      captureServerEvent(data.user.id, 'signup_completed', {
+        funnel: 'activation',
+        funnel_step: 3,
+        email_confirmed: !!data.user.email_confirmed_at,
+      }).catch(() => {})
     }
     return NextResponse.json({ ok: true, user: data.user ? { id: data.user.id, email: data.user.email } : null })
   } catch {

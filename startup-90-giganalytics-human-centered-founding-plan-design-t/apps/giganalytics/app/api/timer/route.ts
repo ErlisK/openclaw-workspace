@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
         .select()
         .single()
       if (error) return json({ error: 'could_not_start' }, 400)
-      captureServerEvent(user.id, 'timer_started', { stream_id: streamId ?? null }).catch(() => {})
+      captureServerEvent(user.id, 'timer_started', { stream_id: streamId ?? null, funnel: 'activation', funnel_step: 5 }).catch(() => {})
       return json({ ok: true, entry: data })
     }
 
@@ -108,6 +108,8 @@ export async function POST(request: NextRequest) {
         .single()
       if (error) return json({ error: 'could_not_log' }, 400)
       captureServerEvent(user.id, 'timer_session', {
+        funnel: 'activation',
+        funnel_step: 5,
         duration_minutes: duration,
         entry_type: entryType ?? 'billable',
         stream_id: streamId ?? null,

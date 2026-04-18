@@ -32,6 +32,7 @@ const VALID_STEPS = new Set([
   'landing_cta_clicked',
   'signup_started',
   'signup_completed',
+  'stream_created',
   'onboarding_started',
   'import_started',
   'import_completed',
@@ -90,17 +91,20 @@ export async function GET() {
     ok: true,
     experiment: 'landing-variant',
     funnel: 'activation',
-    north_star: 'activation_complete',
+    north_star: 'insights_viewed',  // 6-step primary funnel end
+    extended_north_star: 'activation_complete',
     steps: [
+      // ── Primary 6-step activation funnel (tracked in all routes) ──────────
       { n: 1, event: 'landing_viewed', label: 'Saw landing page' },
-      { n: 2, event: 'landing_cta_clicked', label: 'Clicked CTA' },
-      { n: 3, event: 'signup_started', label: 'Opened signup form' },
-      { n: 4, event: 'signup_completed', label: 'Created account' },
-      { n: 5, event: 'onboarding_started', label: 'Hit dashboard (first time)' },
-      { n: 6, event: 'import_started', label: 'Navigated to /import' },
-      { n: 7, event: 'import_completed', label: 'Imported ≥1 transaction ⭐ activation' },
-      { n: 8, event: 'roi_viewed', label: 'Viewed ROI dashboard with data' },
-      { n: 9, event: 'timer_started', label: 'Started first timer' },
+      { n: 2, event: 'signup_completed', label: 'Created account' },
+      { n: 3, event: 'stream_created', label: 'Created first income stream (/api/streams POST)' },
+      { n: 4, event: 'import_completed', label: 'Imported ≥1 transaction (/api/import)' },
+      { n: 5, event: 'timer_session', label: 'Logged first timer session (/api/timer)' },
+      { n: 6, event: 'insights_viewed', label: 'Viewed AI insights (/api/ai/insights)' },
+      // ── Extended steps (tracked but not in primary funnel) ────────────────
+      { n: 7, event: 'landing_cta_clicked', label: 'Clicked CTA on landing' },
+      { n: 8, event: 'onboarding_started', label: 'Hit dashboard (first time)' },
+      { n: 9, event: 'roi_viewed', label: 'Viewed ROI dashboard with data' },
       { n: 10, event: 'activation_complete', label: 'North-star: import + ROI viewed' },
     ],
     variants: {

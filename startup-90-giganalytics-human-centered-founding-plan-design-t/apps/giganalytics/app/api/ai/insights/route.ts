@@ -273,6 +273,8 @@ Constraints:
       insight_count: filtered.length,
       data_quality: dataQuality,
       is_ai_generated: true,
+      funnel: 'activation',
+      funnel_step: 6,
     }).catch(() => {})
 
     return NextResponse.json({
