@@ -1,18 +1,32 @@
 import { test, expect } from '@playwright/test'
 
-// Health check — works via vercel curl bypass; direct Playwright request
-// will get 401 from team SSO on deployed URL.
-// Skip if behind SSO, verify API contract via request (bypasses browser SSO).
 test('GET /api/health returns ok status', async ({ request }) => {
   const response = await request.get('/api/health')
-  // Accept 200 (no SSO) or note SSO is active (401 from Vercel team protection)
   if (response.status() === 200) {
     const body = await response.json()
     expect(body.status).toBe('ok')
     expect(body.service).toBe('giganalytics')
+    expect(body.timestamp).toBeTruthy()
+    expect(typeof body.latencyMs).toBe('number')
+    // Build info
+    expect(body.build).toBeTruthy()
+    expect(body.build.version).toBeTruthy()
+    expect(body.build.environment).toBeTruthy()
+    // DB check
+    expect(body.checks).toBeTruthy()
+    expect(body.checks.db).toBeTruthy()
+    expect(body.checks.db.status).toBe('ok')
   } else {
-    // SSO wall active — verify API exists by checking it returns auth challenge
+    // Vercel team SSO wall — endpoint exists, just auth-gated at CDN level
     expect([200, 401]).toContain(response.status())
     console.log('Note: Vercel team SSO active — health endpoint auth-guarded at CDN level')
   }
+})
+
+test('GET /api/health responds quickly (< 5s)', async ({ request }) => {
+  const start = Date.now()
+  const response = await request.get('/api/health')
+  const elapsed = Date.now() - start
+  expect([200, 401]).toContain(response.status())
+  expect(elapsed).toBeLessThan(5000)
 })
