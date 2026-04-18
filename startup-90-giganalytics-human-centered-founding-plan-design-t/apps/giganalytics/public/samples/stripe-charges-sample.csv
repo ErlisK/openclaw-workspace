@@ -1,0 +1,5 @@
+id,Amount,Amount Refunded,Fee,Currency,Created (UTC),Status,Description,Customer Email
+ch_abc001,5000,0,175,usd,2024-01-15 14:00:00,succeeded,Logo design project,client@example.com
+ch_abc002,2500,0,103,usd,2024-01-22 09:00:00,succeeded,Web consulting - 5hrs,client2@example.com
+ch_abc003,1200,0,55,usd,2024-02-01 11:30:00,succeeded,Brand identity package,client3@example.com
+ch_abc004,800,0,38,usd,2024-02-08 16:00:00,succeeded,WordPress maintenance,client4@example.com
