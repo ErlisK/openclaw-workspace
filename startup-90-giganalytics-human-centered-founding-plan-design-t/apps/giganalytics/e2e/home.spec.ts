@@ -13,9 +13,8 @@ test.describe('home page', () => {
     await page.goto('/', { waitUntil: 'networkidle' })
     const isSso = page.url().includes('vercel.com/sso')
     if (!isSso) {
-      await page.waitForTimeout(1000)
-      const count = await page.locator('a[href*="/signup"]').count()
-      expect(count).toBeGreaterThan(0)
+      const signupLink = await page.waitForSelector('a[href*="/signup"]', { timeout: 8000 }).catch(() => null)
+      expect(signupLink).not.toBeNull()
       console.log('✓ landing page has signup link')
     } else {
       console.log('Note: SSO gate active')

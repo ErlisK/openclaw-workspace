@@ -76,11 +76,11 @@ test('signup page loads with email input', async ({ page }) => {
   const res = await page.goto('/signup', { waitUntil: 'networkidle' })
   expect([200, 302, 401]).toContain(res?.status() ?? 200)
   const url = page.url()
-  if (!url.includes('vercel.com') && !url.includes('sso')) {
-    // Wait for React hydration then check
-    await page.waitForTimeout(1000)
-    const count = await page.locator('input[type="email"]').count()
-    expect(count).toBeGreaterThan(0)
+  const isSSOPage = url.includes('vercel.com/sso') || url.includes('vercel-login')
+  if (!isSSOPage) {
+    // waitForSelector is more reliable than count() for hydrated Next.js pages
+    const emailInput = await page.waitForSelector('input[type="email"]', { timeout: 8000 }).catch(() => null)
+    expect(emailInput).not.toBeNull()
     console.log('✓ signup page has email input')
   } else {
     console.log('Note: SSO gate active')
@@ -88,12 +88,12 @@ test('signup page loads with email input', async ({ page }) => {
 })
 
 test('login page loads with password input', async ({ page }) => {
-  await page.goto('/login', { waitUntil: 'networkidle' })
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
   const url = page.url()
-  if (!url.includes('vercel.com')) {
-    await page.waitForTimeout(1000)
-    const count = await page.locator('input[type="password"]').count()
-    expect(count).toBeGreaterThan(0)
+  const isSSOPage = url.includes('vercel.com/sso') || url.includes('vercel-login')
+  if (!isSSOPage) {
+    const pwInput = await page.waitForSelector('input[type="password"]', { timeout: 8000 }).catch(() => null)
+    expect(pwInput).not.toBeNull()
     console.log('✓ login page has password input')
   } else {
     console.log('Note: SSO gate active')
