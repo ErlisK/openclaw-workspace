@@ -73,6 +73,13 @@ export default function PricingPage() {
         subtitle=""
       />
 
+      {/* Financial disclaimer */}
+      <div className="max-w-2xl mx-auto px-6 pb-4 text-center">
+        <p className="text-xs text-gray-400">
+          GigAnalytics provides data analytics tools only and does not provide financial, tax, or investment advice. Individual results vary.
+        </p>
+      </div>
+
       {/* FAQ */}
       <div className="max-w-2xl mx-auto px-6 pb-16">
         <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">Frequently asked questions</h2>

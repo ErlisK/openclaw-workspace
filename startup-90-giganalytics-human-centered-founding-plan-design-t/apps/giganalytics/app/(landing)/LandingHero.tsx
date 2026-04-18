@@ -119,6 +119,11 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           ))}
         </div>
 
+        {/* Financial disclaimer */}
+        <p className="text-xs text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+          GigAnalytics provides data analytics tools only and does not provide financial, tax, or investment advice. Individual results vary.
+        </p>
+
         {/* Sample data CTA */}
         <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-16">
           <div className="text-2xl mb-3">🎲</div>

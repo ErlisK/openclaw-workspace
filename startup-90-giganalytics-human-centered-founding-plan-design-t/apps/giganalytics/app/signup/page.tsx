@@ -7,6 +7,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [benchmarkOptIn, setBenchmarkOptIn] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -136,14 +137,30 @@ export default function SignupPage() {
               </a>
             </label>
           </div>
+          <div className="flex items-start gap-2">
+            <input
+              id="benchmark-opt-in"
+              type="checkbox"
+              checked={benchmarkOptIn}
+              onChange={e => setBenchmarkOptIn(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="benchmark-opt-in" className="text-sm text-gray-600">
+              Contribute my anonymized hourly rate to community benchmarks (optional — see{' '}
+              <a href="/privacy#benchmark" target="_blank" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </a>
+              )
+            </label>
+          </div>
 
-          {error && (
+
             <div className="bg-red-50 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>
           )}
 
           <button
             type="submit"
-            disabled={loading || !acceptedTerms || !strength.ok}
+            disabled={loading}
             className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Creating account…' : 'Create free account'}

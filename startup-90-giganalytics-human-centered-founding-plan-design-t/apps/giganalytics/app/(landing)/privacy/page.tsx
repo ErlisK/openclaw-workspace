@@ -158,6 +158,21 @@ export default function PrivacyPage() {
           </p>
         </div>
 
+        {/* AI */}
+        <div>
+          <h2 className="text-base font-semibold mb-2">8a. AI-Powered Features</h2>
+          <p className="mb-2">
+            GigAnalytics uses AI models (including Claude by Anthropic, served via Vercel AI Gateway) to generate
+            personalized income insights, pricing suggestions, and scheduling recommendations.
+          </p>
+          <ul className="list-disc list-inside space-y-1">
+            <li>AI outputs are generated automatically and may not reflect your full circumstances.</li>
+            <li>Recommendations are for informational purposes only and do <strong>not</strong> constitute financial, tax, investment, or legal advice.</li>
+            <li>We do not guarantee the accuracy of AI-generated outputs. You assume all responsibility for decisions made using these insights.</li>
+            <li>AI outputs are computed server-side; your raw data is not sent to third-party model providers in identifiable form.</li>
+          </ul>
+        </div>
+
         {/* 8 */}
         <div>
           <h2 className="text-base font-semibold mb-2">8. Cookies &amp; Analytics</h2>

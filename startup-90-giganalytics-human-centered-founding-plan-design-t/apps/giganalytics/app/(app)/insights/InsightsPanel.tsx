@@ -148,6 +148,11 @@ export default function InsightsPanel({ initialDays = 30 }: { initialDays?: numb
         </div>
       </div>
 
+      {/* AI + financial disclaimer */}
+      <p className="text-xs text-gray-400 mb-4">
+        AI-generated recommendation · Not financial advice · Individual results vary.
+      </p>
+
       {/* Status badges */}
       {loaded && (
         <div className="flex items-center gap-2 mb-4 text-xs text-gray-400">

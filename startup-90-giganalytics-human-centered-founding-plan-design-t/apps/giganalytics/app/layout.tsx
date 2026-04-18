@@ -15,11 +15,11 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const APP_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "https://giganalytics.app").replace(/\/$/, "");
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://startup-90-giganalytics-human-cente.vercel.app").replace(/\/$/, "");
 const APP_TITLE = "GigAnalytics — ROI Dashboard for Multi-Income Freelancers";
 const APP_DESC =
   "Turn raw Stripe, PayPal, and CSV payments into true hourly rates, acquisition ROI, A/B pricing experiments, and earnings heatmaps. Built for people juggling 2–5 income streams.";
-const OG_IMAGE = `${APP_URL}/og-image.png`;
+const OG_IMAGE = "/og-image.png"; // relative — resolved via metadataBase
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -51,7 +51,7 @@ export const metadata: Metadata = {
     description: APP_DESC,
     images: [
       {
-        url: OG_IMAGE,
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "GigAnalytics — Know your real hourly rate",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: APP_TITLE,
     description: APP_DESC,
-    images: [OG_IMAGE],
+    images: ["/og-image.png"],
     creator: "@giganalytics",
   },
   robots: {
