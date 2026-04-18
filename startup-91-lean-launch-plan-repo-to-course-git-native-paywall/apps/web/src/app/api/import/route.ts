@@ -255,7 +255,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Validation error', details: parsed.error.errors }, { status: 400 });
   }
 
-  const { repo_url, branch, tag, path: coursePath, token } = parsed.data;
+  const { repo_url, branch, tag, path: coursePath, token: userToken } = parsed.data;
+  // Use server-side GitHub PAT as fallback (enables importing private repos)
+  const token = userToken ?? process.env.GITHUB_IMPORT_TOKEN;
   const serviceSupa = createServiceClient();
 
   // 3. Verify creator profile exists
