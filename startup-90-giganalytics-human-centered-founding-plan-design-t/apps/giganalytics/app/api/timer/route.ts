@@ -29,6 +29,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
 
+  if (!durationMinutes || durationMinutes <= 0) {
+    return NextResponse.json({ error: 'durationMinutes must be a positive number' }, { status: 400 })
+  }
+
   const { data, error } = await supabase
     .from('time_entries')
     .insert({

@@ -75,6 +75,10 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Pro gate — benchmark opt-in requires Pro
+  const { isPro } = await getUserTier(supabase, user.id)
+  if (!isPro) return proRequiredResponse('benchmark')
+
   const body = await request.json()
   const { optedIn, serviceCategory } = body as { optedIn: boolean; serviceCategory?: string }
 
