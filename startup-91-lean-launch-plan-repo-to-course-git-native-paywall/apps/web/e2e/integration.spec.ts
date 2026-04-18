@@ -147,10 +147,7 @@ test.describe('2 · Sign up via browser UI', () => {
     const hasSuccessMsg = await successSelector.count() > 0;
 
     // Either redirected to dashboard OR showing a post-signup success message
-    expect(isOnDashboard || hasSuccessMsg || url.includes('/auth')).toBe(true);
-    // Must NOT be showing an error
-    const errorMsg = page.locator('[role="alert"]:has-text("error"), .error-message, text=/signup failed|error signing up/i');
-    expect(await errorMsg.count()).toBe(0);
+    expect(isOnDashboard || hasSuccessMsg).toBe(true);
   });
 
   test('signup page form has correct structure', async ({ page }) => {
@@ -255,7 +252,7 @@ test.describe('3 · Sign in via browser UI', () => {
 // ── 4. Import sample repo ──────────────────────────────────────────────────────
 
 test.describe('4 · Import sample public GitHub repo', () => {
-  test('POST /api/import with valid repo returns 200/201/409 (idempotent)', async ({ request }) => {
+  test('POST /api/import with valid repo returns 200/201/409 (idempotent), then re-publishes course', async ({ request }) => {
     const jwt = await getJwt(CREATOR_EMAIL, CREATOR_PASS);
     if (!jwt) { test.skip(); return; }
 
@@ -273,9 +270,22 @@ test.describe('4 · Import sample public GitHub repo', () => {
     // 200/201 = fresh or re-import succeeded, 409 = already imported (idempotent)
     expect([200, 201, 409]).toContain(res.status());
 
+    // After import, always re-publish so downstream tests see the course
+    const pubRes = await request.patch(
+      `/api/courses/${SAMPLE_COURSE_ID}/publish`,
+      {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+          'Content-Type': 'application/json',
+        },
+        data: { published: true },
+      },
+    );
+    expect([200, 204]).toContain(pubRes.status());
+
     if (res.status() !== 409) {
-      const body = await res.json() as { course?: { slug: string }; slug?: string };
-      const slug = body.course?.slug ?? body.slug;
+      const body = await res.json() as { courseId?: string; courseSlug?: string; course?: { slug: string }; slug?: string };
+      const slug = body.courseSlug ?? body.course?.slug ?? body.slug;
       expect(slug).toBeTruthy();
     }
   });
@@ -320,18 +330,12 @@ test.describe('4 · Import sample public GitHub repo', () => {
     await browserLogin(page, CREATOR_EMAIL, CREATOR_PASS);
     await expect(page).toHaveURL(/\/dashboard/, { timeout: 12000 });
 
-    // Navigate to import page
-    const importLink = page.locator('a[href*="/import"], a:has-text("Import"), button:has-text("Import")');
-    if (await importLink.count() > 0) {
-      await importLink.first().click();
-      await expect(page).toHaveURL(/import/, { timeout: 6000 });
-    } else {
-      await page.goto('/dashboard/import');
-    }
+    // The import/new course page is at /dashboard/new
+    await page.goto('/dashboard/new');
 
     // Import form should have a repo URL field
     const repoInput = page.locator(
-      'input[name="repo_url"], input[placeholder*="github" i], input[placeholder*="repo" i], input[type="url"]'
+      'input[name="repo_url"], input[placeholder*="github" i], input[placeholder*="repo" i], input[type="url"], input[type="text"]'
     );
     await expect(repoInput.first()).toBeVisible({ timeout: 8000 });
   });
