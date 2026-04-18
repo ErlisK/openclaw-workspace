@@ -58,7 +58,8 @@ export default function BlogIndex() {
         <Link href="/" className="text-xl font-bold text-white">GigAnalytics</Link>
         <nav className="flex gap-6 text-sm text-gray-400">
           <Link href="/pricing" className="hover:text-white">Pricing</Link>
-          <Link href="/docs" className="hover:text-white">Docs</Link>
+          <Link href="/demo" className="hover:text-white">Demo</Link>
+          <Link href="/login" className="hover:text-white">Log in</Link>
           <Link href="/signup" className="text-blue-400 hover:text-blue-300">Sign up free →</Link>
         </nav>
       </header>
@@ -119,7 +120,6 @@ export default function BlogIndex() {
         <div className="flex justify-center gap-6 mb-4">
           <Link href="/" className="hover:text-gray-300">Home</Link>
           <Link href="/pricing" className="hover:text-gray-300">Pricing</Link>
-          <Link href="/docs" className="hover:text-gray-300">Docs</Link>
           <Link href="/privacy" className="hover:text-gray-300">Privacy</Link>
         </div>
         <p>© {new Date().getFullYear()} GigAnalytics. Built for the multi-income generation.</p>

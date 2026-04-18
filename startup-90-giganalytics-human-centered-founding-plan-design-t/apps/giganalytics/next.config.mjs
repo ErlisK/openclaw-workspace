@@ -35,11 +35,11 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' https://js.stripe.com https://app.posthog.com",
+              "script-src 'self' 'unsafe-inline' https://js.stripe.com https://app.posthog.com https://plausible.io",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://api.stripe.com https://app.posthog.com",
+              "connect-src 'self' https://*.supabase.co https://api.stripe.com https://app.posthog.com https://plausible.io",
               "frame-src https://js.stripe.com",
               "object-src 'none'",
               "base-uri 'self'",

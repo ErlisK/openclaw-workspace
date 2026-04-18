@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) {
       if (error.status === 429) {
-        return NextResponse.json({ error: 'rate_limited', message: 'Sign-ups are temporarily rate limited. Please try again later or use Google Sign-In.' }, { status: 429 })
+        return NextResponse.json({ error: 'rate_limited', message: 'Sign-ups are temporarily rate limited. Please try again in a few minutes.' }, { status: 429 })
       }
       return NextResponse.json({ error: 'signup_failed', message: error.message }, { status: 400 })
     }

@@ -92,14 +92,16 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         </div>
       </nav>
 
-      {/* Experiment badge — visible to confirm which variant is active */}
-      <div className="bg-gray-50 border-b border-gray-100 py-1 px-6 text-center">
-        <span className="text-xs text-gray-400 font-mono">
-          variant={variant.id} · {variant.name}
-          {' '}·{' '}
-          <span className="text-gray-300">try ?v=1 ?v=2 ?v=3</span>
-        </span>
-      </div>
+      {/* Experiment badge — dev only */}
+      {process.env.NODE_ENV !== 'production' && (
+        <div className="bg-gray-50 border-b border-gray-100 py-1 px-6 text-center">
+          <span className="text-xs text-gray-400 font-mono">
+            variant={variant.id} · {variant.name}
+            {' '}·{' '}
+            <span className="text-gray-300">try ?v=1 ?v=2 ?v=3</span>
+          </span>
+        </div>
+      )}
 
       {/* Hero */}
       <main className="max-w-4xl mx-auto px-6 pt-16 pb-12 text-center">
