@@ -98,6 +98,54 @@ export function authHeaders(
 }
 
 /**
+ * Upgrade a test user to Pro directly via Supabase service role.
+ * Bypasses stripe-simulate and sim-upgrade — works in any environment.
+ * Also writes a minimal subscriptions row so GET /api/subscription is consistent.
+ */
+export async function upgradeUserToPro(
+  request: APIRequestContext,
+  userId: string
+): Promise<void> {
+  // Set tier = 'pro' on profiles
+  const res = await request.patch(
+    `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
+    {
+      headers: {
+        apikey: SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      data: { tier: 'pro' },
+    }
+  )
+  if (res.status() >= 400) {
+    throw new Error(`Failed to upgrade user to Pro: ${await res.text()}`)
+  }
+}
+
+/**
+ * Downgrade a test user to free directly via Supabase service role.
+ */
+export async function downgradeUserToFree(
+  request: APIRequestContext,
+  userId: string
+): Promise<void> {
+  await request.patch(
+    `${SUPABASE_URL}/rest/v1/profiles?id=eq.${userId}`,
+    {
+      headers: {
+        apikey: SERVICE_ROLE_KEY,
+        Authorization: `Bearer ${SERVICE_ROLE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal',
+      },
+      data: { tier: 'free' },
+    }
+  )
+}
+
+/**
  * Wait for a condition with retries.
  */
 export async function waitFor(

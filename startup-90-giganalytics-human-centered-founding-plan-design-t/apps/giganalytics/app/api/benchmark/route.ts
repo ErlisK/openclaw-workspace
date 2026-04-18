@@ -33,13 +33,13 @@ export async function GET(request: NextRequest) {
   // Fetch user's opt-in status
   const { data: optIn } = await supabase
     .from('benchmark_opt_ins')
-    .select('opted_in, service_category, consent_version')
+    .select('is_active, service_category, consent_version')
     .eq('user_id', user.id)
     .single()
 
   // User's own percentile for current month (if opted in and has data)
   let userPercentile: { percentile: number; rate: number; category: string } | null = null
-  if (optIn?.opted_in) {
+  if (optIn?.is_active) {
     const now = new Date()
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
     const { data: userSnap } = await supabase
@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     snapshots: snapshots ?? [],
-    optIn: optIn ?? { opted_in: false },
+    optIn: optIn ?? { is_active: false },
     userPercentile,
     categories: Array.from(new Set((snapshots ?? []).map(s => s.service_category))).sort(),
     platforms: Array.from(new Set((snapshots ?? []).map(s => s.platform))).sort(),
@@ -86,13 +86,13 @@ export async function POST(request: NextRequest) {
     .from('benchmark_opt_ins')
     .upsert({
       user_id: user.id,
-      opted_in: optedIn,
+      is_active: optedIn,
       service_category: serviceCategory ?? 'general',
       consent_version: '1.0',
     }, { onConflict: 'user_id' })
-    .select('opted_in, service_category')
+    .select('is_active, service_category')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, optedIn: data.opted_in })
+  return NextResponse.json({ ok: true, optedIn: data.is_active })
 }
