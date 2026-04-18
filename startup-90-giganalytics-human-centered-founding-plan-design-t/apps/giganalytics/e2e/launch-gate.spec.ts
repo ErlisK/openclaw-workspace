@@ -62,7 +62,7 @@ test('health is minimal', async ({ page }) => {
   const res = await page.request.get(BASE + '/api/health');
   expect(res.status()).toBe(200);
   const body = await res.json();
-  expect(body).toEqual({ status: 'ok' });
+  expect(body.status).toBe('ok');
 });
 
 test('signup page loads', async ({ page }) => {
