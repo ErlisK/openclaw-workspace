@@ -73,7 +73,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         {/* CTAs */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <Link
-            href="/signup"
+            href="/signup?utm_source=landing&utm_medium=hero&utm_campaign=organic"
             onClick={() => trackCtaClick(variant.name, 'hero_primary')}
             className={`px-8 py-4 rounded-xl text-base font-semibold transition-colors shadow-sm ${accent.cta}`}
           >
@@ -147,8 +147,10 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <span>© {new Date().getFullYear()} GigAnalytics</span>
           <Link href="/pricing" className="hover:text-gray-600">Pricing</Link>
           <Link href="/demo" className="hover:text-gray-600">Demo</Link>
+          <Link href="/blog" className="hover:text-gray-600">Blog</Link>
+          <Link href="/launch" className="hover:text-gray-600">Launch</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>
-          <Link href="/signup" className="hover:text-gray-600">Sign up free</Link>
+          <Link href="/signup?utm_source=landing&utm_medium=footer&utm_campaign=organic" className="hover:text-gray-600">Sign up free</Link>
           <Link href="/terms" className="hover:text-gray-600">Terms</Link>
           <Link href="/privacy" className="hover:text-gray-600">Privacy</Link>
           <Link href="/contact" className="hover:text-gray-600">Contact</Link>
