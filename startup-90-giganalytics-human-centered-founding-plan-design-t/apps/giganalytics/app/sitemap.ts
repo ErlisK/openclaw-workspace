@@ -27,5 +27,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url('/launch'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     // Social
     { url: url('/social'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
+    // Compare pages
+    { url: url('/compare'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/compare/giganalytics-vs-toggl'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/compare/giganalytics-vs-wave'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/compare/giganalytics-vs-spreadsheet'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    // Advanced docs
+    { url: url('/docs/benchmark-data'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: url('/docs/heatmap-guide'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    // Changelog + Media Kit
+    { url: url('/changelog'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: url('/media-kit'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
   ]
 }
