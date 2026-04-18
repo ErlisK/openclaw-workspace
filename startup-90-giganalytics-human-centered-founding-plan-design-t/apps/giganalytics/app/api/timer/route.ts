@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 export async function GET() {
   const supabase = await createClient()
@@ -43,6 +44,12 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  // Fire PostHog event
+  captureServerEvent(user.id, 'timer_session', {
+    duration_minutes: durationMinutes,
+    entry_type: entryType ?? 'billable',
+    stream_id: streamId ?? null,
+  }).catch(() => {})
   return NextResponse.json({ id: data.id })
 }
 

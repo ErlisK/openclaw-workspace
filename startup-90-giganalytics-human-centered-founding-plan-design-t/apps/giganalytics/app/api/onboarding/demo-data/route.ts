@@ -7,6 +7,7 @@
  */
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 export const dynamic = "force-dynamic";
 
@@ -126,6 +127,13 @@ export async function POST() {
 
   const { error: teErr } = await supabase.from("time_entries").insert(teRows);
   if (teErr) return NextResponse.json({ error: teErr.message }, { status: 500 });
+
+  captureServerEvent(user.id, 'demo_data_loaded', {
+    streams: streamIds.length,
+    transactions: txRows.length,
+    time_entries: teRows.length,
+    source: 'onboarding_checklist',
+  }).catch(() => {})
 
   return NextResponse.json({
     seeded: true,

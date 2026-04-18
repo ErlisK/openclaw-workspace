@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { computeROI } from '@/lib/roi'
 import { computeWhatIf } from '@/lib/pricing'
 import { getUserTier, proRequiredResponse } from '@/lib/pro/gate'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 // ─── Response schema ──────────────────────────────────────────────────────────
 
@@ -265,6 +266,14 @@ Constraints:
     const filtered = insightType === 'all'
       ? object.insights
       : object.insights.filter(i => i.type === insightType)
+
+    // Fire PostHog event
+    captureServerEvent(user.id, 'insights_viewed', {
+      insight_type: insightType,
+      insight_count: filtered.length,
+      data_quality: dataQuality,
+      is_ai_generated: true,
+    }).catch(() => {})
 
     return NextResponse.json({
       insights: filtered,

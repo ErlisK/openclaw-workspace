@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/lib/supabase/server";
+import { captureServerEvent } from "@/lib/posthog/server";
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
         metadata: { user_id: user.id },
       },
     });
+
+    captureServerEvent(user.id, 'upgrade_clicked', {
+      price_id: priceId,
+      source: 'checkout',
+    }).catch(() => {})
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {

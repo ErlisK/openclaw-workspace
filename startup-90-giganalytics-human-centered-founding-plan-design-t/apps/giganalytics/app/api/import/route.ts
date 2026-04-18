@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { captureServerEvent } from '@/lib/posthog/server'
 
 interface ImportRow {
   date?: string
@@ -100,8 +101,17 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
+  const importedCount = data?.length ?? txRows.length
+
+  // Fire PostHog event (best-effort)
+  captureServerEvent(user.id, 'import_completed', {
+    platform: platform ?? 'custom',
+    row_count: importedCount,
+    stream_id: resolvedStreamId,
+  }).catch(() => {})
+
   return NextResponse.json({
-    imported: data?.length ?? txRows.length,
+    imported: importedCount,
     total: rows.length,
     streamId: resolvedStreamId,
     platform: platform ?? 'custom',
