@@ -92,11 +92,28 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No valid transactions found after filtering' }, { status: 400 })
   }
 
-  // Upsert with dedup on source_id
-  const { data, error } = await supabase
+  // Insert with dedup: try upsert first, fall back to plain insert
+  let data: { id: string }[] | null = null
+  let error: { message: string; code?: string } | null = null
+
+  // Try upsert with source_id dedup (requires unique constraint)
+  const upsertResult = await supabase
     .from('transactions')
     .upsert(txRows, { onConflict: 'source_id', ignoreDuplicates: true })
     .select('id')
+
+  if (upsertResult.error?.code === '42P10' || upsertResult.error?.message?.includes('no unique or exclusion constraint')) {
+    // No unique constraint on source_id — fall back to plain insert
+    const insertResult = await supabase
+      .from('transactions')
+      .insert(txRows)
+      .select('id')
+    data = insertResult.data
+    error = insertResult.error
+  } else {
+    data = upsertResult.data
+    error = upsertResult.error
+  }
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
