@@ -418,6 +418,7 @@ export async function POST(req: NextRequest) {
       has_quiz: boolean;
       has_sandbox: boolean;
       sandbox_url: string | null;
+      quiz_slug: string | null;
       updated_at: string;
     }> = [];
     const importErrors: Array<{ path: string; message: string }> = [];
