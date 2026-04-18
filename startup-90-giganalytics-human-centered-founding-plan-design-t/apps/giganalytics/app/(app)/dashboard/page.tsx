@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { computeROI, fmt$, fmtRate } from '@/lib/roi'
 import Link from 'next/link'
+import OnboardingChecklist from './OnboardingChecklist'
 
 function StatCard({ label, value, sub, color = 'blue' }: {
   label: string; value: string; sub?: string; color?: string
@@ -66,6 +67,27 @@ export default async function DashboardPage() {
   const agg = roi.aggregate
   const hasData = roi.streams.length > 0 || (transactions?.length ?? 0) > 0
 
+  // Onboarding progress
+  const [{ count: streamCount }, { count: txCount }, { count: teCount }, { data: settings }] = await Promise.all([
+    supabase.from('streams').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('time_entries').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+    supabase.from('user_settings').select('onboarding_flags').eq('user_id', user.id).single(),
+  ])
+  const obFlags = (settings?.onboarding_flags as Record<string, boolean>) ?? {}
+  const obProgress = {
+    has_streams_2: (streamCount ?? 0) >= 2,
+    has_import: (txCount ?? 0) >= 1,
+    has_timer: (teCount ?? 0) >= 1,
+    has_viewed_heatmap: obFlags.has_viewed_heatmap ?? false,
+    has_viewed_roi: obFlags.has_viewed_roi ?? false,
+  }
+  const obCompleted = Object.values(obProgress).filter(Boolean).length
+  const obTotal = Object.keys(obProgress).length
+  // Check if demo data already seeded
+  const { data: demoCheck } = await supabase.from('transactions')
+    .select('id').eq('user_id', user.id).like('source_id', 'demo-%').limit(1)
+
   // Monthly pacing
   const now = new Date()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -95,6 +117,16 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
+
+      {/* Onboarding checklist */}
+      <OnboardingChecklist
+        progress={obProgress}
+        completed={obCompleted}
+        total={obTotal}
+        percentage={Math.round((obCompleted / obTotal) * 100)}
+        isDone={obCompleted === obTotal}
+        hasDemoData={(demoCheck?.length ?? 0) > 0}
+      />
 
       {!hasData && (
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6 text-center">
