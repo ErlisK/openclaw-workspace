@@ -41,7 +41,17 @@ export default function RoiFormulasPage() {
         client-side from your imported data — no estimation, no rounding before display.
       </p>
 
-      <section className="mb-10">
+      
+        {/* How-to animated demo */}
+        <div className="mb-8">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Multi-stream comparison demo</div>
+          <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+            <img src="/demos/hourly-rate.svg" alt="True hourly rate per income stream — consulting $112/hr vs Upwork $60/hr vs digital products $70/hr" className="w-full" loading="lazy" />
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">Animated demo — true hourly rate per stream after platform fees. Wider bar = higher ROI.</p>
+        </div>
+
+<section className="mb-10">
         <h2 className="text-base font-semibold mb-4">Core Revenue Metrics</h2>
 
         <Formula

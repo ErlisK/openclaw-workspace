@@ -1,0 +1,161 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 380" width="640" height="380">
+  <defs>
+    <style>
+      .bg { fill: #f8fafc; }
+      .card { fill: #ffffff; rx: 12; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.08)); }
+      .label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 12px; fill: #64748b; }
+      .value { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 22px; font-weight: 700; fill: #1e293b; }
+      .title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; font-weight: 600; fill: #1e293b; }
+      .small { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 11px; fill: #94a3b8; }
+      .tag-green { fill: #dcfce7; }
+      .tag-green-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; font-weight: 600; fill: #16a34a; }
+      .tag-red { fill: #fee2e2; }
+      .tag-red-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; font-weight: 600; fill: #dc2626; }
+      .bar-bg { fill: #f1f5f9; }
+      .bar-1 { fill: #3b82f6; }
+      .bar-2 { fill: #f59e0b; }
+      .bar-3 { fill: #10b981; }
+      .step-circle { fill: #3b82f6; }
+      .step-text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 11px; font-weight: 700; fill: #fff; }
+      .step-label { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; fill: #64748b; }
+      .highlight { fill: #eff6ff; stroke: #3b82f6; stroke-width: 1.5; }
+
+      /* Step 1: Upload CSV */
+      #step1 { opacity: 0; animation: fadeIn 0.5s 0.3s forwards; }
+      #step2 { opacity: 0; animation: fadeIn 0.5s 2s forwards; }
+      #step3 { opacity: 0; animation: fadeIn 0.5s 3.8s forwards; }
+      #step4 { opacity: 0; animation: fadeIn 0.5s 5.6s forwards; }
+
+      #csv-rows rect { opacity: 0; }
+      #csv-rows rect:nth-child(1) { animation: popIn 0.3s 2.2s forwards; }
+      #csv-rows rect:nth-child(2) { animation: popIn 0.3s 2.5s forwards; }
+      #csv-rows rect:nth-child(3) { animation: popIn 0.3s 2.8s forwards; }
+      #csv-rows rect:nth-child(4) { animation: popIn 0.3s 3.1s forwards; }
+
+      #progress-bar rect { width: 0; animation: growBar 1.5s 3.9s ease-out forwards; }
+
+      #metric-1 { opacity: 0; animation: slideUp 0.5s 5.8s forwards; }
+      #metric-2 { opacity: 0; animation: slideUp 0.5s 6.1s forwards; }
+      #metric-3 { opacity: 0; animation: slideUp 0.5s 6.4s forwards; }
+
+      #bar1 { transform: scaleY(0); transform-origin: bottom; animation: growUp 0.6s 6.8s ease-out forwards; }
+      #bar2 { transform: scaleY(0); transform-origin: bottom; animation: growUp 0.6s 7.1s ease-out forwards; }
+      #bar3 { transform: scaleY(0); transform-origin: bottom; animation: growUp 0.6s 7.4s ease-out forwards; }
+
+      @keyframes fadeIn { to { opacity: 1; } }
+      @keyframes popIn { 0% { opacity: 0; transform: translateX(-10px); } 100% { opacity: 1; transform: translateX(0); } }
+      @keyframes growBar { from { width: 0; } to { width: 220px; } }
+      @keyframes growUp { to { transform: scaleY(1); } }
+      @keyframes slideUp { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="640" height="380" class="bg" rx="12"/>
+
+  <!-- Header bar -->
+  <rect width="640" height="44" fill="#1e293b" rx="12"/>
+  <rect x="0" y="32" width="640" height="12" fill="#1e293b"/>
+  <circle cx="20" cy="22" r="6" fill="#ef4444" opacity="0.8"/>
+  <circle cx="38" cy="22" r="6" fill="#f59e0b" opacity="0.8"/>
+  <circle cx="56" cy="22" r="6" fill="#22c55e" opacity="0.8"/>
+  <text x="320" y="27" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#94a3b8">GigAnalytics — Import Income Stream</text>
+
+  <!-- Step indicators -->
+  <g id="step1">
+    <circle cx="80" cy="70" r="12" class="step-circle"/>
+    <text x="80" y="74" text-anchor="middle" class="step-text">1</text>
+    <text x="80" y="92" text-anchor="middle" class="step-label">Upload</text>
+
+    <circle cx="213" cy="70" r="12" fill="#e2e8f0"/>
+    <text x="213" y="74" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#94a3b8">2</text>
+    <text x="213" y="92" text-anchor="middle" class="step-label">Map</text>
+
+    <circle cx="346" cy="70" r="12" fill="#e2e8f0"/>
+    <text x="346" y="74" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#94a3b8">3</text>
+    <text x="346" y="92" text-anchor="middle" class="step-label">Import</text>
+
+    <circle cx="479" cy="70" r="12" fill="#e2e8f0"/>
+    <text x="479" y="74" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="700" fill="#94a3b8">4</text>
+    <text x="479" y="92" text-anchor="middle" class="step-label">Dashboard</text>
+
+    <line x1="92" y1="70" x2="201" y2="70" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="225" y1="70" x2="334" y2="70" stroke="#e2e8f0" stroke-width="2"/>
+    <line x1="358" y1="70" x2="467" y2="70" stroke="#e2e8f0" stroke-width="2"/>
+
+    <!-- Upload card -->
+    <rect x="40" y="108" width="560" height="90" rx="10" fill="#fff" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.06))"/>
+    <rect x="70" y="130" width="500" height="48" rx="8" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="320" y="151" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" fill="#64748b">📁  Drop your CSV here — Stripe, PayPal, Upwork, or any format</text>
+    <text x="320" y="168" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#94a3b8">stripe_balance_history.csv detected</text>
+  </g>
+
+  <!-- Step 2: Column mapping (appears at 2s) -->
+  <g id="step2">
+    <circle cx="213" cy="70" r="12" class="step-circle"/>
+    <text x="213" y="74" text-anchor="middle" class="step-text">2</text>
+    <line x1="92" y1="70" x2="201" y2="70" stroke="#3b82f6" stroke-width="2"/>
+
+    <!-- CSV preview rows -->
+    <rect x="40" y="210" width="560" height="100" rx="10" fill="#fff" filter="drop-shadow(0 2px 6px rgba(0,0,0,0.06))"/>
+    <text x="56" y="228" class="title">Auto-detected columns</text>
+
+    <g id="csv-rows">
+      <rect x="52" y="234" width="520" height="18" rx="4" fill="#eff6ff"/>
+      <rect x="52" y="255" width="520" height="16" rx="4" fill="#f8fafc"/>
+      <rect x="52" y="274" width="520" height="16" rx="4" fill="#f8fafc"/>
+      <rect x="52" y="293" width="520" height="16" rx="4" fill="#f8fafc"/>
+    </g>
+    <text x="68" y="247" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#3b82f6">date → created</text>
+    <text x="220" y="247" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#3b82f6">amount → gross</text>
+    <text x="380" y="247" font-family="-apple-system,sans-serif" font-size="10" font-weight="600" fill="#3b82f6">fee → fee</text>
+    <text x="68" y="265" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">2024-03-01</text>
+    <text x="220" y="265" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$1,200.00</text>
+    <text x="380" y="265" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$34.80</text>
+    <text x="68" y="284" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">2024-03-08</text>
+    <text x="220" y="284" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$850.00</text>
+    <text x="380" y="284" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$24.65</text>
+    <text x="68" y="303" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">2024-03-15</text>
+    <text x="220" y="303" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$2,100.00</text>
+    <text x="380" y="303" font-family="-apple-system,sans-serif" font-size="10" fill="#64748b">$60.90</text>
+  </g>
+
+  <!-- Step 3: Importing progress (appears at 3.8s) -->
+  <g id="step3">
+    <circle cx="346" cy="70" r="12" class="step-circle"/>
+    <text x="346" y="74" text-anchor="middle" class="step-text">3</text>
+    <line x1="225" y1="70" x2="334" y2="70" stroke="#3b82f6" stroke-width="2"/>
+
+    <rect x="150" y="320" width="340" height="28" rx="14" fill="#e2e8f0"/>
+    <g id="progress-bar">
+      <rect x="150" y="320" height="28" rx="14" fill="#3b82f6"/>
+    </g>
+    <text x="320" y="339" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#fff">Importing 847 transactions…</text>
+  </g>
+
+  <!-- Step 4: Dashboard metrics (appears at 5.6s) -->
+  <g id="step4">
+    <circle cx="479" cy="70" r="12" class="step-circle"/>
+    <text x="479" y="74" text-anchor="middle" class="step-text">4</text>
+    <line x1="358" y1="70" x2="467" y2="70" stroke="#3b82f6" stroke-width="2"/>
+
+    <!-- Metric cards -->
+    <g id="metric-1">
+      <rect x="40" y="318" width="160" height="52" rx="8" fill="#fff" filter="drop-shadow(0 1px 4px rgba(0,0,0,0.08))"/>
+      <text x="56" y="336" class="small">Net Revenue (90d)</text>
+      <text x="56" y="358" font-family="-apple-system,sans-serif" font-size="18" font-weight="700" fill="#1e293b">$18,420</text>
+      <rect x="140" y="326" width="44" height="16" rx="8" class="tag-green"/>
+      <text x="162" y="338" text-anchor="middle" class="tag-green-text">+12%</text>
+    </g>
+    <g id="metric-2">
+      <rect x="213" y="318" width="160" height="52" rx="8" fill="#fff" filter="drop-shadow(0 1px 4px rgba(0,0,0,0.08))"/>
+      <text x="229" y="336" class="small">True Hourly Rate</text>
+      <text x="229" y="358" font-family="-apple-system,sans-serif" font-size="18" font-weight="700" fill="#1e293b">$82.50/hr</text>
+    </g>
+    <g id="metric-3">
+      <rect x="386" y="318" width="218" height="52" rx="8" fill="#fff" filter="drop-shadow(0 1px 4px rgba(0,0,0,0.08))"/>
+      <text x="402" y="336" class="small">Best Stream</text>
+      <text x="402" y="358" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#3b82f6">Consulting → $112/hr</text>
+    </g>
+  </g>
+</svg>

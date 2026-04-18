@@ -86,7 +86,17 @@ export default function CsvTemplatesPage() {
       </p>
 
       {/* Quick rules */}
-      <section className="mb-10 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
+      
+        {/* How-to animated demo */}
+        <div className="mb-8">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">How it works</div>
+          <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+            <img src="/demos/csv-import.svg" alt="CSV import walkthrough: upload → auto-detect columns → import → dashboard" className="w-full" loading="lazy" />
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">Animated demo — upload any CSV and GigAnalytics maps your columns automatically</p>
+        </div>
+
+<section className="mb-10 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800">
         <h2 className="font-semibold mb-2">Import Rules</h2>
         <ul className="space-y-1 text-xs list-disc list-inside text-blue-900 dark:text-blue-200">
           <li>File must be UTF-8 CSV (comma-separated, optional quotes)</li>

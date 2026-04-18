@@ -21,7 +21,17 @@ export default function PricingExperimentsPage() {
       </p>
 
       {/* What is a pricing experiment */}
-      <section className="mb-10">
+      
+        {/* How-to animated demo */}
+        <div className="mb-8">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Pricing Lab in action</div>
+          <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+            <img src="/demos/pricing-experiment.svg" alt="A/B pricing experiment showing control vs variant revenue and statistical significance" className="w-full" loading="lazy" />
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">Animated demo — GigAnalytics tracks sessions per rate variant and shows significance as sessions accumulate.</p>
+        </div>
+
+<section className="mb-10">
         <h2 className="text-base font-semibold mb-4">What is a Pricing Experiment?</h2>
         <p className="mb-4">
           A pricing experiment records a period during which you charged a specific rate (Variant A) and

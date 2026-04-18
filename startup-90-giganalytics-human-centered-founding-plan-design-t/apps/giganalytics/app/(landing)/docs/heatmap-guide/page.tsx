@@ -23,7 +23,17 @@ export default function HeatmapGuidePage() {
         </div>
 
         {/* What the heatmap shows */}
-        <section className="mb-10">
+        
+        {/* How-to animated demo */}
+        <div className="mb-8">
+          <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Live heatmap example</div>
+          <div className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm">
+            <img src="/demos/heatmap.svg" alt="Earnings heatmap — 9x7 grid of avg $/hr by hour and day of week" className="w-full" loading="lazy" />
+          </div>
+          <p className="text-xs text-gray-400 mt-2 text-center">Animated demo — darker blue = higher $/hr. Your peak times fill in as you log more sessions.</p>
+        </div>
+
+<section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">What the heatmap shows</h2>
           <p className="text-gray-600 mb-4">
             Each cell in the 7×18 grid (7 days × 18 hours, 6am–11pm) shows the <strong>average net earnings per hour of work</strong> for that day/time combination, aggregated across all your income streams.
