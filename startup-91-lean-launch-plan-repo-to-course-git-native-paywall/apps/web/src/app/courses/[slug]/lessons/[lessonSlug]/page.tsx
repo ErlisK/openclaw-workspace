@@ -113,7 +113,7 @@ export default async function LessonPage({ params }: LessonPageProps) {
           id: quiz.id,
           title: quiz.title,
           pass_threshold: quiz.pass_threshold,
-          questions: questions as typeof quizData.questions,
+          questions: questions as NonNullable<typeof quizData>['questions'],
         };
       }
     }
