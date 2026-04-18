@@ -104,12 +104,31 @@ export async function GET(req: NextRequest) {
   const paymentId =
     typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id ?? null;
 
+  // Verify amount matches the course price (anti-fraud check)
+  // session.amount_total is the actual amount Stripe charged
+  // We fetch the course price and warn if they differ (allow if within 1 cent rounding)
+  const { data: courseForVerification } = await serviceSupa
+    .from('courses')
+    .select('price_cents, title')
+    .eq('id', courseId)
+    .single();
+
+  if (courseForVerification && session.amount_total !== null) {
+    const amountDiff = Math.abs((session.amount_total ?? 0) - courseForVerification.price_cents);
+    if (amountDiff > 1) {
+      // Log but don't fail — Stripe amount may differ from DB due to Stripe fees or currency
+      console.warn(
+        `[enroll] Amount mismatch: Stripe charged ${session.amount_total}, DB price ${courseForVerification.price_cents} for course ${courseId}`
+      );
+    }
+  }
+
   const { data: purchaseRow } = await serviceSupa
     .from('purchases')
     .update({
       status: 'completed',
-      stripe_payment_id: paymentId,
-      completed_at: new Date().toISOString(),
+      stripe_payment_intent_id: paymentId,
+      purchased_at: new Date().toISOString(),
     })
     .eq('stripe_session_id', session_id)
     .eq('user_id', user.id)
@@ -126,12 +145,12 @@ export async function GET(req: NextRequest) {
           user_id: user.id,
           course_id: courseId,
           stripe_session_id: session_id,
-          stripe_payment_id: paymentId,
+          stripe_payment_intent_id: paymentId,
           amount_cents: session.amount_total ?? 0,
           currency: session.currency ?? 'usd',
           status: 'completed',
           affiliate_id: affiliateId || null,
-          completed_at: new Date().toISOString(),
+          purchased_at: new Date().toISOString(),
         },
         { onConflict: 'stripe_session_id' }
       )

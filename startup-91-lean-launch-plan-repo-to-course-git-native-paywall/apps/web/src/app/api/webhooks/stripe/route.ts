@@ -71,12 +71,12 @@ export async function POST(req: NextRequest) {
             user_id: userId,
             course_id: courseId,
             stripe_session_id: session.id,
-            stripe_payment_id: paymentId,
+            stripe_payment_intent_id: paymentId,
             amount_cents: session.amount_total ?? 0,
             currency: session.currency ?? 'usd',
             status: 'completed',
             affiliate_id: affiliateId || null,
-            completed_at: new Date().toISOString(),
+            purchased_at: new Date().toISOString(),
           },
           { onConflict: 'stripe_session_id' }
         )
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
       const { data: purchase } = await serviceSupa
         .from('purchases')
         .update({ status: 'refunded' })
-        .eq('stripe_payment_id', paymentIntentId)
+        .eq('stripe_payment_intent_id', paymentIntentId)
         .select('id, user_id, course_id')
         .single();
 
