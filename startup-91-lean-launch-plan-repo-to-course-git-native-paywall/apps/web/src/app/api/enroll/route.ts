@@ -169,7 +169,7 @@ export async function GET(req: NextRequest) {
       })
       .select()
       .maybeSingle()
-      .catch(() => null); // Non-critical — don't fail enrollment on affiliate error
+      .then(() => null, () => null); // Non-critical — don't fail enrollment on affiliate error
   }
 
   // 10. Fetch first lesson slug for redirect

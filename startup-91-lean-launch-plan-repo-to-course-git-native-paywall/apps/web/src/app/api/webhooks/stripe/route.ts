@@ -32,9 +32,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.text();
 
-  let event: ReturnType<typeof stripe.webhooks.constructEvent> extends Promise<infer T> ? T : never;
-  type StripeEvent = Awaited<ReturnType<(typeof stripe)['webhooks']['constructEventAsync']>>;
-  let stripeEvent: StripeEvent;
+  let stripeEvent: Awaited<ReturnType<(typeof stripe)['webhooks']['constructEventAsync']>>;
 
   try {
     stripeEvent = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
