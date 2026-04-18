@@ -78,6 +78,36 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Already enrolled', courseSlug: course.slug }, { status: 409 });
   }
 
+  // Resolve affiliate record if referralId (user_id of affiliate) is provided
+  // The purchases.affiliate_id is a FK to affiliates.id, not to auth.users.id
+  let affiliateRecordId: string | null = null;
+  if (referralId) {
+    // Find or create an affiliate record for this user+course
+    const { data: existingAffiliate } = await serviceSupa
+      .from('affiliates')
+      .select('id')
+      .eq('affiliate_user_id', referralId)
+      .eq('course_id', courseId)
+      .maybeSingle();
+
+    if (existingAffiliate) {
+      affiliateRecordId = existingAffiliate.id;
+    } else {
+      const { data: newAffiliate } = await serviceSupa
+        .from('affiliates')
+        .insert({
+          affiliate_user_id: referralId,
+          course_id: courseId,
+          creator_id: course.slug ? undefined : undefined, // not required
+          commission_pct: 20,
+          is_active: true,
+        })
+        .select('id')
+        .single();
+      affiliateRecordId = newAffiliate?.id ?? null;
+    }
+  }
+
   // Create a simulated purchase row (no real Stripe session)
   const simulatedSessionId = `cs_simulated_${Date.now()}_${user.id.slice(0, 8)}`;
   const now = new Date().toISOString();
@@ -92,7 +122,7 @@ export async function POST(req: NextRequest) {
       amount_cents: course.price_cents,
       currency: course.currency ?? 'usd',
       status: 'completed',
-      affiliate_id: referralId ?? null,
+      affiliate_id: affiliateRecordId ?? null,
       purchased_at: now,
     })
     .select('id')
@@ -116,9 +146,9 @@ export async function POST(req: NextRequest) {
   );
 
   // Affiliate conversion tracking
-  if (referralId) {
+  if (referralId && affiliateRecordId) {
     await serviceSupa.from('referrals').insert({
-      affiliate_id: referralId,
+      affiliate_id: affiliateRecordId,
       course_id: courseId,
       purchase_id: purchaseId,
       converted: true,

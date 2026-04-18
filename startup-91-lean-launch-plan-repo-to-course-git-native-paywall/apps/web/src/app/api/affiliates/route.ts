@@ -17,20 +17,14 @@ export async function GET(req: NextRequest) {
 
   const serviceSupa = createServiceClient();
 
-  // Fetch referral conversions where this user is the affiliate
-  const { data: referrals } = await serviceSupa
-    .from('referrals')
-    .select(`
-      id, course_id, purchase_id, converted_at,
-      purchases(amount_cents, currency)
-    `)
-    .eq('affiliate_id', user.id);
+  // Fetch affiliate records for this user
+  const { data: affiliateRecords } = await serviceSupa
+    .from('affiliates')
+    .select('id, course_id, total_conversions, total_earned_cents, commission_pct')
+    .eq('affiliate_user_id', user.id);
 
-  const totalConversions = referrals?.length ?? 0;
-  const totalRevenueCents = referrals?.reduce((sum, r) => {
-    const purchase = Array.isArray(r.purchases) ? r.purchases[0] : r.purchases;
-    return sum + ((purchase as { amount_cents?: number } | null)?.amount_cents ?? 0);
-  }, 0) ?? 0;
+  const totalConversions = affiliateRecords?.reduce((s, a) => s + (a.total_conversions ?? 0), 0) ?? 0;
+  const totalRevenueCents = affiliateRecords?.reduce((s, a) => s + (a.total_earned_cents ?? 0), 0) ?? 0;
 
   // Get courses created by this user that have a price
   const { data: courses } = await serviceSupa
