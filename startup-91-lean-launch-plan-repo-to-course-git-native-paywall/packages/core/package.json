@@ -1,21 +1,27 @@
 {
   "name": "@teachrepo/core",
   "version": "0.1.0",
-  "description": "Shared course parsing logic for TeachRepo",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "description": "Shared course parsing, validation, and schema logic for TeachRepo",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "test": "jest"
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "lint": "eslint src/"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "@teachrepo/types": "*"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "typescript": "^5.4.2",
     "@types/node": "^20.11.0",
     "@types/js-yaml": "^4.0.9"
   }

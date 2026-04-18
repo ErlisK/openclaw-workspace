@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "tsc --watch",
     "build": "tsc",
+    "type-check": "tsc --noEmit",
     "test": "jest",
     "lint": "eslint src/"
   },
@@ -20,12 +21,13 @@
     "js-yaml": "^4.1.0",
     "node-fetch": "^3.3.2",
     "@teachrepo/core": "*",
-    "@teachrepo/quiz-engine": "*"
+    "@teachrepo/quiz-engine": "*",
+    "@teachrepo/types": "*"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
     "@types/js-yaml": "^4.0.9",
     "@types/inquirer": "^9.0.7",
-    "typescript": "^5.3.3"
+    "typescript": "^5.4.2"
   }
 }

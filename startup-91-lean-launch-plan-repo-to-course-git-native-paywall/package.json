@@ -2,30 +2,40 @@
   "name": "teachrepo",
   "version": "0.1.0",
   "private": true,
-  "description": "Convert a GitHub repo into a paywalled, versioned mini-course site",
+  "description": "TeachRepo monorepo — convert a GitHub repo into a paywalled course site",
   "workspaces": [
     "apps/*",
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspace=apps/web",
-    "build": "npm run build --workspaces",
-    "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
+    "build": "turbo build",
+    "dev": "turbo dev --parallel",
+    "lint": "turbo lint",
+    "type-check": "turbo type-check",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "clean": "turbo clean && find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + 2>/dev/null; true",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml,yml}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yaml,yml}\" --ignore-path .gitignore"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
-    "@types/node": "^20.11.0",
-    "turbo": "^1.13.2"
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "turbo": "^1.13.3",
+    "typescript": "^5.4.2"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
+  "packageManager": "npm@10.5.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ErlisK/openclaw-workspace"
+    "url": "https://github.com/ErlisK/openclaw-workspace",
+    "directory": "startup-91-lean-launch-plan-repo-to-course-git-native-paywall"
   },
   "license": "MIT"
 }

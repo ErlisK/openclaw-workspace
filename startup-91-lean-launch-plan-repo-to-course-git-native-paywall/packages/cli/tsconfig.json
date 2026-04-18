@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "composite": true,
+    "paths": {
+      "@teachrepo/types": ["../types/src/index.ts"],
+      "@teachrepo/core": ["../core/src/index.ts"],
+      "@teachrepo/quiz-engine": ["../quiz-engine/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.react.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/*": ["./src/*"],
+      "@teachrepo/types": ["../../packages/types/src/index.ts"],
+      "@teachrepo/core": ["../../packages/core/src/index.ts"],
+      "@teachrepo/quiz-engine": ["../../packages/quiz-engine/src/index.ts"],
+      "@teachrepo/ui": ["../../packages/ui/src/index.ts"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
