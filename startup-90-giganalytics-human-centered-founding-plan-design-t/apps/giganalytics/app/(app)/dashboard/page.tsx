@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { computeROI, fmt$, fmtRate } from '@/lib/roi'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import OnboardingChecklist from './OnboardingChecklist'
 import FinancialDisclaimer from '@/components/FinancialDisclaimer'
 import { captureServerEvent } from '@/lib/posthog/server'
+import { getCachedDashboardData } from '@/lib/cache/dashboard'
 
 function StatCard({ label, value, sub, color = 'blue' }: {
   label: string; value: string; sub?: string; color?: string
@@ -36,33 +38,19 @@ export default async function DashboardPage() {
     funnel_step: 5,
   }).catch(() => {})
 
-  const days = 90
-  const fromDate = new Date()
-  fromDate.setDate(fromDate.getDate() - days)
-  const from = fromDate.toISOString().split('T')[0]
-  const to = new Date().toISOString().split('T')[0]
-
-  const [
-    { data: streams },
-    { data: transactions },
-    { data: timeEntries },
-    { data: acquisitionCosts },
-    { data: goals },
-  ] = await Promise.all([
-    supabase.from('streams').select('id, name, color, platform').eq('user_id', user.id),
-    supabase.from('transactions')
-      .select('stream_id, net_amount, amount, fee_amount, transaction_date')
-      .eq('user_id', user.id).gte('transaction_date', from).lte('transaction_date', to),
-    supabase.from('time_entries')
-      .select('stream_id, duration_minutes, entry_type, started_at')
-      .eq('user_id', user.id).gte('started_at', fromDate.toISOString()),
-    supabase.from('acquisition_costs')
-      .select('stream_id, channel, amount, period_start, period_end')
-      .eq('user_id', user.id).gte('period_start', from),
-    supabase.from('user_goals')
-      .select('monthly_target, hourly_target')
-      .eq('user_id', user.id).single(),
-  ])
+  const days = 30  // reduced from 90 — 30 days is the core use-case
+  // ─── Cached data fetch (30s TTL, private per-user) ─────────────────────
+  const cached = await getCachedDashboardData(user.id, days)
+  const { streams, transactions, timeEntries, acquisitionCosts, goals } = {
+    streams: cached.streams,
+    transactions: cached.transactions,
+    timeEntries: cached.timeEntries,
+    acquisitionCosts: cached.acquisitionCosts,
+    goals: cached.goals,
+  }
+  const from = cached.from
+  const to = cached.to
+  const fromDate = new Date(from)
 
   const roi = computeROI(
     streams ?? [],
@@ -91,26 +79,18 @@ export default async function DashboardPage() {
     }).catch(() => {})
   }
 
-  // Onboarding progress
-  const [{ count: streamCount }, { count: txCount }, { count: teCount }, { data: settings }] = await Promise.all([
-    supabase.from('streams').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('transactions').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('time_entries').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
-    supabase.from('user_settings').select('onboarding_flags').eq('user_id', user.id).single(),
-  ])
-  const obFlags = (settings?.onboarding_flags as Record<string, boolean>) ?? {}
+  // ─── Onboarding progress (from cache) ─────────────────────────────────
+  const obFlags = cached.onboardingFlags
   const obProgress = {
-    has_streams_2: (streamCount ?? 0) >= 2,
-    has_import: (txCount ?? 0) >= 1,
-    has_timer: (teCount ?? 0) >= 1,
+    has_streams_2: cached.streamCount >= 2,
+    has_import: cached.txCount >= 1,
+    has_timer: cached.teCount >= 1,
     has_viewed_heatmap: obFlags.has_viewed_heatmap ?? false,
     has_viewed_roi: obFlags.has_viewed_roi ?? false,
   }
   const obCompleted = Object.values(obProgress).filter(Boolean).length
   const obTotal = Object.keys(obProgress).length
-  // Check if demo data already seeded
-  const { data: demoCheck } = await supabase.from('transactions')
-    .select('id').eq('user_id', user.id).like('source_id', 'demo-%').limit(1)
+  const demoCheck = cached.demoDataExists ? [{ id: 'demo' }] : []
 
   // Monthly pacing
   const now = new Date()

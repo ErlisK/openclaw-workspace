@@ -10,13 +10,15 @@ export default async function ROIPage() {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
   const since = thirtyDaysAgo.toISOString().split('T')[0]
 
-  const [{ data: streams }, { data: transactions }, { data: acqCosts }, { data: timeEntries }] =
-    await Promise.all([
-      supabase.from('streams').select('*').eq('user_id', user.id),
-      supabase.from('transactions').select('stream_id,amount,net_amount,fee_amount').eq('user_id', user.id).gte('transaction_date', since),
-      supabase.from('acquisition_costs').select('*').eq('user_id', user.id).gte('period_start', since),
-      supabase.from('time_entries').select('stream_id,duration_minutes').eq('user_id', user.id).eq('entry_type', 'billable').gte('started_at', thirtyDaysAgo.toISOString()),
-    ])
+  // Use cached dashboard data — avoids 4 duplicate queries
+  const { getCachedDashboardData } = await import('@/lib/cache/dashboard')
+  const cached = await getCachedDashboardData(user.id, 30)
+  const [streams, transactions, acqCosts, timeEntries] = [
+    cached.streams,
+    cached.transactions,
+    cached.acquisitionCosts,
+    cached.timeEntries.filter(te => te.entry_type === 'billable'),
+  ]
 
   const streamMap = new Map(streams?.map(s => [s.id, s]) ?? [])
 

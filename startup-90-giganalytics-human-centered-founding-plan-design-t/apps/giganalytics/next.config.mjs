@@ -6,6 +6,20 @@ const nextConfig = {
   },
   async headers() {
     return [
+      // Landing pages: CDN-cacheable, 5min fresh, 1hr stale-while-revalidate
+      {
+        source: '/(|signup|login|pricing|blog|demo|launch|social|about|terms|privacy|contact)',
+        headers: [
+          { key: 'Cache-Control', value: 's-maxage=300, stale-while-revalidate=3600' },
+        ],
+      },
+      // Static sample files: long cache
+      {
+        source: '/samples/(.*)',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [

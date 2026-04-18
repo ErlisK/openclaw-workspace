@@ -6,5 +6,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { data } = await supabase.from('transactions').select('*').eq('user_id', user.id).limit(100)
-  return NextResponse.json({ earnings: data ?? [] })
+  return NextResponse.json({ earnings: data ?? [] }, {
+    headers: { 'Cache-Control': 'private, max-age=30, stale-while-revalidate=60', 'Vary': 'Cookie' },
+  })
 }
