@@ -149,6 +149,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <Link href="/demo" className="hover:text-gray-600">Demo</Link>
           <Link href="/blog" className="hover:text-gray-600">Blog</Link>
           <Link href="/launch" className="hover:text-gray-600">Launch</Link>
+          <Link href="/social" className="hover:text-gray-600">Social</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>
           <Link href="/signup?utm_source=landing&utm_medium=footer&utm_campaign=organic" className="hover:text-gray-600">Sign up free</Link>
           <Link href="/terms" className="hover:text-gray-600">Terms</Link>

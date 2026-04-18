@@ -1,0 +1,88 @@
+{
+  "product": "GigAnalytics",
+  "productionUrl": "https://startup-90-giganalytics-human-cente.vercel.app",
+  "generatedAt": "2025-04-18",
+  "tagline": "Know your real hourly rate. Finally.",
+  "description": "Analytics dashboard for people running 2-5 side incomes. True hourly rates, A/B pricing experiments, earnings heatmap, AI insights.",
+  "keyMetrics": {
+    "setupTime": "5 minutes",
+    "freeStreams": 2,
+    "proPrice": "$29/mo",
+    "testsPassing": "260/260"
+  },
+  "targetSubreddits": [
+    "r/freelance",
+    "r/entrepreneur",
+    "r/SideProject",
+    "r/digitalnomad",
+    "r/beermoney",
+    "r/personalfinance"
+  ],
+  "utmLinks": {
+    "twitter": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=twitter&utm_medium=social&utm_campaign=launch",
+    "linkedin": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=linkedin&utm_medium=social&utm_campaign=launch",
+    "reddit_organic": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=reddit&utm_medium=organic&utm_campaign=launch_post",
+    "reddit_ad": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=reddit&utm_medium=cpc&utm_campaign=launch_ad",
+    "producthunt": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=producthunt&utm_medium=listing&utm_campaign=launch",
+    "indiehackers": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=indiehackers&utm_medium=listing&utm_campaign=launch",
+    "betalist": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=betalist&utm_medium=listing&utm_campaign=launch",
+    "hackernews": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=hackernews&utm_medium=show_hn&utm_campaign=launch",
+    "social_page": "https://startup-90-giganalytics-human-cente.vercel.app?utm_source=social_page&utm_campaign=launch"
+  },
+  "twitterThread": [
+    {
+      "n": 1,
+      "text": "I just launched GigAnalytics — an analytics dashboard for people with 2–5 income streams.\n\nThe insight that started it: most freelancers think they earn $80/hr. They actually earn ~$47.\n\nHere's the thread 🧵"
+    },
+    {
+      "n": 2,
+      "text": "The \"true hourly rate\" gap:\n\n• Upwork fees: −13%\n• Admin/unpaid time: −20%\n• Client acquisition: −8%\n• Tools & software: −$3/hr\n\n$80 becomes ~$47 in real take-home. Most freelancers have no idea."
+    },
+    {
+      "n": 3,
+      "text": "GigAnalytics calculates this automatically:\n\n→ Import from Stripe, PayPal, or CSV\n→ Log time with a one-tap timer\n→ See true hourly rate per income stream\n\nNo spreadsheets. 5 min setup."
+    },
+    {
+      "n": 4,
+      "text": "It also shows you:\n\n📊 Which streams pull their weight\n🗺️ Best times/days to accept work (heatmap)\n🧪 A/B pricing experiments with stat significance\n🤖 AI suggestions based on YOUR data\n\nAll privacy-first. No raw data sharing."
+    },
+    {
+      "n": 5,
+      "text": "Free plan includes:\n• 2 income streams\n• Unlimited CSV imports\n• Full ROI dashboard\n• Heatmap\n\nPro ($29/mo) adds AI insights + benchmark data from anonymized freelancer pool.\n\nWould love your feedback 🙏"
+    }
+  ],
+  "redditPosts": [
+    {
+      "subreddit": "r/freelance",
+      "title": "I built a tool to calculate your real hourly rate (after fees, admin time, acquisition costs) — free to use",
+      "type": "text",
+      "flair": "Tools & Resources"
+    },
+    {
+      "subreddit": "r/SideProject",
+      "title": "GigAnalytics — see your true ROI across all income streams (Stripe, PayPal, CSV import)",
+      "type": "link",
+      "flair": "Show HN / Product"
+    },
+    {
+      "subreddit": "r/entrepreneur",
+      "title": "Built analytics for multi-income freelancers: true hourly rate, heatmap, A/B pricing — launching today",
+      "type": "text",
+      "flair": "Tools"
+    }
+  ],
+  "linkedinHashtags": [
+    "#freelance",
+    "#sideincome",
+    "#gigeconomy",
+    "#analytics",
+    "#saas",
+    "#buildinpublic",
+    "#freelancer",
+    "#entrepreneurship"
+  ],
+  "productHuntTagline": "Know your real hourly rate across all income streams",
+  "productHuntDescription": "GigAnalytics turns raw Stripe/PayPal/CSV payments + minimal time inputs into true hourly rates, A/B pricing experiments, earnings heatmap, and AI-powered income insights. Built for the multi-income earner.",
+  "productHuntTopics": ["Productivity", "Finance", "Freelance", "Analytics", "SaaS"],
+  "hackerNewsTitle": "Show HN: GigAnalytics – analytics for multi-income freelancers (true hourly rate, pricing A/B tests)"
+}

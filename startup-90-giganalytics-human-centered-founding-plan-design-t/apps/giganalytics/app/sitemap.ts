@@ -24,5 +24,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url('/blog/five-income-streams'), lastModified: new Date('2025-03-27'), changeFrequency: 'monthly', priority: 0.7 },
     // Launch
     { url: url('/launch'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    // Social
+    { url: url('/social'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
   ]
 }
