@@ -1,8 +1,11 @@
 import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { checkEntitlement } from '@/lib/entitlement/check';
-import type { QuizFile } from '@/lib/types/quiz';
+import { compileLessonMdx } from '@/lib/mdx/compile';
+import { Quiz } from '@/components/lesson/Quiz';
+import { SandboxEmbed } from '@/components/lesson/SandboxEmbed';
 
 interface LessonPageProps {
   params: { slug: string; lessonSlug: string };
@@ -14,47 +17,56 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
     .from('courses')
     .select('id, title')
     .eq('slug', params.slug)
-    .eq('published', true)
     .single();
-  if (!course) return { title: 'Lesson not found' };
+
+  if (!course) return { title: 'Lesson not found — TeachRepo' };
+
   const { data: lesson } = await supabase
     .from('lessons')
     .select('title, description')
     .eq('course_id', course.id)
     .eq('slug', params.lessonSlug)
     .single();
+
   return {
-    title: lesson ? `${lesson.title} — ${course.title}` : course.title,
+    title: lesson ? `${lesson.title} — ${course.title} | TeachRepo` : `${course.title} | TeachRepo`,
     description: lesson?.description ?? undefined,
   };
 }
 
 export default async function LessonPage({ params }: LessonPageProps) {
   const supabase = createServerClient();
+  const serviceSupa = createServiceClient();
 
+  // ── 1. Fetch course ──────────────────────────────────────────────────────
   const { data: course } = await supabase
     .from('courses')
-    .select('id, slug, title, price_cents, currency, pricing_model')
+    .select('id, slug, title, price_cents, currency, pricing_model, published')
     .eq('slug', params.slug)
-    .eq('published', true)
     .single();
+
   if (!course) notFound();
 
-  const { data: lesson } = await supabase
+  // ── 2. Fetch lesson ──────────────────────────────────────────────────────
+  const { data: lesson } = await serviceSupa
     .from('lessons')
-    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, quiz_id, body_md, sandbox_url')
+    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz, quiz_slug')
     .eq('course_id', course.id)
     .eq('slug', params.lessonSlug)
     .single();
+
   if (!lesson) notFound();
 
+  // ── 3. Entitlement check ─────────────────────────────────────────────────
   const { enrolled } = await checkEntitlement({ courseId: course.id });
+
+  // Redirect to course overview paywall if not enrolled and not a free preview
   if (!lesson.is_preview && !enrolled) {
     redirect(`/courses/${params.slug}?paywall=1`);
   }
 
-  // Fetch sibling lessons for nav
-  const { data: siblings } = await supabase
+  // ── 4. Sibling lessons for sidebar + nav ─────────────────────────────────
+  const { data: siblings } = await serviceSupa
     .from('lessons')
     .select('id, slug, title, order_index, is_preview')
     .eq('course_id', course.id)
@@ -64,123 +76,191 @@ export default async function LessonPage({ params }: LessonPageProps) {
   const prev = idx > 0 ? siblings![idx - 1] : null;
   const next = idx >= 0 && idx < (siblings?.length ?? 0) - 1 ? siblings![idx + 1] : null;
 
-  // Fetch quiz if attached
-  let quiz: QuizFile | null = null;
-  if (lesson.quiz_id) {
-    const { data: quizRow } = await supabase
+  // ── 5. Fetch quiz (if lesson has one) ────────────────────────────────────
+  let quizData: {
+    id: string;
+    title: string;
+    pass_threshold: number;
+    questions: Array<{
+      id: string;
+      question: string;
+      question_type: 'multiple_choice' | 'true_false' | 'short_answer';
+      options: string[] | null;
+      correct_index: number | null;
+      correct_bool: boolean | null;
+      explanation: string | null;
+      order_index: number;
+    }>;
+  } | null = null;
+
+  if (lesson.has_quiz && lesson.quiz_slug) {
+    const { data: quiz } = await serviceSupa
       .from('quizzes')
-      .select('id, external_id, title, pass_threshold, ai_generated, quiz_questions(order_index, type, prompt, choices, correct_answer, points, explanation)')
+      .select('id, title, pass_threshold, lesson_id')
       .eq('course_id', course.id)
-      .eq('external_id', lesson.quiz_id)
+      .eq('slug', lesson.quiz_slug)
       .single();
-    if (quizRow) quiz = normalizeQuiz(quizRow);
+
+    if (quiz) {
+      const { data: questions } = await serviceSupa
+        .from('quiz_questions')
+        .select('id, question, question_type, options, correct_index, correct_bool, explanation, order_index')
+        .eq('quiz_id', quiz.id)
+        .order('order_index', { ascending: true });
+
+      if (questions && questions.length > 0) {
+        quizData = {
+          id: quiz.id,
+          title: quiz.title,
+          pass_threshold: quiz.pass_threshold,
+          questions: questions as typeof quizData.questions,
+        };
+      }
+    }
   }
 
-  const sandboxUrl = enrolled && lesson.sandbox_url ? lesson.sandbox_url : '';
+  // ── 6. Compile MDX ───────────────────────────────────────────────────────
+  let renderedContent: React.ReactElement | null = null;
+  try {
+    renderedContent = await compileLessonMdx(lesson.content_md ?? '');
+  } catch {
+    // Fallback to plain text if MDX compilation fails
+  }
 
   return (
-    <div className="mx-auto flex max-w-7xl gap-8 px-4 py-10 lg:px-8">
-      {/* Sidebar */}
-      <aside className="hidden w-60 flex-shrink-0 lg:block">
-        <nav aria-label="Course lessons">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-500">{course.title}</p>
-          <ul className="space-y-1">
-            {siblings?.map((l) => (
-              <li key={l.id}>
-                <a
-                  href={`/courses/${params.slug}/lessons/${l.slug}`}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm transition-colors ${
-                    l.slug === params.lessonSlug
-                      ? 'bg-violet-100 font-medium text-violet-800'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  <span className="flex-1">{l.title}</span>
-                  {l.is_preview && (
-                    <span className="rounded px-1.5 py-0.5 text-xs font-medium text-green-700 ring-1 ring-green-300">Free</span>
-                  )}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto flex max-w-7xl gap-0 lg:gap-8 px-0 lg:px-8 py-0 lg:py-10">
 
-      {/* Main */}
-      <main className="min-w-0 flex-1">
-        <header className="mb-8 border-b border-gray-200 pb-6">
-          <div className="mb-2 flex items-center gap-2 text-sm text-gray-500">
-            <a href={`/courses/${params.slug}`} className="hover:text-violet-600">{course.title}</a>
-            <span>›</span>
-            <span>{lesson.title}</span>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">{lesson.title}</h1>
-          {lesson.estimated_minutes && (
-            <p className="mt-2 text-sm text-gray-500">~{lesson.estimated_minutes} min read</p>
-          )}
-        </header>
-
-        {/* Lesson body — rendered as plain markdown prose */}
-        <article className="prose prose-gray max-w-none">
-          <div dangerouslySetInnerHTML={{ __html: '' }} />
-          {/* Body stored as MD — render as pre-formatted for now */}
-          <div className="whitespace-pre-wrap font-mono text-sm text-gray-700 rounded bg-gray-50 p-4">
-            {lesson.body_md}
-          </div>
-        </article>
-
-        {/* Sandbox embed (if enrolled) */}
-        {sandboxUrl && (
-          <div className="my-8 overflow-hidden rounded-xl border border-gray-200" style={{ height: 500 }}>
-            <iframe src={sandboxUrl} title="Live sandbox" className="h-full w-full border-0" loading="lazy" />
-          </div>
-        )}
-
-        {/* Quiz placeholder */}
-        {quiz && (
-          <div className="my-8 rounded-xl border border-violet-200 bg-violet-50 p-6">
-            <h3 className="mb-4 text-lg font-semibold text-violet-900">{quiz.title}</h3>
-            <p className="text-sm text-violet-700">{quiz.questions.length} questions · {quiz.pass_threshold}% to pass</p>
-          </div>
-        )}
-
-        {/* Lesson nav */}
-        <nav className="mt-12 flex items-center justify-between border-t border-gray-200 pt-6">
-          {prev ? (
-            <a href={`/courses/${params.slug}/lessons/${prev.slug}`} className="rounded-lg border border-gray-200 px-4 py-3 text-sm hover:border-violet-300">
-              ← {prev.title}
+        {/* ── Sidebar ─────────────────────────────────────────────────── */}
+        <aside className="hidden lg:block w-64 flex-shrink-0">
+          <div className="sticky top-6">
+            <a href={`/courses/${params.slug}`} className="mb-4 flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600">
+              ← {course.title}
             </a>
-          ) : <div />}
-          {next ? (
-            <a href={`/courses/${params.slug}/lessons/${next.slug}`} className="rounded-lg bg-violet-600 px-4 py-3 text-sm font-semibold text-white hover:bg-violet-700">
-              {next.title} →
-            </a>
-          ) : (
-            <div className="rounded-lg bg-green-100 px-4 py-3 text-sm font-medium text-green-800">🎉 Course complete!</div>
+            <nav aria-label="Course lessons">
+              <ul className="space-y-0.5">
+                {siblings?.map((l, i) => {
+                  const isCurrent = l.slug === params.lessonSlug;
+                  const isLocked = !l.is_preview && !enrolled;
+                  return (
+                    <li key={l.id}>
+                      <a
+                        href={isLocked ? `#` : `/courses/${params.slug}/lessons/${l.slug}`}
+                        onClick={isLocked ? (e) => e.preventDefault() : undefined}
+                        className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                          isCurrent
+                            ? 'bg-violet-100 font-semibold text-violet-800'
+                            : isLocked
+                            ? 'cursor-default text-gray-400'
+                            : 'text-gray-700 hover:bg-gray-100'
+                        }`}
+                      >
+                        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full text-xs font-medium ring-1 ring-gray-200 bg-white">
+                          {i + 1}
+                        </span>
+                        <span className="flex-1 leading-tight">{l.title}</span>
+                        {l.is_preview && !isLocked && (
+                          <span className="rounded-full bg-green-100 px-1.5 py-0.5 text-xs font-medium text-green-700">Free</span>
+                        )}
+                        {isLocked && <span className="text-gray-300">🔒</span>}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
+        </aside>
+
+        {/* ── Main ─────────────────────────────────────────────────────── */}
+        <main className="min-w-0 flex-1 px-4 py-8 lg:px-0">
+
+          {/* Lesson header */}
+          <header className="mb-8 border-b border-gray-200 pb-6">
+            {/* Mobile breadcrumb */}
+            <div className="mb-3 flex items-center gap-2 text-xs text-gray-500 lg:hidden">
+              <a href={`/courses/${params.slug}`} className="hover:text-violet-600">{course.title}</a>
+              <span>›</span>
+              <span>{lesson.title}</span>
+            </div>
+
+            <div className="flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-bold text-gray-900 lg:text-3xl">{lesson.title}</h1>
+              {lesson.is_preview && (
+                <span className="flex-shrink-0 rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                  Free preview
+                </span>
+              )}
+            </div>
+
+            {lesson.description && (
+              <p className="mt-2 text-base text-gray-600">{lesson.description}</p>
+            )}
+            {lesson.estimated_minutes && (
+              <p className="mt-2 text-sm text-gray-400">~{lesson.estimated_minutes} min read</p>
+            )}
+          </header>
+
+          {/* Lesson body — MDX rendered */}
+          <article className="prose prose-gray prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-code:rounded prose-code:bg-gray-100 prose-code:px-1 prose-code:text-sm prose-pre:rounded-xl prose-pre:bg-gray-900 max-w-none">
+            {renderedContent ?? (
+              <div className="whitespace-pre-wrap font-mono text-sm text-gray-700 rounded-xl bg-gray-50 p-5 leading-relaxed">
+                {lesson.content_md}
+              </div>
+            )}
+          </article>
+
+          {/* Sandbox embed */}
+          {lesson.sandbox_url && (
+            <SandboxEmbed
+              url={lesson.sandbox_url}
+              enrolled={enrolled}
+              title="Interactive Sandbox"
+            />
           )}
-        </nav>
-      </main>
+
+          {/* Quiz */}
+          {quizData && (
+            <Quiz
+              quizId={quizData.id}
+              title={quizData.title}
+              passThreshold={quizData.pass_threshold}
+              questions={quizData.questions}
+              courseId={course.id}
+              lessonId={lesson.id}
+            />
+          )}
+
+          {/* ── Lesson navigation ───────────────────────────────────────── */}
+          <nav className="mt-12 flex items-center justify-between gap-4 border-t border-gray-200 pt-6">
+            {prev ? (
+              <a
+                href={`/courses/${params.slug}/lessons/${prev.slug}`}
+                className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 transition-colors hover:border-violet-300 hover:text-violet-700"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline">{prev.title}</span>
+                <span className="sm:hidden">Previous</span>
+              </a>
+            ) : <div />}
+
+            {next ? (
+              <a
+                href={`/courses/${params.slug}/lessons/${next.slug}`}
+                className="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-violet-700"
+              >
+                <span className="hidden sm:inline">{next.title}</span>
+                <span className="sm:hidden">Next</span>
+                <span>→</span>
+              </a>
+            ) : (
+              <div className="flex items-center gap-2 rounded-xl bg-green-600 px-5 py-3 text-sm font-semibold text-white">
+                🎉 <span>Course complete!</span>
+              </div>
+            )}
+          </nav>
+        </main>
+      </div>
     </div>
   );
-}
-
-function normalizeQuiz(row: Record<string, unknown>): QuizFile {
-  const questions = (row.quiz_questions as Array<Record<string, unknown>> ?? [])
-    .sort((a, b) => (a.order_index as number) - (b.order_index as number))
-    .map((q) => {
-      if (q.type === 'multiple_choice') {
-        return { type: 'multiple_choice' as const, prompt: q.prompt as string, choices: (q.choices as string[]) ?? [], answer: parseInt(q.correct_answer as string, 10), points: q.points as number, explanation: (q.explanation as string) ?? undefined };
-      }
-      if (q.type === 'true_false') {
-        return { type: 'true_false' as const, prompt: q.prompt as string, answer: q.correct_answer === 'true', points: q.points as number, explanation: (q.explanation as string) ?? undefined };
-      }
-      return { type: 'short_answer' as const, prompt: q.prompt as string, answer: q.correct_answer as string, points: q.points as number, explanation: (q.explanation as string) ?? undefined };
-    });
-  return {
-    id: row.external_id as string,
-    title: row.title as string,
-    pass_threshold: row.pass_threshold as number,
-    ai_generated: row.ai_generated as boolean,
-    questions,
-  };
 }

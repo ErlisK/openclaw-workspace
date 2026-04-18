@@ -447,6 +447,7 @@ export async function POST(req: NextRequest) {
           has_quiz: !!quizId,
           has_sandbox: !!(fm.sandbox_url),
           sandbox_url: (fm.sandbox_url as string) ?? null,
+          quiz_slug: quizId ? slugify(quizId) : null,
           updated_at: new Date().toISOString(),
         });
       } catch (e) {
@@ -476,12 +477,12 @@ export async function POST(req: NextRequest) {
         const content = await fetchFile(owner, repoName, `${prefix}${qPath}`, token);
         const parsed = parseQuizYaml(content, quizFileId);
 
-        // Find the lesson(s) that reference this quiz
+        // Find the lesson that references this quiz by quiz_slug
         const lesson = await serviceSupa
           .from('lessons')
           .select('id')
           .eq('course_id', courseId)
-          .filter('content_md', 'ilike', `%${quizFileId}%`)
+          .eq('quiz_slug', slugify(quizFileId))
           .limit(1)
           .maybeSingle();
 
@@ -491,6 +492,7 @@ export async function POST(req: NextRequest) {
           lesson_id: lesson?.data?.id ?? null,
           title: parsed.title,
           pass_threshold: parsed.pass_threshold,
+          slug: slugify(quizFileId),
           updated_at: new Date().toISOString(),
         };
 
