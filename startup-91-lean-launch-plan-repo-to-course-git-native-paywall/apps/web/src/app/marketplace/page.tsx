@@ -301,7 +301,6 @@ function CourseCardUI({ course }: { course: CourseCard }) {
               key={tag}
               href={buildUrl({ tags: tag })}
               className="rounded-full bg-white/20 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm hover:bg-white/30"
-              onClick={(e) => e.stopPropagation()}
             >
               {tag}
             </a>
