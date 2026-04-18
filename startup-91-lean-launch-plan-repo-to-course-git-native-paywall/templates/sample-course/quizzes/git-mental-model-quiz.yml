@@ -1,0 +1,50 @@
+id: "git-mental-model-quiz"
+title: "Git Mental Model — Check Your Understanding"
+pass_threshold: 70
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "Which Git command moves changes from the Working Tree into the Index (staging area)?"
+    choices:
+      - "git commit"
+      - "git push"
+      - "git add"
+      - "git stash"
+    answer: 2
+    points: 1
+    explanation: "git add copies changes from the Working Tree to the Index. Nothing is written to history yet — that happens on git commit."
+
+  - type: multiple_choice
+    prompt: "What does `git reset --hard HEAD~1` do to the three trees?"
+    choices:
+      - "Moves HEAD back; leaves Index and Working Tree unchanged"
+      - "Moves HEAD back; resets Index; leaves Working Tree unchanged"
+      - "Moves HEAD back; resets Index; resets Working Tree to match HEAD ⚠️"
+      - "Deletes the last commit from remote"
+    answer: 2
+    points: 2
+    explanation: "--hard ripples all the way through all three trees. HEAD moves, the Index is reset, AND the Working Tree is overwritten. Any uncommitted changes are permanently lost."
+
+  - type: true_false
+    prompt: "In Git, a branch is a full copy of the repository's files."
+    answer: false
+    points: 1
+    explanation: "A branch is just a named pointer (a 41-byte file in .git/refs/heads/) to a specific commit. Creating a branch is free and instant — no files are copied."
+
+  - type: multiple_choice
+    prompt: "What is the difference between `git restore file.txt` and `git restore --staged file.txt`?"
+    choices:
+      - "They do the same thing"
+      - "`git restore` restores Working Tree from Index; `--staged` restores Index from HEAD"
+      - "`git restore` restores from HEAD; `--staged` restores Working Tree from Index"
+      - "`git restore` works on binaries; `--staged` works on text files only"
+    answer: 1
+    points: 2
+    explanation: "git restore file.txt restores the Working Tree from the Index (discarding unstaged changes). git restore --staged file.txt restores the Index from HEAD (unstaging a file without touching the Working Tree)."
+
+  - type: short_answer
+    prompt: "What data structure is used to represent Git commit history?"
+    answer: "dag"
+    points: 1
+    explanation: "Git history is a Directed Acyclic Graph (DAG) of commit objects. Each commit points to its parent(s), forming a graph that only flows in one direction and never forms a cycle."

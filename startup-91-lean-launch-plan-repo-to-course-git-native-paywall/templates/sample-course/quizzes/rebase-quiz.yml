@@ -1,0 +1,55 @@
+id: "rebase-quiz"
+title: "Rebase Without Fear — Assessment"
+pass_threshold: 75
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "What is the Golden Rule of rebase?"
+    choices:
+      - "Always rebase instead of merge"
+      - "Never rebase commits that have been pushed to a shared branch"
+      - "Rebase only on Mondays"
+      - "Always use --force after rebasing"
+    answer: 1
+    points: 2
+    explanation: "Rebasing rewrites commit SHAs. If other people have fetched those commits, their history will diverge from yours and git pull will create chaos. Only rebase commits that exist only on your local or personal branch."
+
+  - type: multiple_choice
+    prompt: "What does `fixup` do in an interactive rebase?"
+    choices:
+      - "Opens the conflicting file in your editor"
+      - "Squashes the commit into the previous one and discards this commit's message"
+      - "Squashes the commit but keeps its message for editing"
+      - "Drops the commit entirely"
+    answer: 1
+    points: 2
+    explanation: "fixup (f) squashes the commit into the previous one and discards its message. squash (s) is similar but prompts you to combine the messages. Use fixup for 'fix typo' commits you don't want appearing in the final history."
+
+  - type: multiple_choice
+    prompt: "What is the difference between `git push --force` and `git push --force-with-lease`?"
+    choices:
+      - "They are identical"
+      - "--force-with-lease is slower but more reliable"
+      - "--force-with-lease aborts if someone else has pushed to the branch since your last fetch"
+      - "--force-with-lease only works on feature branches"
+    answer: 2
+    points: 2
+    explanation: "--force-with-lease adds a safety check: it verifies the remote ref matches what you last fetched. If someone else pushed to the branch since your last fetch, --force-with-lease will refuse to overwrite their work. --force does not check."
+
+  - type: true_false
+    prompt: "You can safely abort an in-progress rebase with `git rebase --abort` to return to the pre-rebase state."
+    answer: true
+    points: 1
+    explanation: "git rebase --abort is the escape hatch. It cancels the rebase entirely and restores your branch to exactly how it was before you started. This is why rebase is less scary than its reputation suggests."
+
+  - type: multiple_choice
+    prompt: "When is it appropriate to use merge instead of rebase?"
+    choices:
+      - "Always — rebase should never be used"
+      - "When you want a linear history on your feature branch"
+      - "When merging a PR into main, or on shared branches with multiple contributors"
+      - "Merge is only for hotfixes"
+    answer: 2
+    points: 2
+    explanation: "Merge is the right choice when: (1) preserving the parallel work record matters, (2) you're integrating a PR into main, or (3) you're on a shared branch where others have committed. Rebase is for personal feature branches."

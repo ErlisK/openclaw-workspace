@@ -1,0 +1,23 @@
+name: Publish Course
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "lessons/**"
+      - "quizzes/**"
+      - "course.yml"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate course
+        run: npx @teachrepo/cli validate
+
+      - name: Publish to TeachRepo
+        run: npx @teachrepo/cli publish --token ${{ secrets.TEACHREPO_PUBLISH_TOKEN }}
+        env:
+          TEACHREPO_PUBLISH_TOKEN: ${{ secrets.TEACHREPO_PUBLISH_TOKEN }}

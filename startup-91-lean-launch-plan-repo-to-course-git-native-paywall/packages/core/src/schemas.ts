@@ -92,15 +92,11 @@ export const MultipleChoiceQuestionSchema = QuestionBaseSchema.extend({
 
 export const TrueFalseQuestionSchema = QuestionBaseSchema.extend({
   type: z.literal('true_false'),
-
-  /** Boolean answer */
   answer: z.boolean(),
 });
 
 export const ShortAnswerQuestionSchema = QuestionBaseSchema.extend({
   type: z.literal('short_answer'),
-
-  /** Expected answer — matched case-insensitively */
   answer: z.string().min(1, 'short_answer requires an expected answer string'),
 });
 
@@ -121,29 +117,98 @@ export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
 // ============================================================
 
 export const QuizFileSchema = z.object({
-  /** Must match the filename without .yml extension */
   id: z.string().regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/),
-
-  /** Display title shown above the quiz */
   title: z.string().min(1),
-
-  /** Minimum score percentage to pass — overrides course-level default */
   pass_threshold: z.number().int().min(0).max(100).default(70),
-
-  /** Whether this quiz was AI-generated */
   ai_generated: z.boolean().default(false),
-
-  /** Array of question objects — at least 1 required */
-  questions: z
-    .array(QuizQuestionSchema)
-    .min(1, 'quiz must have at least one question'),
+  questions: z.array(QuizQuestionSchema).min(1, 'quiz must have at least one question'),
 });
 
 export type QuizFile = z.infer<typeof QuizFileSchema>;
 
 // ============================================================
-// Course Config Schema
-// Matches: course.config.yaml
+// Course Config Shared fields
+// ============================================================
+
+const CourseSharedFields = {
+  /** Default pass threshold for all quizzes */
+  pass_threshold: z.number().int().min(0).max(100).default(70),
+
+  /** Relative path to the lessons directory */
+  lessons_dir: z.string().default('./lessons'),
+
+  /**
+   * Explicit lesson order by slug.
+   * If omitted, CLI sorts by filename prefix (NN-slug.md).
+   */
+  lessons_order: z.array(z.string()).default([]),
+
+  affiliates: z
+    .object({
+      enabled: z.boolean().default(false),
+      default_commission_pct: z.number().int().min(0).max(100).default(30),
+      cookie_days: z.number().int().min(1).default(30),
+    })
+    .default({}),
+
+  sandboxes: z
+    .object({
+      enabled: z.boolean().default(false),
+      provider: z.enum(['codesandbox', 'stackblitz', 'codepen']).default('codesandbox'),
+    })
+    .default({}),
+
+  certificate: z
+    .object({
+      enabled: z.boolean().default(false),
+      template: z.string().default('default'),
+    })
+    .default({}),
+};
+
+// ============================================================
+// course.yml — flat format (new, used by sample-course)
+//   title, description, price_cents, currency, affiliate_pct, repo_url
+// ============================================================
+
+export const CourseYmlSchema = z
+  .object({
+    // Required identity
+    title: z.string().min(1),
+    slug: z.string().regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/),
+    description: z.string().default(''),
+    author: z.string().default(''),
+    email: z.string().email().optional(),
+    version: z.string().default('1.0.0'),
+    language: z.string().default('en'),
+    tags: z.array(z.string()).default([]),
+
+    /** Canonical repo URL for this course */
+    repo_url: z.string().url().optional(),
+
+    // Pricing (flat fields)
+    price_cents: z.number().int().min(0).default(0),
+    currency: z.string().length(3).default('usd'),
+    stripe_price_id: z.string().optional(),
+
+    // Affiliate (flat field — convenience alias for affiliates.default_commission_pct)
+    affiliate_pct: z.number().int().min(0).max(100).default(30),
+
+    ...CourseSharedFields,
+  })
+  .transform((data) => ({
+    ...data,
+    // Normalize: ensure affiliates block is consistent with top-level affiliate_pct
+    affiliates: {
+      ...data.affiliates,
+      default_commission_pct: data.affiliate_pct,
+    },
+  }));
+
+export type CourseYml = z.infer<typeof CourseYmlSchema>;
+
+// ============================================================
+// course.config.yaml — nested format (legacy)
 // ============================================================
 
 export const CourseConfigSchema = z.object({
@@ -156,45 +221,24 @@ export const CourseConfigSchema = z.object({
     version: z.string().default('1.0.0'),
     language: z.string().default('en'),
     tags: z.array(z.string()).default([]),
+    repo_url: z.string().url().optional(),
   }),
 
-  pricing: z.object({
-    model: z.enum(['free', 'one_time', 'subscription']).default('one_time'),
-    amount_cents: z.number().int().min(0).default(0),
-    currency: z.string().length(3).default('usd'),
-    stripe_price_id: z.string().optional(),
-  }).default({}),
+  pricing: z
+    .object({
+      model: z.enum(['free', 'one_time', 'subscription']).default('one_time'),
+      amount_cents: z.number().int().min(0).default(0),
+      currency: z.string().length(3).default('usd'),
+      stripe_price_id: z.string().optional(),
+    })
+    .default({}),
 
-  /** Default pass threshold for all quizzes — can be overridden per quiz */
-  pass_threshold: z.number().int().min(0).max(100).default(70),
-
-  /** Slugs of lessons accessible without enrollment (cross-referenced with access: free) */
-  preview_lessons: z.array(z.string()).default([]),
-
-  affiliates: z.object({
-    enabled: z.boolean().default(false),
-    default_commission_pct: z.number().int().min(0).max(100).default(30),
-    cookie_days: z.number().int().min(1).default(30),
-  }).default({}),
-
-  /** Relative path to the lessons directory */
-  lessons_dir: z.string().default('./lessons'),
-
-  /**
-   * Explicit lesson order by slug.
-   * If omitted, CLI sorts lessons by filename prefix (NN-slug.md).
-   */
-  lessons_order: z.array(z.string()).default([]),
-
-  sandboxes: z.object({
-    enabled: z.boolean().default(false),
-    provider: z.enum(['codesandbox', 'stackblitz', 'codepen']).default('codesandbox'),
-  }).default({}),
-
-  certificate: z.object({
-    enabled: z.boolean().default(false),
-    template: z.string().default('default'),
-  }).default({}),
+  ...CourseSharedFields,
 });
 
 export type CourseConfig = z.infer<typeof CourseConfigSchema>;
+
+// ============================================================
+// Union type for either config format (used by parseCourse)
+// ============================================================
+export type AnyCourseConfig = CourseYml | CourseConfig;

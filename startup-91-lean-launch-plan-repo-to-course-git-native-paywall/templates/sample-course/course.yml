@@ -1,0 +1,58 @@
+# course.yml — TeachRepo Course Configuration
+# Docs: https://teachrepo.com/docs/course-format
+#
+# This is the single source of truth for your course.
+# Run `teachrepo validate` to check for errors.
+# Run `teachrepo publish` to deploy to teachrepo.com.
+
+title: "Ship It: A Practical Git Workflow for Engineers"
+description: >
+  Everything a working engineer needs to know about Git beyond the basics.
+  Trunk-based development, meaningful commit messages, rebasing without fear,
+  PR hygiene, and a CI/CD pipeline that actually helps you ship faster.
+  Hands-on exercises throughout — no videos, just code.
+
+# Canonical GitHub repo for this course content
+repo_url: "https://github.com/ErlisK/openclaw-workspace"
+
+# ── Pricing ──────────────────────────────────────────────────────────────────
+price_cents: 2900         # $29.00 — 0 = free
+currency: "usd"           # ISO 4217, lowercase
+
+# ── Affiliate / Referral ─────────────────────────────────────────────────────
+affiliate_pct: 30         # Percentage of sale price paid to referring affiliate
+
+# ── Course Identity ───────────────────────────────────────────────────────────
+slug: "git-workflow-engineers"
+version: "1.0.0"
+language: "en"
+author: "TeachRepo Team"
+email: "hello@teachrepo.com"
+tags:
+  - git
+  - devops
+  - engineering
+  - ci-cd
+
+# ── Lesson Order ──────────────────────────────────────────────────────────────
+# If omitted, TeachRepo CLI sorts by the NN- filename prefix.
+# List slugs in the order students should take them.
+lessons_order:
+  - "git-mental-model"
+  - "branches-and-commits"
+  - "rebase-without-fear"
+  - "pull-request-hygiene"
+  - "ci-cd-pipeline"
+
+# ── Quizzes ───────────────────────────────────────────────────────────────────
+pass_threshold: 70        # Default minimum score % to pass any quiz
+
+# ── Sandboxes ────────────────────────────────────────────────────────────────
+sandboxes:
+  enabled: true
+  provider: "stackblitz"  # codesandbox | stackblitz | codepen
+
+# ── Certificate of Completion ─────────────────────────────────────────────────
+certificate:
+  enabled: true
+  template: "default"
