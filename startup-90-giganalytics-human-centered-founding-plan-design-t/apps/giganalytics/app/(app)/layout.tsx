@@ -9,6 +9,7 @@ const navLinks = [
   { href: '/heatmap', label: 'Heatmap', icon: '🔥' },
   { href: '/roi', label: 'ROI', icon: '💰' },
   { href: '/pricing', label: 'Pricing Lab', icon: '🧪' },
+  { href: '/benchmark', label: 'Benchmarks', icon: '📈' },
 ]
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
