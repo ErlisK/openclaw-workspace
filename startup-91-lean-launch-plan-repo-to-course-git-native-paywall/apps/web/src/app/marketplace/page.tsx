@@ -52,7 +52,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
     .select(
       `
       id, slug, title, description, price_cents, currency, pricing_model, published_at, tags,
-      creators!inner(handle),
+      creators!inner(display_name),
       lessons(id, is_preview),
       enrollments(id)
     `
@@ -100,7 +100,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
       id: string; slug: string; title: string; description: string;
       price_cents: number; currency: string; pricing_model: string;
       published_at: string; tags: string[];
-      creators: { handle: string } | { handle: string }[];
+      creators: { display_name: string } | { display_name: string }[];
       lessons: { id: string; is_preview: boolean }[];
       enrollments: { id: string }[];
     };
@@ -113,7 +113,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
       price_cents: row.price_cents,
       currency: row.currency,
       pricing_model: row.pricing_model,
-      author_handle: creator?.handle ?? 'unknown',
+      author_handle: creator?.display_name ?? 'unknown',
       free_lesson_count: (row.lessons ?? []).filter((l) => l.is_preview).length,
       total_lesson_count: (row.lessons ?? []).length,
       enrollment_count: (row.enrollments ?? []).length,
