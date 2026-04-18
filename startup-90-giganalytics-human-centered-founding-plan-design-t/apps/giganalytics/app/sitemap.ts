@@ -38,5 +38,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Changelog + Media Kit
     { url: url('/changelog'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: url('/media-kit'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    // Advanced docs (whitepaper + privacy + integrations)
+    { url: url('/docs/roi-whitepaper'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: url('/docs/privacy-benchmarking'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: url('/docs/integration-roadmap'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
   ]
 }

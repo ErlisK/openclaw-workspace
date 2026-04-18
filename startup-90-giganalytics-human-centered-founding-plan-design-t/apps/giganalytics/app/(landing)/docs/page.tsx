@@ -35,6 +35,41 @@ const DOCS = [
     desc: 'What the AI can and cannot do, confidence levels, data quality thresholds, and when to trust it.',
     badge: 'Important',
   },
+  {
+    href: '/docs/heatmap-guide',
+    icon: '🗓️',
+    title: 'Earnings Heatmap Guide',
+    desc: 'How the earnings heatmap is calculated, how to filter it, and how to act on the patterns it reveals.',
+    badge: 'Advanced',
+  },
+  {
+    href: '/docs/benchmark-data',
+    icon: '📊',
+    title: 'Benchmark Dataset',
+    desc: 'How GigAnalytics collects, anonymizes, and surfaces the freelancer benchmark data that powers rate comparisons.',
+    badge: 'Advanced',
+  },
+  {
+    href: '/docs/roi-whitepaper',
+    icon: '📋',
+    title: 'ROI Methodology Whitepaper',
+    desc: 'Complete mathematical framework: true hourly rate, acquisition ROI, comparison index, pricing projections, and statistical significance.',
+    badge: 'Whitepaper',
+  },
+  {
+    href: '/docs/privacy-benchmarking',
+    icon: '🔒',
+    title: 'Privacy & Benchmarking Explainer',
+    desc: 'How GigAnalytics protects your data — k-anonymity (k=25), differential privacy (ε=0.5), data flows, and user controls.',
+    badge: 'Privacy',
+  },
+  {
+    href: '/docs/integration-roadmap',
+    icon: '🔌',
+    title: 'Integration Roadmap',
+    desc: 'Live integrations, Stripe Connect OAuth, Google Calendar OAuth, and the full upcoming integration pipeline.',
+    badge: 'Roadmap',
+  },
 ]
 
 export default function DocsIndexPage() {
