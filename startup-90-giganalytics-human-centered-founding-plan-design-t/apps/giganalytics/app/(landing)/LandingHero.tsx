@@ -82,7 +82,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
             onClick={() => trackCtaClick(variant.name, 'hero_secondary')}
             className="px-8 py-4 rounded-xl text-base font-semibold border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
           >
-            {variant.cta_secondary}
+            Log in
           </Link>
           <Link
             href="/demo"
@@ -137,7 +137,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
       {/* Footer */}
       <footer className="border-t border-gray-100 py-6 px-6 text-center text-xs text-gray-400">
         <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
-          <span>© 2024 GigAnalytics</span>
+          <span>© {new Date().getFullYear()} GigAnalytics</span>
           <Link href="/pricing" className="hover:text-gray-600">Pricing</Link>
           <Link href="/demo" className="hover:text-gray-600">Demo</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>

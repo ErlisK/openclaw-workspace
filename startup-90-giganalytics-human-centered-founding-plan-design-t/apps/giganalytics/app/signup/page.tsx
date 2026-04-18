@@ -32,17 +32,37 @@ export default function SignupPage() {
     setLoading(true)
     setError('')
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
     })
     if (error) {
-      setError(error.message)
+      if (error.status === 429) {
+        setError('Too many attempts. Please wait a few minutes and try again.')
+      } else if (
+        error.message?.toLowerCase().includes('already registered') ||
+        error.message?.toLowerCase().includes('already in use') ||
+        error.message?.toLowerCase().includes('user already exists')
+      ) {
+        setError('That email is already in use. Try logging in instead.')
+      } else if (
+        error.message?.toLowerCase().includes('password') ||
+        error.message?.toLowerCase().includes('weak')
+      ) {
+        setError('Password is too weak. Use at least 8 characters with letters and numbers.')
+      } else {
+        setError('Could not create your account. Please try again.')
+      }
       setLoading(false)
-    } else {
-      setSuccess(true)
+      return
     }
+    if (data?.user && data.user?.identities?.length === 0) {
+      setError('That email is already in use. Try logging in instead.')
+      setLoading(false)
+      return
+    }
+    setSuccess(true)
   }
 
   if (success) {

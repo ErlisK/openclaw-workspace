@@ -1,0 +1,21 @@
+<svg width='1200' height='630' xmlns='http://www.w3.org/2000/svg'>
+  <defs>
+    <linearGradient id='bg' x1='0%' y1='0%' x2='100%' y2='100%'>
+      <stop offset='0%' style='stop-color:#1e40af'/>
+      <stop offset='100%' style='stop-color:#1d4ed8'/>
+    </linearGradient>
+  </defs>
+  <rect width='1200' height='630' fill='url(#bg)'/>
+  <rect x='80' y='80' width='60' height='60' rx='12' fill='white' fill-opacity='0.15'/>
+  <text x='100' y='122' font-family='Arial' font-size='40' fill='white' font-weight='bold'>G</text>
+  <text x='80' y='240' font-family='Arial' font-size='72' fill='white' font-weight='bold'>GigAnalytics</text>
+  <text x='80' y='310' font-family='Arial' font-size='32' fill='#93c5fd'>ROI Dashboard for Multi-Income Freelancers</text>
+  <text x='80' y='370' font-family='Arial' font-size='24' fill='#bfdbfe'>True hourly rates · Acquisition ROI · Pricing experiments</text>
+  <rect x='0' y='440' width='1200' height='190' fill='black' fill-opacity='0.25'/>
+  <text x='80' y='510' font-family='Arial' font-size='48' fill='white' font-weight='bold'>$87/hr</text>
+  <text x='80' y='550' font-family='Arial' font-size='20' fill='#bfdbfe'>avg true hourly rate</text>
+  <text x='420' y='510' font-family='Arial' font-size='48' fill='white' font-weight='bold'>3.2×</text>
+  <text x='420' y='550' font-family='Arial' font-size='20' fill='#bfdbfe'>ROAS on top channel</text>
+  <text x='740' y='510' font-family='Arial' font-size='48' fill='white' font-weight='bold'>11 min</text>
+  <text x='740' y='550' font-family='Arial' font-size='20' fill='#bfdbfe'>to full ROI dashboard</text>
+</svg>
