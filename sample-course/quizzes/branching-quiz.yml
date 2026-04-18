@@ -1,0 +1,25 @@
+title: "Branching & Merging Quiz"
+pass_threshold: 75
+questions:
+  - question: "Which command creates AND switches to a new branch?"
+    type: multiple_choice
+    options:
+      - "git branch new-branch"
+      - "git checkout -b new-branch"
+      - "git switch -c new-branch"
+      - "Both B and C"
+    correct_index: 3
+    explanation: "Both 'git checkout -b' and 'git switch -c' create and switch to a new branch."
+  - question: "A fast-forward merge creates a merge commit."
+    type: true_false
+    correct_bool: false
+    explanation: "Fast-forward merge simply moves the pointer forward — no merge commit is created."
+  - question: "When should you NOT rebase?"
+    type: multiple_choice
+    options:
+      - "On private local branches"
+      - "On shared branches others have checked out"
+      - "Before submitting a PR"
+      - "When you want a linear history"
+    correct_index: 1
+    explanation: "Never rebase shared branches — it rewrites history and causes problems for collaborators."

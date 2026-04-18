@@ -1,0 +1,25 @@
+title: "Git Basics Quiz"
+pass_threshold: 70
+questions:
+  - question: "What does 'git status' show?"
+    type: multiple_choice
+    options:
+      - "The current branch and uncommitted changes"
+      - "The last 10 commits"
+      - "Remote branches"
+      - "File contents"
+    correct_index: 0
+    explanation: "git status shows branch, staged changes, and untracked files."
+  - question: "Git uses SHA-1 hashes for data integrity."
+    type: true_false
+    correct_bool: true
+    explanation: "Every object in Git is checksummed with SHA-1."
+  - question: "Which command stages ALL changes?"
+    type: multiple_choice
+    options:
+      - "git commit -m 'all'"
+      - "git add ."
+      - "git push origin main"
+      - "git stage all"
+    correct_index: 1
+    explanation: "'git add .' stages all changes in the current directory."

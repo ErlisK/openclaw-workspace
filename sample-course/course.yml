@@ -1,0 +1,11 @@
+title: "Git for Engineers: A Practical Course"
+slug: git-for-engineers
+description: "Master Git workflows used at top engineering teams — branching strategies, rebasing, bisect, and more."
+version: "1.0.0"
+price_cents: 0
+currency: usd
+affiliate_pct: 30
+tags:
+  - git
+  - engineering
+  - version-control
