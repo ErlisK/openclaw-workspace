@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   const simulatedSessionId = `cs_simulated_${Date.now()}_${user.id.slice(0, 8)}`;
   const now = new Date().toISOString();
 
-  const { data: newPurchase } = await serviceSupa
+  const { data: newPurchase, error: purchaseError } = await serviceSupa
     .from('purchases')
     .insert({
       user_id: user.id,
@@ -98,6 +98,9 @@ export async function POST(req: NextRequest) {
     .select('id')
     .single();
 
+  if (purchaseError) {
+    console.error('[enroll/simulate] purchase insert error:', purchaseError.message);
+  }
   const purchaseId = newPurchase?.id ?? null;
 
   // Create enrollment with entitlement granted
@@ -118,7 +121,7 @@ export async function POST(req: NextRequest) {
       affiliate_id: referralId,
       course_id: courseId,
       purchase_id: purchaseId,
-      referred_user_id: user.id,
+      converted: true,
       converted_at: now,
     }).then(() => null, () => null);
   }

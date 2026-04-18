@@ -178,7 +178,7 @@ export async function GET(req: NextRequest) {
         affiliate_id: affiliateId,
         course_id: courseId,
         purchase_id: purchaseId,
-        referred_user_id: user.id,
+        converted: true,
         converted_at: new Date().toISOString(),
       })
       .select()
