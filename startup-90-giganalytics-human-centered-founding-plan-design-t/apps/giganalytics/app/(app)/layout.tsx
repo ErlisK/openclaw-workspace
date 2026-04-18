@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { headers } from 'next/headers'
 import Link from 'next/link'
 import FeedbackButton from './FeedbackButton'
 
@@ -18,9 +19,30 @@ const navLinks = [
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  const headersList = await headers()
+  const pathname = headersList.get('x-invoke-path') || headersList.get('x-pathname') || ''
 
-  if (!user) {
+  // Allow public access to pricing page
+  const isPublicRoute = pathname === '/pricing' || pathname.startsWith('/pricing')
+
+  if (!user && !isPublicRoute) {
     redirect('/login')
+  }
+
+  // Unauthenticated users on public routes: render without sidebar
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+          <Link href="/" className="text-blue-600 font-bold text-lg">GigAnalytics</Link>
+          <div className="flex gap-3">
+            <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Sign in</Link>
+            <Link href="/signup" className="text-sm bg-blue-600 text-white px-4 py-1.5 rounded-lg hover:bg-blue-700">Get started free</Link>
+          </div>
+        </header>
+        <main>{children}</main>
+      </div>
+    )
   }
 
   return (
