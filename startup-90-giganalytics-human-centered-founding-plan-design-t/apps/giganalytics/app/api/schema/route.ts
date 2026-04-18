@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server'
-import { createServiceClient } from '@/lib/supabase/server'
+import { createServiceClient, createClient } from '@/lib/supabase/server'
 
 export async function GET() {
-  const supabase = await createServiceClient()
+  // Require authentication; also return 404 in production to avoid schema leakage
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 })
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const serviceClient = await createServiceClient()
+  void serviceClient // used for potential future introspection
 
   const { data: tables, error } = await supabase
     .from('pg_tables' as never)

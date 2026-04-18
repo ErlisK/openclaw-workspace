@@ -6,12 +6,17 @@ import { createClient } from '@/lib/supabase/client'
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault()
+    if (!acceptedTerms) {
+      setError('You must accept the Terms of Service and Privacy Policy to continue.')
+      return
+    }
     setLoading(true)
     setError('')
     const supabase = createClient()
@@ -76,13 +81,34 @@ export default function SignupPage() {
             />
           </div>
 
+          <div className="flex items-start gap-2">
+            <input
+              id="accept-terms"
+              type="checkbox"
+              required
+              checked={acceptedTerms}
+              onChange={e => setAcceptedTerms(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <label htmlFor="accept-terms" className="text-sm text-gray-600">
+              I agree to the{' '}
+              <a href="/terms" target="_blank" className="text-blue-600 hover:underline">
+                Terms of Service
+              </a>{' '}
+              and{' '}
+              <a href="/privacy" target="_blank" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </a>
+            </label>
+          </div>
+
           {error && (
             <div className="bg-red-50 text-red-700 text-sm rounded-lg px-3 py-2">{error}</div>
           )}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !acceptedTerms}
             className="w-full bg-blue-600 text-white rounded-lg px-4 py-2.5 font-medium text-sm hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? 'Creating account…' : 'Create free account'}

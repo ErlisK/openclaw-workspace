@@ -7,12 +7,26 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { searchParams } = new URL(request.url)
-  const days = parseInt(searchParams.get('days') ?? '90')
-  const fromDate = new Date()
-  fromDate.setDate(fromDate.getDate() - days)
-  const from = fromDate.toISOString().split('T')[0]
-  const to = new Date().toISOString().split('T')[0]
+  const url = new URL(request.url)
+  const fromParam = url.searchParams.get('from') || url.searchParams.get('start') || url.searchParams.get('startDate')
+  const toParam = url.searchParams.get('to') || url.searchParams.get('end') || url.searchParams.get('endDate')
+
+  // Validate ISO dates; fallback to last 90 days only if absent
+  const isValidDate = (d: string | null): d is string => !!d && !isNaN(new Date(d).getTime())
+
+  let from: string
+  let to: string
+  if (isValidDate(fromParam) && isValidDate(toParam)) {
+    from = fromParam
+    to = toParam
+  } else {
+    const days = parseInt(url.searchParams.get('days') ?? '90')
+    const fromDate = new Date()
+    fromDate.setDate(fromDate.getDate() - days)
+    from = fromDate.toISOString().split('T')[0]
+    to = new Date().toISOString().split('T')[0]
+  }
+  const fromDate = new Date(from)
 
   const [
     { data: streams },
@@ -44,5 +58,5 @@ export async function GET(request: NextRequest) {
     { from, to }
   )
 
-  return NextResponse.json(snapshot)
+  return NextResponse.json({ ...snapshot, dateRange: { from, to } })
 }

@@ -18,6 +18,10 @@ function isTestMode() {
   return key.startsWith("sk_test_");
 }
 
+function isDevSimEnabled() {
+  return process.env.ENABLE_DEV_SIM === 'true' && isTestMode();
+}
+
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -25,9 +29,9 @@ function getServiceClient() {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isTestMode()) {
+  if (!isDevSimEnabled()) {
     return NextResponse.json(
-      { error: "dev-sim only available in test mode" },
+      { error: "dev-sim only available when ENABLE_DEV_SIM=true in test mode" },
       { status: 403 }
     );
   }
@@ -74,8 +78,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  if (!isTestMode()) {
-    return NextResponse.json({ error: "dev-sim only available in test mode" }, { status: 403 });
+  if (!isDevSimEnabled()) {
+    return NextResponse.json({ error: "dev-sim only available when ENABLE_DEV_SIM=true in test mode" }, { status: 403 });
   }
 
   const supabase = await createClient();

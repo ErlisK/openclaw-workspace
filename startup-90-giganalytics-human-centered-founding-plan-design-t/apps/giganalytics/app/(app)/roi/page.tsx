@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import FinancialDisclaimer from '@/components/FinancialDisclaimer'
 
 export default async function ROIPage() {
   const supabase = await createClient()
@@ -143,6 +144,8 @@ export default async function ROIPage() {
           <button type="submit" className="bg-blue-600 text-white rounded px-4 py-2 text-sm font-medium">Save</button>
         </form>
       </div>
+
+      <FinancialDisclaimer />
     </div>
   )
 }

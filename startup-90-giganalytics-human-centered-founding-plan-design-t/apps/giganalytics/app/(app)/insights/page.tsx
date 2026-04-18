@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import InsightsPanel from './InsightsPanel'
 import Link from 'next/link'
+import FinancialDisclaimer from '@/components/FinancialDisclaimer'
 
 export default async function InsightsPage() {
   const supabase = await createClient()
@@ -74,6 +75,8 @@ export default async function InsightsPage() {
         <div>⚡ <strong>Fallback mode</strong> — when data is sparse or AI is unavailable, rule-based deterministic suggestions are shown instead</div>
         <div>🔒 <strong>Privacy</strong> — only aggregate metrics (totals, averages, counts) are sent to the AI — no transaction IDs, names, or amounts beyond your own aggregates</div>
       </div>
+
+      <FinancialDisclaimer />
     </div>
   )
 }

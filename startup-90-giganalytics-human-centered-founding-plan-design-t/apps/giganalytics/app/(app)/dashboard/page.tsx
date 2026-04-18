@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { computeROI, fmt$, fmtRate } from '@/lib/roi'
 import Link from 'next/link'
 import OnboardingChecklist from './OnboardingChecklist'
+import FinancialDisclaimer from '@/components/FinancialDisclaimer'
 
 function StatCard({ label, value, sub, color = 'blue' }: {
   label: string; value: string; sub?: string; color?: string
@@ -297,6 +298,8 @@ export default async function DashboardPage() {
           <div className="text-xs text-gray-400">Target rate calculator</div>
         </Link>
       </div>
+
+      <FinancialDisclaimer compact />
     </div>
   )
 }

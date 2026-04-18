@@ -23,38 +23,102 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { action, streamId, startedAt, endedAt, durationMinutes, entryType, note } = body
+  const { action, streamId, startedAt, endedAt, durationMinutes, entryType, note, entryId } = body
 
-  if (action !== 'log') {
-    return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
+  const json = (data: unknown, status = 200) =>
+    NextResponse.json(data, { status })
+
+  switch (action) {
+    case 'start': {
+      const sa = startedAt ?? new Date().toISOString()
+      const { error, data } = await supabase
+        .from('time_entries')
+        .insert({
+          user_id: user.id,
+          stream_id: streamId ?? null,
+          started_at: sa,
+          entry_type: entryType ?? 'billable',
+          status: 'in_progress',
+        })
+        .select()
+        .single()
+      if (error) return json({ error: 'could_not_start' }, 400)
+      captureServerEvent(user.id, 'timer_started', { stream_id: streamId ?? null }).catch(() => {})
+      return json({ ok: true, entry: data })
+    }
+
+    case 'stop': {
+      const ea = endedAt ?? new Date().toISOString()
+      let entryQuery
+      if (entryId) {
+        entryQuery = supabase
+          .from('time_entries')
+          .select('*')
+          .eq('id', entryId)
+          .eq('user_id', user.id)
+          .eq('status', 'in_progress')
+          .single()
+      } else {
+        entryQuery = supabase
+          .from('time_entries')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'in_progress')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      }
+      const { data: entry } = await entryQuery
+      if (!entry) return json({ error: 'no_active_timer' }, 400)
+      const duration = Math.max(
+        1,
+        Math.ceil(
+          (new Date(ea).getTime() - new Date(entry.started_at).getTime()) / 60000
+        )
+      )
+      const { error: uErr, data: updated } = await supabase
+        .from('time_entries')
+        .update({ ended_at: ea, duration_minutes: duration, status: 'completed' })
+        .eq('id', entry.id)
+        .select()
+        .single()
+      if (uErr) return json({ error: 'could_not_stop' }, 400)
+      captureServerEvent(user.id, 'timer_stopped', { duration_minutes: duration }).catch(() => {})
+      return json({ ok: true, entry: updated })
+    }
+
+    case 'log': {
+      const duration = Number(durationMinutes)
+      if (!duration || duration <= 0)
+        return json({ error: 'durationMinutes_required' }, 400)
+      const sa = startedAt ?? new Date(Date.now() - duration * 60000).toISOString()
+      const ea = endedAt ?? new Date().toISOString()
+      const { data, error } = await supabase
+        .from('time_entries')
+        .insert({
+          user_id: user.id,
+          stream_id: streamId ?? null,
+          started_at: sa,
+          ended_at: ea,
+          duration_minutes: duration,
+          entry_type: entryType ?? 'billable',
+          note: note ?? null,
+          status: 'completed',
+        })
+        .select('id')
+        .single()
+      if (error) return json({ error: 'could_not_log' }, 400)
+      captureServerEvent(user.id, 'timer_session', {
+        duration_minutes: duration,
+        entry_type: entryType ?? 'billable',
+        stream_id: streamId ?? null,
+      }).catch(() => {})
+      return json({ ok: true, entry: data })
+    }
+
+    default:
+      return json({ error: 'invalid_action' }, 400)
   }
-
-  if (!durationMinutes || durationMinutes <= 0) {
-    return NextResponse.json({ error: 'durationMinutes must be a positive number' }, { status: 400 })
-  }
-
-  const { data, error } = await supabase
-    .from('time_entries')
-    .insert({
-      user_id: user.id,
-      stream_id: streamId || null,
-      started_at: startedAt,
-      ended_at: endedAt,
-      duration_minutes: durationMinutes,
-      entry_type: entryType ?? 'billable',
-      note: note ?? null,
-    })
-    .select('id')
-    .single()
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  // Fire PostHog event
-  captureServerEvent(user.id, 'timer_session', {
-    duration_minutes: durationMinutes,
-    entry_type: entryType ?? 'billable',
-    stream_id: streamId ?? null,
-  }).catch(() => {})
-  return NextResponse.json({ id: data.id })
 }
 
 export async function PATCH(request: NextRequest) {

@@ -59,8 +59,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error";
-    console.error("[CHECKOUT]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const isStripeError = typeof err === 'object' && err !== null && 'type' in err
+    const code = isStripeError ? (err as Record<string, unknown>).code : undefined
+    const message = err instanceof Error ? err.message : 'Internal server error'
+    console.error('checkout_error', { code, message })
+    // Return user-safe message, not raw Stripe error
+    return NextResponse.json({ error: 'stripe_connection_error', detail: isStripeError ? 'Payment provider error' : message }, { status: 502 })
   }
 }
