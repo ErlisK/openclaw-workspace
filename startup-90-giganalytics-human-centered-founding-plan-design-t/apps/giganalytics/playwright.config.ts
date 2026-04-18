@@ -1,4 +1,8 @@
 import { defineConfig, devices } from '@playwright/test'
+import * as dotenv from 'dotenv'
+
+// Load .env.local for local runs (Vercel injects these at CI/deploy time)
+dotenv.config({ path: '.env.local' })
 
 export default defineConfig({
   testDir: './e2e',
