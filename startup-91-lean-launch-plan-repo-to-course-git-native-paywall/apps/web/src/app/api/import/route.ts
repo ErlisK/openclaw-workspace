@@ -3,8 +3,9 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
-// Inline importer logic to avoid workspace package dependency at build time
-// Full importer lives in packages/importer — used here as a direct port
+// ────────────────────────────────────────────────────────────────────────────
+// GitHub helpers
+// ────────────────────────────────────────────────────────────────────────────
 
 const GITHUB_API = 'https://api.github.com';
 
@@ -19,162 +20,566 @@ function ghHeaders(token?: string): HeadersInit {
 
 async function ghGet(url: string, token?: string) {
   const res = await fetch(url, { headers: ghHeaders(token), cache: 'no-store' });
-  if (!res.ok) throw new Error(`GitHub API ${res.status} — ${url}`);
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '');
+    throw new Error(`GitHub ${res.status} — ${url}${errText ? ': ' + errText.slice(0, 120) : ''}`);
+  }
   return res.json();
 }
 
+async function fetchFile(owner: string, repo: string, path: string, token?: string): Promise<string> {
+  const data = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`, token) as { content: string; encoding: string };
+  if (data.encoding !== 'base64') throw new Error(`Unexpected encoding: ${data.encoding}`);
+  return Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf-8');
+}
+
 function parseRepoUrl(repoUrl: string): { owner: string; repo: string } {
-  const cleaned = repoUrl.replace(/^https?:\/\//, '').replace(/^github\.com\//, '').replace(/\.git$/, '').trim();
+  const cleaned = repoUrl
+    .replace(/^https?:\/\/(www\.)?github\.com\//, '')
+    .replace(/\.git$/, '')
+    .trim();
   const parts = cleaned.split('/').filter(Boolean);
   if (parts.length < 2) throw new Error(`Invalid GitHub repo URL: "${repoUrl}"`);
   return { owner: parts[0], repo: parts[1] };
 }
 
+// ────────────────────────────────────────────────────────────────────────────
+// Frontmatter parser (gray-matter compatible, no dependency)
+// Handles: strings, numbers, booleans, arrays, and multi-line values
+// ────────────────────────────────────────────────────────────────────────────
+
+interface FrontmatterResult {
+  data: Record<string, unknown>;
+  content: string;
+}
+
+function parseFrontmatter(raw: string): FrontmatterResult {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
+  if (!match) return { data: {}, content: raw };
+
+  const yamlBlock = match[1];
+  const body = match[2];
+  const data: Record<string, unknown> = {};
+
+  // Simple line-by-line YAML parser (covers TeachRepo frontmatter spec)
+  let currentKey: string | null = null;
+  let arrayMode = false;
+  const arrBuffer: string[] = [];
+
+  const flushArray = () => {
+    if (currentKey && arrayMode) {
+      data[currentKey] = arrBuffer.slice();
+      arrBuffer.length = 0;
+      arrayMode = false;
+    }
+  };
+
+  for (const line of yamlBlock.split('\n')) {
+    // Array item
+    if (line.match(/^\s*-\s+/)) {
+      const val = line.replace(/^\s*-\s+/, '').trim().replace(/^["']|["']$/g, '');
+      if (currentKey) { arrayMode = true; arrBuffer.push(val); }
+      continue;
+    }
+
+    // Key: value
+    const kv = line.match(/^([a-zA-Z_][a-zA-Z0-9_-]*):\s*(.*)$/);
+    if (kv) {
+      flushArray();
+      currentKey = kv[1];
+      const rawVal = kv[2].trim().replace(/^["']|["']$/g, '');
+      if (rawVal === '') {
+        // value on subsequent lines (array or block)
+        arrayMode = false;
+      } else if (rawVal === 'true') {
+        data[currentKey] = true;
+      } else if (rawVal === 'false') {
+        data[currentKey] = false;
+      } else if (!isNaN(Number(rawVal)) && rawVal !== '') {
+        data[currentKey] = Number(rawVal);
+      } else {
+        data[currentKey] = rawVal;
+      }
+    }
+  }
+  flushArray();
+
+  return { data, content: body.trim() };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// YAML quiz parser (quizzes/*.yml)
+// ────────────────────────────────────────────────────────────────────────────
+
+interface ParsedQuestion {
+  question: string;
+  question_type: 'multiple_choice' | 'true_false' | 'short_answer';
+  options: string[] | null;
+  correct_index: number | null;
+  correct_bool: boolean | null;
+  correct_text: string | null;
+  explanation: string | null;
+  order_index: number;
+}
+
+interface ParsedQuiz {
+  title: string;
+  pass_threshold: number;
+  questions: ParsedQuestion[];
+}
+
+function parseQuizYaml(raw: string, quizId: string): ParsedQuiz {
+  // Simple YAML parser for our quiz format
+  const lines = raw.split('\n');
+  let title = quizId;
+  let pass_threshold = 70;
+  const questions: ParsedQuestion[] = [];
+
+  let inQuestions = false;
+  let current: Partial<ParsedQuestion> & { _options?: string[]; _orderIdx?: number } | null = null;
+  let inOptions = false;
+  let optIdx = 0;
+
+  const pushCurrent = () => {
+    if (current?.question) {
+      questions.push({
+        question: current.question,
+        question_type: (current.question_type as ParsedQuestion['question_type']) ?? 'multiple_choice',
+        options: current._options ?? null,
+        correct_index: current.correct_index ?? null,
+        correct_bool: current.correct_bool ?? null,
+        correct_text: current.correct_text ?? null,
+        explanation: current.explanation ?? null,
+        order_index: current._orderIdx ?? questions.length + 1,
+      });
+    }
+    current = null;
+    inOptions = false;
+    optIdx = 0;
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trimEnd();
+
+    if (trimmed.startsWith('title:')) {
+      title = trimmed.replace(/^title:\s*/, '').replace(/^["']|["']$/g, '').trim();
+    } else if (trimmed.startsWith('pass_threshold:')) {
+      pass_threshold = parseInt(trimmed.split(':')[1]) || 70;
+    } else if (trimmed.startsWith('questions:')) {
+      inQuestions = true;
+    } else if (inQuestions) {
+      // New question
+      if (trimmed.match(/^\s{2}-\s+question:/)) {
+        pushCurrent();
+        current = {
+          question: trimmed.replace(/^\s{2}-\s+question:\s*/, '').replace(/^["']|["']$/g, '').trim(),
+          _orderIdx: questions.length + 1,
+        };
+        inOptions = false;
+      } else if (current) {
+        if (trimmed.match(/^\s{4}question:/)) {
+          current.question = trimmed.replace(/^\s{4}question:\s*/, '').replace(/^["']|["']$/g, '').trim();
+        } else if (trimmed.match(/^\s{4}type:/)) {
+          current.question_type = trimmed.replace(/^\s{4}type:\s*/, '').trim() as ParsedQuestion['question_type'];
+        } else if (trimmed.match(/^\s{4}options:/)) {
+          current._options = [];
+          inOptions = true;
+          optIdx = 0;
+        } else if (inOptions && trimmed.match(/^\s{6}-\s+/)) {
+          current._options = current._options ?? [];
+          current._options.push(trimmed.replace(/^\s{6}-\s+/, '').replace(/^["']|["']$/g, '').trim());
+          optIdx++;
+        } else if (trimmed.match(/^\s{4}correct_index:/)) {
+          current.correct_index = parseInt(trimmed.split(':')[1]) ?? 0;
+          inOptions = false;
+        } else if (trimmed.match(/^\s{4}correct_bool:/)) {
+          current.correct_bool = trimmed.includes('true');
+          inOptions = false;
+        } else if (trimmed.match(/^\s{4}correct_text:/)) {
+          current.correct_text = trimmed.replace(/^\s{4}correct_text:\s*/, '').replace(/^["']|["']$/g, '').trim();
+          inOptions = false;
+        } else if (trimmed.match(/^\s{4}explanation:/)) {
+          current.explanation = trimmed.replace(/^\s{4}explanation:\s*/, '').replace(/^["']|["']$/g, '').trim();
+        }
+      }
+    }
+  }
+  pushCurrent();
+
+  return { title, pass_threshold, questions };
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Slug helpers
+// ────────────────────────────────────────────────────────────────────────────
+
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+}
+
+function isSemVer(s: string): boolean {
+  return /^\d+\.\d+(\.\d+)?/.test(s);
+}
+
+// ────────────────────────────────────────────────────────────────────────────
+// Request schema
+// ────────────────────────────────────────────────────────────────────────────
+
 const ImportRequestSchema = z.object({
-  repo_url: z.string().url(),
+  repo_url: z.string().url('Must be a valid URL'),
   branch: z.string().optional(),
   tag: z.string().optional(),
-  token: z.string().optional(),
+  path: z.string().optional(), // subdirectory inside repo, e.g. "sample-course"
+  token: z.string().optional(), // optional PAT for private repos
 });
 
+// ────────────────────────────────────────────────────────────────────────────
+// POST /api/import
+// ────────────────────────────────────────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
+  // 1. Auth
   const supabase = createServerClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
-  if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
+  // 2. Parse body
   let body: unknown;
-  try { body = await req.json(); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  try { body = await req.json(); } catch {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
 
   const parsed = ImportRequestSchema.safeParse(body);
-  if (!parsed.success) return NextResponse.json({ error: 'Validation error', details: parsed.error.errors }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Validation error', details: parsed.error.errors }, { status: 400 });
+  }
 
-  const { repo_url, branch, tag, token } = parsed.data;
+  const { repo_url, branch, tag, path: coursePath, token } = parsed.data;
   const serviceSupa = createServiceClient();
 
+  // 3. Verify creator profile exists
   const { data: creator } = await serviceSupa.from('creators').select('id').eq('id', user.id).single();
   if (!creator) return NextResponse.json({ error: 'Creator profile not found' }, { status: 403 });
 
-  let owner: string, repo: string;
-  try { ({ owner, repo } = parseRepoUrl(repo_url)); } catch (e) { return NextResponse.json({ error: (e as Error).message }, { status: 400 }); }
+  // 4. Parse repo URL
+  let owner: string, repoName: string;
+  try {
+    ({ owner, repo: repoName } = parseRepoUrl(repo_url));
+  } catch (e) {
+    return NextResponse.json({ error: (e as Error).message }, { status: 400 });
+  }
+
+  // Record import attempt
+  const importRecord = await serviceSupa.from('repo_imports').insert({
+    creator_id: user.id,
+    repo_url,
+    branch: branch ?? tag ?? 'main',
+    status: 'running',
+    error_log: null,
+  }).select('id').single();
+  const importId = importRecord.data?.id as string | undefined;
+
+  const fail = async (msg: string, status = 422) => {
+    if (importId) {
+      await serviceSupa.from('repo_imports').update({ status: 'failed', error_log: msg }).eq('id', importId)
+        .then(() => null, () => null);
+    }
+    return NextResponse.json({ error: msg }, { status });
+  };
 
   try {
-    // Resolve ref
-    const repoData = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}`, token);
+    // 5. Resolve ref → commit SHA
+    const repoData = await ghGet(`${GITHUB_API}/repos/${owner}/${repoName}`, token);
     const defaultBranch: string = repoData.default_branch ?? 'main';
     const refName = tag ?? branch ?? defaultBranch;
     const isTag = !!tag;
 
     let headSha: string;
     if (isTag) {
-      const refData = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/git/ref/tags/${encodeURIComponent(refName)}`, token);
+      const refData = await ghGet(`${GITHUB_API}/repos/${owner}/${repoName}/git/ref/tags/${encodeURIComponent(refName)}`, token);
       if (refData.object.type === 'tag') {
-        const tagData = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/git/tags/${refData.object.sha}`, token);
+        const tagData = await ghGet(`${GITHUB_API}/repos/${owner}/${repoName}/git/tags/${refData.object.sha}`, token);
         headSha = tagData.object.sha;
       } else {
         headSha = refData.object.sha;
       }
     } else {
-      const branchData = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/branches/${encodeURIComponent(refName)}`, token);
+      const branchData = await ghGet(`${GITHUB_API}/repos/${owner}/${repoName}/branches/${encodeURIComponent(refName)}`, token);
       headSha = branchData.commit.sha;
     }
     const shortSha = headSha.slice(0, 7);
 
-    // Fetch tree
-    const treeData = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/git/trees/${headSha}?recursive=1`, token);
-    const paths: string[] = treeData.tree.filter((e: { type: string }) => e.type === 'blob').map((e: { path: string }) => e.path);
+    // 6. Fetch repo tree (scoped to coursePath if provided)
+    const treeData = await ghGet(`${GITHUB_API}/repos/${owner}/${repoName}/git/trees/${headSha}?recursive=1`, token);
+    const allPaths: string[] = treeData.tree
+      .filter((e: { type: string }) => e.type === 'blob')
+      .map((e: { path: string }) => e.path);
 
-    // Fetch course config
-    const configPath = ['course.yml', 'course.config.yaml'].find((p) => paths.includes(p));
-    if (!configPath) throw new Error('No course.yml or course.config.yaml found in repo');
+    // Scope paths to subdirectory if specified
+    const prefix = coursePath ? coursePath.replace(/\/$/, '') + '/' : '';
+    const paths = prefix
+      ? allPaths.filter((p) => p.startsWith(prefix)).map((p) => p.slice(prefix.length))
+      : allPaths;
 
-    const configContent = await fetchFile(owner, repo, configPath, token);
-    const yaml = await import('js-yaml');
+    // 7. Find + parse course.yml
+    const configPath = ['course.yml', 'course.yaml', 'course.config.yml', 'course.config.yaml'].find((p) => paths.includes(p));
+    if (!configPath) {
+      return fail(`No course.yml found in ${prefix ? `"${coursePath}"` : 'repo root'}. Expected one of: course.yml, course.yaml`);
+    }
+
+    const configContent = await fetchFile(owner, repoName, `${prefix}${configPath}`, token);
+    const { default: yaml } = await import('js-yaml');
     const rawConfig = yaml.load(configContent) as Record<string, unknown>;
 
-    const title = (rawConfig['title'] as string) ?? repo;
-    const slug = ((rawConfig['slug'] ?? repo) as string).toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const title = (rawConfig['title'] as string) ?? repoName;
+    const slug = slugify((rawConfig['slug'] as string) ?? title ?? repoName);
     const description = (rawConfig['description'] as string) ?? '';
     const priceCents = (rawConfig['price_cents'] as number) ?? 0;
-    const currency = (rawConfig['currency'] as string) ?? 'usd';
+    const currency = ((rawConfig['currency'] as string) ?? 'usd').toLowerCase();
     const affiliatePct = (rawConfig['affiliate_pct'] as number) ?? 30;
-    const version = (rawConfig['version'] as string) ?? '1.0.0';
-    const tags = (rawConfig['tags'] as string[]) ?? [];
-    const versionLabel = tag ? tag : (isSemVer(version) ? version : `sha:${shortSha}`);
+    const configVersion = (rawConfig['version'] as string) ?? '1.0.0';
+    const tags = Array.isArray(rawConfig['tags']) ? (rawConfig['tags'] as string[]) : [];
+    const versionLabel = isTag ? refName : (isSemVer(configVersion) ? configVersion : `sha:${shortSha}`);
 
-    // Upsert course
+    // 8. Upsert course (status=draft, version=SHA)
     const { data: course, error: courseErr } = await serviceSupa
       .from('courses')
-      .upsert({ creator_id: user.id, slug, title, description, price_cents: priceCents, currency, pricing_model: priceCents === 0 ? 'free' : 'one_time', affiliate_pct: affiliatePct, repo_url, version: versionLabel, tags, published: false }, { onConflict: 'creator_id,slug' })
-      .select('id').single();
-    if (courseErr || !course) throw new Error(courseErr?.message ?? 'Failed to upsert course');
+      .upsert({
+        creator_id: user.id,
+        slug,
+        title,
+        description,
+        price_cents: priceCents,
+        currency,
+        pricing_model: priceCents === 0 ? 'free' : 'one_time',
+        affiliate_pct: affiliatePct,
+        repo_url,
+        version: versionLabel,
+        tags,
+        published: false, // always draft on import
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'creator_id,slug' })
+      .select('id')
+      .single();
 
+    if (courseErr || !course) return fail(courseErr?.message ?? 'Failed to upsert course');
     const courseId: string = course.id;
 
-    // Check existing version
-    const { data: existingVer } = await serviceSupa.from('course_versions').select('id, is_current').eq('course_id', courseId).eq('commit_sha', headSha).maybeSingle();
-    if (!existingVer?.is_current) {
-      if (!existingVer) {
-        await serviceSupa.from('course_versions').insert({ course_id: courseId, commit_sha: headSha, branch: isTag ? defaultBranch : refName, tag: isTag ? refName : null, version_label: versionLabel, lesson_count: 0, quiz_count: 0, is_current: true, published_at: new Date().toISOString(), imported_by: user.id });
-      } else {
-        await serviceSupa.from('course_versions').update({ is_current: true, published_at: new Date().toISOString() }).eq('id', existingVer.id);
-      }
-      await serviceSupa.from('course_versions').update({ is_current: false }).eq('course_id', courseId).neq('commit_sha', headSha);
+    // 9. Upsert course_version row
+    const { data: existingVer } = await serviceSupa
+      .from('course_versions')
+      .select('id')
+      .eq('course_id', courseId)
+      .eq('commit_sha', headSha)
+      .maybeSingle();
+
+    if (!existingVer) {
+      // Mark all previous versions as not current
+      await serviceSupa.from('course_versions').update({ is_current: false }).eq('course_id', courseId)
+        .then(() => null, () => null);
+      await serviceSupa.from('course_versions').insert({
+        course_id: courseId,
+        commit_sha: headSha,
+        branch: isTag ? defaultBranch : refName,
+        tag: isTag ? refName : null,
+        version_label: versionLabel,
+        lesson_count: 0,
+        quiz_count: 0,
+        is_current: true,
+        published_at: new Date().toISOString(),
+        imported_by: user.id,
+      });
+    } else {
+      await serviceSupa.from('course_versions').update({ is_current: true }).eq('id', existingVer.id)
+        .then(() => null, () => null);
+      await serviceSupa.from('course_versions').update({ is_current: false }).eq('course_id', courseId).neq('id', existingVer.id)
+        .then(() => null, () => null);
     }
 
-    // Fetch + parse lessons
-    const lessonPaths = paths.filter((p) => p.startsWith('lessons/') && p.endsWith('.md')).sort();
-    const lessons = [];
-    const errors = [];
+    // 10. Parse lessons (lessons/*.md)
+    const lessonPaths = paths
+      .filter((p) => (p.startsWith('lessons/') || p.startsWith('lesson/')) && (p.endsWith('.md') || p.endsWith('.mdx')))
+      .sort();
+
+    // Track quiz_ids referenced by lessons so we can import quizzes
+    const quizIdsNeeded = new Set<string>();
+    const lessonRows: Array<{
+      course_id: string;
+      slug: string;
+      title: string;
+      description: string | null;
+      content_md: string;
+      order_index: number;
+      is_preview: boolean;
+      estimated_minutes: number | null;
+      has_quiz: boolean;
+      has_sandbox: boolean;
+      sandbox_url: string | null;
+      updated_at: string;
+    }> = [];
+    const importErrors: Array<{ path: string; message: string }> = [];
+
     for (const lPath of lessonPaths) {
       try {
-        const content = await fetchFile(owner, repo, lPath, token);
-        const { data: fm, content: body } = parseFrontmatter(content);
-        const lessonSlug = (fm.slug as string) ?? lPath.replace(/\.md$/, '').replace(/^.*\//, '').replace(/^\d+-/, '');
-        lessons.push({ slug: lessonSlug, title: (fm.title as string) ?? lessonSlug, order_index: (fm.order as number) ?? lessons.length + 1, is_preview: fm.access === 'free', description: (fm.description as string) ?? null, estimated_minutes: (fm.estimated_minutes as number) ?? null, sandbox_url: (fm.sandbox_url as string) ?? null, quiz_id: (fm.quiz_id as string) ?? null, body_md: body.trim() });
-      } catch (e) { errors.push({ path: lPath, message: (e as Error).message }); }
-    }
+        const content = await fetchFile(owner, repoName, `${prefix}${lPath}`, token);
+        const { data: fm, content: bodyMd } = parseFrontmatter(content);
 
-    if (lessons.length > 0) {
-      await serviceSupa.from('lessons').upsert(lessons.map((l) => ({ ...l, course_id: courseId })), { onConflict: 'course_id,slug' });
-    }
+        // Derive slug from frontmatter > filename
+        const rawSlug = (fm.slug as string)
+          ?? lPath.replace(/\.(md|mdx)$/, '').replace(/^.*\//, '').replace(/^\d+-/, '');
+        const lessonSlug = slugify(rawSlug);
 
-    // Update lesson count
-    await serviceSupa.from('course_versions').update({ lesson_count: lessons.length }).eq('course_id', courseId).eq('commit_sha', headSha);
-    await serviceSupa.from('repo_imports').insert({ creator_id: user.id, course_id: courseId, repo_url, branch: isTag ? defaultBranch : refName, commit_sha: headSha, status: errors.length === 0 ? 'success' : 'partial', lesson_count: lessons.length, quiz_count: 0, error_log: errors.length > 0 ? JSON.stringify(errors) : null });
+        const quizId = fm.quiz_id as string | undefined;
+        if (quizId) quizIdsNeeded.add(quizId);
 
-    return NextResponse.json({ success: true, courseId, courseSlug: slug, versionLabel, commitSha: headSha, shortSha, imported: { lessons: lessons.length }, errors: errors.length > 0 ? errors : undefined });
-  } catch (err) {
-    const message = (err as Error).message;
-    await serviceSupa.from('repo_imports').insert({ creator_id: user.id, repo_url, branch: branch ?? 'main', status: 'failed', error_log: message }).then(() => null, () => null);
-    return NextResponse.json({ error: message }, { status: 422 });
-  }
-}
-
-async function fetchFile(owner: string, repo: string, path: string, token?: string): Promise<string> {
-  const data = await ghGet(`${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`, token) as { content: string; encoding: string };
-  if (data.encoding !== 'base64') throw new Error(`Unexpected encoding: ${data.encoding}`);
-  return Buffer.from(data.content.replace(/\n/g, ''), 'base64').toString('utf-8');
-}
-
-function parseFrontmatter(content: string): { data: Record<string, unknown>; content: string } {
-  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-  if (!match) return { data: {}, content };
-  try {
-    // Simple YAML parse inline to avoid imports
-    const lines = match[1].split('\n');
-    const data: Record<string, unknown> = {};
-    for (const line of lines) {
-      const m = line.match(/^(\w+):\s*(.+)$/);
-      if (m) {
-        const [, k, v] = m;
-        const val = v.trim().replace(/^["']|["']$/g, '');
-        data[k] = isNaN(Number(val)) ? (val === 'true' ? true : val === 'false' ? false : val) : Number(val);
+        lessonRows.push({
+          course_id: courseId,
+          slug: lessonSlug,
+          title: (fm.title as string) ?? lessonSlug,
+          description: (fm.description as string) ?? null,
+          content_md: bodyMd,
+          order_index: typeof fm.order === 'number' ? fm.order : lessonRows.length + 1,
+          is_preview: fm.access === 'free' || fm.is_preview === true,
+          estimated_minutes: typeof fm.estimated_minutes === 'number' ? fm.estimated_minutes : null,
+          has_quiz: !!quizId,
+          has_sandbox: !!(fm.sandbox_url),
+          sandbox_url: (fm.sandbox_url as string) ?? null,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (e) {
+        importErrors.push({ path: lPath, message: (e as Error).message });
       }
     }
-    return { data, content: match[2] };
-  } catch { return { data: {}, content: match[2] }; }
-}
 
-function isSemVer(s: string): boolean {
-  return /^\d+\.\d+(\.\d+)?/.test(s);
+    if (lessonRows.length > 0) {
+      const { error: lessonErr } = await serviceSupa
+        .from('lessons')
+        .upsert(lessonRows, { onConflict: 'course_id,slug' });
+      if (lessonErr) importErrors.push({ path: 'lessons', message: lessonErr.message });
+    }
+
+    // 11. Parse and store quizzes (quizzes/*.yml) referenced by lessons
+    const quizPaths = paths.filter((p) =>
+      (p.startsWith('quizzes/') || p.startsWith('quiz/')) && (p.endsWith('.yml') || p.endsWith('.yaml'))
+    );
+
+    let quizCount = 0;
+    for (const qPath of quizPaths) {
+      // Extract quiz ID from filename: quizzes/intro-quiz.yml → intro-quiz
+      const quizFileId = qPath.replace(/^(quizzes|quiz)\//, '').replace(/\.(yml|yaml)$/, '');
+      if (quizIdsNeeded.size > 0 && !quizIdsNeeded.has(quizFileId)) continue;
+
+      try {
+        const content = await fetchFile(owner, repoName, `${prefix}${qPath}`, token);
+        const parsed = parseQuizYaml(content, quizFileId);
+
+        // Find the lesson(s) that reference this quiz
+        const lesson = await serviceSupa
+          .from('lessons')
+          .select('id')
+          .eq('course_id', courseId)
+          .filter('content_md', 'ilike', `%${quizFileId}%`)
+          .limit(1)
+          .maybeSingle();
+
+        // Upsert quiz — unique on lesson_id (if present) or insert new
+        const quizPayload = {
+          course_id: courseId,
+          lesson_id: lesson?.data?.id ?? null,
+          title: parsed.title,
+          pass_threshold: parsed.pass_threshold,
+          updated_at: new Date().toISOString(),
+        };
+
+        let quiz: { id: string } | null = null;
+        let quizErr: { message: string } | null = null;
+
+        if (lesson?.data?.id) {
+          // Has a lesson_id — safe to upsert on lesson_id unique key
+          const r = await serviceSupa
+            .from('quizzes')
+            .upsert(quizPayload, { onConflict: 'lesson_id' })
+            .select('id')
+            .single();
+          quiz = r.data;
+          quizErr = r.error;
+        } else {
+          // No lesson_id — just insert (avoid duplicate only by checking title+course)
+          const existing = await serviceSupa
+            .from('quizzes')
+            .select('id')
+            .eq('course_id', courseId)
+            .eq('title', parsed.title)
+            .maybeSingle();
+          if (existing.data) {
+            await serviceSupa.from('quizzes').update(quizPayload).eq('id', existing.data.id).then(() => null, () => null);
+            quiz = existing.data;
+          } else {
+            const r = await serviceSupa.from('quizzes').insert(quizPayload).select('id').single();
+            quiz = r.data;
+            quizErr = r.error;
+          }
+        }
+
+        if (quizErr || !quiz) {
+          importErrors.push({ path: qPath, message: quizErr?.message ?? 'Failed to upsert quiz' });
+          continue;
+        }
+
+        // Upsert questions
+        if (parsed.questions.length > 0) {
+          await serviceSupa.from('quiz_questions').upsert(
+            parsed.questions.map((q) => ({
+              quiz_id: quiz.id,
+              lesson_id: lesson?.data?.id ?? null,
+              ...q,
+            })),
+            { onConflict: 'quiz_id,order_index' }
+          );
+        }
+
+        quizCount++;
+      } catch (e) {
+        importErrors.push({ path: qPath, message: (e as Error).message });
+      }
+    }
+
+    // 12. Update version counts
+    await serviceSupa.from('course_versions')
+      .update({ lesson_count: lessonRows.length, quiz_count: quizCount })
+      .eq('course_id', courseId).eq('commit_sha', headSha)
+      .then(() => null, () => null);
+
+    // 13. Update import record
+    const importStatus = importErrors.length === 0 ? 'success' : 'partial';
+    if (importId) {
+      await serviceSupa.from('repo_imports').update({
+        course_id: courseId,
+        commit_sha: headSha,
+        status: importStatus,
+        lesson_count: lessonRows.length,
+        quiz_count: quizCount,
+        error_log: importErrors.length > 0 ? JSON.stringify(importErrors) : null,
+      }).eq('id', importId).then(() => null, () => null);
+    }
+
+    return NextResponse.json({
+      success: true,
+      courseId,
+      courseSlug: slug,
+      versionLabel,
+      commitSha: headSha,
+      shortSha,
+      imported: {
+        lessons: lessonRows.length,
+        quizzes: quizCount,
+      },
+      errors: importErrors.length > 0 ? importErrors : undefined,
+    });
+
+  } catch (err) {
+    return fail((err as Error).message);
+  }
 }
