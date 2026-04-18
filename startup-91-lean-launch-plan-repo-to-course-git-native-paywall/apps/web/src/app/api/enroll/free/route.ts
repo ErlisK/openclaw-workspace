@@ -14,16 +14,7 @@ const FreeEnrollSchema = z.object({
  * Idempotent: calling twice has no effect.
  */
 export async function POST(req: NextRequest) {
-  const supabase = createServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+  // 1. Parse + validate BEFORE auth (so bad input always → 400, not 401)
   let body: unknown;
   try {
     body = await req.json();
@@ -37,6 +28,17 @@ export async function POST(req: NextRequest) {
       { error: 'Validation error', details: parsed.error.errors },
       { status: 400 }
     );
+  }
+
+  // 2. Auth
+  const supabase = createServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { courseId } = parsed.data;

@@ -25,18 +25,7 @@ const CheckoutRequestSchema = z.object({
  *   - Embeds client_reference_id = user_id (verified on return).
  */
 export async function POST(req: NextRequest) {
-  // 1. Auth
-  const supabase = createServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // 2. Parse body
+  // 1. Parse + validate BEFORE auth (bad input → 400, not 401)
   let body: unknown;
   try {
     body = await req.json();
@@ -52,6 +41,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 2. Auth
+  const supabase = createServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // 3. Parse body
   const { courseId } = parsed.data;
   const serviceSupa = createServiceClient();
 

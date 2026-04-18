@@ -23,18 +23,7 @@ const EnrollQuerySchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
-  // 1. Auth
-  const supabase = createServerClient();
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser();
-
-  if (authError || !user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // 2. Parse query params
+  // 1. Validate query params BEFORE auth (bad input → 400, not 401)
   const { searchParams } = new URL(req.url);
   const parsed = EnrollQuerySchema.safeParse({
     session_id: searchParams.get('session_id'),
@@ -46,6 +35,17 @@ export async function GET(req: NextRequest) {
       { error: 'Validation error', details: parsed.error.errors },
       { status: 400 }
     );
+  }
+
+  // 2. Auth
+  const supabase = createServerClient();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const { session_id } = parsed.data;
