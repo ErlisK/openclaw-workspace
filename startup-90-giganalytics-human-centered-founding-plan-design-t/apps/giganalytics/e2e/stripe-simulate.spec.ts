@@ -70,10 +70,7 @@ test('POST /api/dev/stripe-simulate returns 403 without e2e-secret header', asyn
   // Send JWT but no x-e2e-secret
   const res = await request.post('/api/dev/stripe-simulate', {
     headers: {
-      Cookie: `sb-weofiforpfamjdtvvmgu-auth-token=${JSON.stringify({
-        access_token: testUser.accessToken,
-        token_type: 'bearer',
-      })}`,
+      Authorization: `Bearer ${testUser.accessToken}`,
       'Content-Type': 'application/json',
       // intentionally omit x-e2e-secret
     },

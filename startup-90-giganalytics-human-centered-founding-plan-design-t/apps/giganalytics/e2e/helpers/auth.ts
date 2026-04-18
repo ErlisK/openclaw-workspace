@@ -85,10 +85,9 @@ export function authHeaders(
   opts: { includeE2ESecret?: boolean } = {}
 ): Record<string, string> {
   const headers: Record<string, string> = {
-    Cookie: `sb-weofiforpfamjdtvvmgu-auth-token=${JSON.stringify({
-      access_token: accessToken,
-      token_type: 'bearer',
-    })}`,
+    // Use Authorization Bearer — works with both cookie-based SSR and direct API auth.
+    // The server.ts createClient() now accepts Bearer tokens as fallback.
+    Authorization: `Bearer ${accessToken}`,
     'Content-Type': 'application/json',
   }
   if (opts.includeE2ESecret) {
