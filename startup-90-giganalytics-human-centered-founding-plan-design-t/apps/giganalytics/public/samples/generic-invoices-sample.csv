@@ -1,0 +1,12 @@
+Date,Client,Description,Amount,Fee,Net,Invoice
+2024-01-05,Acme Corp,UX Design Consultation,150.00,0,150.00,INV-2024-001
+2024-01-10,Acme Corp,Website Redesign Kickoff,2500.00,0,2500.00,INV-2024-002
+2024-01-15,Sarah M.,Coaching Session,75.00,0,75.00,INV-2024-003
+2024-01-22,NEFF Brand,Brand Strategy Workshop,1200.00,0,1200.00,INV-2024-004
+2024-02-05,Sarah M.,Coaching Session,75.00,0,75.00,INV-2024-005
+2024-02-08,Acme Corp,Monthly Retainer,800.00,0,800.00,INV-2024-006
+2024-02-14,NEFF Brand,UI Design System,1800.00,0,1800.00,INV-2024-007
+2024-03-04,Acme Corp,Monthly Retainer,800.00,0,800.00,INV-2024-008
+2024-03-10,Acme Corp,Website Final Milestone,3200.00,0,3200.00,INV-2024-009
+2024-03-14,Sarah M.,Coaching Session x2,150.00,0,150.00,INV-2024-010
+2024-03-20,NEFF Brand,Q1 Campaign Creative,2200.00,0,2200.00,INV-2024-011

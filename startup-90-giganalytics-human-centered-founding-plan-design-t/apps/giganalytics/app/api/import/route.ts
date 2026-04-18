@@ -1,21 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-interface CsvRow {
-  stream_name?: string
+interface ImportRow {
+  date?: string
   amount?: string
   net_amount?: string
   fee_amount?: string
-  date?: string
   description?: string
   source_id?: string
-  platform?: string
+  currency?: string
 }
 
 function parseAmount(v: string | undefined): number | null {
   if (!v) return null
   const n = parseFloat(v.replace(/[$,]/g, ''))
-  return isNaN(n) ? null : n
+  return isNaN(n) ? null : Math.abs(n)
 }
 
 function parseDate(v: string | undefined): string | null {
@@ -33,21 +32,26 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { rows, streamId, platform }: { rows: CsvRow[]; streamId?: string; platform?: string } = body
+  const { rows, streamId, platform, streamName } = body as {
+    rows: ImportRow[]
+    streamId?: string
+    platform?: string
+    streamName?: string
+  }
 
   if (!rows || !Array.isArray(rows) || rows.length === 0) {
     return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
   }
 
-  // Ensure stream exists or create default
+  // Resolve or create stream
   let resolvedStreamId = streamId
   if (!resolvedStreamId) {
-    const streamName = platform ?? 'Imported'
+    const name = streamName || (platform === 'stripe' ? 'Stripe' : platform === 'paypal' ? 'PayPal' : platform === 'upwork' ? 'Upwork' : 'Imported')
     const { data: existing } = await supabase
       .from('streams')
       .select('id')
       .eq('user_id', user.id)
-      .eq('name', streamName)
+      .eq('name', name)
       .single()
 
     if (existing) {
@@ -55,7 +59,7 @@ export async function POST(request: NextRequest) {
     } else {
       const { data: created } = await supabase
         .from('streams')
-        .insert({ user_id: user.id, name: streamName, platform: platform ?? 'other' })
+        .insert({ user_id: user.id, name, platform: platform ?? 'other' })
         .select('id')
         .single()
       resolvedStreamId = created?.id
@@ -77,16 +81,16 @@ export async function POST(request: NextRequest) {
       description: row.description ?? null,
       transaction_date: txDate,
       source_platform: platform ?? null,
-      source_id: row.source_id ?? `import-${Date.now()}-${i}`,
-      currency: 'usd',
+      source_id: row.source_id ?? `import-${platform}-${Date.now()}-${i}`,
+      currency: row.currency ?? 'usd',
     }
   }).filter(r => r.amount > 0 && r.transaction_date)
 
   if (txRows.length === 0) {
-    return NextResponse.json({ error: 'No valid transactions found' }, { status: 400 })
+    return NextResponse.json({ error: 'No valid transactions found after filtering' }, { status: 400 })
   }
 
-  // Upsert (dedup by source_id)
+  // Upsert with dedup on source_id
   const { data, error } = await supabase
     .from('transactions')
     .upsert(txRows, { onConflict: 'source_id', ignoreDuplicates: true })
@@ -97,8 +101,9 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({
-    imported: data?.length ?? 0,
-    total: txRows.length,
+    imported: data?.length ?? txRows.length,
+    total: rows.length,
     streamId: resolvedStreamId,
+    platform: platform ?? 'custom',
   })
 }

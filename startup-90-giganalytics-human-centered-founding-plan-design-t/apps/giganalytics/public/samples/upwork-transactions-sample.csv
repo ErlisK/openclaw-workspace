@@ -1,0 +1,16 @@
+Date,Type,Description,Amount,Balance
+Jan 03 2024,Fixed Price,Service Contract: Acme Corp - UX Design,680.00,2345.67
+Jan 10 2024,Fixed Price,Project Milestone: Mobile App Screens,850.00,3195.67
+Jan 15 2024,Hourly,Weekly Billing - Web Development (12.5hrs @ $85),1062.50,4258.17
+Jan 22 2024,Fixed Price,UX Audit Report Delivery,500.00,4758.17
+Jan 26 2024,Withdrawal,Transfer to Local Bank Account,-4000.00,758.17
+Feb 05 2024,Fixed Price,Service Contract: Acme Corp - UX Design,680.00,1438.17
+Feb 09 2024,Hourly,Weekly Billing - Web Development (10hrs @ $85),850.00,2288.17
+Feb 16 2024,Fixed Price,Brand Style Guide - NEFF,1200.00,3488.17
+Feb 20 2024,Hourly,Weekly Billing - Web Development (8hrs @ $85),680.00,4168.17
+Feb 26 2024,Withdrawal,Transfer to Local Bank Account,-3500.00,668.17
+Mar 04 2024,Fixed Price,Service Contract: Acme Corp - UX Design,680.00,1348.17
+Mar 08 2024,Fixed Price,Website Redesign Final Payment,1700.00,3048.17
+Mar 15 2024,Hourly,Weekly Billing - Web Development (11hrs @ $85),935.00,3983.17
+Mar 22 2024,Fixed Price,Q1 Campaign Visuals - NEFF,1500.00,5483.17
+Mar 27 2024,Withdrawal,Transfer to Local Bank Account,-4500.00,983.17

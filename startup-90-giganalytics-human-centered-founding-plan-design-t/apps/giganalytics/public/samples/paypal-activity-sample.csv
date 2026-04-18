@@ -1,0 +1,16 @@
+Date,Time,TimeZone,Name,Type,Status,Currency,Gross,Fee,Net,From Email Address,To Email Address,Transaction ID,Item Title,Balance
+01/05/2024,10:23:45,PST,Sarah Mitchell,Payment Received,Completed,USD,75.00,-2.48,72.52,smitchell@email.com,freelancer@giganalytics.io,8AB12345CD678901,1-on-1 Coaching Session,72.52
+01/08/2024,14:10:22,PST,Acme Corporation,Invoice Payment Received,Completed,USD,2500.00,-75.25,2424.75,billing@acmecorp.com,freelancer@giganalytics.io,9CD23456EF789012,Website Redesign Invoice #INV-001,2497.27
+01/12/2024,09:30:00,PST,Acme Corporation,Subscription Payment,Completed,USD,800.00,-23.50,776.50,billing@acmecorp.com,freelancer@giganalytics.io,1EF34567GH890123,Monthly Retainer January,3273.77
+01/15/2024,11:45:00,PST,James Park,Payment Received,Completed,USD,350.00,-10.45,339.55,jpark@startup.io,freelancer@giganalytics.io,2GH45678IJ901234,UX Audit Report,3613.32
+01/22/2024,15:20:00,PST,NEFF Brand,Invoice Payment Received,Completed,USD,1200.00,-35.10,1164.90,brand@neff.com,freelancer@giganalytics.io,3IJ56789KL012345,Brand Strategy Workshop,4778.22
+01/24/2024,08:00:00,PST,PayPal,Transfer to Bank Account,Completed,USD,-4000.00,0.00,-4000.00,freelancer@giganalytics.io,bank@paypal.com,4KL67890MN123456,Transfer,778.22
+02/05/2024,10:00:00,PST,Sarah Mitchell,Payment Received,Completed,USD,75.00,-2.48,72.52,smitchell@email.com,freelancer@giganalytics.io,5MN78901OP234567,Coaching Session,850.74
+02/07/2024,14:30:00,PST,Acme Corporation,Subscription Payment,Completed,USD,800.00,-23.50,776.50,billing@acmecorp.com,freelancer@giganalytics.io,6OP89012QR345678,Monthly Retainer February,1627.24
+02/14/2024,11:00:00,PST,NEFF Brand,Invoice Payment Received,Completed,USD,1800.00,-53.10,1746.90,brand@neff.com,freelancer@giganalytics.io,7QR90123ST456789,UI Design System,3374.14
+02/19/2024,16:00:00,PST,James Park,Payment Received,Completed,USD,600.00,-18.00,582.00,jpark@startup.io,freelancer@giganalytics.io,8ST01234UV567890,Mobile App Screens,3956.14
+02/26/2024,09:30:00,PST,PayPal,Transfer to Bank Account,Completed,USD,-3200.00,0.00,-3200.00,freelancer@giganalytics.io,bank@paypal.com,9UV12345WX678901,Transfer,756.14
+03/04/2024,09:00:00,PST,Acme Corporation,Subscription Payment,Completed,USD,800.00,-23.50,776.50,billing@acmecorp.com,freelancer@giganalytics.io,1WX23456YZ789012,Monthly Retainer March,1532.64
+03/10/2024,13:30:00,PST,Acme Corporation,Invoice Payment Received,Completed,USD,3200.00,-93.10,3106.90,billing@acmecorp.com,freelancer@giganalytics.io,2YZ34567AB890123,Website Redesign Final Milestone,4639.54
+03/14/2024,16:00:00,PST,Sarah Mitchell,Payment Received,Completed,USD,150.00,-4.65,145.35,smitchell@email.com,freelancer@giganalytics.io,3AB45678CD901234,Coaching x2 Sessions,4784.89
+03/20/2024,10:00:00,PST,NEFF Brand,Invoice Payment Received,Completed,USD,2200.00,-64.10,2135.90,brand@neff.com,freelancer@giganalytics.io,4CD56789EF012345,Q1 Campaign Creative,6920.79
