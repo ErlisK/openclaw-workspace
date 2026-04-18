@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, courseId, courseSlug: slug, versionLabel, commitSha: headSha, shortSha, imported: { lessons: lessons.length }, errors: errors.length > 0 ? errors : undefined });
   } catch (err) {
     const message = (err as Error).message;
-    await serviceSupa.from('repo_imports').insert({ creator_id: user.id, repo_url, branch: branch ?? 'main', status: 'failed', error_log: message }).catch(() => null);
+    await serviceSupa.from('repo_imports').insert({ creator_id: user.id, repo_url, branch: branch ?? 'main', status: 'failed', error_log: message }).then(() => null, () => null);
     return NextResponse.json({ error: message }, { status: 422 });
   }
 }
