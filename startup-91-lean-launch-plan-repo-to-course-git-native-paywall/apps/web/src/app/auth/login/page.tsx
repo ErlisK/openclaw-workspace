@@ -1,52 +1,32 @@
-'use client';
-import * as React from 'react';
-import { useState } from 'react';
-import { createClient } from '@/lib/supabase/browser';
+import { Metadata } from 'next';
+import { AuthForm } from '@/components/auth/AuthForm';
 
-export default function LoginPage({ searchParams }: { searchParams: { next?: string } }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+export const metadata: Metadata = {
+  title: 'Sign in — TeachRepo',
+  description: 'Sign in to your TeachRepo account',
+};
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-    if (authError) {
-      setError(authError.message);
-      setLoading(false);
-    } else {
-      window.location.href = searchParams.next ?? '/dashboard';
-    }
-  };
-
+export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="mb-8 text-2xl font-bold text-gray-900">Sign in to TeachRepo</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200" />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-gray-700">Password</label>
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200" />
-          </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button type="submit" disabled={loading}
-            className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60">
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
+        <div className="mb-8 text-center">
+          <a href="/" className="inline-flex items-center gap-2 text-2xl font-bold text-violet-600">
+            📚 TeachRepo
+          </a>
+          <h1 className="mt-4 text-xl font-bold text-gray-900">Welcome back</h1>
+          <p className="mt-1 text-sm text-gray-500">Sign in to your account</p>
+        </div>
+
+        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <AuthForm mode="login" />
+        </div>
+
         <p className="mt-4 text-center text-sm text-gray-600">
           Don't have an account?{' '}
-          <a href="/auth/signup" className="text-violet-600 underline">Sign up</a>
+          <a href="/auth/signup" className="font-medium text-violet-600 hover:underline">
+            Sign up free
+          </a>
         </p>
       </div>
     </div>
