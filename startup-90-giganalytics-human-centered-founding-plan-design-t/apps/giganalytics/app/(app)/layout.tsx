@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { headers } from 'next/headers'
 import Link from 'next/link'
 import FeedbackButton from './FeedbackButton'
+import MobileSidebar from './MobileSidebar'
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊' },
@@ -48,8 +49,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-52 bg-gray-900 text-white flex flex-col z-20">
+      {/* Mobile top bar */}
+      <div className="sm:hidden fixed top-0 left-0 right-0 z-30 bg-gray-900 text-white flex items-center justify-between px-4 py-3 border-b border-gray-800">
+        <div className="text-blue-400 font-bold">GigAnalytics</div>
+        <MobileSidebar navLinks={navLinks} userEmail={user.email ?? ''} />
+      </div>
+
+      {/* Desktop Sidebar */}
+      <aside className="hidden sm:flex fixed left-0 top-0 h-full w-52 bg-gray-900 text-white flex-col z-20">
         <div className="p-4 border-b border-gray-800">
           <div className="text-blue-400 font-bold text-lg">GigAnalytics</div>
           <div className="text-gray-500 text-xs mt-0.5 truncate">{user.email}</div>
@@ -59,7 +66,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link
               key={l.href}
               href={l.href}
-              className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors ${
+                pathname.startsWith(l.href) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+              }`}
             >
               <span>{l.icon}</span>
               <span>{l.label}</span>
@@ -77,7 +86,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main */}
-      <main className="ml-52 flex-1 min-h-screen">
+      <main className="sm:ml-52 mt-14 sm:mt-0 flex-1 min-h-screen">
         {children}
       </main>
     </div>
