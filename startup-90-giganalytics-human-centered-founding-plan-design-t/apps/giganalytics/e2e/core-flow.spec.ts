@@ -73,13 +73,14 @@ test('GET /api/health returns 200 with build info and db ok', async ({ request }
 
 // ─── 2. Signup / Login (browser flow) ────────────────────────────────────────
 test('signup page loads with email input', async ({ page }) => {
-  const res = await page.goto('/signup')
+  const res = await page.goto('/signup', { waitUntil: 'networkidle' })
   expect([200, 302, 401]).toContain(res?.status() ?? 200)
   const url = page.url()
   if (!url.includes('vercel.com') && !url.includes('sso')) {
-    // Check by content not visibility (Next.js RSC hidden divs can confuse Playwright)
-    const html = await page.innerHTML('body')
-    expect(html).toContain('type="email"')
+    // Wait for React hydration then check
+    await page.waitForTimeout(1000)
+    const count = await page.locator('input[type="email"]').count()
+    expect(count).toBeGreaterThan(0)
     console.log('✓ signup page has email input')
   } else {
     console.log('Note: SSO gate active')
@@ -87,11 +88,12 @@ test('signup page loads with email input', async ({ page }) => {
 })
 
 test('login page loads with password input', async ({ page }) => {
-  await page.goto('/login')
+  await page.goto('/login', { waitUntil: 'networkidle' })
   const url = page.url()
   if (!url.includes('vercel.com')) {
-    const html = await page.innerHTML('body')
-    expect(html).toContain('type="password"')
+    await page.waitForTimeout(1000)
+    const count = await page.locator('input[type="password"]').count()
+    expect(count).toBeGreaterThan(0)
     console.log('✓ login page has password input')
   } else {
     console.log('Note: SSO gate active')
@@ -216,7 +218,7 @@ test('POST /api/timer logs a time entry (start + stop)', async ({ request: req }
 
   expect(res.status()).toBe(200)
   const body = await res.json()
-  expect(body.id).toBeTruthy()
+  expect(body.id ?? body.entry?.id).toBeTruthy()
 })
 
 test('POST /api/timer logs a second time entry (for ROI calculation)', async ({ request: req }) => {

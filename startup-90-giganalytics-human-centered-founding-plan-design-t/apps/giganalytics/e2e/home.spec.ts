@@ -10,12 +10,12 @@ test.describe('home page', () => {
   })
 
   test('hero headline or signup CTA is visible when not behind SSO', async ({ page }) => {
-    await page.goto('/')
+    await page.goto('/', { waitUntil: 'networkidle' })
     const isSso = page.url().includes('vercel.com/sso')
     if (!isSso) {
-      // Check by HTML content (avoids overflow:hidden visibility issues)
-      const html = await page.innerHTML('body')
-      expect(html).toContain('/signup')
+      await page.waitForTimeout(1000)
+      const count = await page.locator('a[href*="/signup"]').count()
+      expect(count).toBeGreaterThan(0)
       console.log('✓ landing page has signup link')
     } else {
       console.log('Note: SSO gate active')
