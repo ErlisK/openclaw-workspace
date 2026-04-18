@@ -16,7 +16,7 @@ export default async function DashboardPage() {
 
   const { data: courses } = await serviceSupa
     .from('courses')
-    .select('id, slug, title, published, price_cents, currency')
+    .select('id, slug, title, published, published_at, price_cents, currency, version, updated_at')
     .eq('creator_id', user.id)
     .order('created_at', { ascending: false });
 
@@ -57,20 +57,44 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {courses.map((c) => (
-            <a key={c.id} href={`/dashboard/courses/${c.id}`}
-              className="group rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-semibold text-gray-900 group-hover:text-violet-600 transition-colors">{c.title}</h3>
-                <span className={`ml-2 flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
+            <div key={c.id} className="group rounded-xl border border-gray-200 bg-white p-5 hover:shadow-md transition-shadow flex flex-col gap-3">
+              {/* Title + status */}
+              <div className="flex items-start justify-between gap-2">
+                <a href={`/dashboard/courses/${c.id}`} className="font-semibold text-gray-900 group-hover:text-violet-600 transition-colors line-clamp-2">
+                  {c.title}
+                </a>
+                <span className={`ml-1 flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                   c.published ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
                 }`}>
-                  {c.published ? 'Live' : 'Draft'}
+                  {c.published ? '● Live' : '○ Draft'}
                 </span>
               </div>
-              <p className="text-sm text-gray-500">
-                {c.price_cents === 0 ? 'Free' : `$${(c.price_cents / 100).toFixed(0)} ${c.currency?.toUpperCase()}`}
-              </p>
-            </a>
+
+              {/* Meta */}
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                {c.version && <span>v{c.version}</span>}
+                <span>·</span>
+                <span>{c.price_cents === 0 ? 'Free' : `$${(c.price_cents / 100).toFixed(0)} ${c.currency?.toUpperCase()}`}</span>
+              </div>
+
+              {/* Quick actions */}
+              <div className="flex items-center gap-2 mt-auto pt-2 border-t border-gray-100">
+                <a
+                  href={`/dashboard/courses/${c.id}`}
+                  className="flex-1 rounded-md bg-gray-50 py-1.5 text-center text-xs font-medium text-gray-600 hover:bg-gray-100"
+                >
+                  Manage
+                </a>
+                <a
+                  href={`/courses/${c.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 rounded-md border border-gray-200 py-1.5 text-center text-xs font-medium text-gray-600 hover:bg-gray-50"
+                >
+                  Preview ↗
+                </a>
+              </div>
+            </div>
           ))}
         </div>
       )}
