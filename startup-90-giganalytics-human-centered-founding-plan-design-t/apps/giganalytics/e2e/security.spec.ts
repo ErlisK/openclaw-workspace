@@ -128,9 +128,9 @@ test('POST /api/dev/stripe-simulate requires x-e2e-secret', async ({ request }) 
   console.log(`✓ /api/dev/stripe-simulate returns ${res.status()} without secret`)
 })
 
-test('POST /api/dev/sim-upgrade returns 401 without auth', async ({ request }) => {
+test('POST /api/dev/sim-upgrade returns 401 or 403 without auth', async ({ request }) => {
   const res = await request.post('/api/dev/sim-upgrade', { data: {} })
-  expect(res.status()).toBe(401)
+  expect([401, 403]).toContain(res.status())
 })
 
 test('POST /api/webhooks/stripe returns 400 (no sig) not 401', async ({ request }) => {

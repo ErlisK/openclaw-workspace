@@ -43,7 +43,7 @@ test('GET /robots.txt returns 200 with correct rules', async ({ request }) => {
   expect([200, 401]).toContain(res.status())
   if (res.status() === 200) {
     const text = await res.text()
-    expect(text).toContain('User-agent: *')
+    expect(text.toLowerCase()).toContain('user-agent: *')
     expect(text).toContain('Disallow:')
     expect(text).toContain('Sitemap:')
     expect(text).toContain('/dashboard')

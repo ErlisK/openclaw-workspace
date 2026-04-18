@@ -4,18 +4,19 @@ import { captureServerEvent } from '@/lib/posthog/server'
 
 interface ImportRow {
   date?: string
-  amount?: string
-  net_amount?: string
-  fee_amount?: string
+  amount?: string | number
+  net_amount?: string | number
+  fee_amount?: string | number
   description?: string
   source_id?: string
   currency?: string
 }
 
-function parseAmount(v: string | undefined): number | null {
-  if (!v) return null
-  const n = parseFloat(v.replace(/[$,]/g, ''))
-  return isNaN(n) ? null : Math.abs(n)
+function parseAmount(v: string | number | undefined): number | null {
+  if (v === undefined || v === null || v === '') return null
+  if (typeof v === 'number') return isNaN(v) ? null : v
+  const n = parseFloat(String(v).replace(/[$,]/g, ''))
+  return isNaN(n) ? null : n
 }
 
 function parseDate(v: string | undefined): string | null {
