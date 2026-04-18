@@ -69,19 +69,29 @@ export async function GET(request: NextRequest) {
     }
 
     // Build funnel with drop-off analysis
+    // For steps without DB backing (landing_viewed), use the next step count as baseline
+    // First, fill in landing_viewed using profiles count as upper bound
+    if (counts['landing_viewed'] === 0) {
+      counts['landing_viewed'] = counts['signup_completed']
+    }
+
     const funnelSteps = FUNNEL_STEPS.map((s, i) => {
       const count = counts[s.event]
       const prevCount = i > 0 ? counts[FUNNEL_STEPS[i - 1].event] : count
-      const dropOff = prevCount > 0 ? +(((prevCount - count) / prevCount) * 100).toFixed(1) : 0
-      const conversion = prevCount > 0 ? +((count / prevCount) * 100).toFixed(1) : (i === 0 ? 100 : 0)
+
+      // Only compute drop-off when we have a valid previous count > 0
+      // and the previous count is >= current count (avoid negative drop-off from data gaps)
+      const validPrev = prevCount > 0 && prevCount >= count
+      const dropOff = validPrev ? +(((prevCount - count) / prevCount) * 100).toFixed(1) : 0
+      const conversion = validPrev ? +((count / prevCount) * 100).toFixed(1) : (i === 0 ? 100 : 0)
 
       return {
         step: s.step,
         event: s.event,
         label: s.label,
         count,
-        conversion_rate: conversion,
-        drop_off_rate: dropOff,
+        conversion_rate: Math.max(0, Math.min(100, conversion)),
+        drop_off_rate: Math.max(0, Math.min(100, dropOff)),
         is_bottleneck: dropOff > 50,
       }
     })

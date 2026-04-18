@@ -38,6 +38,7 @@ const VALID_STEPS = new Set([
   'import_completed',
   'roi_viewed',
   'timer_started',
+  'timer_session',
   'heatmap_viewed',
   'insights_viewed',
   'upgrade_clicked',
