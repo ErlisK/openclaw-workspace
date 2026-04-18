@@ -1,36 +1,11 @@
 ---
 title: "Introduction to TeachRepo"
-slug: "01-introduction"
-description: "Welcome! Learn what TeachRepo is and how it can help you publish your first course."
+slug: "introduction"
 order: 1
-is_preview: true
+access: free
+description: "Learn what TeachRepo is, why it exists, and how it fits into a Git-native workflow for engineers."
 estimated_minutes: 5
-
-quiz:
-  - question: "What is TeachRepo?"
-    type: multiple_choice
-    options:
-      - "A payment processing service"
-      - "A platform that converts GitHub repos into paywalled course sites"
-      - "A code editor for writing documentation"
-      - "A video hosting platform"
-    correct: 1
-    explanation: "TeachRepo converts GitHub repos (or Markdown folders) into paywalled, versioned mini-course sites — targeted at engineers who prefer code-first workflows."
-
-  - question: "What file format does TeachRepo use to define quizzes?"
-    type: multiple_choice
-    options:
-      - "JSON files in a /quizzes directory"
-      - "A separate XML configuration file"
-      - "YAML frontmatter inside each Markdown lesson"
-      - "A database table you edit in a UI"
-    correct: 2
-    explanation: "Quiz questions are defined directly in YAML frontmatter at the top of each Markdown lesson file — no separate quiz files needed."
-
-  - question: "TeachRepo requires OAuth authentication to import a public GitHub repository."
-    type: true_false
-    correct: false
-    explanation: "For MVP, TeachRepo supports public GitHub repo import by URL only — no OAuth required. Just paste the repo URL."
+quiz_id: "intro-quiz"
 ---
 
 # Introduction to TeachRepo
@@ -64,7 +39,7 @@ Your GitHub Repo / Markdown folder
 ## Key Concepts
 
 - **Lesson** — a Markdown file with YAML frontmatter
-- **Quiz** — optional questions defined in the frontmatter
+- **Quiz** — a separate `quizzes/quiz-id.yml` file referenced from a lesson
 - **Course config** — `course.config.yaml` at the repo root
 - **Entitlement** — granted immediately after Stripe payment
 

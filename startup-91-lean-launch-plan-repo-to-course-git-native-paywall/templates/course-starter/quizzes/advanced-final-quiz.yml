@@ -1,0 +1,50 @@
+id: "advanced-final-quiz"
+title: "Advanced Topics — Final Assessment"
+pass_threshold: 80
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "How does TeachRepo track affiliate referrals?"
+    choices:
+      - "A separate affiliate dashboard login required"
+      - "Unique subdomain per affiliate"
+      - "A ?ref= query parameter stored in an httpOnly cookie"
+      - "Coupon codes entered at checkout"
+    answer: 2
+    points: 2
+    explanation: "TeachRepo captures ?ref=<code> on page load and stores it in a 30-day httpOnly cookie (set server-side in the middleware). If the visitor purchases within the cookie window, the sale is attributed to the affiliate."
+
+  - type: multiple_choice
+    prompt: "Which CLI command generates a quiz for a lesson using AI?"
+    choices:
+      - "teachrepo ai quiz lessons/01-introduction.md"
+      - "teachrepo quiz generate lessons/01-introduction.md"
+      - "teachrepo generate --quiz lessons/01-introduction.md"
+      - "teachrepo --ai-quiz lessons/01-introduction.md"
+    answer: 1
+    points: 2
+    explanation: "teachrepo quiz generate <lesson-file> sends the lesson content to Claude Sonnet and creates a new quizzes/{slug}-quiz.yml file. You review and edit the output before committing."
+
+  - type: multiple_choice
+    prompt: "Course versioning in TeachRepo is handled by which underlying system?"
+    choices:
+      - "A built-in version database in TeachRepo"
+      - "Semantic versioning in course.config.yaml + Git"
+      - "A manual tagging process in the web dashboard"
+      - "Automatic daily snapshots"
+    answer: 1
+    points: 2
+    explanation: "TeachRepo is fully Git-native. Version numbers are declared in course.config.yaml. Every course update is a git commit. Students enrolled before a major version bump continue seeing their purchased version."
+
+  - type: true_false
+    prompt: "The sandbox_url in a paid lesson's frontmatter is sent to unenrolled visitors' browsers."
+    answer: false
+    points: 2
+    explanation: "For lessons with access: paid, the sandbox_url is never included in the HTML or API response for unenrolled visitors. The entitlement check happens server-side before the lesson content (including sandbox_url) is returned."
+
+  - type: short_answer
+    prompt: "What is the name of the YAML file that configures course metadata, pricing, and affiliate settings?"
+    answer: "course.config.yaml"
+    points: 2
+    explanation: "course.config.yaml lives at the root of your course repo and is the single source of truth for course metadata, pricing, affiliates, sandbox settings, and lesson ordering."

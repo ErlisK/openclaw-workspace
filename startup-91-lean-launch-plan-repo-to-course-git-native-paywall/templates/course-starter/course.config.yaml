@@ -1,5 +1,5 @@
 # Course configuration for TeachRepo
-# Docs: https://teachrepo.com/docs/course-config
+# Docs: https://teachrepo.com/docs/course-format
 
 course:
   title: "My Engineering Course"
@@ -20,30 +20,30 @@ pricing:
   currency: "usd"
   stripe_price_id: ""      # Fill in after creating price in Stripe
 
-# Free preview lessons (slugs of lessons accessible without purchase)
-preview_lessons:
-  - "01-introduction"
+# Default pass threshold for all quizzes (can be overridden per quiz)
+pass_threshold: 70
 
 # Affiliate / referral tracking
 affiliates:
   enabled: true
   default_commission_pct: 30   # 30% of sale price to affiliate
-  cookie_days: 30              # Affiliate attribution window
+  cookie_days: 30              # Affiliate attribution window in days
 
-# Course structure
+# Lessons directory (relative to this file)
 lessons_dir: "./lessons"
+
+# Explicit lesson order by slug (optional — CLI uses NN- filename prefix if omitted)
 lessons_order:
-  - "01-introduction"
-  - "02-getting-started"
-  - "03-advanced-topics"
+  - "introduction"
+  - "getting-started"
+  - "advanced-topics"
 
 # Optional: gated code sandboxes (requires SaaS tier)
 sandboxes:
-  enabled: false
+  enabled: true
   provider: "codesandbox"   # codesandbox | stackblitz | codepen
 
 # Optional: certificate of completion
 certificate:
   enabled: true
   template: "default"
-  pass_threshold: 70         # % quiz score required

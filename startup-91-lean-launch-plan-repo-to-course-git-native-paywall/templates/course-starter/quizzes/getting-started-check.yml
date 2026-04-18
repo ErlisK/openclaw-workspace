@@ -1,0 +1,44 @@
+id: "getting-started-check"
+title: "Getting Started — Knowledge Check"
+pass_threshold: 70
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "Which command initializes a new TeachRepo course from an existing GitHub repo?"
+    choices:
+      - "teachrepo create"
+      - "teachrepo init <repo-url>"
+      - "git clone && teachrepo setup"
+      - "npm create teachrepo"
+    answer: 1
+    points: 1
+    explanation: "teachrepo init <repo-url> clones the repo and scaffolds the course structure — adding course.config.yaml and frontmatter to existing Markdown files."
+
+  - type: multiple_choice
+    prompt: "Where is course pricing configured?"
+    choices:
+      - "In the Stripe dashboard only"
+      - "In each lesson's YAML frontmatter"
+      - "In course.config.yaml at the repo root"
+      - "In the TeachRepo web dashboard only"
+    answer: 2
+    points: 1
+    explanation: "Pricing is declared in course.config.yaml under the pricing key. The TeachRepo CLI reads this file when publishing to create the corresponding Stripe product and price."
+
+  - type: multiple_choice
+    prompt: "What command validates your course structure before publishing?"
+    choices:
+      - "teachrepo lint"
+      - "teachrepo check"
+      - "teachrepo validate"
+      - "teachrepo test"
+    answer: 2
+    points: 1
+    explanation: "teachrepo validate checks frontmatter schema, quiz file references, duplicate slugs, and other structural rules. Run it before publishng to catch errors early."
+
+  - type: true_false
+    prompt: "After a student pays, access to a paid course is granted immediately without any manual action from the creator."
+    answer: true
+    points: 1
+    explanation: "TeachRepo uses Stripe webhooks: when checkout.session.completed fires, the entitlement is granted instantly in the database. The student can start the course immediately."

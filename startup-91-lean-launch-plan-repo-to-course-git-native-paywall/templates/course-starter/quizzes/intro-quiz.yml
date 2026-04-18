@@ -1,0 +1,39 @@
+id: "intro-quiz"
+title: "Introduction Quiz"
+pass_threshold: 70
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "What is TeachRepo?"
+    choices:
+      - "A payment processing service"
+      - "A platform that converts GitHub repos into paywalled course sites"
+      - "A code editor for writing documentation"
+      - "A video hosting platform"
+    answer: 1
+    points: 1
+    explanation: "TeachRepo converts GitHub repos (or Markdown folders) into paywalled, versioned mini-course sites targeted at engineers who prefer code-first workflows."
+
+  - type: multiple_choice
+    prompt: "How does TeachRepo store quiz questions?"
+    choices:
+      - "Inline in the Markdown file as YAML frontmatter"
+      - "In a separate quizzes/{id}.yml file referenced from the lesson"
+      - "In a JSON file at the course root"
+      - "In the Supabase database only — no file format"
+    answer: 1
+    points: 1
+    explanation: "Quizzes live in separate quizzes/{id}.yml files. A lesson references its quiz via the quiz_id frontmatter field. This keeps quiz changes isolated from lesson content in git diffs."
+
+  - type: true_false
+    prompt: "TeachRepo requires OAuth authentication to import a public GitHub repository."
+    answer: false
+    points: 1
+    explanation: "For MVP, TeachRepo supports public GitHub repo import by URL only — no OAuth required. Just paste the repo URL and TeachRepo fetches the content."
+
+  - type: short_answer
+    prompt: "What access level makes a lesson visible to anyone without an account?"
+    answer: "free"
+    points: 1
+    explanation: "Setting access: free in a lesson's frontmatter marks it as a free preview. Setting access: paid requires an active enrollment (paid entitlement)."

@@ -1,32 +1,49 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import matter from 'gray-matter';
 import { LessonFrontmatterSchema, type LessonFrontmatter } from './schemas';
 
 export interface ParsedLesson {
   filePath: string;
+  /** Derived from frontmatter.slug (authoritative) or filename if slug absent */
   slug: string;
   frontmatter: LessonFrontmatter;
-  content: string;     // Markdown body (without frontmatter)
-  rawSource: string;   // Full file content
+  /** Markdown body — everything after the closing --- delimiter */
+  content: string;
+  /** Full raw file source including frontmatter block */
+  rawSource: string;
 }
 
 /**
  * Parse a single lesson Markdown file.
- * Extracts and validates YAML frontmatter, returns body content.
+ *
+ * Extracts and validates YAML frontmatter against LessonFrontmatterSchema.
+ * Throws a ZodError with a descriptive message if validation fails.
  */
 export async function parseLesson(filePath: string): Promise<ParsedLesson> {
   const rawSource = fs.readFileSync(filePath, 'utf-8');
   const { data, content } = matter(rawSource);
 
-  const frontmatter = LessonFrontmatterSchema.parse(data);
+  // Validate against schema — throws ZodError on failure
+  const result = LessonFrontmatterSchema.safeParse(data);
+  if (!result.success) {
+    const messages = result.error.errors
+      .map((e) => `  ${e.path.join('.')}: ${e.message}`)
+      .join('\n');
+    throw new Error(
+      `Invalid frontmatter in ${path.basename(filePath)}:\n${messages}`
+    );
+  }
 
-  // Derive slug from filename if not in frontmatter
+  const frontmatter = result.data;
+
+  // slug in frontmatter is authoritative; fall back to filename-derived slug
   const slug =
     frontmatter.slug ??
-    filePath
-      .split('/')
-      .pop()!
-      .replace(/\.md$/, '');
+    path
+      .basename(filePath, '.md')
+      .replace(/^\d+-/, '') // strip leading NN- prefix
+      .toLowerCase();
 
-  return { filePath, slug, frontmatter, content, rawSource };
+  return { filePath, slug, frontmatter, content: content.trim(), rawSource };
 }

@@ -1,41 +1,12 @@
 ---
 title: "Getting Started — Your First Course in 15 Minutes"
-slug: "02-getting-started"
-description: "Install the CLI, configure your course, and publish it live."
+slug: "getting-started"
 order: 2
-is_preview: false
+access: free
+description: "Install the TeachRepo CLI, configure your course, and publish it live in under 15 minutes."
 estimated_minutes: 15
-
-quiz:
-  - question: "Which command initializes a new TeachRepo course from an existing GitHub repo?"
-    type: multiple_choice
-    options:
-      - "teachrepo create"
-      - "teachrepo init <repo-url>"
-      - "git clone && teachrepo setup"
-      - "npm create teachrepo"
-    correct: 1
-    explanation: "`teachrepo init <repo-url>` clones the repo and scaffolds the course structure automatically."
-
-  - question: "Where do you configure pricing for your course?"
-    type: multiple_choice
-    options:
-      - "In the Stripe dashboard only"
-      - "In each lesson's YAML frontmatter"
-      - "In course.config.yaml"
-      - "In the TeachRepo web dashboard"
-    correct: 2
-    explanation: "Pricing is configured in `course.config.yaml` at the repo root. You specify the model (one_time/subscription/free), amount in cents, and the Stripe price ID."
-
-  - question: "After a student pays, how quickly do they get access to the course?"
-    type: multiple_choice
-    options:
-      - "After manual approval by the creator"
-      - "Within 24 hours"
-      - "Immediately — entitlement is granted via Stripe webhook"
-      - "After email verification"
-    correct: 2
-    explanation: "TeachRepo uses Stripe webhooks: when `checkout.session.completed` fires, the entitlement is granted instantly in the database."
+quiz_id: "getting-started-check"
+sandbox_url: "https://stackblitz.com/edit/teachrepo-starter?embed=1"
 ---
 
 # Getting Started
@@ -91,20 +62,27 @@ teachrepo dev
 # → Opens http://localhost:3000
 ```
 
-## Step 5: Publish
+## Step 5: Validate
+
+```bash
+teachrepo validate
+# → Checks frontmatter, quiz references, slugs
+```
+
+## Step 6: Publish
 
 ```bash
 teachrepo publish
 # → Deploys to https://teachrepo.com/your-course
 ```
 
-Your course is live! Share the URL and start earning. 🎉
+Your course is live! 🎉
 
-## Step 6: Set Up Payments (5 minutes)
+## Step 7: Connect Stripe (5 minutes)
 
 1. Go to your [TeachRepo Dashboard](https://teachrepo.com/dashboard)
 2. Navigate to **Settings → Payments**
-3. Connect your Stripe account (OAuth flow)
+3. Connect your Stripe account
 4. TeachRepo auto-creates a Stripe product and price for you
 
-Students can now checkout. Entitlements are granted automatically.
+Students can now checkout. Entitlements are granted automatically via webhook.
