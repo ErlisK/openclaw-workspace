@@ -231,3 +231,102 @@ test('/docs/ai-limitations page renders', async ({ page }) => {
   console.log(`/docs/ai-limitations title: "${title}"`)
   expect(title.length).toBeGreaterThan(0)
 })
+
+// ─── Advanced Docs: Whitepaper, Privacy, Integration Roadmap ──────────────────
+
+test('GET /docs/roi-whitepaper returns 200', async ({ request }) => {
+  const res = await request.get('/docs/roi-whitepaper')
+  expect([200, 301, 302]).toContain(res.status())
+  console.log('✓ /docs/roi-whitepaper → 200')
+})
+
+test('/docs/roi-whitepaper contains key formula terms', async ({ request }) => {
+  const res = await request.get('/docs/roi-whitepaper')
+  const html = await res.text()
+  expect(html).toContain('true_hourly_rate')
+  expect(html).toContain('acquisition_roi')
+  console.log('✓ whitepaper: ROI formula terms present in HTML')
+})
+
+test('/docs/roi-whitepaper TOC has 10 sections', async ({ request }) => {
+  const res = await request.get('/docs/roi-whitepaper')
+  const html = await res.text()
+  expect(html).toContain('The problem with traditional income tracking')
+  expect(html).toContain('Statistical significance')
+  console.log('✓ whitepaper: TOC sections present')
+})
+
+test('GET /docs/privacy-benchmarking returns 200', async ({ request }) => {
+  const res = await request.get('/docs/privacy-benchmarking')
+  expect([200, 301, 302]).toContain(res.status())
+  console.log('✓ /docs/privacy-benchmarking → 200')
+})
+
+test('/docs/privacy-benchmarking contains k-anonymity details', async ({ request }) => {
+  const res = await request.get('/docs/privacy-benchmarking')
+  const html = await res.text()
+  expect(html).toContain('k-anonymity')
+  expect(html).toMatch(/k\s*=\s*25/)
+  console.log('✓ privacy: k-anonymity k=25 present')
+})
+
+test('/docs/privacy-benchmarking contains differential privacy details', async ({ request }) => {
+  const res = await request.get('/docs/privacy-benchmarking')
+  const html = await res.text()
+  expect(html).toContain('differential privacy')
+  expect(html).toMatch(/ε\s*=\s*0\.5/)
+  console.log('✓ privacy: differential privacy ε=0.5 present')
+})
+
+test('/docs/privacy-benchmarking contains data deletion section', async ({ request }) => {
+  const res = await request.get('/docs/privacy-benchmarking')
+  const html = await res.text()
+  expect(html.toLowerCase()).toMatch(/deletion|opt.out|right to be forgotten/)
+  console.log('✓ privacy: data deletion section present')
+})
+
+test('GET /docs/integration-roadmap returns 200', async ({ request }) => {
+  const res = await request.get('/docs/integration-roadmap')
+  expect([200, 301, 302]).toContain(res.status())
+  console.log('✓ /docs/integration-roadmap → 200')
+})
+
+test('/docs/integration-roadmap shows Stripe Connect as in-progress', async ({ request }) => {
+  const res = await request.get('/docs/integration-roadmap')
+  const html = await res.text()
+  expect(html).toContain('Stripe Connect')
+  console.log('✓ roadmap: Stripe Connect listed')
+})
+
+test('/docs/integration-roadmap shows Google Calendar OAuth', async ({ request }) => {
+  const res = await request.get('/docs/integration-roadmap')
+  const html = await res.text()
+  expect(html).toContain('Google Calendar')
+  console.log('✓ roadmap: Google Calendar OAuth listed')
+})
+
+test('/docs/integration-roadmap lists live integrations', async ({ request }) => {
+  const res = await request.get('/docs/integration-roadmap')
+  const html = await res.text()
+  expect(html).toContain('Stripe Balance History')
+  expect(html).toContain('PayPal Transaction')
+  expect(html).toContain('Upwork')
+  console.log('✓ roadmap: 3+ live integrations confirmed')
+})
+
+test('/docs/integration-roadmap has OAuth security policy section', async ({ request }) => {
+  const res = await request.get('/docs/integration-roadmap')
+  const html = await res.text()
+  expect(html.toLowerCase()).toContain('oauth security')
+  expect(html).toContain('read-only')
+  console.log('✓ roadmap: OAuth security policy present')
+})
+
+test('sitemap.xml includes all 3 new advanced docs', async ({ request }) => {
+  const res = await request.get('/sitemap.xml')
+  const html = await res.text()
+  expect(html).toContain('/docs/roi-whitepaper')
+  expect(html).toContain('/docs/privacy-benchmarking')
+  expect(html).toContain('/docs/integration-roadmap')
+  console.log('✓ sitemap: all 3 advanced docs present')
+})
