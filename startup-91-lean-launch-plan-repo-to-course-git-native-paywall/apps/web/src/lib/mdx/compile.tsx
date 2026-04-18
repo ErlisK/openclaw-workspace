@@ -1,4 +1,3 @@
-import type { QuizFile } from '@/lib/types/quiz';
 import { Callout } from '@/components/mdx/Callout';
 import { SandboxEmbed } from '@/components/mdx/SandboxEmbed';
 
