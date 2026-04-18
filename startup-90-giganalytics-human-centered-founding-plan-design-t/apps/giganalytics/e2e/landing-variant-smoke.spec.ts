@@ -360,3 +360,60 @@ test.describe('A11y + SEO', () => {
   })
 
 })
+
+// ─── Comparison pages smoke tests ────────────────────────────────────────────
+
+test.describe('Comparison pages', () => {
+
+  const pages = [
+    { slug: 'giganalytics-vs-toggl', keyword: 'Toggl', gaWins: true },
+    { slug: 'giganalytics-vs-quickbooks', keyword: 'QuickBooks', gaWins: true },
+    { slug: 'giganalytics-vs-harvest', keyword: 'Harvest', gaWins: true },
+    { slug: 'giganalytics-vs-wave', keyword: 'Wave', gaWins: true },
+    { slug: 'giganalytics-vs-spreadsheet', keyword: 'Spreadsheet', gaWins: true },
+  ]
+
+  test('compare hub page returns 200', async ({ request }) => {
+    const res = await request.get('/compare')
+    expect(res.status()).toBe(200)
+    const html = await res.text()
+    expect(html).toContain('GigAnalytics vs')
+    console.log('✓ /compare hub → 200')
+  })
+
+  test('compare hub lists all 5 comparisons', async ({ request }) => {
+    const res = await request.get('/compare')
+    const html = await res.text()
+    for (const p of pages) {
+      expect(html).toContain(p.keyword)
+    }
+    console.log('✓ compare hub: all 5 comparisons listed')
+  })
+
+  for (const p of pages) {
+    test(`/compare/${p.slug} returns 200`, async ({ request }) => {
+      const res = await request.get(`/compare/${p.slug}`)
+      expect(res.status()).toBe(200)
+      console.log(`✓ /compare/${p.slug} → 200`)
+    })
+
+    test(`/compare/${p.slug} contains comparison table`, async ({ request }) => {
+      const res = await request.get(`/compare/${p.slug}`)
+      const html = await res.text()
+      expect(html).toContain(p.keyword)
+      expect(html).toContain('GigAnalytics')
+      expect(html).toContain('/signup')
+      console.log(`✓ /compare/${p.slug}: comparison content + CTA present`)
+    })
+  }
+
+  test('sitemap.xml includes all 5 comparison pages', async ({ request }) => {
+    const res = await request.get('/sitemap.xml')
+    const html = await res.text()
+    for (const p of pages) {
+      expect(html).toContain(`/compare/${p.slug}`)
+    }
+    console.log('✓ sitemap: all 5 comparison pages present')
+  })
+
+})
