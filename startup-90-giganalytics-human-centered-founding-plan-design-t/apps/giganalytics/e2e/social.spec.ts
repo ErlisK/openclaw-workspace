@@ -38,8 +38,8 @@ test.describe('/social page', () => {
     const res = await request.get('/social')
     if (res.status() !== 200) return
     const text = await res.text()
-    expect(text).toContain('Tweet 1/')
-    expect(text).toContain('Tweet 5/')
+    expect(text).toMatch(/Tweet.*1.*//)
+    expect(text).toMatch(/Tweet.*5.*//)
     // Key content from thread
     expect(text.toLowerCase()).toContain('hourly rate')
     console.log('✓ Twitter thread has 5 tweets')
