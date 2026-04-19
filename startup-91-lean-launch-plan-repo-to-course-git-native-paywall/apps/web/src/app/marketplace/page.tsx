@@ -91,7 +91,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
     query = query.order('published_at', { ascending: false });
   }
 
-  const { data: rawCourses } = await query.limit(60);
+  const { data: rawCourses } = await query.limit(200);
 
   const courses: CourseCard[] = (rawCourses ?? []).map((c: unknown) => {
     const row = c as {
