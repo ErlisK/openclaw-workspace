@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, useSearchParams } from 'next/navigation'
 import type { TestJob, Project } from '@/lib/types'
@@ -26,6 +26,14 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50" />}>
+      <DashboardContent />
+    </Suspense>
+  )
+}
+
+function DashboardContent() {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
