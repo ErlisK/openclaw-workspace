@@ -182,6 +182,7 @@ export default async function LessonDetailPage({ params }: LessonDetailPageProps
           lessonSlug={lesson.slug}
           lessonTitle={lesson.title}
           existingQuizSlug={lesson.quiz_slug}
+          hasContent={Boolean(lesson.content_md?.trim())}
         />
 
       </div>

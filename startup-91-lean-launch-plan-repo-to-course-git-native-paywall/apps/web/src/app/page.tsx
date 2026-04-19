@@ -32,40 +32,40 @@ const FEATURES = [
   {
     icon: '📝',
     title: 'Markdown-first',
-    desc: 'Write lessons in plain Markdown or MDX. Frontmatter controls order, access, and quiz links.',
+    desc: 'Write lessons in plain Markdown. Frontmatter sets order, paywall, and quiz links — no CMS needed.',
   },
   {
     icon: '🔒',
-    title: 'Built-in paywall',
-    desc: 'Stripe Checkout handles payments. Lesson access is enforced server-side — no client tricks.',
+    title: 'Zero-config paywall',
+    desc: 'Set price_cents in course.yml. Stripe Checkout handles the rest — access is enforced server-side.',
   },
   {
     icon: '🧪',
-    title: 'Auto-graded quizzes',
-    desc: 'Define quizzes in YAML. Multiple-choice, true/false, short-answer. AI generation in one click.',
+    title: 'AI quiz generation',
+    desc: 'One click to generate MCQs from your lesson content. Edit, reorder, then save directly to the course.',
   },
   {
     icon: '🔀',
     title: 'Git-native versioning',
-    desc: 'Every import creates a version snapshot. Roll back or publish updates with a single push.',
+    desc: 'Every import creates a version snapshot. Roll back or publish a new version with a single push.',
   },
   {
     icon: '📊',
-    title: 'Analytics & affiliates',
-    desc: 'Track signups, completions, and revenue. Give affiliates referral links with configurable commissions.',
+    title: 'Creator analytics',
+    desc: 'See your full funnel: signups → imports → published → checkouts. Know exactly where you lose people.',
   },
   {
     icon: '🖥️',
-    title: 'Self-hostable',
-    desc: '0% platform fee on the OSS tier. Deploy on your own Vercel + Supabase in under 10 minutes.',
+    title: 'Self-hostable, 0% fee',
+    desc: 'MIT-licensed core. Deploy on your own Vercel + Supabase in 10 minutes. Keep 100% of revenue.',
   },
 ];
 
 const HOW_IT_WORKS = [
-  { step: '1', title: 'Write in your repo', desc: 'Create Markdown lessons + a course.yml file anywhere in your repo.' },
-  { step: '2', title: 'Import via CLI or dashboard', desc: 'Run `teachrepo import` or paste your GitHub URL in the dashboard.' },
-  { step: '3', title: 'Set a price', desc: 'Free, $9, $99 — set price_cents in course.yml. Stripe does the rest.' },
-  { step: '4', title: 'Publish and share', desc: 'Hit publish. Your course page is live on teachrepo.com with a shareable URL.' },
+  { step: '1', title: 'Structure your repo', desc: 'Add course.yml + a lessons/ folder to any GitHub repo. Copy from our template to skip setup.' },
+  { step: '2', title: 'Paste the GitHub URL', desc: 'Drop the URL into the import form. We fetch lessons, parse YAML, and import everything automatically.' },
+  { step: '3', title: 'Set your price', desc: 'price_cents: 0 for free, or any amount for paid. Stripe handles checkout, receipts, and refunds.' },
+  { step: '4', title: 'Publish and share', desc: 'Hit Publish. Your course is live with a shareable link, SEO metadata, and a buy button.' },
 ];
 
 export default async function HomePage() {
@@ -114,19 +114,18 @@ export default async function HomePage() {
       <section className="flex flex-col items-center justify-center px-6 py-24 text-center bg-gradient-to-b from-white to-violet-50">
         <div className="max-w-4xl">
           <div className="mb-6 inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-sm font-medium text-violet-700">
-            🚀 Now in beta — <a href="/auth/signup" className="ml-1 underline font-semibold">Get early access</a>
+            🚀 Now in beta — <a href="/auth/signup" className="ml-1 underline font-semibold">Get early access free</a>
           </div>
 
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl leading-tight">
-            Turn your{' '}
-            <span className="text-violet-600">GitHub repo</span>
-            {' '}into a paywalled course
+            Your GitHub repo is already{' '}
+            <span className="text-violet-600">a course</span>
           </h1>
 
           <p className="mb-10 text-xl text-gray-600 max-w-2xl mx-auto">
-            Write lessons in Markdown. Define quizzes in YAML frontmatter. Deploy with{' '}
+            Write lessons in Markdown. Ship quizzes in YAML. Deploy with{' '}
             <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-base">git push</code>.
-            Accept payments with Stripe. Done in under 15 minutes.
+            Charge for access via Stripe — in under 15 minutes.
           </p>
 
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
@@ -134,7 +133,7 @@ export default async function HomePage() {
               href="/auth/signup"
               className="inline-flex items-center rounded-lg bg-violet-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-violet-700 transition-colors"
             >
-              Start for free →
+              Import your first course →
             </a>
             <a
               href="#demo-courses"
@@ -145,7 +144,7 @@ export default async function HomePage() {
           </div>
 
           <p className="mt-8 text-sm text-gray-500">
-            Self-hostable · Free tier · No lock-in · <a href="mailto:hello@teachrepo.com" className="underline">hello@teachrepo.com</a>
+            Free to self-host · MIT licensed · No lock-in · <a href="mailto:hello@teachrepo.com" className="underline">hello@teachrepo.com</a>
           </p>
         </div>
       </section>
@@ -246,22 +245,22 @@ export default async function HomePage() {
       {/* ── CTA ───────────────────────────────────────────────────────────── */}
       <section className="px-6 py-20 bg-violet-600 text-white text-center">
         <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold mb-4">Ready to ship your course?</h2>
+          <h2 className="text-3xl font-bold mb-4">Ship your course this week.</h2>
           <p className="text-violet-200 mb-8 text-lg">
-            Free tier available. No credit card required to start.
+            If you can write Markdown, you can build a course. Free to start — no credit card, no lock-in.
           </p>
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <a
               href="/auth/signup"
               className="rounded-lg bg-white px-6 py-3 text-base font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
             >
-              Create your account →
+              Get started free →
             </a>
             <a
               href="/docs/quickstart"
               className="rounded-lg border border-violet-400 px-6 py-3 text-base font-medium text-white hover:bg-violet-700 transition-colors"
             >
-              Read the docs
+              Read the 5-minute guide
             </a>
           </div>
         </div>
