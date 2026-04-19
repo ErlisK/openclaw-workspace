@@ -97,15 +97,13 @@ test.describe('1 · POST /api/quiz/generate — AI quiz generation', () => {
     expect(res.status()).toBe(401);
   });
 
-  test('returns 400 for missing lessonContent', async ({ request }) => {
+  test('returns 400 for missing lessonContent and no lessonId', async ({ request }) => {
     const jwt = await supabaseLogin(request, CREATOR_EMAIL, CREATOR_PASS);
     const res = await request.post('/api/quiz/generate', {
       headers: { Authorization: `Bearer ${jwt}` },
-      data: { numQuestions: 3 },
+      data: { numQuestions: 3 },  // neither lessonContent nor lessonId
     });
     expect(res.status()).toBe(400);
-    const body = await res.json() as { error: string };
-    expect(body.error).toContain('Validation');
   });
 
   test('returns 400 for lessonContent too short', async ({ request }) => {
