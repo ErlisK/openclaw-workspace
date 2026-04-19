@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/dashboard/stats
  *
