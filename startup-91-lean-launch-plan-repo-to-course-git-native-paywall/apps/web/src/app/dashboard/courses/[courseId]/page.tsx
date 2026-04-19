@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { PublishToggle } from '@/components/dashboard/PublishToggle';
 import { VersionBadge } from '@/components/dashboard/VersionBadge';
+import { PricingForm } from '@/components/dashboard/PricingForm';
 
 interface CourseDetailPageProps {
   params: { courseId: string };
@@ -222,6 +223,20 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
 
         {/* ── Right column (1/3) ───────────────────────────────────────── */}
         <div className="space-y-6">
+
+          {/* Pricing card */}
+          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" data-testid="pricing-card">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">
+              Pricing
+            </h2>
+            <PricingForm
+              courseId={params.courseId}
+              initialPriceCents={course.price_cents}
+              initialCurrency={course.currency ?? 'usd'}
+              initialStripeProductId={course.stripe_product_id}
+              initialStripePriceId={course.stripe_price_id}
+            />
+          </section>
 
           {/* Current version card */}
           <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
