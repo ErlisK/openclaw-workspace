@@ -267,6 +267,95 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Open Source ──────────────────────────────────────────────────── */}
+      <section className="py-20 px-6 bg-gray-50 border-t border-gray-100">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-12">
+            <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-700 mb-4">
+              <span>⚡</span>
+              <span>Open Source</span>
+            </div>
+            <h2 className="text-3xl font-black text-gray-900 mb-3">Free to Use. Free to Fork.</h2>
+            <p className="text-lg text-gray-500 max-w-xl mx-auto">
+              The TeachRepo core is MIT-licensed and self-hostable. Deploy to your own Vercel, keep 100% of revenue.
+            </p>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-3 mb-10">
+            {/* Template repo */}
+            <a
+              href="https://github.com/ErlisK/teachrepo-template"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
+            >
+              <div className="text-2xl mb-3">📁</div>
+              <h3 className="font-bold text-gray-900 mb-1">Course Template</h3>
+              <p className="text-sm text-gray-500 mb-4">Official course template — Markdown lessons, YAML config, GitHub Actions CI/CD. Clone and ship.</p>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">MIT</span>
+                <span className="text-xs font-semibold text-violet-600 group-hover:underline">teachrepo-template ↗</span>
+              </div>
+            </a>
+
+            {/* CLI repo */}
+            <a
+              href="https://github.com/ErlisK/teachrepo-cli"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
+            >
+              <div className="text-2xl mb-3">⌨️</div>
+              <h3 className="font-bold text-gray-900 mb-1">TeachRepo CLI</h3>
+              <p className="text-sm text-gray-500 mb-4">Import repos, validate YAML, scaffold courses from the terminal. Works in CI/CD pipelines.</p>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">npm</span>
+                <span className="text-xs font-semibold text-violet-600 group-hover:underline">@teachrepo/cli ↗</span>
+              </div>
+            </a>
+
+            {/* Main repo */}
+            <a
+              href="https://github.com/ErlisK/teachrepo"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
+            >
+              <div className="text-2xl mb-3">⭐</div>
+              <h3 className="font-bold text-gray-900 mb-1">Platform Source</h3>
+              <p className="text-sm text-gray-500 mb-4">The full TeachRepo platform. Next.js 15, Supabase, Stripe, 500+ Playwright tests. Self-host it.</p>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">MIT</span>
+                <span className="text-xs font-semibold text-violet-600 group-hover:underline">ErlisK/teachrepo ↗</span>
+              </div>
+            </a>
+          </div>
+
+          {/* CLI install snippet */}
+          <div className="rounded-2xl bg-gray-900 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-sm font-semibold text-gray-300">Quick install</span>
+              <span className="rounded-full bg-violet-900/50 text-violet-300 text-xs px-2 py-0.5">@teachrepo/cli</span>
+            </div>
+            <pre className="text-sm text-green-400 leading-relaxed overflow-x-auto">{`npm install -g @teachrepo/cli
+
+# Scaffold a new course
+teachrepo new "Advanced Git for Engineers"
+
+# Import from GitHub
+teachrepo import --repo=https://github.com/you/your-course
+
+# Validate course.yml
+teachrepo validate --verbose`}</pre>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <a href="/docs/cli" className="text-xs font-semibold text-violet-400 hover:text-violet-300">CLI docs →</a>
+              <a href="/docs/self-hosting" className="text-xs font-semibold text-violet-400 hover:text-violet-300">Self-hosting guide →</a>
+              <a href="https://github.com/ErlisK/teachrepo-template" className="text-xs font-semibold text-violet-400 hover:text-violet-300" target="_blank" rel="noopener noreferrer">Clone template →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Footer ────────────────────────────────────────────────────────── */}
       <footer className="px-6 py-10 bg-gray-900 text-gray-400 text-sm">
         <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4">

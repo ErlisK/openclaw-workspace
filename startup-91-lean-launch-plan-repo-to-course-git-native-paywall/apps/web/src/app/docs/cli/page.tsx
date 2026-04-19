@@ -1,164 +1,174 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'CLI Reference — TeachRepo Docs',
-  description: 'Full reference for the teachrepo command-line interface.',
+  description: 'Official TeachRepo CLI (@teachrepo/cli) reference. Import repos, validate course YAML, and scaffold new courses from your terminal.',
 };
 
-function Cmd({ name, args, desc, example }: { name: string; args?: string; desc: string; example?: string }) {
+const commands = [
+  {
+    name: 'teachrepo import',
+    desc: 'Import a GitHub repository as a TeachRepo course.',
+    options: [
+      { flag: '--repo <url>', desc: 'GitHub repository URL (required)' },
+      { flag: '--token <token>', desc: 'TeachRepo API token (or set TEACHREPO_TOKEN)' },
+      { flag: '--base-url <url>', desc: 'API base URL (default: https://teachrepo.com)' },
+      { flag: '--dry-run', desc: 'Validate course.yml without importing' },
+    ],
+    examples: [
+      'teachrepo import --repo=https://github.com/you/your-course',
+      'teachrepo import --repo=https://github.com/you/your-course --dry-run',
+      'TEACHREPO_TOKEN=tr_xxx teachrepo import --repo=https://github.com/you/your-course',
+    ],
+  },
+  {
+    name: 'teachrepo validate',
+    desc: 'Validate a course.yml file without importing.',
+    options: [
+      { flag: '--file <path>', desc: 'Path to course.yml (default: ./course.yml)' },
+      { flag: '--verbose', desc: 'Show detailed validation output including summary' },
+    ],
+    examples: [
+      'teachrepo validate',
+      'teachrepo validate --verbose',
+      'teachrepo validate --file=./my-course.yml',
+    ],
+  },
+  {
+    name: 'teachrepo new <course-name>',
+    desc: 'Scaffold a new course from the official template.',
+    options: [
+      { flag: '--template <t>', desc: 'Template: basic | quiz | sandbox (default: basic)' },
+      { flag: '--slug <slug>', desc: 'URL slug (default: kebab-case of course-name)' },
+    ],
+    examples: [
+      'teachrepo new "Advanced Git for Engineers"',
+      'teachrepo new "Python Async" --template=sandbox',
+      'teachrepo new "React Patterns" --slug=react-patterns --template=quiz',
+    ],
+  },
+  {
+    name: 'teachrepo whoami',
+    desc: 'Show the authenticated TeachRepo user.',
+    options: [
+      { flag: '--token <token>', desc: 'TeachRepo API token (or set TEACHREPO_TOKEN)' },
+    ],
+    examples: [
+      'teachrepo whoami',
+    ],
+  },
+];
+
+export default function CliDocs() {
   return (
-    <div className="mb-8 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <code className="rounded bg-gray-900 px-3 py-1 text-sm font-mono text-green-300">
-          teachrepo {name}
-        </code>
-        {args && (
-          <code className="rounded bg-gray-100 px-2 py-1 text-xs font-mono text-gray-500">{args}</code>
-        )}
-      </div>
-      <p className="mb-2 text-sm text-gray-700">{desc}</p>
-      {example && (
-        <pre className="mt-3 overflow-x-auto rounded-lg bg-gray-900 px-4 py-3 text-xs text-green-300">
-          <code>{example}</code>
-        </pre>
-      )}
-    </div>
-  );
-}
+    <div className="min-h-screen bg-white">
+      <div className="mx-auto max-w-3xl px-6 py-16">
+        <div className="mb-2">
+          <Link href="/docs" className="text-sm text-gray-400 hover:text-violet-600">← Docs</Link>
+        </div>
 
-export default function CLIPage() {
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-16 lg:px-8">
-      <nav className="mb-8 text-sm">
-        <a href="/docs" className="text-violet-600 hover:underline">Docs</a>
-        <span className="mx-2 text-gray-400">/</span>
-        <span className="text-gray-600">CLI Reference</span>
-      </nav>
+        <header className="mb-10">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="text-2xl">⌨️</span>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900">CLI Reference</h1>
+              <p className="text-sm text-gray-400 font-mono">@teachrepo/cli</p>
+            </div>
+          </div>
+          <p className="text-lg text-gray-600">
+            Import repos, validate course YAML, and scaffold new courses from your terminal.
+            Works standalone and in GitHub Actions CI/CD.
+          </p>
+        </header>
 
-      <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900">CLI Reference</h1>
-      <p className="mb-12 text-lg text-gray-600">
-        The <code className="bg-gray-100 px-1.5 rounded text-sm">teachrepo</code> CLI gives you a
-        Git-native workflow for creating, importing, and deploying courses.
-      </p>
+        {/* Install */}
+        <div className="rounded-2xl bg-gray-900 p-5 mb-10">
+          <p className="text-xs text-gray-400 mb-3 font-mono">Installation</p>
+          <pre className="text-sm text-green-400 leading-relaxed">{`# Global install (recommended)
+npm install -g @teachrepo/cli
 
-      <h2 className="mb-6 text-xl font-bold text-gray-900">Authentication</h2>
+# Or use without installing
+npx @teachrepo/cli --help`}</pre>
+        </div>
 
-      <Cmd
-        name="login"
-        desc="Authenticate with your TeachRepo account. Opens a browser window to complete OAuth."
-        example="$ teachrepo login\n✓ Logged in as you@example.com"
-      />
+        {/* Auth */}
+        <section className="mb-10">
+          <h2 className="text-xl font-bold text-gray-900 mb-3">Authentication</h2>
+          <p className="text-gray-600 mb-4">
+            Set your TeachRepo API token as an environment variable, or pass it with <code className="bg-gray-100 px-1 rounded">--token</code>.
+            Get your token at <a href="/dashboard/settings" className="text-violet-600 hover:underline">Dashboard → Settings</a>.
+          </p>
+          <pre className="bg-gray-900 text-sm text-green-400 rounded-xl p-4">{`export TEACHREPO_TOKEN=tr_your_token_here`}</pre>
+        </section>
 
-      <Cmd
-        name="logout"
-        desc="Remove stored credentials from your local machine."
-        example="$ teachrepo logout\n✓ Credentials cleared"
-      />
+        {/* Commands */}
+        <section className="space-y-10">
+          <h2 className="text-xl font-bold text-gray-900">Commands</h2>
 
-      <Cmd
-        name="whoami"
-        desc="Display the currently authenticated user and account details."
-        example="$ teachrepo whoami\nyou@example.com (Pro tier)"
-      />
+          {commands.map((cmd) => (
+            <div key={cmd.name} className="border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="bg-gray-50 px-5 py-4 border-b border-gray-100">
+                <code className="text-base font-bold text-gray-900">{cmd.name}</code>
+                <p className="text-sm text-gray-500 mt-1">{cmd.desc}</p>
+              </div>
+              <div className="p-5">
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Options</h4>
+                <div className="space-y-2 mb-6">
+                  {cmd.options.map((opt) => (
+                    <div key={opt.flag} className="flex gap-4">
+                      <code className="text-sm font-mono text-violet-700 shrink-0 w-52">{opt.flag}</code>
+                      <span className="text-sm text-gray-600">{opt.desc}</span>
+                    </div>
+                  ))}
+                </div>
+                <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Examples</h4>
+                <pre className="bg-gray-900 text-sm text-green-400 rounded-xl p-4 overflow-x-auto">{cmd.examples.join('\n')}</pre>
+              </div>
+            </div>
+          ))}
+        </section>
 
-      <h2 className="mb-6 mt-10 text-xl font-bold text-gray-900">Course Management</h2>
+        {/* CI/CD */}
+        <section className="mt-14">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">GitHub Actions</h2>
+          <p className="text-gray-600 mb-4">
+            Add the CLI to your workflow to auto-import on every push to <code className="bg-gray-100 px-1 rounded">main</code>.
+            The <Link href="/docs/template" className="text-violet-600 hover:underline">course template</Link> includes this workflow pre-configured.
+          </p>
+          <pre className="bg-gray-900 text-sm text-green-400 rounded-xl p-5 overflow-x-auto">{`name: Deploy to TeachRepo
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g @teachrepo/cli
+      - run: teachrepo import --repo="\${{ github.repositoryUrl }}"
+        env:
+          TEACHREPO_TOKEN: \${{ secrets.TEACHREPO_TOKEN }}`}</pre>
+        </section>
 
-      <Cmd
-        name="init"
-        args="[directory]"
-        desc="Scaffold a new course template in the given directory (or current directory)."
-        example={`$ teachrepo init my-course\n✓ Created my-course/\n  ├── course.yml\n  ├── lessons/01-introduction.md\n  └── README.md`}
-      />
-
-      <Cmd
-        name="import"
-        args="<repo-url> [--branch <branch>] [--tag <tag>]"
-        desc="Import a GitHub repository as a TeachRepo course. Parses course.yml, creates lessons, stores version."
-        example={`$ teachrepo import https://github.com/you/my-course\n→ Fetching repo...\n→ Parsing course.yml...\n→ Created 8 lessons, 3 quizzes\n✓ Course imported: https://teachrepo.com/courses/my-course`}
-      />
-
-      <Cmd
-        name="import"
-        args="--dir <path>"
-        desc="Import from a local directory of Markdown files instead of a GitHub repo."
-        example="$ teachrepo import --dir ./my-notes"
-      />
-
-      <Cmd
-        name="publish"
-        args="<slug>"
-        desc="Toggle a course live on TeachRepo. Published courses appear in the marketplace and are accessible at their URL."
-        example="$ teachrepo publish typescript-deep-dive\n✓ Published: https://teachrepo.com/courses/typescript-deep-dive"
-      />
-
-      <Cmd
-        name="unpublish"
-        args="<slug>"
-        desc="Take a course offline (it remains in your dashboard but is not publicly accessible)."
-        example="$ teachrepo unpublish typescript-deep-dive"
-      />
-
-      <Cmd
-        name="versions"
-        args="<slug>"
-        desc="List all imported versions of a course with commit SHAs, import dates, and current pointer."
-        example={`$ teachrepo versions typescript-deep-dive\n  v-abc1234  2025-01-15  (current)\n  v-def5678  2025-01-08`}
-      />
-
-      <Cmd
-        name="promote"
-        args="<slug> <version-label>"
-        desc="Promote an older version to current. Useful for rollbacks."
-        example="$ teachrepo promote typescript-deep-dive v-def5678"
-      />
-
-      <h2 className="mb-6 mt-10 text-xl font-bold text-gray-900">Quizzes</h2>
-
-      <Cmd
-        name="quiz generate"
-        args="<slug> <lesson-slug> [--count 5]"
-        desc="Use AI to generate a quiz for a lesson. Opens an interactive editor to review questions before saving."
-        example={`$ teachrepo quiz generate typescript-deep-dive intro-to-types --count 3\n→ Generating 3 questions with AI...\n→ Reviewing...\n✓ Saved quiz with 3 questions`}
-      />
-
-      <h2 className="mb-6 mt-10 text-xl font-bold text-gray-900">Global Options</h2>
-
-      <div className="overflow-x-auto rounded-xl border border-gray-100">
-        <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Flag</th>
-              <th className="px-4 py-3 text-left font-semibold text-gray-700">Description</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {[
-              ['--help', 'Show help for any command'],
-              ['--version', 'Show CLI version'],
-              ['--token <jwt>', 'Override auth token (useful in CI)'],
-              ['--api-url <url>', 'Override API base URL (for self-hosted)'],
-              ['--json', 'Output results as JSON (useful for scripting)'],
-            ].map(([flag, desc]) => (
-              <tr key={flag}>
-                <td className="px-4 py-3 font-mono text-xs text-violet-700">{flag}</td>
-                <td className="px-4 py-3 text-gray-600">{desc}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="mt-10 rounded-xl bg-violet-50 p-6">
-        <h2 className="mb-2 font-semibold text-gray-900">Install</h2>
-        <pre className="rounded-lg bg-gray-900 px-4 py-3 text-sm text-green-300">
-          <code>npm install -g @teachrepo/cli</code>
-        </pre>
-        <p className="mt-3 text-sm text-gray-600">
-          Requires Node.js 18+. The CLI is open-source —
-          <a href="https://github.com/ErlisK/openclaw-workspace" className="ml-1 text-violet-600 hover:underline">
-            view on GitHub ↗
+        {/* Source */}
+        <div className="mt-14 rounded-2xl border border-gray-200 bg-gray-50 p-6">
+          <h3 className="font-semibold text-gray-900 mb-2">Source Code</h3>
+          <p className="text-sm text-gray-600 mb-4">The CLI is open-source under MIT. Issues and PRs welcome.</p>
+          <a
+            href="https://github.com/ErlisK/teachrepo-cli"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:border-gray-300"
+          >
+            ⭐ github.com/ErlisK/teachrepo-cli →
           </a>
-        </p>
+        </div>
+
+        <div className="mt-12 flex gap-6 text-sm">
+          <Link href="/docs" className="text-gray-400 hover:text-violet-600">← All docs</Link>
+          <Link href="/docs/template" className="text-violet-600 hover:underline">Course Template →</Link>
+        </div>
       </div>
     </div>
   );

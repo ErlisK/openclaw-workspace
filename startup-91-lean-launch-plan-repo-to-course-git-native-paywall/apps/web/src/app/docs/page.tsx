@@ -26,10 +26,16 @@ const sections = [
     icon: '🧪',
   },
   {
-    href: '/docs/cli-reference',
+    href: '/docs/cli',
     title: 'CLI Reference',
-    desc: 'Full reference for the teachrepo CLI tool — init, import, deploy, and more.',
+    desc: 'Full reference for @teachrepo/cli — import, validate, new, whoami. Works in CI/CD.',
     icon: '⌨️',
+  },
+  {
+    href: '/docs/template',
+    title: 'Course Template',
+    desc: 'Official course template with GitHub Actions CI/CD. Clone it and ship your first course.',
+    icon: '📁',
   },
   {
     href: '/docs/payments-affiliates',
