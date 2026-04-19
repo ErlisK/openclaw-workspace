@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
     .select('id')
     .eq('user_id', user.id)
     .eq('course_id', courseId)
-    .is('revoked_at', null)
+    .is('entitlement_revoked_at', null)
     .maybeSingle();
 
   if (existingEnrollment) {

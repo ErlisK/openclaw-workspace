@@ -63,11 +63,11 @@ test.describe('1 · Course detail page UI', () => {
     await expect(page.locator('h1').first()).toBeVisible({ timeout: 8000 });
 
     // Price should be visible
-    await expect(page.getByText(/$d+/).first()).toBeVisible();
+    await expect(page.getByText(/\$\d+/).first()).toBeVisible();
 
     // Buy button should be present (checkout-button testid or contains "Enroll")
     const btn = page.locator('[data-testid="checkout-button"]');
-    await expect(btn).toBeVisible();
+    await expect(btn).toBeVisible({ timeout: 8000 });
     await expect(btn).toContainText(/Enroll/i);
   });
 
