@@ -5,10 +5,15 @@ import { createServiceClient } from '@/lib/supabase/service';
 
 const VALID_EVENT_NAMES = [
   'signup_completed', 'login', 'logout',
+  'onboarding_started',
   'repo_import_started', 'repo_import_completed',
-  'course_published', 'course_unpublished',
-  'checkout_started', 'checkout_completed',
-  'quiz_submitted', 'lesson_viewed', 'sandbox_viewed',
+  'course_created', 'course_published', 'course_unpublished',
+  'checkout_started', 'checkout_initiated', 'checkout_completed',
+  'entitlement_granted',
+  'quiz_submitted', 'quiz_attempted',
+  'ai_quiz_generated',
+  'lesson_viewed', 'sandbox_viewed', 'sandbox_opened',
+  'affiliate_link_clicked',
 ] as const;
 
 const EventSchema = z.object({
