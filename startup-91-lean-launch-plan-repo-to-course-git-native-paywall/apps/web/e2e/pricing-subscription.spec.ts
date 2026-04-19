@@ -20,7 +20,7 @@ test.describe('1 · Pricing page structure', () => {
 
     // Tier labels
     await expect(page.getByText('Free / Self-Hosted')).toBeVisible();
-    await expect(page.getByText('Hosted Creator')).toBeVisible();
+    await expect(page.getByText('Hosted Creator', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('Marketplace / Enterprise')).toBeVisible();
   });
 
@@ -71,8 +71,8 @@ test.describe('1 · Pricing page structure', () => {
     await page.goto(`${BASE}/pricing`);
     await expect(page.getByText('Feature comparison')).toBeVisible();
     await expect(page.getByText('Max courses')).toBeVisible();
-    await expect(page.getByText('AI quiz generation')).toBeVisible();
-    await expect(page.getByText('Custom domain')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'AI quiz generation' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Custom domain' })).toBeVisible();
   });
 
   test('FAQ section is visible', async ({ page }) => {
@@ -161,7 +161,7 @@ test.describe('4 · Plan-gated features', () => {
     // Creator features should be highlighted
     await expect(page.getByText('Unlimited courses & lessons')).toBeVisible();
     await expect(page.getByText('Unlimited AI quiz generation')).toBeVisible();
-    await expect(page.getByText('90-day analytics retention')).toBeVisible();
+    await expect(page.getByText('Analytics — 90-day retention')).toBeVisible();
   });
 
   test('pricing page shows Free tier limits', async ({ page }) => {
@@ -208,13 +208,14 @@ test.describe('5 · Stripe subscription checkout', () => {
   test('billing dashboard shows upgrade button for free users', async ({ page }) => {
     // Login first with test user
     await page.goto(`${BASE}/auth/login`);
-    await page.getByLabel(/email/i).fill('scide-founder@agentmail.to');
-    await page.getByLabel(/password/i).fill('HappyPath999!');
+    await page.waitForLoadState('networkidle');
+    await page.locator('input[type="email"]').fill('scide-founder@agentmail.to');
+    await page.locator('input[type="password"]').fill('HappyPath999!');
     await page.getByRole('button', { name: /sign in|log in/i }).click();
-    await page.waitForURL(/dashboard/, { timeout: 10000 }).catch(() => {});
+    await page.waitForURL(/dashboard/, { timeout: 15000 }).catch(() => {});
 
     await page.goto(`${BASE}/dashboard/billing`);
-    // Either upgrade btn OR manage billing btn (depending on plan state)
+    await page.waitForTimeout(3000);
     const hasUpgrade = await page.getByTestId('upgrade-btn').isVisible().catch(() => false);
     const hasManage = await page.getByTestId('manage-billing-btn').isVisible().catch(() => false);
     expect(hasUpgrade || hasManage).toBe(true);

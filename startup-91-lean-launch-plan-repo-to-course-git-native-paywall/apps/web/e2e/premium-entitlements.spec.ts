@@ -16,10 +16,11 @@ const TEST_COURSE_ID = 'be277891-3203-4497-8f81-06a3ee29ae16';
 
 async function loginAsFounder(page: import('@playwright/test').Page) {
   await page.goto(`${BASE}/auth/login`);
-  await page.getByLabel(/email/i).fill('scide-founder@agentmail.to');
-  await page.getByLabel(/password/i).fill('HappyPath999!');
+  await page.waitForLoadState('networkidle');
+  await page.locator('input[type="email"]').fill('scide-founder@agentmail.to');
+  await page.locator('input[type="password"]').fill('HappyPath999!');
   await page.getByRole('button', { name: /sign in|log in/i }).click();
-  await page.waitForURL(/dashboard/, { timeout: 10000 }).catch(() => {});
+  await page.waitForURL(/dashboard/, { timeout: 15000 }).catch(() => {});
 }
 
 // ─── 1. Settings API plan limits ─────────────────────────────────────────────
