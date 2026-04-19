@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { track } from '@/lib/analytics/server';
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -28,8 +29,14 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return response;
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      // Track signup_completed only on initial email confirmation (not password reset)
+      if (type !== 'recovery' && data?.user) {
+        void track({ eventName: 'signup_completed', userId: data.user.id, properties: { email: data.user.email } });
+      }
+      return response;
+    }
   }
 
   return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { resolveUser } from '@/lib/auth/resolve-user';
+import { trackQuizSubmitted } from '@/lib/analytics/server';
 
 const SubmitSchema = z.object({
   quiz_id: z.string().uuid(),
@@ -142,6 +143,15 @@ export async function POST(req: NextRequest) {
 
   // Insert attempt rows
   await serviceSupa.from('quiz_attempts').insert(attemptRows).then(() => null, () => null);
+
+  // Track quiz submission
+  void trackQuizSubmitted({
+    userId: user.id,
+    courseId: parsed.data.course_id,
+    lessonId: parsed.data.lesson_id ?? null,
+    quizId: quiz.id,
+    properties: { score, passed, correct, total },
+  });
 
   return NextResponse.json({ score, passed, correct, total, feedback });
 }

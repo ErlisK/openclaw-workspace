@@ -1,10 +1,24 @@
+'use client';
+import { useEffect } from 'react';
+import { trackClient } from '@/lib/analytics/client';
+
 interface SandboxEmbedProps {
   url: string | null;
   enrolled: boolean;
   title?: string;
+  courseId?: string;
+  lessonId?: string;
 }
 
-export function SandboxEmbed({ url, enrolled, title = 'Live Sandbox' }: SandboxEmbedProps) {
+export function SandboxEmbed({ url, enrolled, title = 'Live Sandbox', courseId, lessonId }: SandboxEmbedProps) {
+  // Track sandbox_viewed once when the iframe renders for an enrolled user
+  useEffect(() => {
+    if (url && enrolled) {
+      trackClient('sandbox_viewed', { course_id: courseId ?? null, lesson_id: lessonId ?? null });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [url, enrolled]);
+
   if (!url) return null;
 
   if (!enrolled) {

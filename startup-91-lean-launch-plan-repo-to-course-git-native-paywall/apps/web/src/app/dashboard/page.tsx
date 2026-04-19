@@ -33,6 +33,9 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
+          <a href="/dashboard/analytics" className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Analytics
+          </a>
           <a href="/dashboard/settings" className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
             Settings
           </a>

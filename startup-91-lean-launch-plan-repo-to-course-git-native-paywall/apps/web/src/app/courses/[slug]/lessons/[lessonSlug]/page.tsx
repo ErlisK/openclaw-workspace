@@ -7,6 +7,7 @@ import { compileLessonMdx } from '@/lib/mdx/compile';
 import { Quiz } from '@/components/lesson/Quiz';
 import { SandboxEmbed } from '@/components/lesson/SandboxEmbed';
 import { PaywallGate } from '@/components/lesson/PaywallGate';
+import { trackLessonViewed } from '@/lib/analytics/server';
 
 interface LessonPageProps {
   params: { slug: string; lessonSlug: string };
@@ -60,7 +61,16 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   if (!lesson) notFound();
 
   // ── 3. Entitlement check ─────────────────────────────────────────────────
+  const supabaseUser = await supabase.auth.getUser().then(r => r.data.user).catch(() => null);
   const { enrolled } = await checkEntitlement({ courseId: course.id });
+
+  // Track lesson viewed (fire-and-forget, non-blocking)
+  void trackLessonViewed({
+    userId: supabaseUser?.id ?? null,
+    courseId: course.id,
+    lessonId: lesson.id,
+    properties: { enrolled, course_slug: params.slug, lesson_slug: params.lessonSlug },
+  });
 
   // Determine if user just returned from Stripe Checkout
   const returningFromCheckout = !!searchParams.unlocking || !!searchParams.session_id;

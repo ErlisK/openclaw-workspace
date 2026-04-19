@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { resolveUser } from '@/lib/auth/resolve-user';
+import { trackCoursePublished } from '@/lib/analytics/server';
 
 /**
  * PATCH /api/courses/[courseId]/publish
@@ -61,6 +62,11 @@ export async function PATCH(
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Track publish event (only when publishing, not unpublishing)
+  if (body.published) {
+    void trackCoursePublished({ userId: user.id, courseId: params.courseId });
   }
 
   return NextResponse.json({

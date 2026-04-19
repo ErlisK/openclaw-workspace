@@ -4,6 +4,7 @@ import { stripe, APP_URL } from '@/lib/stripe/client';
 import { ensureCourseStripeProduct } from '@/lib/stripe/product';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
+import { trackCheckoutStarted } from '@/lib/analytics/server';
 
 const CheckoutRequestSchema = z.object({
   courseId: z.string().uuid(),
@@ -196,5 +197,13 @@ export async function POST(req: NextRequest) {
     affiliate_id: affiliateRecordId,
   });
 
+  // Track checkout started
+  void trackCheckoutStarted({
+    userId: user.id,
+    courseId,
+    properties: { amount_cents: course.price_cents, currency: course.currency, stripe_session_id: session.id },
+  });
+
   return NextResponse.json({ url: session.url });
 }
+

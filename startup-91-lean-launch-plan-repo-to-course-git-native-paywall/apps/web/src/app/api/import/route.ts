@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { resolveUser } from '@/lib/auth/resolve-user';
+import { trackRepoImportStarted, trackRepoImportCompleted } from '@/lib/analytics/server';
 
 // ────────────────────────────────────────────────────────────────────────────
 // GitHub helpers
@@ -431,6 +432,9 @@ export async function POST(req: NextRequest) {
   }).select('id').single();
   const importId = importRecord.data?.id as string | undefined;
 
+  // Track import started
+  void trackRepoImportStarted({ userId: user.id, properties: { repo_url, branch: branch ?? tag ?? 'main' } });
+
   const fail = async (msg: string, status = 422) => {
     if (importId) {
       await serviceSupa.from('repo_imports').update({ status: 'failed', error_log: msg }).eq('id', importId)
@@ -717,6 +721,19 @@ export async function POST(req: NextRequest) {
         error_log: importErrors.length > 0 ? JSON.stringify(importErrors) : null,
       }).eq('id', importId).then(() => null, () => null);
     }
+
+    // Track import completed
+    await trackRepoImportCompleted({
+      userId: user.id,
+      courseId,
+      properties: {
+        course_slug: slug,
+        lessons: lessonRows.length,
+        quizzes: quizCount,
+        version_label: versionLabel,
+        status: importStatus,
+      },
+    });
 
     return NextResponse.json({
       success: true,
