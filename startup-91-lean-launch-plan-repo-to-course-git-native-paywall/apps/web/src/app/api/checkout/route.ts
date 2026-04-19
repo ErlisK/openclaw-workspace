@@ -33,6 +33,7 @@ function normalizeBody(body: unknown): unknown {
  *   - Embeds client_reference_id = user_id (verified on return).
  */
 export async function POST(req: NextRequest) {
+  try {
   // 1. Parse + validate BEFORE auth (bad input → 400, not 401)
   let body: unknown;
   try {
@@ -212,5 +213,19 @@ export async function POST(req: NextRequest) {
   });
 
   return NextResponse.json({ url: session.url });
+  } catch (err) {
+    console.error('[checkout] uncaught error:', err);
+    return NextResponse.json({ error: (err as Error).message ?? 'Internal server error' }, { status: 500 });
+  }
+}
+
+// Global error boundary — surfaces uncaught exceptions as JSON 500 (tracking gap fix)
+export async function withErrorBoundary(handler: (req: NextRequest) => Promise<Response>, req: NextRequest) {
+  try {
+    return await handler(req);
+  } catch (err) {
+    console.error('[checkout] uncaught error:', err);
+    return NextResponse.json({ error: (err as Error).message ?? 'Internal server error' }, { status: 500 });
+  }
 }
 

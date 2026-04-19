@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
+import { trackSignupCompleted } from '@/lib/analytics/server';
 
 const SignupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -32,6 +33,11 @@ export async function POST(req: NextRequest) {
     }
     console.error('[auth/signup] Supabase error:', error.message);
     return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
+  }
+
+  // Track signup event (fire-and-forget — don't block response)
+  if (data.user?.id) {
+    void trackSignupCompleted({ userId: data.user.id, properties: { email } });
   }
 
   return NextResponse.json(
