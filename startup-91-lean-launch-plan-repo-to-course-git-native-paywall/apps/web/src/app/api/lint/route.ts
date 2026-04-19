@@ -17,6 +17,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { lintBatch, type BatchLintResult } from '@/lib/lint/frontmatter';
+import { createServerClient } from '@/lib/supabase/server';
+import { trackLintCheckRun } from '@/lib/analytics/server';
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -70,10 +72,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  // Try direct lint first
+  // Direct lint
   const directParsed = DirectLintSchema.safeParse(body);
   if (directParsed.success) {
     const result: BatchLintResult = lintBatch(directParsed.data.files);
+    // Track lint usage (fire-and-forget, unauthenticated ok)
+    const supabase = createServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      void trackLintCheckRun({ userId: user.id, properties: { mode: 'direct', files: directParsed.data.files.length, errors: result.errorCount } });
+    }
     return NextResponse.json(result);
   }
 

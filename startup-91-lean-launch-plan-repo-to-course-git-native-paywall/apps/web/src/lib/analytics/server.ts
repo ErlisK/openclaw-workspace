@@ -20,7 +20,8 @@ export type EventName =
   | 'onboarding_started'
   | 'entitlement_granted'
   | 'affiliate_link_clicked'
-  | 'ai_quiz_generated';
+  | 'ai_quiz_generated'
+  | 'lint_check_run';
 
 export interface TrackOptions {
   eventName: EventName;
@@ -123,3 +124,9 @@ export const trackSandboxViewed = (opts: Omit<TrackOptions, 'eventName'>) =>
 
 export const trackEntitlementGranted = (opts: Omit<TrackOptions, 'eventName'>) =>
   track({ ...opts, eventName: 'entitlement_granted' });
+
+export const trackAiQuizGenerated = (opts: Omit<TrackOptions, 'eventName'>) =>
+  track({ ...opts, eventName: 'ai_quiz_generated' });
+
+export const trackLintCheckRun = (opts: Omit<TrackOptions, 'eventName'>) =>
+  track({ ...opts, eventName: 'lint_check_run' });

@@ -17,7 +17,10 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+import { trackAiQuizGenerated } from '@/lib/analytics/server';
 import { resolveUser } from '@/lib/auth/resolve-user';
+import { createServiceClient } from '@/lib/supabase/service';
+
 import { generateObject } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
 import { z } from 'zod';
@@ -116,7 +119,6 @@ export async function POST(req: NextRequest) {
   // If lessonId provided but no content, fetch from DB
   let lessonContent = inputContent || '';
   if (lessonId && !lessonContent) {
-    const { createServiceClient } = await import('@/lib/supabase/service');
     const supa = createServiceClient();
     const { data: lessonRow } = await supa
       .from('lessons')
@@ -184,6 +186,9 @@ Generate ${numQuestions} quiz questions.`,
     });
 
     const yaml = questionsToYaml(quizId, `${lessonTitle} — Check Your Understanding`, quiz.questions);
+
+    // Track AI quiz generation for discovery analytics
+    void trackAiQuizGenerated({ userId: user.id, properties: { lessonId, quizId, numGenerated: quiz.questions.length } });
 
     return NextResponse.json({
       yaml,
