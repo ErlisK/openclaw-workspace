@@ -5,11 +5,12 @@
  * Returns { enrolled: boolean } — used by the PaywallGate component to
  * auto-unlock content after Stripe Checkout returns without a full page reload.
  *
- * Auth: SSR cookie (no Bearer for this endpoint — it's called from the browser)
+ * Auth: SSR cookie OR Bearer token (for API clients and tests)
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { checkEntitlement } from '@/lib/entitlement/check';
+import { resolveUser } from '@/lib/auth/resolve-user';
+import { createServiceClient } from '@/lib/supabase/service';
 
 export async function GET(req: NextRequest) {
   const courseId = req.nextUrl.searchParams.get('courseId');
@@ -17,6 +18,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Missing or invalid courseId' }, { status: 400 });
   }
 
-  const result = await checkEntitlement({ courseId });
-  return NextResponse.json({ enrolled: result.enrolled, userId: result.userId });
+  const serviceSupa = createServiceClient();
+
+  // Check if course is free — free courses are always enrolled
+  const { data: course } = await serviceSupa
+    .from('courses')
+    .select('price_cents')
+    .eq('id', courseId)
+    .single();
+
+  if (course?.price_cents === 0) {
+    return NextResponse.json({ enrolled: true, userId: null });
+  }
+
+  // resolveUser handles both Bearer token (API clients/tests) and SSR cookies (browser)
+  const user = await resolveUser(req);
+  if (!user) {
+    return NextResponse.json({ enrolled: false, userId: null });
+  }
+
+  // Check enrollment row
+  const { data } = await serviceSupa
+    .from('enrollments')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('course_id', courseId)
+    .is('entitlement_revoked_at', null)
+    .maybeSingle();
+
+  return NextResponse.json({ enrolled: !!data, userId: user.id });
 }
