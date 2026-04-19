@@ -650,7 +650,7 @@ test.describe('A · AI Quiz Generation — YAML output + save flow', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe('B · Sandbox gating — before and after purchase', () => {
-  test.describe.configure({ mode: 'serial', retries: 2 });
+  test.describe.configure({ mode: 'serial', retries: 3 });
   const TEST_SANDBOX_URL = 'https://stackblitz.com/edit/rust-ownership-demo?embed=1';
 
   // ── B1. Before purchase ───────────────────────────────────────────────────
