@@ -1,7 +1,9 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
+import { createServiceClient } from '@/lib/supabase/service';
 import { VersionBadge } from '@/components/dashboard/VersionBadge';
+import { PromoteButton } from '@/components/dashboard/PromoteButton';
 
 export const metadata: Metadata = {
   title: 'Version History — Creator Dashboard',
@@ -38,10 +40,12 @@ export default async function VersionHistoryPage({ params }: VersionHistoryPageP
     );
   }
 
+  const serviceSupa = createServiceClient();
+
   // Fetch course — must belong to the authenticated creator
-  const { data: course } = await supabase
+  const { data: course } = await serviceSupa
     .from('courses')
-    .select('id, slug, title, repo_url, default_branch, version')
+    .select('id, slug, title, repo_url, git_branch, version')
     .eq('id', params.courseId)
     .eq('creator_id', user.id)
     .single();
@@ -49,7 +53,7 @@ export default async function VersionHistoryPage({ params }: VersionHistoryPageP
   if (!course) notFound();
 
   // Fetch version history
-  const { data: versions } = await supabase
+  const { data: versions } = await serviceSupa
     .from('course_versions')
     .select('id, commit_sha, branch, tag, version_label, lesson_count, quiz_count, is_current, published_at, imported_at')
     .eq('course_id', params.courseId)
@@ -107,7 +111,7 @@ export default async function VersionHistoryPage({ params }: VersionHistoryPageP
               {course.repo_url.replace('https://github.com/', '')}
             </a>
             <span>·</span>
-            <span>Default branch: <code className="font-mono">{course.default_branch ?? 'main'}</code></span>
+            <span>Default branch: <code className="font-mono">{course.git_branch ?? 'main'}</code></span>
           </div>
         )}
       </div>
@@ -245,17 +249,11 @@ function VersionRow({
       {/* Actions */}
       <td className="px-4 py-3">
         {!version.is_current && (
-          <form
-            method="POST"
-            action={`/dashboard/courses/${courseId}/versions/${version.id}/promote`}
-          >
-            <button
-              type="submit"
-              className="text-xs font-medium text-violet-600 hover:text-violet-700 hover:underline dark:text-violet-400"
-            >
-              Set as current
-            </button>
-          </form>
+          <PromoteButton
+            courseId={courseId}
+            versionId={version.id}
+            versionLabel={version.version_label}
+          />
         )}
       </td>
     </tr>

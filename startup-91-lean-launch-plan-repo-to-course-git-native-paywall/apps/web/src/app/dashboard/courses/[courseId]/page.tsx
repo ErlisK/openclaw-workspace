@@ -34,7 +34,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
   const { data: course } = await serviceSupa
     .from('courses')
     .select(`
-      id, slug, title, description, repo_url, default_branch,
+      id, slug, title, description, repo_url, git_branch,
       published, published_at, price_cents, currency, pricing_model,
       stripe_product_id, stripe_price_id,
       version, created_at, updated_at, creator_id
@@ -293,9 +293,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                 <span>⎇</span>
                 <span>{course.repo_url.replace('https://github.com/', '')}</span>
               </a>
-              {course.default_branch && (
+              {course.git_branch && (
                 <p className="mt-1 text-xs text-gray-400">
-                  Default branch: <code className="font-mono">{course.default_branch}</code>
+                  Default branch: <code className="font-mono">{course.git_branch}</code>
                 </p>
               )}
             </section>

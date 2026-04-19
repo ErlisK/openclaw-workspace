@@ -308,6 +308,8 @@ async function handleDirectImport(
   if (data.gitSha) {
     const shortSha = data.gitSha.slice(0, 7);
     const label = `v-${shortSha}`;
+    // Clear existing current before inserting new one
+    await serviceSupa.from('course_versions').update({ is_current: false, is_latest: false }).eq('course_id', courseId);
     const { data: ver } = await serviceSupa.from('course_versions').insert({
       course_id: courseId,
       repo_url: data.repoUrl || '',
@@ -316,9 +318,15 @@ async function handleDirectImport(
       version_label: label,
       version: label,
       is_current: true,
+      is_latest: true,
       lesson_count: data.lessons.length,
+      quiz_count: data.quizzes.length,
+      imported_at: new Date().toISOString(),
+      published_at: new Date().toISOString(),
     }).select('id').single();
     versionId = ver?.id || '';
+    // Update course version field
+    await serviceSupa.from('courses').update({ version: label }).eq('id', courseId);
   }
 
   // Upsert lessons
