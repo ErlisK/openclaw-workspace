@@ -67,7 +67,9 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
       lessons(id, is_preview, estimated_minutes),
       enrollments(id)
     `)
-    .eq('published', true);
+    .eq('published', true)
+    .not('description', 'is', null)
+    .neq('description', '');
 
   if (searchParams.price === 'free') {
     query = query.eq('price_cents', 0);
