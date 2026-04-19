@@ -14,10 +14,28 @@ const sections = [
     icon: '🚀',
   },
   {
+    href: '/docs/repo-format',
+    title: 'Repo Format',
+    desc: 'Directory layout, file naming conventions, and course.yml + lesson frontmatter fields.',
+    icon: '📁',
+  },
+  {
+    href: '/docs/quizzes',
+    title: 'Quizzes YAML Schema',
+    desc: 'Full schema for auto-graded quizzes — MCQ, true/false, short answer, and AI generation.',
+    icon: '🧪',
+  },
+  {
     href: '/docs/cli',
     title: 'CLI Reference',
     desc: 'Full reference for the teachrepo CLI tool — init, import, deploy, and more.',
     icon: '⌨️',
+  },
+  {
+    href: '/docs/payments-affiliates',
+    title: 'Payments & Affiliates',
+    desc: 'Stripe checkout integration, pricing models, affiliate links, and commission payouts.',
+    icon: '💳',
   },
   {
     href: '/docs/course-yaml',
@@ -29,7 +47,7 @@ const sections = [
     href: '/docs/pricing',
     title: 'Pricing & Billing',
     desc: 'Understand TeachRepo\'s pricing tiers, revenue share, and paywall mechanics.',
-    icon: '💳',
+    icon: '💰',
   },
   {
     href: '/docs/self-hosting',

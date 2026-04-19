@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 
 export default async function DashboardPage() {
   const supabase = createServerClient();
@@ -22,6 +23,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 lg:px-8">
+      {/* Onboarding checklist — hides after dismissal (localStorage) */}
+      <OnboardingChecklist />
       {/* Header */}
       <div className="mb-8 flex items-start justify-between">
         <div>
