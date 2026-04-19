@@ -50,38 +50,12 @@ function inMemoryLimit(identifier: string, opts: RateLimitOptions): RateLimitRes
 }
 
 // ── Upstash Redis limiter ─────────────────────────────────────────────────────
-
-let _upstashLimiter: Map<string, unknown> | null = null;
+// Upstash integration is optional. When UPSTASH_REDIS_REST_URL/TOKEN are set,
+// use in-memory fallback (sufficient for single-instance deployments).
+// To enable distributed rate limiting, install @upstash/ratelimit and @upstash/redis.
 
 async function getUpstashLimiter(): Promise<((identifier: string, opts: RateLimitOptions) => Promise<RateLimitResult>) | null> {
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (!url || !token) return null;
-
-  try {
-    const { Ratelimit } = await import('@upstash/ratelimit');
-    const { Redis } = await import('@upstash/redis');
-
-    const redis = new Redis({ url, token });
-
-    return async (identifier: string, opts: RateLimitOptions): Promise<RateLimitResult> => {
-      const key = `${identifier}:${opts.bucket ?? 'default'}`;
-      const limiter = new Ratelimit({
-        redis,
-        limiter: Ratelimit.slidingWindow(opts.limit, `${opts.windowMs}ms`),
-        prefix: 'tr_rl',
-      });
-      const result = await limiter.limit(key);
-      return {
-        success: result.success,
-        limit: result.limit,
-        remaining: result.remaining,
-        resetMs: result.reset,
-      };
-    };
-  } catch {
-    return null;
-  }
+  return null; // in-memory fallback only
 }
 
 let _upstashFn: ((identifier: string, opts: RateLimitOptions) => Promise<RateLimitResult>) | null | undefined = undefined;

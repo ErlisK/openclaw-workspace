@@ -219,13 +219,3 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Global error boundary — surfaces uncaught exceptions as JSON 500 (tracking gap fix)
-export async function withErrorBoundary(handler: (req: NextRequest) => Promise<Response>, req: NextRequest) {
-  try {
-    return await handler(req);
-  } catch (err) {
-    console.error('[checkout] uncaught error:', err);
-    return NextResponse.json({ error: (err as Error).message ?? 'Internal server error' }, { status: 500 });
-  }
-}
-
