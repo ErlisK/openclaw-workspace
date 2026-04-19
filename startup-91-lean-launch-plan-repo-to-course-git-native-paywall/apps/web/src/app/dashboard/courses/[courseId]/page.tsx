@@ -198,9 +198,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                     </span>
                     <div className="min-w-0 flex-1">
                       <a
-                        href={`/courses/${course.slug}/lessons/${lesson.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`/dashboard/courses/${params.courseId}/lessons/${lesson.id}`}
                         className="text-sm font-medium text-gray-800 hover:text-violet-600 truncate block"
                       >
                         {lesson.title}

@@ -24,7 +24,8 @@ import { z } from 'zod';
 
 // ── Input validation ─────────────────────────────────────────────────────────
 const RequestSchema = z.object({
-  lessonContent: z.string().min(50, 'Lesson content must be at least 50 characters').max(50000),
+  lessonContent: z.string().max(50000).optional(),  // optional if lessonId provided
+  lessonId: z.string().uuid().optional(),            // fetch content from DB if provided
   numQuestions: z.number().int().min(1).max(10).default(3),
   quizId: z.string().optional(),
 });
@@ -110,7 +111,32 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { lessonContent, numQuestions, quizId: inputQuizId } = parsed.data;
+  const { lessonContent: inputContent, lessonId, numQuestions, quizId: inputQuizId } = parsed.data;
+
+  // If lessonId provided but no content, fetch from DB
+  let lessonContent = inputContent || '';
+  if (lessonId && !lessonContent) {
+    const { createServiceClient } = await import('@/lib/supabase/service');
+    const supa = createServiceClient();
+    const { data: lessonRow } = await supa
+      .from('lessons')
+      .select('content_md, title, slug')
+      .eq('id', lessonId)
+      .single();
+    if (!lessonRow) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
+    lessonContent = lessonRow.content_md || '';
+    if (!lessonContent || lessonContent.length < 50) {
+      return NextResponse.json(
+        { error: 'Lesson content is too short to generate a quiz (need at least 50 chars)' },
+        { status: 400 },
+      );
+    }
+  } else if (!lessonContent || lessonContent.length < 50) {
+    return NextResponse.json(
+      { error: 'lessonContent must be at least 50 characters, or provide a lessonId' },
+      { status: 400 },
+    );
+  }
 
   // Extract lesson title from frontmatter (for quiz title)
   const titleMatch = lessonContent.match(/^---\r?\n[\s\S]*?title:\s*["']?([^"'\n]+)["']?/m);
