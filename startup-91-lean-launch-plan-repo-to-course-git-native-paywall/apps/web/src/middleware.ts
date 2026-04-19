@@ -4,8 +4,8 @@ import { rateLimit } from '@/lib/rate-limit';
 
 // ── Rate-limit buckets ────────────────────────────────────────────────────────
 const RATE_LIMITS: { pattern: RegExp; limit: number; windowMs: number; bucket: string }[] = [
-  // Import is expensive (hits GitHub API) — 5 req/min per IP
-  { pattern: /^\/api\/import/, limit: 5, windowMs: 60_000, bucket: 'import' },
+  // Import is expensive (hits GitHub API) — 20 req/min per IP
+  { pattern: /^\/api\/import/, limit: 20, windowMs: 60_000, bucket: 'import' },
   // Auth endpoints — 10 req/min
   { pattern: /^\/api\/auth/, limit: 10, windowMs: 60_000, bucket: 'auth' },
   // Checkout — 10 req/min

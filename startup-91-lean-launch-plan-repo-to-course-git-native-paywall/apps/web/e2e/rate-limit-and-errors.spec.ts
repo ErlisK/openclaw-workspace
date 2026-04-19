@@ -70,9 +70,9 @@ test.describe('2 · Rate limiting — /api/import', () => {
   });
 
   test('excessive requests to import return 429', async ({ request }) => {
-    // Fire 7 rapid requests to trigger the limit (5/min)
+    // Fire 23 rapid requests to trigger the limit (20/min)
     const results: number[] = [];
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 23; i++) {
       const res = await request.post('/api/import', {
         data: { repo_url: 'https://github.com/octocat/Hello-World' },
       });
