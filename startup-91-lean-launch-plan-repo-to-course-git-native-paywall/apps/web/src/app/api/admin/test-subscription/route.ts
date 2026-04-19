@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
     const { data: creator } = await supa
       .from('creators')
       .select('stripe_customer_id')
-      .eq('user_id', targetUserId)
+      .or(`user_id.eq.${targetUserId},id.eq.${targetUserId}`)
       .maybeSingle();
 
     let customerId = creator?.stripe_customer_id;

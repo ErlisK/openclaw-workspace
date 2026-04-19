@@ -1,17 +1,33 @@
 /**
  * Server-side subscription helpers.
  * Reads the creator's plan from the `creators` table.
+ *
+ * NOTE: The creators table uses `id` as the primary key matching auth.users.id.
+ * `user_id` is a secondary column that may be NULL on older rows.
+ * We check both `user_id = userId` and `id = userId` for compatibility.
  */
 import { createServiceClient } from '@/lib/supabase/service';
 import type { CreatorPlan } from './plans';
 
 export async function getCreatorPlan(userId: string): Promise<CreatorPlan> {
   const supa = createServiceClient();
-  const { data } = await supa
+
+  // Try user_id column first (new rows)
+  let { data } = await supa
     .from('creators')
     .select('creator_plan, plan_expires_at')
     .eq('user_id', userId)
     .maybeSingle();
+
+  // Fall back to id column (legacy rows where user_id IS NULL)
+  if (!data) {
+    const res = await supa
+      .from('creators')
+      .select('creator_plan, plan_expires_at')
+      .eq('id', userId)
+      .maybeSingle();
+    data = res.data;
+  }
 
   if (!data) return 'free';
 
@@ -34,21 +50,45 @@ export async function setCreatorPlan(
 ): Promise<void> {
   const supa = createServiceClient();
 
-  const upsertData: Record<string, unknown> = {
-    user_id: userId,
+  const updateData: Record<string, unknown> = {
     creator_plan: plan,
     updated_at: new Date().toISOString(),
   };
 
-  if (opts?.stripeCustomerId) upsertData.stripe_customer_id = opts.stripeCustomerId;
-  if (opts?.stripeSubscriptionId !== undefined) upsertData.stripe_subscription_id = opts.stripeSubscriptionId;
+  if (opts?.stripeCustomerId) updateData.stripe_customer_id = opts.stripeCustomerId;
+  if (opts?.stripeSubscriptionId !== undefined) updateData.stripe_subscription_id = opts.stripeSubscriptionId;
   if (opts?.planExpiresAt !== undefined) {
-    upsertData.plan_expires_at = opts.planExpiresAt ? opts.planExpiresAt.toISOString() : null;
+    updateData.plan_expires_at = opts.planExpiresAt ? opts.planExpiresAt.toISOString() : null;
   }
 
-  await supa
+  // Try updating by user_id first, fall back to id (legacy rows)
+  const byUserIdRes = await supa
     .from('creators')
-    .upsert(upsertData, { onConflict: 'user_id' });
+    .update(updateData)
+    .eq('user_id', userId)
+    .select('id');
+
+  if (!byUserIdRes.data?.length) {
+    // No row matched by user_id — try by id (legacy) or insert new
+    const byIdRes = await supa
+      .from('creators')
+      .update(updateData)
+      .eq('id', userId)
+      .select('id');
+
+    if (!byIdRes.data?.length) {
+      // Insert new creator row
+      await supa.from('creators').insert({
+        id: userId,
+        user_id: userId,
+        creator_plan: plan,
+        stripe_customer_id: opts?.stripeCustomerId ?? null,
+        stripe_subscription_id: opts?.stripeSubscriptionId ?? null,
+        plan_expires_at: opts?.planExpiresAt ? opts.planExpiresAt.toISOString() : null,
+        updated_at: new Date().toISOString(),
+      });
+    }
+  }
 }
 
 export async function syncSubscription(
