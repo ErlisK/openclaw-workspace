@@ -2,6 +2,9 @@ import { redirect } from 'next/navigation';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { PlanBadge } from '@/components/dashboard/PlanBadge';
+import { getCreatorPlan } from '@/lib/subscription/server';
+import { PLANS } from '@/lib/subscription/plans';
 
 export default async function DashboardPage() {
   const supabase = createServerClient();
@@ -14,6 +17,9 @@ export default async function DashboardPage() {
     .select('display_name, saas_tier')
     .eq('id', user.id)
     .single();
+
+  const creatorPlan = await getCreatorPlan(user.id);
+  const planLimits = PLANS[creatorPlan].limits;
 
   const { data: courses } = await serviceSupa
     .from('courses')
@@ -32,7 +38,7 @@ export default async function DashboardPage() {
             {creator?.display_name ? `Hey, ${creator.display_name} 👋` : 'Your Dashboard'}
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            {user.email} · <span className="capitalize">{creator?.saas_tier ?? 'free'} plan</span>
+            {user.email} · <PlanBadge plan={creatorPlan} showUpgrade={creatorPlan === 'free'} size="xs" />
           </p>
         </div>
         <div className="flex gap-3">
@@ -50,6 +56,20 @@ export default async function DashboardPage() {
           </a>
         </div>
       </div>
+
+      {/* Plan limit notice */}
+      {creatorPlan === 'free' && courses && planLimits.maxCourses !== null && courses.length >= planLimits.maxCourses - 1 && (
+        <div className="mb-6 flex items-center justify-between rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm" data-testid="plan-limit-notice">
+          <span className="text-amber-800">
+            {courses.length >= planLimits.maxCourses
+              ? `Free plan limit reached: ${planLimits.maxCourses} courses max.`
+              : `You\'re almost at the Free plan limit (${courses.length}/${planLimits.maxCourses} courses).`}
+          </span>
+          <a href="/pricing" className="ml-4 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-amber-700">
+            Upgrade →
+          </a>
+        </div>
+      )}
 
       {/* Courses */}
       {(!courses || courses.length === 0) ? (

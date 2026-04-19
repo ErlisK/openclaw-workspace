@@ -47,8 +47,30 @@ export async function POST(req: NextRequest) {
     case 'checkout.session.completed': {
       const session = stripeEvent.data.object;
 
-      const courseId = session.metadata?.course_id;
       const userId = session.client_reference_id ?? session.metadata?.user_id;
+
+      // ── Subscription checkout (Creator plan) ────────────────────────
+      if (session.mode === 'subscription' && userId) {
+        const subscriptionId = typeof session.subscription === 'string'
+          ? session.subscription
+          : (session.subscription as { id: string } | null)?.id ?? null;
+
+        if (subscriptionId) {
+          const stripeSub = await stripe.subscriptions.retrieve(subscriptionId);
+          await syncSubscription(userId, {
+            id: stripeSub.id,
+            status: stripeSub.status,
+            customer: typeof stripeSub.customer === 'string' ? stripeSub.customer : stripeSub.customer.id,
+            current_period_end: stripeSub.current_period_end,
+            price_id: stripeSub.items?.data?.[0]?.price?.id,
+          });
+          console.log(`[stripe-webhook] subscription checkout completed: user=${userId} sub=${subscriptionId}`);
+        }
+        break;
+      }
+
+      // ── Course purchase checkout ─────────────────────────────────────
+      const courseId = session.metadata?.course_id;
       const affiliateId = session.metadata?.affiliate_id ?? null;
 
       if (!courseId || !userId) {
@@ -161,6 +183,51 @@ export async function POST(req: NextRequest) {
           current_period_end: sub.current_period_end,
         });
         console.log(`[stripe-webhook] subscription deleted: user=${userId}`);
+      }
+      break;
+    }
+
+    case 'invoice.payment_succeeded': {
+      // Subscription renewal — re-sync plan to keep period_end fresh
+      const invoice = stripeEvent.data.object as {
+        subscription?: string | { id: string };
+        customer?: string | { id: string };
+      };
+      const subId = typeof invoice.subscription === 'string'
+        ? invoice.subscription
+        : (invoice.subscription as { id: string } | null)?.id;
+      if (subId) {
+        const stripeSub = await stripe.subscriptions.retrieve(subId);
+        const customerId = typeof stripeSub.customer === 'string' ? stripeSub.customer : stripeSub.customer.id;
+        // Find user by Stripe customer id
+        const { data: creator } = await serviceSupa
+          .from('creators')
+          .select('user_id')
+          .eq('stripe_customer_id', customerId)
+          .maybeSingle();
+        if (creator?.user_id) {
+          await syncSubscription(creator.user_id, {
+            id: stripeSub.id,
+            status: stripeSub.status,
+            customer: customerId,
+            current_period_end: stripeSub.current_period_end,
+            price_id: stripeSub.items?.data?.[0]?.price?.id,
+          });
+          console.log(`[stripe-webhook] invoice.payment_succeeded: renewed sub=${subId} user=${creator.user_id}`);
+        }
+      }
+      break;
+    }
+
+    case 'invoice.payment_failed': {
+      const invoice = stripeEvent.data.object as { subscription?: string | { id: string }; customer?: string };
+      const subId = typeof invoice.subscription === 'string'
+        ? invoice.subscription
+        : (invoice.subscription as { id: string } | null)?.id;
+      if (subId) {
+        const stripeSub = await stripe.subscriptions.retrieve(subId);
+        const customerId = typeof stripeSub.customer === 'string' ? stripeSub.customer : stripeSub.customer.id;
+        console.warn(`[stripe-webhook] invoice.payment_failed: sub=${subId} status=${stripeSub.status} customer=${customerId}`);
       }
       break;
     }

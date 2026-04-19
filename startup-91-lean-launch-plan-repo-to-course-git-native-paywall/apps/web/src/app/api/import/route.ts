@@ -429,6 +429,27 @@ export async function POST(req: NextRequest) {
   const { data: creator } = await serviceSupa.from('creators').select('id').eq('id', user.id).single();
   if (!creator) return NextResponse.json({ error: 'Creator profile not found' }, { status: 403 });
 
+  // 3b. Plan enforcement — check course count limit
+  const { getCreatorPlan } = await import('@/lib/subscription/server');
+  const { PLANS } = await import('@/lib/subscription/plans');
+  const plan = await getCreatorPlan(user.id);
+  const maxCourses = PLANS[plan].limits.maxCourses;
+  if (maxCourses !== null) {
+    const { count: existingCount } = await serviceSupa
+      .from('courses')
+      .select('*', { count: 'exact', head: true })
+      .eq('creator_id', user.id);
+    if ((existingCount ?? 0) >= maxCourses) {
+      return NextResponse.json({
+        error: `Free plan limit: ${maxCourses} courses maximum. Upgrade to Creator for unlimited courses.`,
+        upgradeUrl: '/pricing',
+        plan,
+        limit: maxCourses,
+        count: existingCount,
+      }, { status: 402 });
+    }
+  }
+
   // 4. Parse repo URL
   let owner: string, repoName: string;
   try {
