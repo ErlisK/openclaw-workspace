@@ -113,54 +113,77 @@ async function fillStripeCheckout(page: Page) {
   }
 }
 
-/** Traverse frames recursively to find and fill card input fields */
+/** Fill Stripe card fields — handles nested iframes in hosted checkout */
 async function fillCardInFrames(page: Page): Promise<boolean> {
-  // Try all frames (including nested)
-  const frames = page.frames();
+  // Wait for card form to appear after clicking "Pay with card"
+  await page.waitForTimeout(2000);
   
-  for (const frame of frames) {
-    try {
-      // Card number field
-      const cardInput = frame.locator(
-        'input[name="cardnumber"], input[placeholder*="1234"], input[autocomplete="cc-number"], [data-elements-stable-field-name="cardNumber"] input'
-      ).first();
+  // Stripe Checkout embeds card fields in nested iframes.
+  // Use frameLocator for reliable nested frame access.
+  // The outer frame is the Stripe Checkout JS embed, inner frames are per-field.
+  
+  // Strategy 1: Use frameLocator to find card number input in any nested frame
+  try {
+    // Stripe's card number field is often in a frame with title "Secure card number input frame"
+    const cardFrame = page.frameLocator('iframe[title*="Secure card number"], iframe[name*="__privateStripeFrame"]').first();
+    const cardInput = cardFrame.locator('input').first();
+    if (await cardInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await cardInput.type('4242424242424242', { delay: 50 });
       
-      if (await cardInput.isVisible({ timeout: 1000 }).catch(() => false)) {
+      const expiryFrame = page.frameLocator('iframe[title*="Secure expiration"], iframe[title*="exp"]').first();
+      await expiryFrame.locator('input').first().type('1234', { delay: 50 });
+      
+      const cvcFrame = page.frameLocator('iframe[title*="Secure CVC"], iframe[title*="cvc"]').first();
+      await cvcFrame.locator('input').first().type('123', { delay: 50 });
+      return true;
+    }
+  } catch { /* try next strategy */ }
+  
+  // Strategy 2: Scan all frames for card number input
+  for (const frame of page.frames()) {
+    try {
+      const cardInput = frame.locator('input[name="cardnumber"], input[placeholder*="1234 1234"]').first();
+      if (await cardInput.isVisible({ timeout: 500 }).catch(() => false)) {
         await cardInput.click();
         await cardInput.type('4242424242424242', { delay: 50 });
         
-        // Expiry
-        const expiry = frame.locator('input[name="exp-date"], input[placeholder*="MM"], input[autocomplete="cc-exp"]').first();
-        if (await expiry.isVisible({ timeout: 1000 }).catch(() => false)) {
+        const expiry = frame.locator('input[name="exp-date"]').first();
+        if (await expiry.isVisible({ timeout: 500 }).catch(() => false)) {
           await expiry.click();
-          await expiry.type('1234', { delay: 50 }); // 12/34
+          await expiry.type('1234', { delay: 50 });
         }
         
-        // CVC
-        const cvc = frame.locator('input[name="cvc"], input[placeholder*="CVC"], input[placeholder*="123"], input[autocomplete="cc-csc"]').first();
-        if (await cvc.isVisible({ timeout: 1000 }).catch(() => false)) {
+        const cvc = frame.locator('input[name="cvc"]').first();
+        if (await cvc.isVisible({ timeout: 500 }).catch(() => false)) {
           await cvc.click();
           await cvc.type('123', { delay: 50 });
         }
         return true;
       }
-    } catch {
-      continue;
-    }
+    } catch { continue; }
   }
   
-  // Fallback: try direct page inputs
-  const cardDirect = page.locator('input[autocomplete="cc-number"]').first();
+  // Strategy 3: Direct page input (some Stripe versions)
+  const cardDirect = page.locator('input[autocomplete="cc-number"], [data-elements-stable-field-name="cardNumber"]').first();
   if (await cardDirect.isVisible({ timeout: 1000 }).catch(() => false)) {
     await cardDirect.fill('4242424242424242');
-    const expDirect = page.locator('input[autocomplete="cc-exp"]').first();
-    await expDirect.fill('1234');
-    const cvcDirect = page.locator('input[autocomplete="cc-csc"]').first();
-    await cvcDirect.fill('123');
+    await page.locator('input[autocomplete="cc-exp"]').first().fill('1234');
+    await page.locator('input[autocomplete="cc-csc"]').first().fill('123');
     return true;
   }
   
   return false;
+}
+
+/** Query Supabase DB via management API (bypasses RLS) */
+async function queryDb(request: APIRequestContext, sql: string): Promise<unknown[]> {
+  if (!SUPA_MGMT_KEY) return [];
+  const res = await request.post(SUPA_MGMT_URL, {
+    headers: { Authorization: `Bearer ${SUPA_MGMT_KEY}`, 'Content-Type': 'application/json' },
+    data: { query: sql },
+  });
+  if (!res.ok()) return [];
+  return await res.json() as unknown[];
 }
 
 // ── 1. Free lesson — accessible without purchase ──────────────────────────────
