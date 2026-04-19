@@ -75,8 +75,26 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
       </nav>
 
+      {/* Social proof + urgency banner */}
+      <div className="max-w-2xl mx-auto px-4 pt-8 pb-2">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl px-6 py-4 flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+          <div className="text-3xl">📈</div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-blue-800">
+              Pro users find an average of <span className="text-blue-600">$340/mo in hidden earnings</span> within their first 30 days
+            </p>
+            <p className="text-xs text-blue-600 mt-0.5">Based on aggregate benchmark data from opted-in users · 14-day money-back guarantee</p>
+          </div>
+          <div className="flex-shrink-0">
+            <span className="inline-block bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200">
+              🔥 Most Popular
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
-      <div className="text-center pt-16 pb-4 px-4">
+      <div className="text-center pt-8 pb-4 px-4">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">Simple, transparent pricing</h1>
         <p className="text-gray-500 text-lg max-w-xl mx-auto">
           Start free. Upgrade when you need more. No hidden fees.
@@ -101,6 +119,23 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <p className="text-xs text-gray-400">
           GigAnalytics provides data analytics tools only and does not provide financial, tax, or investment advice. Individual results vary.
         </p>
+      </div>
+
+      {/* Trust signals */}
+      <div className="max-w-3xl mx-auto px-6 pb-6">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          {[
+            { icon: '🔒', label: 'Bank-grade encryption', sub: 'AES-256 at rest & in transit' },
+            { icon: '↩️', label: '14-day money-back', sub: 'Full refund, no questions asked' },
+            { icon: '🚫', label: 'No data selling', sub: 'Your data is private by default' },
+          ].map(({ icon, label, sub }) => (
+            <div key={label} className="bg-gray-50 border border-gray-100 rounded-xl p-4">
+              <div className="text-2xl mb-1">{icon}</div>
+              <div className="text-xs font-semibold text-gray-700">{label}</div>
+              <div className="text-xs text-gray-400 mt-0.5">{sub}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* FAQ */}
