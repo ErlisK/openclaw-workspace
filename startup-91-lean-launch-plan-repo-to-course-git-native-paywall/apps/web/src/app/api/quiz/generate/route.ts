@@ -120,10 +120,19 @@ export async function POST(req: NextRequest) {
     const supa = createServiceClient();
     const { data: lessonRow } = await supa
       .from('lessons')
-      .select('content_md, title, slug')
+      .select('content_md, title, slug, is_preview, course_id')
       .eq('id', lessonId)
       .single();
     if (!lessonRow) return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
+    // IDOR fix: verify creator or enrollment access for non-preview lessons
+    if (!lessonRow.is_preview) {
+      const { data: lessonCourse } = await supa.from('courses').select('creator_id').eq('id', lessonRow.course_id).single();
+      const isCreator = lessonCourse?.creator_id === user.id;
+      if (!isCreator) {
+        const { data: enrollment } = await supa.from('enrollments').select('id').eq('user_id', user.id).eq('course_id', lessonRow.course_id).is('entitlement_revoked_at', null).maybeSingle();
+        if (!enrollment) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+    }
     lessonContent = lessonRow.content_md || '';
     if (!lessonContent || lessonContent.length < 50) {
       return NextResponse.json(

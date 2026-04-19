@@ -9,6 +9,8 @@ import { SandboxEmbed } from '@/components/lesson/SandboxEmbed';
 import { PaywallGate } from '@/components/lesson/PaywallGate';
 import { trackLessonViewed } from '@/lib/analytics/server';
 
+export const dynamic = 'force-dynamic';
+
 interface LessonPageProps {
   params: { slug: string; lessonSlug: string };
   searchParams: { unlocking?: string; session_id?: string };
@@ -22,7 +24,7 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
     .eq('slug', params.slug)
     .single();
 
-  if (!course) return { title: 'Lesson not found — TeachRepo' };
+  if (!course) return { title: 'Lesson not found' };
 
   const { data: lesson } = await supabase
     .from('lessons')
@@ -32,7 +34,7 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
     .single();
 
   return {
-    title: lesson ? `${lesson.title} — ${course.title} | TeachRepo` : `${course.title} | TeachRepo`,
+    title: lesson ? `${lesson.title} — ${course.title}` : course.title,
     description: lesson?.description ?? `Part of the ${course.title} course on TeachRepo.`,
     alternates: { canonical: `https://teachrepo.com/courses/${params.slug}/lessons/${params.lessonSlug}` },
     openGraph: {

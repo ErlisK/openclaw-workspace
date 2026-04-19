@@ -51,6 +51,31 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // Handle CORS preflight for API routes
+  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    const origin = request.headers.get('origin');
+    const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? 'https://teachrepo.com').split(',').map(s => s.trim());
+    const res = new NextResponse(null, { status: 204 });
+    if (origin) {
+      const matches = allowedOrigins.some(a => {
+        if (a === origin) return true;
+        if (a.includes('*')) {
+          const regex = new RegExp('^' + a.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
+          return regex.test(origin);
+        }
+        return false;
+      });
+      if (matches) {
+        res.headers.set('Access-Control-Allow-Origin', origin);
+        res.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+        res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Stripe-Signature');
+        res.headers.set('Access-Control-Allow-Credentials', 'true');
+        res.headers.set('Vary', 'Origin');
+      }
+    }
+    return res;
+  }
+
   let response = NextResponse.next({ request: { headers: request.headers } });
 
   const supabase = createServerClient(

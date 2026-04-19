@@ -51,6 +51,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
   }
 
+  // Access check: creator, enrolled, or free course
+  const { data: accessCourse } = await serviceSupa.from('courses').select('creator_id, price_cents').eq('id', course_id).single();
+  if (accessCourse && accessCourse.price_cents > 0) {
+    const isCreator = accessCourse.creator_id === user.id;
+    if (!isCreator) {
+      const { data: enrollment } = await serviceSupa.from('enrollments').select('id').eq('user_id', user.id).eq('course_id', course_id).is('entitlement_revoked_at', null).maybeSingle();
+      if (!enrollment) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+  }
+
   const { data: questions } = await serviceSupa
     .from('quiz_questions')
     .select('id, question, question_type, options, correct_index, correct_bool, correct_text, explanation, order_index')
