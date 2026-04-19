@@ -35,6 +35,8 @@ export async function GET(req: NextRequest) {
       limits: PLANS['free'].limits,
       subscription: null,
       usageCounts: null,
+      atLimit: null,
+      upgradeUrl: '/pricing',
     });
   }
 
