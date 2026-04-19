@@ -120,8 +120,8 @@ test.describe('3 · Events written to Supabase (phase verification)', () => {
         properties: { path: '/test', source: 'phase-verification' },
       },
     });
-    // Accept 200 (written) or 401 (auth required on this endpoint)
-    expect([200, 201, 401]).toContain(res.status());
+    // Events endpoint returns 200, 201, or 204 on success; 401 if auth required
+    expect([200, 201, 204, 401]).toContain(res.status());
   });
 
   test('POST /api/events returns 400 for missing event_name', async ({ request }) => {
@@ -157,7 +157,8 @@ test.describe('3 · Events written to Supabase (phase verification)', () => {
         properties: { source: 'playwright', ts: Date.now() },
       },
     });
-    expect([200, 201]).toContain(res.status());
+    // Events endpoint returns 200, 201, or 204 on success
+    expect([200, 201, 204]).toContain(res.status());
   });
 
   test('authenticated event is written to Supabase events table', async ({ request }) => {
