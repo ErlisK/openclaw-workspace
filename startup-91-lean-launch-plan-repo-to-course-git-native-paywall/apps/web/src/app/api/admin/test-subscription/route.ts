@@ -26,6 +26,7 @@ const Schema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  try {
   if (!ALLOWED) {
     return NextResponse.json({ error: 'Not available in production' }, { status: 403 });
   }
@@ -141,4 +142,9 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[test-subscription]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
 }
