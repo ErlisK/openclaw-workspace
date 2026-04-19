@@ -232,10 +232,11 @@ test.describe('4 · quiz_submitted event', () => {
     )).json()) as Array<{ id: string }>;
 
     // Save a quiz with one question
+    const quizSlug = `track-quiz-${Date.now()}`;
     await request.post(`/api/courses/${courseId}/lessons/${lessonId}/quiz`, {
       headers: { Authorization: `Bearer ${jwt}` },
       data: {
-        quizId: 'track-quiz',
+        quizId: quizSlug,
         title: 'Track Quiz',
         questions: [{
           type: 'true_false',
@@ -249,7 +250,7 @@ test.describe('4 · quiz_submitted event', () => {
 
     // Get quiz UUID from DB
     const quizRows = (await (await request.get(
-      `${SUPA_URL}/rest/v1/quizzes?slug=eq.track-quiz&select=id&limit=1`,
+      `${SUPA_URL}/rest/v1/quizzes?slug=eq.${quizSlug}&select=id&limit=1`,
       { headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}` } },
     )).json()) as Array<{ id: string }>;
     const quizId = quizRows[0]?.id;
