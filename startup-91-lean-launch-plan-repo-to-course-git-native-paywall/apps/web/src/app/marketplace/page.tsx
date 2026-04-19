@@ -134,32 +134,53 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
   const isFiltered = !!(searchParams.q || searchParams.price || searchParams.tags);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ── Hero ──────────────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 py-14 lg:px-8">
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" className="flex items-center gap-2.5 font-bold">
+            <span className="text-xl">📚</span>
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent text-lg">TeachRepo</span>
+          </a>
+          <nav className="hidden sm:flex items-center gap-7 text-sm text-gray-400">
+            <a href="/marketplace" className="text-white">Marketplace</a>
+            <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+            <a href="/blog" className="hover:text-white transition-colors">Blog</a>
+            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-all">Get started</a>
+          </div>
+        </div>
+      </header>
+
+      {/* ── Hero ── */}
+      <div className="relative overflow-hidden border-b border-white/5">
+        <div className="pointer-events-none absolute -top-20 left-1/4 h-72 w-72 rounded-full bg-violet-600/[0.07] blur-3xl" />
+        <div className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
           <div className="max-w-2xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold text-violet-700">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-300">
               <span>🎓</span> TeachRepo Marketplace
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 lg:text-5xl">
+            <h1 className="text-4xl font-extrabold tracking-tight text-white lg:text-5xl mb-4">
               Learn from engineers,<br />
-              <span className="text-violet-600">built in Git.</span>
+              <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">built in Git.</span>
             </h1>
-            <p className="mt-4 text-lg text-gray-600">
+            <p className="text-lg text-gray-400 mb-8">
               Mini-courses authored in Markdown and version-controlled on GitHub.
               Buy once, fork anytime, learn at your own pace.
             </p>
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <a
                 href="/auth/signup"
-                className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+                className="rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white hover:bg-violet-500 transition-all"
               >
                 Start creating →
               </a>
               <a
                 href="#courses"
-                className="text-sm font-medium text-gray-600 hover:text-violet-600"
+                className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
               >
                 Browse {courses.length} course{courses.length !== 1 ? 's' : ''} ↓
               </a>
@@ -180,7 +201,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
                 type="search"
                 defaultValue={searchParams.q}
                 placeholder="Search courses…"
-                className="w-full max-w-xs rounded-xl border border-gray-200 bg-white pl-9 pr-4 py-2 text-sm outline-none transition-colors focus:border-violet-400 focus:ring-2 focus:ring-violet-100"
+                className="w-full max-w-xs rounded-xl border border-white/10 bg-white/5 text-white placeholder-gray-500 pl-9 pr-4 py-2 text-sm outline-none transition-colors focus:border-violet-500/50 focus:bg-white/10"
               />
             </div>
           </form>
@@ -198,7 +219,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   (searchParams.price ?? '') === opt.value
                     ? 'bg-violet-600 text-white'
-                    : 'bg-white border border-gray-200 text-gray-700 hover:border-violet-300'
+                    : 'border border-white/10 bg-white/5 text-gray-300 hover:border-violet-500/30 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -219,7 +240,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
                 className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   sort === opt.value
                     ? 'bg-gray-900 text-white'
-                    : 'bg-white border border-gray-200 text-gray-700 hover:border-gray-400'
+                    : 'border border-white/10 bg-white/5 text-gray-300 hover:border-white/20 hover:text-white'
                 }`}
               >
                 {opt.label}
@@ -230,7 +251,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
 
         {/* ── Results summary ──────────────────────────────────────────── */}
         <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             {courses.length === 0
               ? 'No courses found'
               : `${courses.length} course${courses.length !== 1 ? 's' : ''}`}
@@ -239,7 +260,7 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
             )}
           </p>
           {isFiltered && (
-            <a href="/marketplace" className="text-xs text-violet-600 hover:underline">
+            <a href="/marketplace" className="text-xs text-violet-400 hover:text-violet-300 transition-colors underline">
               Clear filters ×
             </a>
           )}
@@ -257,9 +278,9 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
         )}
 
         {/* ── Become a creator CTA ─────────────────────────────────────── */}
-        <div className="mt-16 rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-white p-8 text-center">
-          <h2 className="text-xl font-bold text-gray-900">Build your own course</h2>
-          <p className="mt-2 text-sm text-gray-600 max-w-md mx-auto">
+        <div className="mt-16 relative overflow-hidden rounded-2xl border border-violet-500/20 bg-gradient-to-br from-violet-950/80 via-purple-950/60 to-indigo-950/80 p-8 text-center">
+          <h2 className="text-xl font-bold text-white">Build your own course</h2>
+          <p className="mt-2 text-sm text-gray-300 max-w-md mx-auto">
             Write your curriculum in Markdown, push to GitHub, and publish your course in minutes.
             Keep 100% of revenue on the free tier.
           </p>
@@ -274,13 +295,28 @@ export default async function MarketplacePage({ searchParams }: MarketplacePageP
               href="https://github.com/ErlisK/openclaw-workspace/tree/main/sample-course"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 hover:border-violet-300"
+              className="rounded-xl border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-all"
             >
               View sample repo ↗
             </a>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 px-6 py-10 mt-16">
+        <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+          <a href="/" className="font-semibold text-white">TeachRepo</a>
+          <nav className="flex flex-wrap gap-6 justify-center text-gray-500">
+            <a href="/docs" className="hover:text-gray-300 transition-colors">Docs</a>
+            <a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a>
+            <a href="/blog" className="hover:text-gray-300 transition-colors">Blog</a>
+            <a href="/legal/terms" className="hover:text-gray-300 transition-colors">Terms</a>
+            <a href="/legal/privacy" className="hover:text-gray-300 transition-colors">Privacy</a>
+          </nav>
+          <div className="text-xs text-gray-700">&copy; {new Date().getFullYear()} TeachRepo</div>
+        </div>
+      </footer>
     </div>
   );
 }
@@ -296,7 +332,7 @@ function CourseCardUI({ course }: { course: CourseCard }) {
   const gradientClass = idToGradient(course.id);
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all duration-300 hover:border-violet-500/30 hover:bg-white/[0.08] hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-900/20">
       {/* Gradient banner */}
       <div className={`relative h-28 w-full ${gradientClass}`}>
         {/* Tags on banner */}
@@ -324,26 +360,26 @@ function CourseCardUI({ course }: { course: CourseCard }) {
       {/* Card body */}
       <div className="flex flex-1 flex-col p-5">
         {/* Title */}
-        <h2 className="mb-1 font-bold text-gray-900 group-hover:text-violet-700 leading-snug line-clamp-2">
+        <h2 className="mb-1 font-bold text-white group-hover:text-violet-300 leading-snug line-clamp-2 transition-colors">
           <a href={`/courses/${course.slug}`} className="stretched-link">
             {course.title}
           </a>
         </h2>
 
         {/* Author */}
-        <p className="mb-3 text-xs text-gray-500">
-          by <span className="font-medium text-gray-700">{course.author_name}</span>
+        <p className="mb-3 text-xs text-gray-500 leading-relaxed">
+          by <span className="font-medium text-gray-300">{course.author_name}</span>
         </p>
 
         {/* Description */}
         {course.description && (
-          <p className="mb-4 flex-1 line-clamp-2 text-sm text-gray-600">
+          <p className="mb-4 flex-1 line-clamp-2 text-sm text-gray-400">
             {course.description}
           </p>
         )}
 
         {/* Stats row */}
-        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+        <div className="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500 leading-relaxed">
           <span>{course.total_lesson_count} lesson{course.total_lesson_count !== 1 ? 's' : ''}</span>
           {course.total_minutes > 0 && (
             <>
@@ -372,7 +408,7 @@ function CourseCardUI({ course }: { course: CourseCard }) {
           <div className="flex items-baseline gap-1.5">
             <span
               className={`text-xl font-extrabold ${
-                isFree ? 'text-green-600' : 'text-gray-900'
+                isFree ? 'text-emerald-400' : 'text-white'
               }`}
             >
               {priceLabel}
@@ -404,12 +440,12 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <div className="flex flex-col items-center justify-center py-24 text-center">
       <span className="text-5xl" aria-hidden="true">📚</span>
-      <h2 className="mt-4 text-xl font-semibold text-gray-900">No courses found</h2>
-      <p className="mt-2 text-sm text-gray-500">
+      <h2 className="mt-4 text-xl font-semibold text-white">No courses found</h2>
+      <p className="mt-2 text-sm text-gray-400">
         {hasFilters ? (
           <>
             Try adjusting your filters or{' '}
-            <a href="/marketplace" className="text-violet-600 underline">clear all filters</a>.
+            <a href="/marketplace" className="text-violet-400 hover:text-violet-300 underline transition-colors">clear all filters</a>.
           </>
         ) : (
           <>Be the first to publish a course on TeachRepo!</>

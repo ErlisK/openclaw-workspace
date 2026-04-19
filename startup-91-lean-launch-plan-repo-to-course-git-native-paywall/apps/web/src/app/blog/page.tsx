@@ -55,27 +55,52 @@ const posts = [
 ];
 
 const tagColors: Record<string, string> = {
-  launch: 'bg-green-50 text-green-700',
-  product: 'bg-blue-50 text-blue-700',
-  engineering: 'bg-orange-50 text-orange-700',
-  philosophy: 'bg-purple-50 text-purple-700',
-  tutorial: 'bg-teal-50 text-teal-700',
-  quickstart: 'bg-yellow-50 text-yellow-700',
-  quizzes: 'bg-pink-50 text-pink-700',
-  sandboxes: 'bg-indigo-50 text-indigo-700',
+  launch: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  product: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  engineering: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+  philosophy: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+  tutorial: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+  quickstart: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
+  quizzes: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+  sandboxes: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
 };
 
 export default function BlogIndex() {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <h1 className="text-3xl font-black text-gray-900 mb-2">Blog</h1>
-        <p className="text-gray-500 mb-12">Updates, tutorials, and deep dives from the TeachRepo team.</p>
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" className="flex items-center gap-2.5 font-bold">
+            <span className="text-xl">📚</span>
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent text-lg">TeachRepo</span>
+          </a>
+          <nav className="hidden sm:flex items-center gap-7 text-sm text-gray-400">
+            <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
+            <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+            <a href="/blog" className="text-white">Blog</a>
+            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-all">Get started</a>
+          </div>
+        </div>
+      </header>
 
-        <div className="space-y-10">
-          {posts.map((post) => (
-            <article key={post.slug} className="border-b border-gray-100 pb-10">
-              <div className="flex items-center gap-3 text-xs text-gray-400 mb-3 flex-wrap">
+      <div className="mx-auto max-w-3xl px-6 py-20">
+        <div className="mb-14">
+          <div className="mb-3">
+            <span className="text-xs font-semibold uppercase tracking-widest text-violet-400">Blog</span>
+          </div>
+          <h1 className="text-4xl font-extrabold text-white mb-3">Latest from TeachRepo</h1>
+          <p className="text-gray-400 text-lg">Updates, tutorials, and deep dives from the TeachRepo team.</p>
+        </div>
+
+        <div className="space-y-6">
+          {posts.map((post, i) => (
+            <article key={post.slug} className={`rounded-2xl border border-white/10 bg-white/5 p-7 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-900/20 ${i === 0 ? 'border-violet-500/20 bg-violet-500/[0.05]' : ''}`}>
+              <div className="flex items-center gap-3 text-xs text-gray-500 mb-4 flex-wrap">
                 <time dateTime={post.date}>
                   {new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </time>
@@ -84,26 +109,44 @@ export default function BlogIndex() {
                 {post.tags.map((t) => (
                   <span
                     key={t}
-                    className={`rounded-full px-2 py-0.5 font-medium ${tagColors[t] ?? 'bg-gray-50 text-gray-600'}`}
+                    className={`rounded-full px-2 py-0.5 font-medium border text-xs ${tagColors[t] ?? 'bg-white/10 text-gray-400 border-white/10'}`}
                   >
                     {t}
                   </span>
                 ))}
               </div>
-              <h2 className="text-xl font-bold text-gray-900 mb-2 hover:text-violet-700">
+              <h2 className="text-xl font-bold text-white mb-3 hover:text-violet-300 transition-colors">
                 <Link href={`/blog/${post.slug}`}>{post.title}</Link>
               </h2>
-              <p className="text-gray-600 leading-relaxed">{post.excerpt}</p>
+              <p className="text-gray-400 leading-relaxed mb-5">{post.excerpt}</p>
               <Link
                 href={`/blog/${post.slug}`}
-                className="mt-4 inline-block text-sm font-semibold text-violet-600 hover:underline"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-400 hover:text-violet-300 transition-colors"
               >
-                Read more →
+                Read more
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
               </Link>
             </article>
           ))}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 px-6 py-10">
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+          <div className="font-semibold text-white">TeachRepo</div>
+          <nav className="flex flex-wrap gap-6 justify-center text-gray-500">
+            <a href="/marketplace" className="hover:text-gray-300 transition-colors">Marketplace</a>
+            <a href="/docs" className="hover:text-gray-300 transition-colors">Docs</a>
+            <a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a>
+            <a href="/legal/terms" className="hover:text-gray-300 transition-colors">Terms</a>
+            <a href="/legal/privacy" className="hover:text-gray-300 transition-colors">Privacy</a>
+          </nav>
+          <div className="text-xs text-gray-700">&copy; {new Date().getFullYear()} TeachRepo</div>
+        </div>
+      </footer>
     </div>
   );
 }

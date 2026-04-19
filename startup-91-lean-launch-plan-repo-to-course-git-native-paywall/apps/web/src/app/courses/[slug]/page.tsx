@@ -121,20 +121,40 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" className="flex items-center gap-2.5 font-bold">
+            <span className="text-xl">📚</span>
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent text-lg">TeachRepo</span>
+          </a>
+          <nav className="hidden sm:flex items-center gap-7 text-sm text-gray-400">
+            <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
+            <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-all">Get started</a>
+          </div>
+        </div>
+      </header>
+
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="border-b border-gray-200 bg-gradient-to-br from-violet-50 to-white px-4 py-12 lg:px-8">
-        <div className="mx-auto max-w-4xl">
+      <div className="relative overflow-hidden border-b border-white/5 px-4 py-16 lg:px-8">
+        <div className="pointer-events-none absolute -top-20 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-violet-600/[0.06] blur-3xl" />
+        <div className="relative mx-auto max-w-4xl">
           {showPaywallBanner && (
-            <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+            <div className="mb-6 flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3">
               <span className="text-xl">🔒</span>
               <div>
-                <p className="text-sm font-semibold text-amber-900">This lesson requires enrollment</p>
-                <p className="text-xs text-amber-700">Enroll below to access all paid lessons.</p>
+                <p className="text-sm font-semibold text-amber-200">This lesson requires enrollment</p>
+                <p className="text-xs text-amber-400">Enroll below to access all paid lessons.</p>
               </div>
             </div>
           )}
@@ -142,19 +162,19 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
           <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
             <div className="flex-1">
               <div className="mb-3 flex items-center gap-2">
-                <span className="rounded-full bg-violet-100 px-3 py-1 text-xs font-medium text-violet-700">
+                <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
                   v{course.version ?? '1.0.0'}
                 </span>
                 {isFree && (
-                  <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">
                     Free
                   </span>
                 )}
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-900 lg:text-4xl">{course.title}</h1>
+              <h1 className="text-3xl font-bold text-white lg:text-4xl">{course.title}</h1>
               {course.description && (
-                <p className="mt-3 text-lg text-gray-600">{course.description}</p>
+                <p className="mt-3 text-lg text-gray-400 leading-relaxed">{course.description}</p>
               )}
 
               <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-gray-500">
@@ -172,9 +192,9 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
 
             {/* Enroll card */}
             <div className="w-full lg:w-72 flex-shrink-0">
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <p className="mb-1 text-3xl font-bold text-gray-900">{priceDisplay}</p>
-                <p className="mb-4 text-sm text-gray-500">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
+                <p className="mb-1 text-3xl font-bold text-white">{priceDisplay}</p>
+                <p className="mb-4 text-sm text-gray-400">
                   {isFree ? 'No credit card required' : 'One-time purchase, lifetime access'}
                 </p>
 
@@ -182,7 +202,7 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
                   firstLesson && (
                     <a
                       href={`/courses/${params.slug}/lessons/${firstLesson.slug}`}
-                      className="block w-full rounded-xl bg-green-600 py-3 text-center text-sm font-semibold text-white hover:bg-green-700"
+                      className="block w-full rounded-xl bg-emerald-600 py-3 text-center text-sm font-semibold text-white hover:bg-emerald-500 transition-colors"
                     >
                       Continue learning →
                     </a>
@@ -199,7 +219,7 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
                 {firstLesson?.is_preview && !enrolled && (
                   <a
                     href={`/courses/${params.slug}/lessons/${firstLesson.slug}`}
-                    className="mt-3 block w-full rounded-xl border border-gray-200 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+                    className="mt-3 block w-full rounded-xl border border-white/10 bg-white/5 py-3 text-center text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-all"
                   >
                     Preview first lesson
                   </a>
@@ -212,22 +232,22 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
 
       {/* Lesson list */}
       <div className="mx-auto max-w-4xl px-4 py-10 lg:px-8">
-        <h2 className="mb-6 text-xl font-bold text-gray-900">Course content</h2>
-        <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-200">
+        <h2 className="mb-6 text-xl font-bold text-white">Course content</h2>
+        <div className="overflow-hidden rounded-2xl border border-white/10">
           {lessons?.map((lesson, i) => {
             const isLocked = !lesson.is_preview && !enrolled;
             return (
-              <div key={lesson.id} className="flex items-center gap-4 px-5 py-4 hover:bg-gray-50 transition-colors">
-                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-medium text-gray-600">
+              <div key={lesson.id} className="flex items-center gap-4 px-5 py-4 border-b border-white/5 last:border-0 hover:bg-white/[0.03] transition-colors">
+                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm font-medium text-gray-400">
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
                   {isLocked ? (
-                    <p className="text-sm font-medium text-gray-700">{lesson.title}</p>
+                    <p className="text-sm font-medium text-gray-400">{lesson.title}</p>
                   ) : (
                     <a
                       href={`/courses/${params.slug}/lessons/${lesson.slug}`}
-                      className="text-sm font-medium text-gray-700 hover:text-violet-700"
+                      className="text-sm font-medium text-white hover:text-violet-300 transition-colors"
                     >
                       {lesson.title}
                     </a>
@@ -238,15 +258,15 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
                 </div>
                 <div className="flex flex-shrink-0 items-center gap-2">
                   {lesson.has_quiz && (
-                    <span className="text-xs text-gray-400">🧪 Quiz</span>
+                    <span className="text-xs text-gray-500">🧪 Quiz</span>
                   )}
                   {lesson.estimated_minutes && (
-                    <span className="text-xs text-gray-400">{lesson.estimated_minutes}m</span>
+                    <span className="text-xs text-gray-500">{lesson.estimated_minutes}m</span>
                   )}
                   {lesson.is_preview ? (
-                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Free</span>
+                    <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-400">Free</span>
                   ) : isLocked ? (
-                    <span className="text-gray-300 text-sm">🔒</span>
+                    <span className="text-gray-600 text-sm">🔒</span>
                   ) : null}
                 </div>
               </div>
@@ -254,6 +274,19 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
           })}
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-white/5 px-6 py-10">
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+          <a href="/" className="font-semibold text-white">TeachRepo</a>
+          <nav className="flex flex-wrap gap-6 justify-center text-gray-500">
+            <a href="/marketplace" className="hover:text-gray-300 transition-colors">Marketplace</a>
+            <a href="/docs" className="hover:text-gray-300 transition-colors">Docs</a>
+            <a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a>
+          </nav>
+          <div className="text-xs text-gray-700">&copy; {new Date().getFullYear()} TeachRepo</div>
+        </div>
+      </footer>
     </div>
   );
 }

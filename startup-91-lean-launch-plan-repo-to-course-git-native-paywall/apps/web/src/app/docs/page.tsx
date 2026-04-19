@@ -35,7 +35,7 @@ const sections = [
     href: '/docs/template',
     title: 'Course Template',
     desc: 'Official course template with GitHub Actions CI/CD. Clone it and ship your first course.',
-    icon: '📁',
+    icon: '📋',
   },
   {
     href: '/docs/payments-affiliates',
@@ -52,7 +52,7 @@ const sections = [
   {
     href: '/docs/pricing',
     title: 'Pricing & Billing',
-    desc: 'What\'s free forever (MIT), what\'s in the Creator plan ($29/mo), rev-share, and billing FAQ.',
+    desc: "What's free forever (MIT), what's in the Creator plan ($29/mo), rev-share, and billing FAQ.",
     icon: '💰',
   },
   {
@@ -71,77 +71,119 @@ const sections = [
 
 export default function DocsIndexPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 lg:px-8">
-      <div className="mb-12 text-center">
-        <div className="mb-4 inline-flex items-center rounded-full bg-violet-50 px-4 py-1.5 text-sm font-medium text-violet-700">
-          Documentation
-        </div>
-        <h1 className="text-4xl font-bold tracking-tight text-gray-900">
-          Build with TeachRepo
-        </h1>
-        <p className="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
-          Everything you need to convert your GitHub repo or Markdown notes into a
-          paywalled, versioned course site — in minutes.
-        </p>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {sections.map((s) => (
-          <Link
-            key={s.href}
-            href={s.href}
-            className="group rounded-xl border border-gray-100 bg-white p-6 shadow-sm hover:border-violet-200 hover:shadow-md transition-all"
-          >
-            <div className="mb-3 text-3xl">{s.icon}</div>
-            <h2 className="mb-1 font-semibold text-gray-900 group-hover:text-violet-600 transition-colors">
-              {s.title}
-            </h2>
-            <p className="text-sm text-gray-500">{s.desc}</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="mt-16 rounded-2xl bg-violet-50 p-8 text-center">
-        <h2 className="mb-2 text-xl font-bold text-gray-900">Ready to launch?</h2>
-        <p className="mb-6 text-gray-600">
-          Deploy your first course in minutes. No credit card required.
-        </p>
-        <div className="flex flex-wrap gap-3 justify-center">
-          <a
-            href="/auth/signup"
-            className="rounded-lg bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 transition-colors"
-          >
-            Start for Free
+    <div className="min-h-screen bg-[#0a0a0f] text-white">
+      {/* Nav */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" className="flex items-center gap-2.5 font-bold">
+            <span className="text-xl">📚</span>
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent text-lg">TeachRepo</span>
           </a>
-          <a
-            href="/docs/quickstart"
-            className="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Read the Docs
-          </a>
-        </div>
-      </div>
-
-      <div className="mt-12 rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p className="font-semibold text-gray-900">Prefer to self-host?</p>
-            <p className="mt-0.5 text-gray-500">The full platform is MIT-licensed and free to deploy on your own infrastructure. No platform fees, no lock-in.</p>
+          <nav className="hidden sm:flex items-center gap-7 text-sm text-gray-400">
+            <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
+            <a href="/docs" className="text-white">Docs</a>
+            <a href="/blog" className="hover:text-white transition-colors">Blog</a>
+            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-all">Get started</a>
           </div>
-          <a href="/docs/self-hosting" className="shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
-            Self-hosting guide →
-          </a>
+        </div>
+      </header>
+
+      <div className="mx-auto max-w-5xl px-4 py-20 lg:px-8">
+        <div className="mb-16 text-center">
+          <div className="inline-flex items-center rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-300 mb-4">
+            Documentation
+          </div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-white mb-4">
+            Build with TeachRepo
+          </h1>
+          <p className="text-gray-400 text-lg max-w-xl mx-auto">
+            Everything you need to turn a GitHub repo into a paywalled, versioned course site.
+          </p>
+        </div>
+
+        {/* Quick start highlight */}
+        <div className="mb-8">
+          <Link
+            href="/docs/quickstart"
+            className="group flex items-center gap-5 rounded-2xl border border-violet-500/30 bg-violet-500/[0.08] p-7 hover:border-violet-500/50 hover:bg-violet-500/[0.12] transition-all duration-300"
+          >
+            <div className="text-4xl shrink-0">🚀</div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold text-white mb-1 group-hover:text-violet-300 transition-colors">
+                Quickstart Guide
+              </h2>
+              <p className="text-gray-400">Set up your first course from a GitHub repo in under 10 minutes.</p>
+            </div>
+            <div className="text-violet-400 group-hover:translate-x-1 transition-transform">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </div>
+          </Link>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {sections.slice(1).map((section) => (
+            <Link
+              key={section.href}
+              href={section.href}
+              className="group flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-900/20"
+            >
+              <div className="text-2xl mb-3">{section.icon}</div>
+              <h3 className="font-semibold text-white group-hover:text-violet-300 mb-2 transition-colors">
+                {section.title}
+              </h3>
+              <p className="text-sm text-gray-400 leading-relaxed flex-1">{section.desc}</p>
+              <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-violet-400 group-hover:text-violet-300 transition-colors">
+                Read docs
+                <svg className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* CLI snippet */}
+        <div className="mt-12 overflow-hidden rounded-2xl border border-white/10 bg-[#0d1117]">
+          <div className="flex items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-5 py-3">
+            <div className="h-3 w-3 rounded-full bg-red-500/60"></div>
+            <div className="h-3 w-3 rounded-full bg-yellow-500/60"></div>
+            <div className="h-3 w-3 rounded-full bg-green-500/60"></div>
+            <span className="ml-3 text-xs text-gray-600 font-mono">quick start</span>
+          </div>
+          <div className="p-6 font-mono text-sm leading-7 overflow-x-auto">
+            <div className="text-gray-600"># Install CLI</div>
+            <div className="text-emerald-400">npm install -g @teachrepo/cli</div>
+            <div className="mt-3 text-gray-600"># Scaffold from template</div>
+            <div className="text-emerald-400">teachrepo init my-course</div>
+            <div className="mt-3 text-gray-600"># Push to GitHub → auto-publish</div>
+            <div className="text-emerald-400">git push origin main</div>
+          </div>
+          <div className="border-t border-white/5 bg-white/[0.02] px-6 py-4 flex flex-wrap gap-5">
+            <Link href="/docs/cli" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Full CLI reference →</Link>
+            <Link href="/docs/quickstart" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Quickstart guide →</Link>
+          </div>
         </div>
       </div>
 
-      <div className="mt-8 text-center">
-        <p className="text-sm text-gray-500">
-          Questions?{' '}
-          <a href="mailto:hello@teachrepo.com" className="text-violet-600 hover:underline">
-            hello@teachrepo.com
-          </a>
-        </p>
-      </div>
+      {/* Footer */}
+      <footer className="border-t border-white/5 px-6 py-10">
+        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+          <div className="font-semibold text-white">TeachRepo</div>
+          <nav className="flex flex-wrap gap-6 justify-center text-gray-500">
+            <a href="/marketplace" className="hover:text-gray-300 transition-colors">Marketplace</a>
+            <a href="/pricing" className="hover:text-gray-300 transition-colors">Pricing</a>
+            <a href="/blog" className="hover:text-gray-300 transition-colors">Blog</a>
+            <a href="mailto:hello@teachrepo.com" className="hover:text-gray-300 transition-colors">Contact</a>
+          </nav>
+          <div className="text-xs text-gray-700">&copy; {new Date().getFullYear()} TeachRepo</div>
+        </div>
+      </footer>
     </div>
   );
 }

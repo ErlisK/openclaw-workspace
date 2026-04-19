@@ -25,7 +25,6 @@ export const metadata: Metadata = {
   },
 };
 
-// Icons for demo courses by index
 const COURSE_ICONS = ['🌿', '⚙️', '🚀', '📦', '🔐', '🧪'];
 
 const FEATURES = [
@@ -33,43 +32,48 @@ const FEATURES = [
     icon: '📝',
     title: 'Markdown-first',
     desc: 'Write lessons in plain Markdown. Frontmatter sets order, paywall, and quiz links — no CMS needed.',
+    gradient: 'from-violet-500/20 to-purple-500/20',
   },
   {
     icon: '🔒',
     title: 'Zero-config paywall',
     desc: 'Set price_cents in course.yml. Stripe Checkout handles the rest — access is enforced server-side.',
+    gradient: 'from-indigo-500/20 to-blue-500/20',
   },
   {
     icon: '🧪',
     title: 'AI quiz generation',
     desc: 'One click to generate MCQs from your lesson content. Edit, reorder, then save directly to the course.',
+    gradient: 'from-purple-500/20 to-pink-500/20',
   },
   {
     icon: '🔀',
     title: 'Git-native versioning',
     desc: 'Every import creates a version snapshot. Roll back or publish a new version with a single push.',
+    gradient: 'from-emerald-500/20 to-teal-500/20',
   },
   {
     icon: '📊',
     title: 'Creator analytics',
     desc: 'See your full funnel: signups → imports → published → checkouts. Know exactly where you lose people.',
+    gradient: 'from-orange-500/20 to-amber-500/20',
   },
   {
     icon: '🖥️',
     title: 'Self-hostable, 0% fee',
     desc: 'MIT-licensed core. Deploy on your own Vercel + Supabase in 10 minutes. Keep 100% of revenue.',
+    gradient: 'from-cyan-500/20 to-sky-500/20',
   },
 ];
 
 const HOW_IT_WORKS = [
-  { step: '1', title: 'Structure your repo', desc: 'Add course.yml + a lessons/ folder to any GitHub repo. Copy from our template to skip setup.' },
-  { step: '2', title: 'Paste the GitHub URL', desc: 'Drop the URL into the import form. We fetch lessons, parse YAML, and import everything automatically.' },
-  { step: '3', title: 'Set your price', desc: 'price_cents: 0 for free, or any amount for paid. Stripe handles checkout, receipts, and refunds.' },
-  { step: '4', title: 'Publish and share', desc: 'Hit Publish. Your course is live with a shareable link, SEO metadata, and a buy button.' },
+  { step: '01', title: 'Structure your repo', desc: 'Add course.yml + a lessons/ folder to any GitHub repo. Copy from our template to skip setup.' },
+  { step: '02', title: 'Paste the GitHub URL', desc: 'Drop the URL into the import form. We fetch lessons, parse YAML, and import everything automatically.' },
+  { step: '03', title: 'Set your price', desc: 'price_cents: 0 for free, or any amount for paid. Stripe handles checkout, receipts, and refunds.' },
+  { step: '04', title: 'Publish and share', desc: 'Hit Publish. Your course is live with a shareable link, SEO metadata, and a buy button.' },
 ];
 
 export default async function HomePage() {
-  // Fetch top 2 published courses for demo section
   const serviceSupa = createServiceClient();
   const { data: rawCourses } = await serviceSupa
     .from('courses')
@@ -90,288 +94,347 @@ export default async function HomePage() {
       icon: COURSE_ICONS[i % COURSE_ICONS.length],
     };
   });
-  return (
-    <main className="flex min-h-screen flex-col">
 
-      {/* ── Top Nav ──────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <a href="/" className="text-lg font-bold text-violet-600">📚 TeachRepo</a>
-          <nav className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
-            <a href="/marketplace" className="hover:text-gray-900">Marketplace</a>
-            <a href="/docs" className="hover:text-gray-900">Docs</a>
-            <a href="/blog" className="hover:text-gray-900">Blog</a>
-            <a href="/pricing" className="hover:text-gray-900">Pricing</a>
+  return (
+    <main className="flex min-h-screen flex-col bg-[#0a0a0f] text-white">
+
+      {/* ── Nav ── */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+          <a href="/" className="flex items-center gap-2.5 font-bold">
+            <span className="text-xl">📚</span>
+            <span className="bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent text-lg">TeachRepo</span>
+          </a>
+          <nav className="hidden sm:flex items-center gap-7 text-sm text-gray-400">
+            <a href="/marketplace" className="hover:text-white transition-colors">Marketplace</a>
+            <a href="/docs" className="hover:text-white transition-colors">Docs</a>
+            <a href="/blog" className="hover:text-white transition-colors">Blog</a>
+            <a href="/pricing" className="hover:text-white transition-colors">Pricing</a>
           </nav>
           <div className="flex items-center gap-3">
-            <a href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-violet-600">Sign in</a>
-            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">Get started</a>
+            <a href="/auth/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition-all duration-200">
+              Get started
+            </a>
           </div>
         </div>
       </header>
 
-      {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="flex flex-col items-center justify-center px-6 py-24 text-center bg-gradient-to-b from-white to-violet-50">
-        <div className="max-w-4xl">
-          <div className="mb-6 inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-sm font-medium text-violet-700">
-            🚀 Now in beta — <a href="/auth/signup" className="ml-1 underline font-semibold">Get early access free</a>
+      {/* ── Hero ── */}
+      <section className="relative flex flex-col items-center justify-center overflow-hidden px-6 py-28 text-center">
+        {/* Glow blobs */}
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-violet-600/[0.07] blur-3xl" />
+        <div className="pointer-events-none absolute top-20 right-1/4 h-72 w-72 rounded-full bg-indigo-600/[0.08] blur-3xl" />
+        <div className="pointer-events-none absolute top-20 left-1/4 h-64 w-64 rounded-full bg-purple-600/[0.06] blur-3xl" />
+
+        <div className="relative z-10 max-w-4xl">
+          <div className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm font-medium text-violet-300">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75"></span>
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-500"></span>
+            </span>
+            Now in beta —{' '}
+            <a href="/auth/signup" className="font-semibold text-violet-200 underline underline-offset-2 hover:text-white transition-colors">
+              Get early access free
+            </a>
           </div>
 
-          <h1 className="mb-6 text-5xl font-bold tracking-tight text-gray-900 sm:text-6xl leading-tight">
-            Your GitHub repo is already{' '}
-            <span className="text-violet-600">a course</span>
+          <h1 className="mb-6 text-5xl font-extrabold tracking-tight sm:text-[4.5rem] leading-[1.1]">
+            Your GitHub repo is<br />already{' '}
+            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              a course
+            </span>
           </h1>
 
-          <p className="mb-10 text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="mb-10 text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Write lessons in Markdown. Ship quizzes in YAML. Deploy with{' '}
-            <code className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-base">git push</code>.
+            <code className="rounded-md bg-white/5 border border-white/10 px-2 py-0.5 font-mono text-sm text-violet-300">git push</code>.
             Charge for access via Stripe — in under 15 minutes.
           </p>
 
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
+          <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center mb-14">
             <a
               href="/auth/signup"
-              className="inline-flex items-center rounded-lg bg-violet-600 px-6 py-3 text-base font-semibold text-white shadow hover:bg-violet-700 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 px-7 py-3.5 text-base font-semibold text-white hover:bg-violet-500 transition-all duration-200 shadow-lg shadow-violet-900/30"
             >
-              Import your first course →
+              Import your first course
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
             </a>
             <a
               href="#demo-courses"
-              className="inline-flex items-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-7 py-3.5 text-base font-medium text-gray-300 hover:bg-white/10 hover:text-white transition-all duration-200"
             >
               Try a free demo lesson
             </a>
           </div>
 
-          <p className="mt-8 text-sm text-gray-500">
-            Free to self-host · MIT licensed · No lock-in · <a href="mailto:hello@teachrepo.com" className="underline">hello@teachrepo.com</a>
+          {/* Terminal block */}
+          <div className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-[#0d1117] text-left shadow-2xl">
+            <div className="flex items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-4 py-3">
+              <div className="h-3 w-3 rounded-full bg-red-500/70"></div>
+              <div className="h-3 w-3 rounded-full bg-yellow-500/70"></div>
+              <div className="h-3 w-3 rounded-full bg-green-500/70"></div>
+              <span className="ml-3 text-xs text-gray-600 font-mono">terminal — @teachrepo/cli</span>
+            </div>
+            <div className="p-5 font-mono text-sm leading-7">
+              <div><span className="text-gray-600"># Install the CLI</span></div>
+              <div><span className="text-emerald-400">$ </span><span className="text-gray-200">npm install -g @teachrepo/cli</span></div>
+              <div className="mt-2"><span className="text-gray-600"># Import your GitHub repo</span></div>
+              <div><span className="text-emerald-400">$ </span><span className="text-gray-200">teachrepo import --repo=https://github.com/you/your-course</span></div>
+              <div className="mt-2"><span className="text-gray-600"># Deploy and earn</span></div>
+              <div><span className="text-emerald-400">$ </span><span className="text-gray-200">git push origin main</span></div>
+              <div className="mt-1"><span className="text-violet-400">✓ Course published at teachrepo.com/courses/your-course</span></div>
+            </div>
+          </div>
+
+          <p className="mt-8 text-sm text-gray-600">
+            Free to self-host · MIT licensed · No lock-in ·{' '}
+            <a href="mailto:hello@teachrepo.com" className="text-gray-500 hover:text-gray-300 underline underline-offset-2 transition-colors">
+              hello@teachrepo.com
+            </a>
           </p>
         </div>
       </section>
 
-      {/* ── Demo Courses ──────────────────────────────────────────────────── */}
-      <section id="demo-courses" className="px-6 py-20 bg-white">
+      {/* ── How it works ── */}
+      <section className="px-6 py-24 border-t border-white/5">
         <div className="mx-auto max-w-5xl">
           <div className="mb-3 text-center">
-            <span className="text-xs font-semibold uppercase tracking-widest text-violet-500">Live demo</span>
+            <span className="text-xs font-semibold uppercase tracking-widest text-violet-400">How it works</span>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-3">
+          <h2 className="text-3xl font-bold text-white text-center mb-14">
+            From repo to revenue in 15 minutes
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {HOW_IT_WORKS.map((item, i) => (
+              <div
+                key={item.step}
+                className="relative flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-violet-500/30 hover:bg-white/[0.07] transition-all duration-300 hover:-translate-y-0.5"
+              >
+                <div className="mb-3 font-mono text-4xl font-black text-white/10 leading-none">{item.step}</div>
+                <h3 className="font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+                {i < 3 && (
+                  <div className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 text-gray-700 z-10">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section className="px-6 py-24 border-t border-white/5">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-3 text-center">
+            <span className="text-xs font-semibold uppercase tracking-widest text-violet-400">Features</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white text-center mb-14">
+            Everything a technical creator needs
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <div
+                key={f.title}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-violet-500/30 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-900/20"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${f.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative z-10">
+                  <div className="text-3xl mb-4">{f.icon}</div>
+                  <h3 className="font-semibold text-white mb-2">{f.title}</h3>
+                  <p className="text-sm text-gray-400 leading-relaxed">{f.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Demo Courses ── */}
+      <section id="demo-courses" className="px-6 py-24 border-t border-white/5">
+        <div className="mx-auto max-w-5xl">
+          <div className="mb-3 text-center">
+            <span className="text-xs font-semibold uppercase tracking-widest text-violet-400">Live demo</span>
+          </div>
+          <h2 className="text-3xl font-bold text-white text-center mb-4">
             Try free lessons right now
           </h2>
-          <p className="text-center text-gray-500 mb-10 max-w-xl mx-auto">
+          <p className="text-center text-gray-400 mb-12 max-w-xl mx-auto">
             These courses were built with TeachRepo itself — Markdown files, YAML quizzes, Stripe paywall. No signup needed for free lessons.
           </p>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-2">
             {demoCourses.map((course) => (
               <a
                 key={course.slug}
                 href={`/courses/${course.slug}`}
-                className="group flex flex-col rounded-2xl border border-gray-200 p-6 hover:border-violet-300 hover:shadow-md transition-all bg-white"
+                className="group flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-violet-900/20"
               >
                 <div className="flex items-start justify-between mb-4">
                   <span className="text-3xl">{course.icon}</span>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isFree ? 'bg-green-100 text-green-700' : 'bg-violet-100 text-violet-700'}`}>
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold border ${course.isFree ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-violet-500/10 text-violet-300 border-violet-500/20'}`}>
                     {course.isFree ? 'Free course' : 'Paid course'}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 group-hover:text-violet-700 mb-2">
+                <h3 className="text-lg font-semibold text-white group-hover:text-violet-300 mb-2 transition-colors">
                   {course.title}
                 </h3>
-                <p className="text-sm text-gray-500 flex-1 mb-4">{course.description}</p>
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <p className="text-sm text-gray-400 flex-1 mb-4 leading-relaxed">{course.description}</p>
+                <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span>📚 {course.lessonCount} lesson{course.lessonCount !== 1 ? 's' : ''}</span>
                   {course.freeLessons > 0 && <span>🆓 {course.freeLessons} free</span>}
                 </div>
-                <div className="mt-4 text-sm font-medium text-violet-600 group-hover:text-violet-800">
-                  Start learning →
+                <div className="mt-4 flex items-center gap-1.5 text-sm font-medium text-violet-400 group-hover:text-violet-300 transition-colors">
+                  Start learning
+                  <svg className="h-4 w-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
                 </div>
               </a>
             ))}
           </div>
 
           <div className="mt-8 text-center">
-            <a href="/marketplace" className="text-sm text-gray-500 hover:text-violet-600 underline">
+            <a href="/marketplace" className="text-sm text-gray-500 hover:text-violet-400 transition-colors underline underline-offset-2">
               Browse all courses in the marketplace →
             </a>
           </div>
         </div>
       </section>
 
-      {/* ── How it works ──────────────────────────────────────────────────── */}
-      <section className="px-6 py-20 bg-gray-50">
+      {/* ── Open Source ── */}
+      <section className="py-24 px-6 border-t border-white/5">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-3 text-center">
-            <span className="text-xs font-semibold uppercase tracking-widest text-violet-500">How it works</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            From repo to revenue in 15 minutes
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {HOW_IT_WORKS.map((item) => (
-              <div key={item.step} className="flex flex-col">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 text-lg font-bold text-violet-700">
-                  {item.step}
-                </div>
-                <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-500">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ──────────────────────────────────────────────────────── */}
-      <section className="px-6 py-20 bg-white">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-3 text-center">
-            <span className="text-xs font-semibold uppercase tracking-widest text-violet-500">Features</span>
-          </div>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
-            Everything a technical creator needs
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="rounded-xl border border-gray-100 p-5">
-                <div className="text-2xl mb-3">{f.icon}</div>
-                <h3 className="font-semibold text-gray-900 mb-1">{f.title}</h3>
-                <p className="text-sm text-gray-500">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="px-6 py-20 bg-violet-600 text-white text-center">
-        <div className="mx-auto max-w-2xl">
-          <h2 className="text-3xl font-bold mb-4">Ship your course this week.</h2>
-          <p className="text-violet-200 mb-8 text-lg">
-            If you can write Markdown, you can build a course. Free to start — no credit card, no lock-in.
-          </p>
-          <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <a
-              href="/auth/signup"
-              className="rounded-lg bg-white px-6 py-3 text-base font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
-            >
-              Get started free →
-            </a>
-            <a
-              href="/docs/quickstart"
-              className="rounded-lg border border-violet-400 px-6 py-3 text-base font-medium text-white hover:bg-violet-700 transition-colors"
-            >
-              Read the 5-minute guide
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Open Source ──────────────────────────────────────────────────── */}
-      <section className="py-20 px-6 bg-gray-50 border-t border-gray-100">
-        <div className="mx-auto max-w-5xl">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-700 mb-4">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-gray-300 mb-4">
               <span>⚡</span>
               <span>Open Source</span>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 mb-3">Free to Use. Free to Fork.</h2>
-            <p className="text-lg text-gray-500 max-w-xl mx-auto">
+            <h2 className="text-3xl font-bold text-white mb-3">Free to Use. Free to Fork.</h2>
+            <p className="text-lg text-gray-400 max-w-xl mx-auto">
               The TeachRepo core is MIT-licensed and self-hostable. Deploy to your own Vercel, keep 100% of revenue.
             </p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3 mb-10">
-            {/* Template repo */}
-            <a
-              href="https://github.com/ErlisK/teachrepo-template"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
-            >
-              <div className="text-2xl mb-3">📁</div>
-              <h3 className="font-bold text-gray-900 mb-1">Course Template</h3>
-              <p className="text-sm text-gray-500 mb-4">Official course template — Markdown lessons, YAML config, GitHub Actions CI/CD. Clone and ship.</p>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">MIT</span>
-                <span className="text-xs font-semibold text-violet-600 group-hover:underline">teachrepo-template ↗</span>
-              </div>
-            </a>
-
-            {/* CLI repo */}
-            <a
-              href="https://github.com/ErlisK/teachrepo-cli"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
-            >
-              <div className="text-2xl mb-3">⌨️</div>
-              <h3 className="font-bold text-gray-900 mb-1">TeachRepo CLI</h3>
-              <p className="text-sm text-gray-500 mb-4">Import repos, validate YAML, scaffold courses from the terminal. Works in CI/CD pipelines.</p>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">npm</span>
-                <span className="text-xs font-semibold text-violet-600 group-hover:underline">@teachrepo/cli ↗</span>
-              </div>
-            </a>
-
-            {/* Main repo */}
-            <a
-              href="https://github.com/ErlisK/teachrepo"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-2xl border border-gray-200 bg-white p-6 hover:border-violet-300 hover:shadow-sm transition-all"
-            >
-              <div className="text-2xl mb-3">⭐</div>
-              <h3 className="font-bold text-gray-900 mb-1">Platform Source</h3>
-              <p className="text-sm text-gray-500 mb-4">The full TeachRepo platform. Next.js 15, Supabase, Stripe, 500+ Playwright tests. Self-host it.</p>
-              <div className="flex items-center gap-2">
-                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-mono">MIT</span>
-                <span className="text-xs font-semibold text-violet-600 group-hover:underline">ErlisK/teachrepo ↗</span>
-              </div>
-            </a>
+          <div className="grid gap-4 md:grid-cols-3 mb-6">
+            {[
+              { href: 'https://github.com/ErlisK/teachrepo-template', icon: '📁', title: 'Course Template', desc: 'Official course template — Markdown lessons, YAML config, GitHub Actions CI/CD. Clone and ship.', badge: 'MIT', link: 'teachrepo-template ↗' },
+              { href: 'https://github.com/ErlisK/teachrepo-cli', icon: '⌨️', title: 'TeachRepo CLI', desc: 'Import repos, validate YAML, scaffold courses from the terminal. Works in CI/CD pipelines.', badge: 'npm', link: '@teachrepo/cli ↗' },
+              { href: 'https://github.com/ErlisK/teachrepo', icon: '⭐', title: 'Platform Source', desc: 'The full TeachRepo platform. Next.js 15, Supabase, Stripe, 500+ Playwright tests. Self-host it.', badge: 'MIT', link: 'ErlisK/teachrepo ↗' },
+            ].map((repo) => (
+              <a key={repo.href} href={repo.href} target="_blank" rel="noopener noreferrer"
+                className="group rounded-2xl border border-white/10 bg-white/5 p-6 hover:border-violet-500/30 hover:bg-white/[0.08] transition-all duration-300 hover:-translate-y-0.5 block"
+              >
+                <div className="text-2xl mb-3">{repo.icon}</div>
+                <h3 className="font-bold text-white mb-2">{repo.title}</h3>
+                <p className="text-sm text-gray-400 mb-4 leading-relaxed">{repo.desc}</p>
+                <div className="flex items-center gap-2">
+                  <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-gray-400 font-mono">{repo.badge}</span>
+                  <span className="text-xs font-semibold text-violet-400 group-hover:text-violet-300 transition-colors">{repo.link}</span>
+                </div>
+              </a>
+            ))}
           </div>
 
-          {/* CLI install snippet */}
-          <div className="rounded-2xl bg-gray-900 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-sm font-semibold text-gray-300">Quick install</span>
-              <span className="rounded-full bg-violet-900/50 text-violet-300 text-xs px-2 py-0.5">@teachrepo/cli</span>
+          <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#0d1117]">
+            <div className="flex items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-5 py-3">
+              <div className="h-3 w-3 rounded-full bg-red-500/60"></div>
+              <div className="h-3 w-3 rounded-full bg-yellow-500/60"></div>
+              <div className="h-3 w-3 rounded-full bg-green-500/60"></div>
+              <span className="ml-3 text-xs text-gray-600 font-mono">@teachrepo/cli — quick install</span>
             </div>
-            <pre className="text-sm text-green-400 leading-relaxed overflow-x-auto">{`npm install -g @teachrepo/cli
-
-# Scaffold a new course
-teachrepo new "Advanced Git for Engineers"
-
-# Import from GitHub
-teachrepo import --repo=https://github.com/you/your-course
-
-# Validate course.yml
-teachrepo validate --verbose`}</pre>
-            <div className="mt-4 flex flex-wrap gap-3">
-              <a href="/docs/cli" className="text-xs font-semibold text-violet-400 hover:text-violet-300">CLI docs →</a>
-              <a href="/docs/self-hosting" className="text-xs font-semibold text-violet-400 hover:text-violet-300">Self-hosting guide →</a>
-              <a href="https://github.com/ErlisK/teachrepo-template" className="text-xs font-semibold text-violet-400 hover:text-violet-300" target="_blank" rel="noopener noreferrer">Clone template →</a>
+            <div className="p-6 font-mono text-sm leading-7 overflow-x-auto">
+              <div className="text-emerald-400">npm install -g @teachrepo/cli</div>
+              <div className="mt-3 text-gray-600"># Scaffold a new course</div>
+              <div className="text-emerald-400">teachrepo new <span className="text-amber-400">&quot;Advanced Git for Engineers&quot;</span></div>
+              <div className="mt-2 text-gray-600"># Import from GitHub</div>
+              <div className="text-emerald-400">teachrepo import --repo=https://github.com/you/your-course</div>
+              <div className="mt-2 text-gray-600"># Validate course.yml</div>
+              <div className="text-emerald-400">teachrepo validate --verbose</div>
+            </div>
+            <div className="border-t border-white/5 bg-white/[0.02] px-6 py-4 flex flex-wrap gap-5">
+              <a href="/docs/cli" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">CLI docs →</a>
+              <a href="/docs/self-hosting" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Self-hosting guide →</a>
+              <a href="https://github.com/ErlisK/teachrepo-template" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Clone template →</a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="px-6 py-10 bg-gray-900 text-gray-400 text-sm">
-        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="font-semibold text-white">TeachRepo</div>
-          <nav className="flex flex-wrap gap-6 justify-center">
-            <a href="/marketplace" className="hover:text-white">Marketplace</a>
-            <a href="/docs" className="hover:text-white">Docs</a>
-            <a href="/blog" className="hover:text-white">Blog</a>
-            <a href="/social" className="hover:text-white">Social</a>
-            <a href="/press" className="hover:text-white">Press</a>
-            <a href="/pricing" className="hover:text-white">Pricing</a>
-            <a href="/docs/self-hosting" className="hover:text-white">Self-Hosting</a>
-            <a href="/legal/terms" className="hover:text-white">Terms</a>
-            <a href="/legal/privacy" className="hover:text-white">Privacy</a>
-            <a href="mailto:hello@teachrepo.com" className="hover:text-white">Contact</a>
-          </nav>
-          <div className="text-xs text-gray-600">&copy; {new Date().getFullYear()} TeachRepo. All rights reserved.</div>
+      {/* ── CTA ── */}
+      <section className="px-6 py-24 border-t border-white/5">
+        <div className="mx-auto max-w-3xl">
+          <div className="relative overflow-hidden rounded-3xl border border-violet-500/20 bg-gradient-to-br from-violet-950/80 via-purple-950/60 to-indigo-950/80 p-12 text-center">
+            <div className="pointer-events-none absolute -top-20 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-600/20 blur-3xl" />
+            <div className="relative z-10">
+              <h2 className="text-3xl font-bold text-white mb-4">Ship your course this week.</h2>
+              <p className="text-gray-300 mb-10 text-lg leading-relaxed">
+                If you can write Markdown, you can build a course.<br className="hidden sm:block" /> Free to start — no credit card, no lock-in.
+              </p>
+              <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                <a
+                  href="/auth/signup"
+                  className="rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-violet-700 hover:bg-violet-50 transition-colors shadow-lg"
+                >
+                  Get started free →
+                </a>
+                <a
+                  href="/docs/quickstart"
+                  className="rounded-xl border border-white/20 bg-white/10 px-8 py-3.5 text-base font-medium text-white hover:bg-white/20 transition-all"
+                >
+                  Read the 5-minute guide
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-white/5 px-6 py-14">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-10 mb-12">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">📚</span>
+                <span className="font-bold text-white text-lg">TeachRepo</span>
+              </div>
+              <p className="text-sm text-gray-500 leading-relaxed">Git-native course platform for engineers. Write in Markdown, earn with Stripe.</p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+              <div>
+                <div className="font-semibold text-gray-300 mb-4">Product</div>
+                <div className="space-y-3">
+                  {([['Marketplace', '/marketplace'], ['Pricing', '/pricing'], ['Docs', '/docs'], ['Blog', '/blog']] as [string, string][]).map(([label, href]) => (
+                    <div key={href}><a href={href} className="text-gray-500 hover:text-gray-300 transition-colors">{label}</a></div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-300 mb-4">Open Source</div>
+                <div className="space-y-3">
+                  {([['Self-Hosting', '/docs/self-hosting'], ['CLI', '/docs/cli'], ['GitHub', 'https://github.com/ErlisK/teachrepo']] as [string, string][]).map(([label, href]) => (
+                    <div key={href}><a href={href} className="text-gray-500 hover:text-gray-300 transition-colors">{label}</a></div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-gray-300 mb-4">Company</div>
+                <div className="space-y-3">
+                  {([['About', '/about'], ['Press', '/press'], ['Terms', '/legal/terms'], ['Privacy', '/legal/privacy'], ['Contact', 'mailto:hello@teachrepo.com']] as [string, string][]).map(([label, href]) => (
+                    <div key={href}><a href={href} className="text-gray-500 hover:text-gray-300 transition-colors">{label}</a></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-white/5 pt-8 text-center text-xs text-gray-700">
+            &copy; {new Date().getFullYear()} TeachRepo. All rights reserved.
+          </div>
         </div>
       </footer>
 

@@ -68,12 +68,12 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   if (message) {
     return (
-      <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-6 text-center">
         <p className="text-2xl mb-2">📧</p>
-        <p className="font-semibold text-green-900 mb-1">Almost there!</p>
-        <p className="text-sm text-green-700">{message}</p>
-        <p className="mt-3 text-xs text-green-600">
-          Sent to <strong>{email}</strong>. Check your spam folder if you don't see it.
+        <p className="font-semibold text-emerald-300 mb-1">Almost there!</p>
+        <p className="text-sm text-emerald-400">{message}</p>
+        <p className="mt-3 text-xs text-emerald-500">
+          Sent to <strong>{email}</strong>. Check your spam folder if you don&apos;t see it.
         </p>
       </div>
     );
@@ -88,7 +88,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             type="button"
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-60 transition-colors"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-gray-300 hover:bg-white/10 hover:text-white disabled:opacity-60 transition-colors"
           >
             <GoogleIcon />
             {googleLoading ? 'Redirecting…' : `Continue with Google`}
@@ -96,10 +96,10 @@ export function AuthForm({ mode }: AuthFormProps) {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200" />
+              <div className="w-full border-t border-white/10" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase text-gray-400">
-              <span className="bg-white px-2">or</span>
+            <div className="relative flex justify-center text-xs uppercase text-gray-500">
+              <span className="bg-transparent px-2">or</span>
             </div>
           </div>
         </>
@@ -108,19 +108,19 @@ export function AuthForm({ mode }: AuthFormProps) {
       {/* Email/password form */}
       <form onSubmit={handleEmailAuth} className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Email</label>
+          <label className="mb-1 block text-sm font-medium text-gray-300">Email</label>
           <input
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-500 px-3 py-2 text-sm outline-none focus:border-violet-500/50 focus:bg-white/10 transition-colors"
             placeholder="you@example.com"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700">Password</label>
+          <label className="mb-1 block text-sm font-medium text-gray-300">Password</label>
           <input
             type="password"
             required
@@ -128,17 +128,17 @@ export function AuthForm({ mode }: AuthFormProps) {
             minLength={mode === 'signup' ? 8 : 1}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+            className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-500 px-3 py-2 text-sm outline-none focus:border-violet-500/50 focus:bg-white/10 transition-colors"
             placeholder={mode === 'signup' ? 'Min. 8 characters' : ''}
           />
         </div>
         {error && (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+          <p className="rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</p>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60 transition-colors"
+          className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-60 transition-colors"
         >
           {loading
             ? mode === 'signup' ? 'Creating account…' : 'Signing in…'
@@ -148,7 +148,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {mode === 'login' && (
         <p className="text-center text-xs text-gray-500">
-          <a href="/auth/forgot-password" className="text-violet-600 hover:underline">
+          <a href="/auth/forgot-password" className="text-violet-400 hover:text-violet-300 transition-colors">
             Forgot password?
           </a>
         </p>
