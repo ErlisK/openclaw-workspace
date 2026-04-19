@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { checkEntitlement } from '@/lib/entitlement/check';
+import { CheckoutButton } from '@/components/checkout/CheckoutButton';
 
 interface CoursePageProps {
   params: { slug: string };
@@ -121,21 +122,13 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
                       Continue learning →
                     </a>
                   )
-                ) : isFree ? (
-                  <a
-                    href={`/api/enroll/free?course_id=${course.id}`}
-                    className="block w-full rounded-xl bg-violet-600 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700"
-                  >
-                    Enroll for free →
-                  </a>
                 ) : (
-                  <a
-                    href={`/api/checkout?course_id=${course.id}`}
-                    className="block w-full rounded-xl bg-violet-600 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700"
-                    id="enroll"
-                  >
-                    Enroll — {priceDisplay} →
-                  </a>
+                  <CheckoutButton
+                    courseId={course.id}
+                    courseSlug={params.slug}
+                    priceDisplay={priceDisplay}
+                    isFree={isFree}
+                  />
                 )}
 
                 {firstLesson?.is_preview && !enrolled && (

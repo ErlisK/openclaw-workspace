@@ -1,188 +1,129 @@
 'use client';
 
-import * as React from 'react';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 interface CheckoutButtonProps {
   courseId: string;
   courseSlug: string;
-  priceCents: number;
-  currency: string;
-  /** If true, renders a "Get free access" button that calls /api/enroll/free */
-  isFree?: boolean;
+  priceDisplay: string;
   className?: string;
-  children?: React.ReactNode;
+  /** If true, renders a free-enroll button (POST /api/enroll/free) instead of Stripe */
+  isFree?: boolean;
 }
 
 /**
- * CheckoutButton — Client Component
+ * CheckoutButton — client component that POST-initiates Stripe Checkout.
  *
- * For paid courses: calls POST /api/checkout → redirects to Stripe Hosted Checkout.
- * For free courses: calls POST /api/enroll/free → redirects to first lesson.
+ * For paid courses: POST /api/checkout → redirects to Stripe Checkout URL.
+ * For free courses: POST /api/enroll/free → redirects to /courses/:slug/enroll?enrolled=1.
  *
- * Handles:
- * - Already enrolled (409) → redirect to course
- * - Loading state
- * - Error display
+ * The tr_affiliate_ref cookie is automatically sent with every same-origin fetch
+ * (fetch with credentials:'include' or just the default same-origin cookie handling).
  */
 export function CheckoutButton({
   courseId,
   courseSlug,
-  priceCents,
-  currency,
+  priceDisplay,
+  className,
   isFree = false,
-  className = '',
-  children,
 }: CheckoutButtonProps) {
-  const [state, setState] = useState<'idle' | 'loading' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleClick = useCallback(async () => {
-    if (state === 'loading') return;
-    setState('loading');
-    setErrorMsg(null);
+  async function handleClick() {
+    setLoading(true);
+    setError(null);
 
     try {
       if (isFree) {
-        // Free enrollment
         const res = await fetch('/api/enroll/free', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ courseId }),
         });
 
-        const data = await res.json();
-
         if (res.status === 401) {
-          // Not logged in — redirect to auth
+          // Not logged in — redirect to auth with return URL
           window.location.href = `/auth/login?next=/courses/${courseSlug}`;
           return;
         }
 
-        if (!res.ok) {
-          throw new Error(data.error ?? `HTTP ${res.status}`);
-        }
-
-        // Redirect to first lesson
-        if (data.firstLessonSlug) {
-          window.location.href = `/courses/${courseSlug}/lessons/${data.firstLessonSlug}`;
+        if (res.ok) {
+          const body = await res.json() as { courseSlug?: string; firstLessonSlug?: string };
+          if (body.firstLessonSlug) {
+            window.location.href = `/courses/${body.courseSlug ?? courseSlug}/lessons/${body.firstLessonSlug}?unlocking=1`;
+          } else {
+            window.location.href = `/courses/${courseSlug}/enroll?enrolled=1`;
+          }
         } else {
-          window.location.href = `/courses/${courseSlug}`;
+          const body = await res.json() as { error?: string };
+          setError(body.error ?? 'Enrollment failed. Please try again.');
         }
-        return;
+      } else {
+        // Paid — initiate Stripe Checkout
+        const res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ courseId }),
+        });
+
+        if (res.status === 401) {
+          window.location.href = `/auth/login?next=/courses/${courseSlug}`;
+          return;
+        }
+
+        if (res.status === 409) {
+          // Already enrolled
+          window.location.href = `/courses/${courseSlug}/enroll?enrolled=1`;
+          return;
+        }
+
+        if (res.ok) {
+          const body = await res.json() as { url?: string };
+          if (body.url) {
+            window.location.href = body.url;
+          } else {
+            setError('Checkout unavailable. Please try again.');
+          }
+        } else {
+          const body = await res.json() as { error?: string };
+          setError(body.error ?? 'Checkout failed. Please try again.');
+        }
       }
-
-      // Paid enrollment — create Stripe Checkout Session
-      const res = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId }),
-      });
-
-      const data = await res.json();
-
-      if (res.status === 401) {
-        window.location.href = `/auth/login?next=/courses/${courseSlug}`;
-        return;
-      }
-
-      if (res.status === 409) {
-        // Already enrolled
-        window.location.href = data.redirectUrl ?? `/courses/${courseSlug}`;
-        return;
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error ?? `HTTP ${res.status}`);
-      }
-
-      if (!data.url) {
-        throw new Error('No checkout URL returned from server');
-      }
-
-      // Redirect to Stripe Hosted Checkout
-      window.location.href = data.url;
-    } catch (err) {
-      setState('error');
-      setErrorMsg((err as Error).message);
+    } catch {
+      setError('Network error. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
     }
-  }, [courseId, courseSlug, isFree, state]);
-
-  const priceLabel = isFree
-    ? 'Get free access'
-    : `Enroll — ${formatPrice(priceCents, currency)}`;
+  }
 
   return (
-    <div>
+    <div className="w-full">
       <button
         onClick={handleClick}
-        disabled={state === 'loading'}
-        className={`relative flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-60 ${
-          isFree
-            ? 'bg-green-600 text-white hover:bg-green-700'
-            : 'bg-violet-600 text-white shadow-lg hover:bg-violet-700 hover:shadow-xl'
-        } ${className}`}
-        aria-label={priceLabel}
+        disabled={loading}
+        data-testid="checkout-button"
+        className={
+          className ??
+          'block w-full rounded-xl bg-violet-600 py-3 text-center text-sm font-semibold text-white hover:bg-violet-700 disabled:opacity-60 disabled:cursor-not-allowed transition-opacity'
+        }
       >
-        {state === 'loading' ? (
-          <>
-            <Spinner />
-            <span>{isFree ? 'Setting up access…' : 'Preparing checkout…'}</span>
-          </>
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            {isFree ? 'Enrolling…' : 'Redirecting to checkout…'}
+          </span>
         ) : (
-          children ?? priceLabel
+          isFree ? 'Enroll for free →' : `Enroll — ${priceDisplay} →`
         )}
       </button>
 
-      {state === 'error' && errorMsg && (
-        <p
-          className="mt-2 text-center text-sm text-red-600 dark:text-red-400"
-          role="alert"
-        >
-          {errorMsg}
-          {errorMsg.includes('401') || errorMsg.toLowerCase().includes('unauthorized') ? (
-            <a
-              href={`/auth/login?next=/courses/${courseSlug}`}
-              className="ml-1 underline"
-            >
-              Sign in
-            </a>
-          ) : null}
-        </p>
+      {error && (
+        <p className="mt-2 text-xs text-red-600" data-testid="checkout-error">{error}</p>
       )}
     </div>
-  );
-}
-
-// ── Utilities ─────────────────────────────────────────────────────────────────
-
-function formatPrice(cents: number, currency: string): string {
-  try {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: currency.toUpperCase(),
-      minimumFractionDigits: 0,
-    }).format(cents / 100);
-  } catch {
-    return `${currency.toUpperCase()} ${(cents / 100).toFixed(0)}`;
-  }
-}
-
-function Spinner() {
-  return (
-    <svg
-      className="h-4 w-4 animate-spin"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-      />
-    </svg>
   );
 }
