@@ -66,7 +66,7 @@ export async function PATCH(
 
   // Track publish event (only when publishing, not unpublishing)
   if (body.published) {
-    void trackCoursePublished({ userId: user.id, courseId: params.courseId });
+    await trackCoursePublished({ userId: user.id, courseId: params.courseId });
   }
 
   return NextResponse.json({

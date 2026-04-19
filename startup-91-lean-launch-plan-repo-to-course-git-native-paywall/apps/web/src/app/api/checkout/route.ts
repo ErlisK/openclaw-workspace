@@ -198,7 +198,7 @@ export async function POST(req: NextRequest) {
   });
 
   // Track checkout started
-  void trackCheckoutStarted({
+  await trackCheckoutStarted({
     userId: user.id,
     courseId,
     properties: { amount_cents: course.price_cents, currency: course.currency, stripe_session_id: session.id },

@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
   await serviceSupa.from('quiz_attempts').insert(attemptRows).then(() => null, () => null);
 
   // Track quiz submission
-  void trackQuizSubmitted({
+  await trackQuizSubmitted({
     userId: user.id,
     courseId: parsed.data.course_id,
     lessonId: parsed.data.lesson_id ?? null,

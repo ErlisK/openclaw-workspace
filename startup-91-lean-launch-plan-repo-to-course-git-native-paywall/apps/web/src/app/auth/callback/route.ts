@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     if (!error) {
       // Track signup_completed only on initial email confirmation (not password reset)
       if (type !== 'recovery' && data?.user) {
-        void track({ eventName: 'signup_completed', userId: data.user.id, properties: { email: data.user.email } });
+        await track({ eventName: 'signup_completed', userId: data.user.id, properties: { email: data.user.email } });
       }
       return response;
     }

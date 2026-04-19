@@ -368,8 +368,8 @@ async function handleDirectImport(
   }
 
   // Track import events
-  void trackRepoImportStarted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
-  void trackRepoImportCompleted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
+  await trackRepoImportStarted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
+  await trackRepoImportCompleted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
 
   return NextResponse.json({
     success: true,
@@ -433,7 +433,7 @@ export async function POST(req: NextRequest) {
   const importId = importRecord.data?.id as string | undefined;
 
   // Track import started
-  void trackRepoImportStarted({ userId: user.id, properties: { repo_url, branch: branch ?? tag ?? 'main' } });
+  await trackRepoImportStarted({ userId: user.id, properties: { repo_url, branch: branch ?? tag ?? 'main' } });
 
   const fail = async (msg: string, status = 422) => {
     if (importId) {
