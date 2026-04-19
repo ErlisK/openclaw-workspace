@@ -31,24 +31,65 @@ export interface TrackOptions {
   properties?: Record<string, unknown>;
 }
 
+// ── PostHog forwarding (optional) ─────────────────────────────────────────
+// Set POSTHOG_API_KEY and optionally POSTHOG_HOST to enable.
+// Falls back gracefully when env vars are absent.
+
+const POSTHOG_KEY = process.env.POSTHOG_API_KEY ?? null;
+const POSTHOG_HOST = process.env.POSTHOG_HOST ?? 'https://us.i.posthog.com';
+
+async function forwardToPostHog(opts: TrackOptions): Promise<void> {
+  if (!POSTHOG_KEY) return; // PostHog not configured — skip silently
+  try {
+    const distinctId = opts.userId ?? 'anonymous';
+    await fetch(`${POSTHOG_HOST}/capture/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: POSTHOG_KEY,
+        event: opts.eventName,
+        distinct_id: distinctId,
+        properties: {
+          ...opts.properties,
+          ...(opts.courseId ? { course_id: opts.courseId } : {}),
+          ...(opts.lessonId ? { lesson_id: opts.lessonId } : {}),
+          ...(opts.quizId ? { quiz_id: opts.quizId } : {}),
+          // PostHog special props
+          $lib: 'teachrepo-server',
+        },
+      }),
+    });
+  } catch (err) {
+    // Non-critical — log and continue
+    console.warn('[analytics] PostHog forward error:', err);
+  }
+}
+
 /**
  * Track an analytics event server-side to Supabase events table.
+ * Optionally forwards to PostHog when POSTHOG_API_KEY is set.
  * Never throws — errors are logged and swallowed.
  */
 export async function track(opts: TrackOptions): Promise<void> {
-  try {
-    const supabase = createServiceClient();
-    await supabase.from('events').insert({
-      event_name: opts.eventName,
-      user_id: opts.userId ?? null,
-      course_id: opts.courseId ?? null,
-      lesson_id: opts.lessonId ?? null,
-      quiz_id: opts.quizId ?? null,
-      properties: opts.properties ?? {},
-    });
-  } catch (err) {
-    console.error('[analytics] track error:', err);
-  }
+  // Run Supabase write and PostHog forward concurrently; neither blocks the other
+  await Promise.all([
+    (async () => {
+      try {
+        const supabase = createServiceClient();
+        await supabase.from('events').insert({
+          event_name: opts.eventName,
+          user_id: opts.userId ?? null,
+          course_id: opts.courseId ?? null,
+          lesson_id: opts.lessonId ?? null,
+          quiz_id: opts.quizId ?? null,
+          properties: opts.properties ?? {},
+        });
+      } catch (err) {
+        console.error('[analytics] supabase track error:', err);
+      }
+    })(),
+    forwardToPostHog(opts),
+  ]);
 }
 
 // ── Convenience wrappers ────────────────────────────────────────────────────
