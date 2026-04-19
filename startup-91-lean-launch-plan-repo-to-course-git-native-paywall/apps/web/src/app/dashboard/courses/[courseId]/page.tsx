@@ -5,6 +5,8 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { PublishToggle } from '@/components/dashboard/PublishToggle';
 import { VersionBadge } from '@/components/dashboard/VersionBadge';
 import { PricingForm } from '@/components/dashboard/PricingForm';
+import { PremiumSettings } from '@/components/dashboard/PremiumSettings';
+import { getCreatorPlan } from '@/lib/subscription/server';
 
 interface CourseDetailPageProps {
   params: { courseId: string };
@@ -37,7 +39,8 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
       id, slug, title, description, repo_url, git_branch,
       published, published_at, price_cents, currency, pricing_model,
       stripe_product_id, stripe_price_id,
-      version, created_at, updated_at, creator_id
+      version, created_at, updated_at, creator_id,
+      affiliate_pct, marketplace_opt_in, marketplace_priority, custom_domain
     `)
     .eq('id', params.courseId)
     .eq('creator_id', user.id)
@@ -66,6 +69,9 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
     .select('id', { count: 'exact', head: true })
     .eq('course_id', params.courseId)
     .is('entitlement_revoked_at', null);
+
+  // Creator plan (for entitlement checks)
+  const creatorPlan = await getCreatorPlan(user.id);
 
   const currentVersion = versions?.find((v) => v.is_current);
   const previewUrl = `/courses/${course.slug}`;
@@ -314,6 +320,24 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
                 <p className="text-xs text-gray-500 mt-0.5">lessons</p>
               </div>
             </div>
+          </section>
+
+          {/* Premium settings */}
+          <section className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm" data-testid="premium-settings-section">
+            <h2 className="mb-1 text-sm font-semibold uppercase tracking-wider text-gray-400">
+              Distribution &amp; monetisation
+            </h2>
+            <p className="text-xs text-gray-500 mb-4">
+              Affiliate commissions, marketplace listing, and custom domain.
+            </p>
+            <PremiumSettings
+              courseId={params.courseId}
+              plan={creatorPlan}
+              initialAffiliatePct={course.affiliate_pct ?? 0}
+              initialMarketplaceOptIn={course.marketplace_opt_in ?? false}
+              initialMarketplacePriority={course.marketplace_priority ?? false}
+              initialCustomDomain={course.custom_domain ?? null}
+            />
           </section>
 
           {/* Danger zone */}
