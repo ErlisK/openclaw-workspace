@@ -52,14 +52,20 @@ const sections = [
   {
     href: '/docs/pricing',
     title: 'Pricing & Billing',
-    desc: 'Understand TeachRepo\'s pricing tiers, revenue share, and paywall mechanics.',
+    desc: 'What\'s free forever (MIT), what\'s in the Creator plan ($29/mo), rev-share, and billing FAQ.',
     icon: '💰',
   },
   {
     href: '/docs/self-hosting',
     title: 'Self-Hosting Guide',
-    desc: 'Deploy TeachRepo on your own infrastructure with full control.',
+    desc: 'Deploy on Vercel, Railway, Fly.io, or Docker. Full step-by-step with Supabase + Stripe setup.',
     icon: '🖥️',
+  },
+  {
+    href: '/docs/github-actions',
+    title: 'GitHub Actions CI/CD',
+    desc: 'Automate deploys, E2E tests, DB migrations, and course auto-publish on push.',
+    icon: '⚙️',
   },
 ];
 
@@ -116,7 +122,19 @@ export default function DocsIndexPage() {
         </div>
       </div>
 
-      <div className="mt-12 text-center">
+      <div className="mt-12 rounded-xl border border-gray-200 bg-gray-50 p-6 text-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <p className="font-semibold text-gray-900">Prefer to self-host?</p>
+            <p className="mt-0.5 text-gray-500">The full platform is MIT-licensed and free to deploy on your own infrastructure. No platform fees, no lock-in.</p>
+          </div>
+          <a href="/docs/self-hosting" className="shrink-0 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">
+            Self-hosting guide →
+          </a>
+        </div>
+      </div>
+
+      <div className="mt-8 text-center">
         <p className="text-sm text-gray-500">
           Questions?{' '}
           <a href="mailto:hello@teachrepo.com" className="text-violet-600 hover:underline">
