@@ -100,7 +100,7 @@ export default async function HomePage() {
           <nav className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
             <a href="/marketplace" className="hover:text-gray-900">Marketplace</a>
             <a href="/docs" className="hover:text-gray-900">Docs</a>
-            <a href="/docs/pricing" className="hover:text-gray-900">Pricing</a>
+            <a href="/pricing" className="hover:text-gray-900">Pricing</a>
           </nav>
           <div className="flex items-center gap-3">
             <a href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-violet-600">Sign in</a>
@@ -273,7 +273,7 @@ export default async function HomePage() {
           <nav className="flex flex-wrap gap-6 justify-center">
             <a href="/marketplace" className="hover:text-white">Marketplace</a>
             <a href="/docs" className="hover:text-white">Docs</a>
-            <a href="/docs/pricing" className="hover:text-white">Pricing</a>
+            <a href="/pricing" className="hover:text-white">Pricing</a>
             <a href="/docs/self-hosting" className="hover:text-white">Self-Hosting</a>
             <a href="/legal/terms" className="hover:text-white">Terms</a>
             <a href="/legal/privacy" className="hover:text-white">Privacy</a>

@@ -1,18 +1,7 @@
-/**
- * POST /api/affiliates/click
- *
- * Records a referral click when a user lands with an affiliate cookie set.
- * Called client-side from the course page on mount when tr_affiliate_ref cookie present.
- *
- * Body: { affiliateCode: string, courseId: string, landingUrl?: string, referrerUrl?: string }
- *
- * Idempotent by nature (click rows accumulate; no dedup needed).
- * Non-authenticated — anyone who lands via a ref link triggers this.
- */
-
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
+import { rateLimitRequest, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const ClickSchema = z.object({
   affiliateCode: z.string().min(1).max(128),
@@ -22,6 +11,12 @@ const ClickSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Rate-limit by IP (unauthenticated route — must be protected)
+  const fwd = req.headers.get('x-forwarded-for');
+  const ip = fwd ? fwd.split(',').at(-1)?.trim() ?? '' : req.headers.get('x-real-ip') ?? '';
+  const rlResult = await rateLimitRequest(ip || 'anon', { limit: 30, windowMs: 60_000, bucket: 'affiliate-click' });
+  if (!rlResult.success) return tooManyRequestsResponse(rlResult);
+
   let body: unknown;
   try {
     body = await req.json();
@@ -51,14 +46,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ recorded: false });
   }
 
-  // Hash IP for privacy (not stored as-is)
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0] ?? req.headers.get('x-real-ip') ?? '';
   const ua = req.headers.get('user-agent') ?? '';
   const uaType = ua.toLowerCase().includes('mobile') ? 'mobile'
     : ua.toLowerCase().includes('bot') ? 'bot'
     : 'desktop';
 
-  const ipHash = ip ? await hashIp(ip) : null;
+  // Hash IP for privacy; gracefully degrade if salt is missing
+  let ipHash: string | null = null;
+  try {
+    ipHash = ip ? await hashIp(ip) : null;
+  } catch {
+    ipHash = null; // Non-fatal — record click without hash
+  }
 
   // Record click
   await serviceSupa.from('referrals').insert({
@@ -90,3 +89,4 @@ async function hashIp(ip: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
 }
+

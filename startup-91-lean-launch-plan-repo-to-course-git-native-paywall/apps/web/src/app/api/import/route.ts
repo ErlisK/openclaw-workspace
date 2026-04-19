@@ -242,6 +242,7 @@ const ImportRequestSchema = z.object({
   branch: z.string().optional(),
   tag: z.string().optional(),
   path: z.string().optional(), // subdirectory inside repo, e.g. "sample-course"
+  folder: z.string().optional(), // alias for path (CLI uses --folder)
   token: z.string().optional(), // optional PAT for private repos
 });
 
@@ -416,7 +417,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Validation error', details: parsed.error.errors }, { status: 400 });
   }
 
-  const { repo_url, branch, tag, path: coursePath, token: userToken } = parsed.data;
+  const { repo_url, branch, tag, path: _path, folder: _folder, token: userToken } = parsed.data;
+  // Support both `path` and `folder` params; normalize away leading/trailing slashes
+  const rawCoursePath = (_folder ?? _path ?? '').replace(/^\/|\/$/, '') || undefined;
+  const coursePath = rawCoursePath;
   // Use server-side GitHub PAT as fallback (enables importing private repos)
   const token = userToken ?? process.env.GITHUB_IMPORT_TOKEN;
   const serviceSupa = createServiceClient();

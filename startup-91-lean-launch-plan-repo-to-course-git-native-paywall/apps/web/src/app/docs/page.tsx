@@ -26,7 +26,7 @@ const sections = [
     icon: '🧪',
   },
   {
-    href: '/docs/cli',
+    href: '/docs/cli-reference',
     title: 'CLI Reference',
     desc: 'Full reference for the teachrepo CLI tool — init, import, deploy, and more.',
     icon: '⌨️',

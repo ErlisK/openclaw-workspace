@@ -93,6 +93,16 @@ export async function rateLimitRequest(identifier: string, opts: RateLimitOption
   if (_upstashFn) {
     return _upstashFn(identifier, opts);
   }
+  // In production, Upstash Redis MUST be configured for correct cross-instance limiting.
+  if (process.env.NODE_ENV !== 'development' && (
+    !process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN
+  )) {
+    // Log and fall through to in-memory (rather than hard-throw) so the app
+    // still starts; but emit a clear warning so ops can fix the config.
+    console.error('[rate-limit] WARNING: Upstash Redis is not configured in production. ' +
+      'Rate limiting is in-memory only and will NOT enforce limits across serverless instances. ' +
+      'Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN.');
+  }
   return inMemoryLimit(identifier, opts);
 }
 
@@ -102,10 +112,27 @@ export function rateLimit(identifier: string, opts: RateLimitOptions): RateLimit
 }
 
 export function getClientIp(req: Request | { headers: Headers }): string {
-  const h = req.headers;
-  return (
-    (h as Headers).get?.('x-real-ip') ??
-    (h as Headers).get?.('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'unknown'
+  const h = req.headers as Headers;
+  // Use the LAST entry in X-Forwarded-For to avoid IP spoofing via prepended headers.
+  const fwd = h.get?.('x-forwarded-for');
+  if (fwd) {
+    const last = fwd.split(',').at(-1)?.trim();
+    if (last) return last;
+  }
+  return h.get?.('x-real-ip') ?? 'unknown';
+}
+
+/**
+ * Build a 429 NextResponse with a Retry-After header.
+ */
+export function tooManyRequestsResponse(result: RateLimitResult): import('next/server').NextResponse {
+  const { NextResponse } = require('next/server');
+  const retryAfterSeconds = Math.ceil(Math.max(0, result.resetMs - Date.now()) / 1000);
+  return NextResponse.json(
+    { error: 'Too many requests', retryAfter: retryAfterSeconds },
+    {
+      status: 429,
+      headers: { 'Retry-After': String(retryAfterSeconds) },
+    },
   );
 }

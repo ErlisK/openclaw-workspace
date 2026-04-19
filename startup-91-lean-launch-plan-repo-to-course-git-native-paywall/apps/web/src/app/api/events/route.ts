@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { rateLimitRequest, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const VALID_EVENT_NAMES = [
   'signup_completed', 'login', 'logout',
@@ -29,6 +30,12 @@ const EventSchema = z.object({
 const ANONYMOUS_ALLOWLIST = new Set(['lesson_viewed', 'page_view', 'sandbox_viewed']);
 
 export async function POST(req: NextRequest) {
+  // Rate-limit by IP to prevent event-flood abuse
+  const fwd = req.headers.get('x-forwarded-for');
+  const ip = fwd ? fwd.split(',').at(-1)?.trim() ?? '' : req.headers.get('x-real-ip') ?? '';
+  const rlResult = await rateLimitRequest(ip || 'anon', { limit: 60, windowMs: 60_000, bucket: 'events' });
+  if (!rlResult.success) return tooManyRequestsResponse(rlResult);
+
   let body: unknown;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });

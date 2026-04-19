@@ -20,6 +20,10 @@ const nextConfig = {
       { source: '/docs/payments', destination: '/docs/payments-affiliates', permanent: false },
       // /courses -> /marketplace
       { source: '/courses', destination: '/marketplace', permanent: true },
+      // /auth/reset-password -> /auth/forgot-password (canonical forgot-password page)
+      { source: '/auth/reset-password', destination: '/auth/forgot-password', permanent: true },
+      // /dashboard/import -> /dashboard/new (old path redirect)
+      { source: '/dashboard/import', destination: '/dashboard/new', permanent: true },
       // Note: /pricing is NOT redirected — the /pricing page is served directly
     ];
   },
