@@ -117,6 +117,7 @@ export async function GET(): Promise<NextResponse> {
       // Do not cache health responses
       'Cache-Control': 'no-store, no-cache, must-revalidate',
       'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': 'https://teachrepo.com',
     },
   });
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import { getBaseUrl } from '@/utils/url';
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com';
+const BASE_URL = getBaseUrl();
 
 export const metadata: Metadata = {
   title: {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   },
   description:
     'Convert a GitHub repo or Markdown notes into a paywalled, versioned course site in minutes. Git-native, one-click deploy, built for engineers.',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? BASE_URL),
+  metadataBase: new URL(BASE_URL),
   keywords: [
     'course platform', 'git native', 'markdown courses', 'paywalled content',
     'developer education', 'self-hosted course', 'teachrepo',

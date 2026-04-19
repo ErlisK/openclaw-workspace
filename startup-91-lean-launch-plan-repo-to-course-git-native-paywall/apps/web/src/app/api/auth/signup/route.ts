@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(
-    { message: 'Account created. Check your email to confirm your address.', userId: data.user?.id },
+    { message: 'Account created. You can now sign in.', userId: data.user?.id },
     { status: 201 },
   );
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
+import { getBaseUrl } from '@/utils/url';
 
 /**
  * GET /api/affiliates
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
     .eq('published', true)
     .gt('price_cents', 0);
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com';
+  const appUrl = getBaseUrl();
 
   // Map affiliate records to course data + referral URLs
   const affiliateLinks = affiliateRecords?.map((a) => {
@@ -168,7 +169,7 @@ export async function POST(req: NextRequest) {
     commissionPct = created.commission_pct;
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com';
+  const appUrl = getBaseUrl();
   const referralUrl = `${appUrl}/courses/${courseSlug}?ref=${code}`;
 
   return NextResponse.json({
