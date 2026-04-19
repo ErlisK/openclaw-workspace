@@ -16,13 +16,14 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: '/docs/payments', destination: '/docs/payments-affiliates', permanent: true },
-      { source: '/pricing', destination: '/docs/pricing', permanent: true },
+      // /docs/payments -> /docs/payments-affiliates (301 permanent)
+      { source: '/docs/payments', destination: '/docs/payments-affiliates', permanent: false },
+      // /courses -> /marketplace
       { source: '/courses', destination: '/marketplace', permanent: true },
+      // Note: /pricing is NOT redirected — the /pricing page is served directly
     ];
   },
   async headers() {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://teachrepo.com';
     return [
       {
         source: '/(.*)',
@@ -32,9 +33,7 @@ const nextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-          { key: 'Access-Control-Allow-Origin', value: appUrl },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+          // CORS headers are handled dynamically in middleware.ts — NOT set statically here
           {
             key: 'Content-Security-Policy',
             value: [
@@ -47,14 +46,6 @@ const nextConfig = {
               "frame-src https://js.stripe.com https://codesandbox.io https://stackblitz.com",
             ].join('; '),
           },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          { key: 'Access-Control-Allow-Origin', value: appUrl },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
         ],
       },
     ];

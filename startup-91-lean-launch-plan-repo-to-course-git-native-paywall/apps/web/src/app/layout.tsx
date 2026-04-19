@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 
-const BASE_URL = 'https://teachrepo.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? 'https://teachrepo.com';
 
 export const metadata: Metadata = {
   title: {

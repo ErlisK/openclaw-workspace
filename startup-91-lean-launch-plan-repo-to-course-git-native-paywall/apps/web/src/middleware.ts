@@ -1,39 +1,87 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimitRequest } from '@/lib/rate-limit';
 
 // ── Rate-limit buckets ────────────────────────────────────────────────────────
 const RATE_LIMITS: { pattern: RegExp; limit: number; windowMs: number; bucket: string }[] = [
-  // Import is expensive (hits GitHub API) — 20 req/min per IP
-  { pattern: /^\/api\/import/, limit: 20, windowMs: 60_000, bucket: 'import' },
+  // Import is expensive (hits GitHub API) — 5 req/min per IP
+  { pattern: /^\/api\/import/, limit: 5, windowMs: 60_000, bucket: 'import' },
+  { pattern: /^\/api\/courses\/import/, limit: 5, windowMs: 60_000, bucket: 'import' },
   // Auth endpoints — 10 req/min
   { pattern: /^\/api\/auth/, limit: 10, windowMs: 60_000, bucket: 'auth' },
-  // Checkout — 10 req/min
+  // Checkout/enroll — 10 req/min
   { pattern: /^\/api\/checkout/, limit: 10, windowMs: 60_000, bucket: 'checkout' },
+  { pattern: /^\/api\/enroll/, limit: 10, windowMs: 60_000, bucket: 'checkout' },
   // General API — 120 req/min
   { pattern: /^\/api\//, limit: 120, windowMs: 60_000, bucket: 'api' },
 ];
 
+/**
+ * Get client IP from NextRequest.
+ * Trust only the LAST value in X-Forwarded-For (the one added by Vercel's edge).
+ * Do NOT trust X-Real-IP — it can be spoofed by a client sending that header directly.
+ */
+function getClientIp(req: NextRequest): string {
+  // NextRequest.ip is set by Vercel runtime (most reliable)
+  if (req.ip) return req.ip;
+  // Fallback: last value in X-Forwarded-For (trimmed)
+  const xff = req.headers.get('x-forwarded-for');
+  if (xff) {
+    const parts = xff.split(',');
+    const last = parts[parts.length - 1]?.trim();
+    if (last) return last;
+  }
+  return 'unknown';
+}
+
+function buildAllowedOrigins(): string[] {
+  return (process.env.ALLOWED_ORIGINS ?? 'https://teachrepo.com').split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+function matchesOrigin(origin: string, allowedOrigins: string[]): boolean {
+  return allowedOrigins.some((a) => {
+    if (a === origin) return true;
+    if (a.includes('*')) {
+      const regex = new RegExp('^' + a.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
+      return regex.test(origin);
+    }
+    return false;
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const origin = request.headers.get('origin');
+  const allowedOrigins = buildAllowedOrigins();
+
+  // ── Handle CORS preflight ────────────────────────────────────────────────
+  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
+    const res = new NextResponse(null, { status: 200 });
+    if (origin && matchesOrigin(origin, allowedOrigins)) {
+      res.headers.set('Access-Control-Allow-Origin', origin);
+      res.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+      res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Stripe-Signature');
+      res.headers.set('Access-Control-Allow-Credentials', 'true');
+      res.headers.set('Vary', 'Origin');
+    }
+    return res;
+  }
 
   // ── Rate limiting ────────────────────────────────────────────────────────
-  const ip =
-    request.headers.get('x-real-ip') ??
-    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ??
-    'unknown';
+  const ip = getClientIp(request);
 
   for (const rule of RATE_LIMITS) {
     if (rule.pattern.test(pathname)) {
-      const result = rateLimit(ip, { limit: rule.limit, windowMs: rule.windowMs, bucket: rule.bucket });
+      const result = await rateLimitRequest(ip, { limit: rule.limit, windowMs: rule.windowMs, bucket: rule.bucket });
       if (!result.success) {
+        const retryAfter = Math.ceil((result.resetMs - Date.now()) / 1000);
         return new NextResponse(
-          JSON.stringify({ error: 'Too many requests', retryAfter: Math.ceil((result.resetMs - Date.now()) / 1000) }),
+          JSON.stringify({ error: 'Too many requests', retryAfter }),
           {
             status: 429,
             headers: {
               'Content-Type': 'application/json',
-              'Retry-After': String(Math.ceil((result.resetMs - Date.now()) / 1000)),
+              'Retry-After': String(retryAfter),
               'X-RateLimit-Limit': String(result.limit),
               'X-RateLimit-Remaining': String(result.remaining),
               'X-RateLimit-Reset': String(result.resetMs),
@@ -41,42 +89,19 @@ export async function middleware(request: NextRequest) {
           },
         );
       }
-      // Set rate-limit headers on passing requests too
-      const next = NextResponse.next({ request: { headers: request.headers } });
-      next.headers.set('X-RateLimit-Limit', String(result.limit));
-      next.headers.set('X-RateLimit-Remaining', String(result.remaining));
-      next.headers.set('X-RateLimit-Reset', String(result.resetMs));
       // Break — only apply the most-specific matching rule
       break;
     }
   }
 
-  // Handle CORS preflight for API routes
-  if (request.method === 'OPTIONS' && pathname.startsWith('/api/')) {
-    const origin = request.headers.get('origin');
-    const allowedOrigins = (process.env.ALLOWED_ORIGINS ?? 'https://teachrepo.com').split(',').map(s => s.trim());
-    const res = new NextResponse(null, { status: 204 });
-    if (origin) {
-      const matches = allowedOrigins.some(a => {
-        if (a === origin) return true;
-        if (a.includes('*')) {
-          const regex = new RegExp('^' + a.replace(/\./g, '\\.').replace(/\*/g, '.*') + '$');
-          return regex.test(origin);
-        }
-        return false;
-      });
-      if (matches) {
-        res.headers.set('Access-Control-Allow-Origin', origin);
-        res.headers.set('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-        res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Stripe-Signature');
-        res.headers.set('Access-Control-Allow-Credentials', 'true');
-        res.headers.set('Vary', 'Origin');
-      }
-    }
-    return res;
-  }
-
   let response = NextResponse.next({ request: { headers: request.headers } });
+
+  // ── Dynamic CORS headers for non-OPTIONS API requests ────────────────────
+  if (pathname.startsWith('/api/') && origin && matchesOrigin(origin, allowedOrigins)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Vary', 'Origin');
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
