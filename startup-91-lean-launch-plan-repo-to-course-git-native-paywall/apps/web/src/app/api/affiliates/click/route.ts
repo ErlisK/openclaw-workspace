@@ -82,7 +82,10 @@ export async function POST(req: NextRequest) {
 
 /** Simple IP hash using SHA-256 (Web Crypto — available in Edge runtime) */
 async function hashIp(ip: string): Promise<string> {
-  const salt = process.env.IP_HASH_SALT ?? 'teachrepo-affiliate-salt';
+  const salt = process.env.IP_HASH_SALT;
+  if (!salt) {
+    throw new Error('IP_HASH_SALT environment variable is required');
+  }
   const data = new TextEncoder().encode(`${salt}:${ip}`);
   const digest = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 16);

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
@@ -54,6 +56,7 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
     .from('courses')
     .select('id, slug, title, description, price_cents, currency, pricing_model, version')
     .eq('slug', params.slug)
+    .eq('published', true)
     .single();
 
   if (!course) notFound();

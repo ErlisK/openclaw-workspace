@@ -1,4 +1,7 @@
 import type { Metadata } from 'next';
+import { createServiceClient } from '@/lib/supabase/service';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'TeachRepo — Turn your GitHub repo into a paywalled course',
@@ -22,30 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
-const SAMPLE_COURSES = [
-  {
-    slug: 'git-for-engineers',
-    title: 'Git for Engineers',
-    description:
-      'Master Git workflows used at top engineering teams — branching, rebasing, and team collaboration.',
-    lessonCount: 6,
-    freeLessons: 3,
-    badge: 'Free course',
-    badgeColor: 'bg-green-100 text-green-700',
-    icon: '🌿',
-  },
-  {
-    slug: 'github-actions-engineers',
-    title: 'GitHub Actions for Engineers',
-    description:
-      'Automate your entire CI/CD pipeline — from a hello-world workflow to OIDC-based keyless cloud deploys.',
-    lessonCount: 5,
-    freeLessons: 2,
-    badge: 'Free course',
-    badgeColor: 'bg-green-100 text-green-700',
-    icon: '⚙️',
-  },
-];
+// Icons for demo courses by index
+const COURSE_ICONS = ['🌿', '⚙️', '🚀', '📦', '🔐', '🧪'];
 
 const FEATURES = [
   {
@@ -87,7 +68,28 @@ const HOW_IT_WORKS = [
   { step: '4', title: 'Publish and share', desc: 'Hit publish. Your course page is live on teachrepo.com with a shareable URL.' },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  // Fetch top 2 published courses for demo section
+  const serviceSupa = createServiceClient();
+  const { data: rawCourses } = await serviceSupa
+    .from('courses')
+    .select('id, slug, title, description, price_cents, lessons(id, is_preview)')
+    .eq('published', true)
+    .order('published_at', { ascending: false })
+    .limit(2);
+
+  const demoCourses = (rawCourses ?? []).map((c, i) => {
+    const lessons = (c.lessons as { id: string; is_preview: boolean }[]) ?? [];
+    return {
+      slug: c.slug,
+      title: c.title,
+      description: c.description ?? '',
+      lessonCount: lessons.length,
+      freeLessons: lessons.filter((l) => l.is_preview).length,
+      isFree: c.price_cents === 0,
+      icon: COURSE_ICONS[i % COURSE_ICONS.length],
+    };
+  });
   return (
     <main className="flex min-h-screen flex-col">
 
@@ -145,7 +147,7 @@ export default function HomePage() {
           </p>
 
           <div className="grid gap-6 sm:grid-cols-2">
-            {SAMPLE_COURSES.map((course) => (
+            {demoCourses.map((course) => (
               <a
                 key={course.slug}
                 href={`/courses/${course.slug}`}
@@ -153,8 +155,8 @@ export default function HomePage() {
               >
                 <div className="flex items-start justify-between mb-4">
                   <span className="text-3xl">{course.icon}</span>
-                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.badgeColor}`}>
-                    {course.badge}
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${course.isFree ? 'bg-green-100 text-green-700' : 'bg-violet-100 text-violet-700'}`}>
+                    {course.isFree ? 'Free course' : 'Paid course'}
                   </span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 group-hover:text-violet-700 mb-2">
@@ -162,8 +164,8 @@ export default function HomePage() {
                 </h3>
                 <p className="text-sm text-gray-500 flex-1 mb-4">{course.description}</p>
                 <div className="flex items-center gap-4 text-xs text-gray-400">
-                  <span>📚 {course.lessonCount} lessons</span>
-                  <span>🆓 {course.freeLessons} free</span>
+                  <span>📚 {course.lessonCount} lesson{course.lessonCount !== 1 ? 's' : ''}</span>
+                  {course.freeLessons > 0 && <span>🆓 {course.freeLessons} free</span>}
                 </div>
                 <div className="mt-4 text-sm font-medium text-violet-600 group-hover:text-violet-800">
                   Start learning →

@@ -25,6 +25,9 @@ const EventSchema = z.object({
   properties: z.record(z.unknown()).default({}),
 });
 
+// Events that are safe for anonymous/unauthenticated callers
+const ANONYMOUS_ALLOWLIST = new Set(['lesson_viewed', 'page_view', 'sandbox_viewed']);
+
 export async function POST(req: NextRequest) {
   let body: unknown;
   try { body = await req.json(); } catch {
@@ -42,15 +45,24 @@ export async function POST(req: NextRequest) {
   const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
 
+  // Require auth for high-value events
+  if (!user && !ANONYMOUS_ALLOWLIST.has(event_name)) {
+    return NextResponse.json({ error: 'Authentication required for this event' }, { status: 401 });
+  }
+
   // Write to Supabase events table
   const serviceSupa = createServiceClient();
-  await serviceSupa.from('events').insert({
+  const { error: insertError } = await serviceSupa.from('events').insert({
     event_name,
     user_id: user?.id ?? null,
     course_id: course_id ?? null,
     lesson_id: lesson_id ?? null,
     properties: { ...properties, session_id: parsed.data.session_id ?? null },
-  }).then(() => null, () => null); // Non-critical — swallow errors
+  });
+
+  if (insertError) {
+    return NextResponse.json({ error: 'Failed to record event' }, { status: 500 });
+  }
 
   return new NextResponse(null, { status: 204 });
 }

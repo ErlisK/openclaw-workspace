@@ -79,7 +79,7 @@ export async function middleware(request: NextRequest) {
   // Affiliate ref cookie
   const ref = request.nextUrl.searchParams.get('ref');
   if (ref) {
-    response.cookies.set('tr_affiliate_ref', ref, { maxAge: 30 * 24 * 60 * 60, sameSite: 'lax', path: '/' });
+    response.cookies.set('tr_affiliate_ref', ref, { maxAge: 30 * 24 * 60 * 60, sameSite: 'lax', path: '/', httpOnly: true });
   }
 
   // Protect dashboard routes
