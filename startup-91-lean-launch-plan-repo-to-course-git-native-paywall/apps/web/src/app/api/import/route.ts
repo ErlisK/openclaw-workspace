@@ -367,6 +367,10 @@ async function handleDirectImport(
     lessonsImported++;
   }
 
+  // Track import events
+  void trackRepoImportStarted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
+  void trackRepoImportCompleted({ userId: creatorId, courseId, properties: { slug, lessons: lessonsImported } });
+
   return NextResponse.json({
     success: true,
     courseId,
@@ -375,10 +379,6 @@ async function handleDirectImport(
     versionId: versionId || undefined,
   });
 }
-
-// ────────────────────────────────────────────────────────────────────────────
-// POST /api/import
-// ────────────────────────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
   // 1. Auth — supports SSR cookie session and Bearer token

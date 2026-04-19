@@ -53,7 +53,7 @@ test.describe('2 · robots.txt', () => {
   test('robots.txt contains User-agent and Disallow', async ({ request }) => {
     const res = await request.get('/robots.txt');
     const text = await res.text();
-    expect(text).toContain('User-agent:');
+    expect(text).toMatch(/User-[Aa]gent:/);
     expect(text).toContain('Disallow:');
   });
 

@@ -129,8 +129,8 @@ test.describe('2 · import events written on course import', () => {
       },
     });
 
-    // Wait briefly for async event write
-    await new Promise((r) => setTimeout(r, 1500));
+    // Wait for async event write (fire-and-forget, allow up to 5s)
+    await new Promise((r) => setTimeout(r, 5000));
     const after = await countRecentEvents(request, jwt, 'repo_import_started');
     expect(after).toBeGreaterThan(before);
   });
@@ -151,7 +151,8 @@ test.describe('2 · import events written on course import', () => {
     });
     expect(importRes.status()).toBe(200);
 
-    await new Promise((r) => setTimeout(r, 1500));
+    // Wait for async event write (fire-and-forget, allow up to 5s)
+    await new Promise((r) => setTimeout(r, 5000));
     const after = await countRecentEvents(request, jwt, 'repo_import_completed');
     expect(after).toBeGreaterThan(before);
   });
@@ -277,7 +278,8 @@ test.describe('4 · quiz_submitted event', () => {
     const submitBody = await submitRes.json() as { score: number; passed: boolean };
     expect(submitBody.score).toBe(100);
 
-    await new Promise((r) => setTimeout(r, 1500));
+    // Wait for async event write (allow up to 5s)
+    await new Promise((r) => setTimeout(r, 5000));
     const after = await countRecentEvents(request, jwt, 'quiz_submitted', courseId);
     expect(after).toBeGreaterThan(before);
   });
@@ -393,22 +395,15 @@ test.describe('7 · GET /api/admin/analytics', () => {
 
   test('returns valid analytics response for authenticated creator', async ({ request }) => {
     const jwt = await loginCreator(request);
-
-    // Use cookie-style auth (SSR route)
-    // The analytics endpoint uses createServerClient which reads cookies
-    // We test via the admin analytics API using service client workaround:
-    // Actually the route uses createServerClient — skip this for non-browser context
-    // Instead verify the response shape via direct Supabase query
+    // Test that the events table is queryable for logged-in creator
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: events } = await (async () => {
-      const res = await request.get(
-        `${SUPA_URL}/rest/v1/events?created_at=gte.${since}&select=event_name&limit=5`,
-        { headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}` } },
-      );
-      return res.json() as Promise<{ data: unknown[] }>;
-    })().catch(() => ({ data: [] }));
-    // Events table is accessible — shape validated
-    expect(Array.isArray(events)).toBe(true);
+    const res = await request.get(
+      `${SUPA_URL}/rest/v1/events?created_at=gte.${since}&select=event_name&limit=5`,
+      { headers: { apikey: ANON_KEY, Authorization: `Bearer ${jwt}` } },
+    );
+    expect(res.ok()).toBe(true);
+    const data = await res.json() as unknown[];
+    expect(Array.isArray(data)).toBe(true);
   });
 
   test('analytics dashboard page returns 200', async ({ page }) => {
