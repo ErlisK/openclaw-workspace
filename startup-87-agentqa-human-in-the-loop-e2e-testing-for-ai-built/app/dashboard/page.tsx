@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { TestJob, Project } from '@/lib/types'
 import { TIER_CONFIG } from '@/lib/types'
 import dynamic from 'next/dynamic'
@@ -28,6 +28,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function DashboardPage() {
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isWelcome = searchParams?.get('welcome') === '1'
   const [userEmail, setUserEmail] = useState('')
   const [projects, setProjects] = useState<Project[]>([])
   const [jobs, setJobs] = useState<TestJob[]>([])
@@ -154,6 +156,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Welcome banner for new signups */}
+      {isWelcome && (
+        <div className="bg-green-600 text-white px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🎉</span>
+            <div>
+              <span className="font-semibold">Welcome to BetaWindow!</span>
+              <span className="ml-2 text-green-100 text-sm">Your free Quick test credit ($5) has been added to your account. Submit your first test job below.</span>
+            </div>
+          </div>
+          <a href="/jobs/new" className="px-4 py-1.5 bg-white text-green-700 font-semibold text-sm rounded-lg hover:bg-green-50">Start first test →</a>
+        </div>
+      )}
       {/* Onboarding */}
       <OnboardingChecklist onAction={handleOnboardingAction} />
       <OnboardingTour autoStart={true} />

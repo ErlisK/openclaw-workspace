@@ -26,7 +26,7 @@ export default function HomePage() {
           {/* Launch promo banner */}
           <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 text-sm font-semibold bg-amber-50 border border-amber-200 text-amber-800 rounded-full">
             <span>🎉</span>
-            <span>Launch week: first Quick test free — use code <strong>LAUNCH</strong> at checkout</span>
+            <span>Launch week: <strong>first Quick test FREE</strong> — auto-applied when you sign up (no code needed)</span>
           </div>
           <div className="inline-block mb-6 px-3 py-1 text-xs font-semibold tracking-wide uppercase bg-indigo-100 text-indigo-700 rounded-full">
             Built for vibe coders &amp; AI agent operators
@@ -41,22 +41,22 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
             <Link
-              href="/jobs/new"
+              href="/signup"
               className="px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-lg"
             >
-              Start a test — from $5
-            </Link>
-            <Link
-              href="/login"
-              className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-lg"
-            >
-              Sign in
+              Get your first test free →
             </Link>
             <Link
               href="/report/demo"
               className="px-8 py-4 bg-white text-indigo-600 font-semibold rounded-lg border border-indigo-200 hover:border-indigo-400 transition-colors text-lg"
             >
               See a sample report →
+            </Link>
+            <Link
+              href="/login"
+              className="px-8 py-4 bg-white text-gray-700 font-semibold rounded-lg border border-gray-200 hover:border-gray-300 transition-colors text-lg"
+            >
+              Sign in
             </Link>
           </div>
 
@@ -206,6 +206,29 @@ curl -X POST https://betawindow.com/api/v1/jobs \\
                 <div className="text-sm text-gray-500 mt-1">to sign up · pay per test</div>
               </div>
             </div>
+          </div>
+
+          {/* AI tool compatibility */}
+          <div className="mt-12 mb-8 py-10 border-t border-gray-100">
+            <p className="text-center text-xs font-semibold uppercase tracking-widest text-gray-400 mb-8">Works with every AI coding tool</p>
+            <div className="flex flex-wrap justify-center items-center gap-6 opacity-60">
+              {[
+                { name: 'Cursor', emoji: '🟣' },
+                { name: 'Replit', emoji: '🟡' },
+                { name: 'Claude', emoji: '🟠' },
+                { name: 'GPT-4o', emoji: '🟢' },
+                { name: 'Gemini', emoji: '🔵' },
+                { name: 'Bolt', emoji: '⚡' },
+                { name: 'Lovable', emoji: '❤️' },
+                { name: 'v0', emoji: '💫' },
+              ].map((tool) => (
+                <div key={tool.name} className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full text-sm font-medium text-gray-600">
+                  <span>{tool.emoji}</span>
+                  <span>{tool.name}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-center text-xs text-gray-400 mt-6">If it outputs a URL, we can test it. No SDK, no config, no agent changes required.</p>
           </div>
 
           <p className="mt-6 text-sm text-gray-400">

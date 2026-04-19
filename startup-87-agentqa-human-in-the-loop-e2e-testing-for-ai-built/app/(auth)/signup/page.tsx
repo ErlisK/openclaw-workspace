@@ -60,6 +60,12 @@ function SignupForm() {
           trackRedditEvent('Lead', { value: 5, currency: 'USD' })
         }
       } catch {}
+      // Auto-apply LAUNCH promo for every new signup (free Quick test)
+      await fetch('/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: 'LAUNCH' }),
+      }).catch(() => {})
       // Apply referral code if present
       if (referralCode) {
         await fetch('/api/referrals/apply', {
@@ -68,7 +74,7 @@ function SignupForm() {
           body: JSON.stringify({ code: referralCode }),
         }).catch(() => {})
       }
-      router.push('/dashboard')
+      router.push('/dashboard?welcome=1')
     } else {
       setSuccess(true)
       setLoading(false)
@@ -97,10 +103,18 @@ function SignupForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <Link href="/" className="text-indigo-600 font-bold text-lg">BetaWindow</Link>
-          <h1 className="text-2xl font-bold text-gray-900 mt-4">Create account</h1>
-          <p className="text-gray-500 mt-1">Start testing your AI-built apps</p>
+          {/* Free credit callout */}
+          <div className="mt-4 mb-4 flex items-start gap-3 px-4 py-3 bg-green-50 border border-green-200 rounded-xl">
+            <span className="text-xl">🎁</span>
+            <div>
+              <p className="text-sm font-semibold text-green-800">Free Quick test included</p>
+              <p className="text-xs text-green-700 mt-0.5">Sign up and instantly get <strong>$5 in credits</strong> — enough for one Quick test. No credit card required to sign up.</p>
+            </div>
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900">Create account</h1>
+          <p className="text-gray-500 mt-1">Start testing your AI-built apps — first test free</p>
         </div>
 
         <button
