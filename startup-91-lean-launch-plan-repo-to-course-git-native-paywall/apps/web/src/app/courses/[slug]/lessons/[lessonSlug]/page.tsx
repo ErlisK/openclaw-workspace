@@ -154,7 +154,10 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   // ── 6. Compile MDX ───────────────────────────────────────────────────────
   let renderedContent: React.ReactElement | null = null;
   try {
-    renderedContent = await compileLessonMdx(lesson.content_md ?? '');
+    renderedContent = await compileLessonMdx(lesson.content_md ?? '', {
+      enrolled,
+      courseSlug: params.slug,
+    });
   } catch {
     // Fallback to plain text if MDX compilation fails
   }
