@@ -68,7 +68,7 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   // ── 2. Fetch lesson ──────────────────────────────────────────────────────
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz, quiz_slug')
+    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz')
     .eq('course_id', course.id)
     .eq('slug', params.lessonSlug)
     .single();
@@ -150,12 +150,12 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
     }>;
   } | null = null;
 
-  if (lesson.has_quiz && lesson.quiz_slug) {
+  if (lesson.has_quiz) {
     const { data: quiz } = await supabase
       .from('quizzes')
       .select('id, title, pass_threshold, lesson_id')
       .eq('course_id', course.id)
-      .eq('slug', lesson.quiz_slug)
+      .eq('lesson_id', lesson.id)
       .single();
 
     if (quiz) {

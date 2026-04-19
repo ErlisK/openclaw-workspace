@@ -26,7 +26,7 @@ export async function GET(
   const supa = getSupabaseClient();
   const { data: lesson, error } = await supa
     .from('lessons')
-    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz, quiz_slug, course_id')
+    .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz, course_id')
     .eq('id', lessonIdParsed.data)
     .eq('course_id', courseIdParsed.data)
     .single();
