@@ -118,9 +118,7 @@ test.describe('2 · import events written on course import', () => {
     const jwt = await loginCreator(request);
     const slug = `analytic-test-${Date.now()}`;
 
-    const before = await countRecentEvents(request, jwt, 'repo_import_started');
-
-    await request.post('/api/import', {
+    const importRes = await request.post('/api/import', {
       headers: { Authorization: `Bearer ${jwt}` },
       data: {
         courseYml: `title: "Analytics Test"\nslug: "${slug}"\nprice_cents: 0\ncurrency: "usd"\nrepo_url: "https://github.com/ErlisK/openclaw-workspace"\n`,
@@ -128,18 +126,18 @@ test.describe('2 · import events written on course import', () => {
         quizzes: [],
       },
     });
+    expect(importRes.status()).toBe(200);
+    const { courseId } = await importRes.json() as { courseId: string };
 
-    // Wait for async event write (fire-and-forget, allow up to 5s)
-    await new Promise((r) => setTimeout(r, 5000));
-    const after = await countRecentEvents(request, jwt, 'repo_import_started');
-    expect(after).toBeGreaterThan(before);
+    // Wait for fire-and-forget event write
+    await new Promise((r) => setTimeout(r, 8000));
+    const after = await countRecentEvents(request, jwt, 'repo_import_started', courseId, 30_000);
+    expect(after).toBeGreaterThanOrEqual(1);
   });
 
   test('repo_import_completed is written after successful import', async ({ request }) => {
     const jwt = await loginCreator(request);
     const slug = `analytic-complete-${Date.now()}`;
-
-    const before = await countRecentEvents(request, jwt, 'repo_import_completed');
 
     const importRes = await request.post('/api/import', {
       headers: { Authorization: `Bearer ${jwt}` },
@@ -150,11 +148,13 @@ test.describe('2 · import events written on course import', () => {
       },
     });
     expect(importRes.status()).toBe(200);
+    const { courseId } = await importRes.json() as { courseId: string };
 
-    // Wait for async event write (fire-and-forget, allow up to 5s)
-    await new Promise((r) => setTimeout(r, 5000));
-    const after = await countRecentEvents(request, jwt, 'repo_import_completed');
-    expect(after).toBeGreaterThan(before);
+    // Wait for fire-and-forget event write (allow up to 8s)
+    await new Promise((r) => setTimeout(r, 8000));
+    // Scope to this specific course to avoid cross-test noise
+    const after = await countRecentEvents(request, jwt, 'repo_import_completed', courseId, 30_000);
+    expect(after).toBeGreaterThanOrEqual(1);
   });
 });
 
@@ -263,7 +263,7 @@ test.describe('4 · quiz_submitted event', () => {
     const qId = qRows[0]?.id;
     if (!qId) { test.skip(); return; }
 
-    const before = await countRecentEvents(request, jwt, 'quiz_submitted', courseId);
+    const before = await countRecentEvents(request, jwt, 'quiz_submitted', courseId, 120_000);
 
     const submitRes = await request.post('/api/quiz/submit', {
       headers: { Authorization: `Bearer ${jwt}` },
