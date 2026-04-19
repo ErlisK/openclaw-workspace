@@ -199,7 +199,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
     .eq('lesson_id', params.lessonId)
     .maybeSingle();
 
-  if (!quiz) return NextResponse.json({ quiz: null });
+  if (!quiz) return NextResponse.json({ quiz: null, questions: [] });
 
   const { data: questions } = await supa
     .from('quiz_questions')
