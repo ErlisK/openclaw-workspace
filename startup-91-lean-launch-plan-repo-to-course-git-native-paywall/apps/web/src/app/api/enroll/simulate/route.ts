@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
   // Fetch course
   const { data: course } = await serviceSupa
     .from('courses')
-    .select('id, slug, price_cents, currency, published')
+    .select('id, slug, price_cents, currency, published, creator_id')
     .eq('id', courseId)
     .single();
 
@@ -97,8 +97,9 @@ export async function POST(req: NextRequest) {
         .from('affiliates')
         .insert({
           affiliate_user_id: referralId,
+          creator_id: course.creator_id as string,
           course_id: courseId,
-          creator_id: course.slug ? undefined : undefined, // not required
+          code: `sim-${referralId.slice(0, 8)}-${courseId.slice(0, 8)}`,
           commission_pct: 20,
           is_active: true,
         })
