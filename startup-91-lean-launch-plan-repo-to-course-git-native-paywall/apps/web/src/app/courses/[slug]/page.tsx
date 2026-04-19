@@ -14,14 +14,35 @@ export async function generateMetadata({ params }: CoursePageProps): Promise<Met
   const supabase = createServerClient();
   const { data: course } = await supabase
     .from('courses')
-    .select('title, description')
+    .select('title, description, price_cents, currency')
     .eq('slug', params.slug)
     .single();
 
   if (!course) return { title: 'Course not found — TeachRepo' };
+
+  const canonicalUrl = `https://teachrepo.com/courses/${params.slug}`;
+  const price = course.price_cents
+    ? `$${(course.price_cents / 100).toFixed(2)}`
+    : 'Free';
+
   return {
     title: `${course.title} | TeachRepo`,
-    description: course.description ?? undefined,
+    description: course.description ?? `Learn ${course.title} on TeachRepo — Git-native courses for engineers.`,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: course.title,
+      description: course.description ?? `Learn ${course.title} on TeachRepo.`,
+      url: canonicalUrl,
+      siteName: 'TeachRepo',
+      type: 'website',
+      images: [{ url: `https://teachrepo.com/og-default.png`, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${course.title} — ${price}`,
+      description: course.description ?? `Git-native course by engineers, for engineers.`,
+      images: [`https://teachrepo.com/og-default.png`],
+    },
   };
 }
 
@@ -59,9 +80,50 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
   const isFree = course.price_cents === 0;
   const priceDisplay = isFree ? 'Free' : `$${(course.price_cents / 100).toFixed(0)} ${course.currency?.toUpperCase()}`;
 
+  // Build JSON-LD structured data
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Course',
+    name: course.title,
+    description: course.description ?? `Learn ${course.title} on TeachRepo.`,
+    url: `https://teachrepo.com/courses/${params.slug}`,
+    provider: {
+      '@type': 'Organization',
+      name: 'TeachRepo',
+      url: 'https://teachrepo.com',
+    },
+    ...(creator?.display_name
+      ? {
+          author: {
+            '@type': 'Person',
+            name: creator.display_name,
+            ...(creator.github_handle
+              ? { url: `https://github.com/${creator.github_handle}` }
+              : {}),
+          },
+        }
+      : {}),
+    offers: {
+      '@type': 'Offer',
+      price: isFree ? '0' : (course.price_cents / 100).toFixed(2),
+      priceCurrency: (course.currency ?? 'usd').toUpperCase(),
+      availability: 'https://schema.org/InStock',
+      url: `https://teachrepo.com/courses/${params.slug}`,
+    },
+    hasCourseInstance: {
+      '@type': 'CourseInstance',
+      courseMode: 'Online',
+    },
+    numberOfCredits: lessons?.length ?? 0,
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero */}
+      {/* JSON-LD structured data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="border-b border-gray-200 bg-gradient-to-br from-violet-50 to-white px-4 py-12 lg:px-8">
         <div className="mx-auto max-w-4xl">
           {showPaywallBanner && (

@@ -33,7 +33,20 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
 
   return {
     title: lesson ? `${lesson.title} — ${course.title} | TeachRepo` : `${course.title} | TeachRepo`,
-    description: lesson?.description ?? undefined,
+    description: lesson?.description ?? `Part of the ${course.title} course on TeachRepo.`,
+    alternates: { canonical: `https://teachrepo.com/courses/${params.slug}/lessons/${params.lessonSlug}` },
+    openGraph: {
+      title: lesson ? `${lesson.title} — ${course.title}` : course.title,
+      description: lesson?.description ?? `Git-native course lesson on TeachRepo.`,
+      url: `https://teachrepo.com/courses/${params.slug}/lessons/${params.lessonSlug}`,
+      siteName: 'TeachRepo',
+      type: 'article',
+    },
+    twitter: {
+      card: 'summary',
+      title: lesson ? `${lesson.title} — ${course.title}` : course.title,
+      description: lesson?.description ?? `Git-native course lesson on TeachRepo.`,
+    },
   };
 }
 
@@ -172,8 +185,27 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
     // Fallback to plain text if MDX compilation fails
   }
 
+  const lessonJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    name: lesson.title,
+    description: lesson.description ?? `Part of ${course.title} on TeachRepo.`,
+    url: `https://teachrepo.com/courses/${params.slug}/lessons/${params.lessonSlug}`,
+    isPartOf: {
+      '@type': 'Course',
+      name: course.title,
+      url: `https://teachrepo.com/courses/${params.slug}`,
+    },
+    provider: { '@type': 'Organization', name: 'TeachRepo', url: 'https://teachrepo.com' },
+    learningResourceType: 'Article',
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(lessonJsonLd) }}
+      />
       <div className="mx-auto flex max-w-7xl gap-0 lg:gap-8 px-0 lg:px-8 py-0 lg:py-10">
 
         {/* ── Sidebar ─────────────────────────────────────────────────── */}
