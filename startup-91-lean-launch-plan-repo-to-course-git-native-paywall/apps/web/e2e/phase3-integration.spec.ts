@@ -650,7 +650,6 @@ test.describe('A · AI Quiz Generation — YAML output + save flow', () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 test.describe('B · Sandbox gating — before and after purchase', () => {
-  test.describe.configure({ mode: 'serial', retries: 3 });
   const TEST_SANDBOX_URL = 'https://stackblitz.com/edit/rust-ownership-demo?embed=1';
 
   // ── B1. Before purchase ───────────────────────────────────────────────────
@@ -803,7 +802,7 @@ test.describe('B · Sandbox gating — before and after purchase', () => {
     // from the PATCH above — at minimum enrolled must be true
   });
 
-  test('B8: full before→purchase→after sandbox flow', async ({ request }) => {
+  test('B8: full before→purchase→after sandbox flow', { retries: 3 }, async ({ request }) => {
     const creatorJwt = await loginCreator(request);
     const { courseId, lessonId } = await createPaidCourseWithSandbox(
       request, creatorJwt, TEST_SANDBOX_URL,
@@ -840,7 +839,7 @@ test.describe('B · Sandbox gating — before and after purchase', () => {
 
   // ── B9. Sandbox URL security ─────────────────────────────────────────────────
 
-  test('B9: sandbox URL hidden in page before purchase, present in entitlement after', async ({ page, request }) => {
+  test('B9: sandbox URL hidden in page before purchase, present in entitlement after', { retries: 3 }, async ({ page, request }) => {
     const creatorJwt = await loginCreator(request);
     const { courseId, lessonId, courseSlug } = await createPaidCourseWithSandbox(
       request, creatorJwt, TEST_SANDBOX_URL,
