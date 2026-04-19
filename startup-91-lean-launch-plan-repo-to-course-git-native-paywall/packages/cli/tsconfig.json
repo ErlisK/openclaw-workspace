@@ -1,14 +1,18 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "rootDir": "./src",
     "outDir": "./dist",
-    "composite": true,
-    "paths": {
-      "@teachrepo/types": ["../types/src/index.ts"],
-      "@teachrepo/core": ["../core/src/index.ts"],
-      "@teachrepo/quiz-engine": ["../quiz-engine/src/index.ts"]
-    }
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "noImplicitReturns": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

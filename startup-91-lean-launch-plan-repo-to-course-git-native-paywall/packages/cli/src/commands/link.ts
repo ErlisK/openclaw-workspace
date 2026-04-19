@@ -1,75 +1,127 @@
 /**
- * teachrepo link --api-url <url>
+ * teachrepo link --api-url <url> [--api-key <key>]
  *
- * Links the current course directory to a TeachRepo instance.
- * Writes a .teachrepo/config.json file with the API URL.
- * Used by `teachrepo push` to know where to send the course.
+ * Links the current course directory to a TeachRepo instance:
+ *   1. Validates connectivity to the API
+ *   2. Creates (or retrieves) the course record via POST /api/courses/link
+ *   3. Stores apiUrl, apiKey, courseId, courseSlug in .coursekitrc
+ *
+ * .coursekitrc is added to .gitignore automatically.
  */
 
 import fs from 'fs';
 import path from 'path';
+import { writeConfig, readConfig, resolveApiKey, resolveApiUrl } from '../config.js';
 
-interface TeachRepoConfig {
-  apiUrl: string;
-  linkedAt: string;
+interface LinkOptions {
+  apiUrl?: string;
+  apiKey?: string;
 }
 
-export async function linkCommand(opts: { apiUrl?: string }) {
+function readCourseYml(cwd: string): Record<string, string> {
+  const yml = fs.readFileSync(path.join(cwd, 'course.yml'), 'utf-8');
+  const data: Record<string, string> = {};
+  for (const line of yml.split('\n')) {
+    const m = line.match(/^(\w[\w_-]*):\s*"?([^"#\n]*)"?\s*(?:#.*)?$/);
+    if (m) data[m[1]] = m[2].trim();
+  }
+  return data;
+}
+
+export async function linkCommand(opts: LinkOptions) {
   const cwd = process.cwd();
 
-  const apiUrl = opts.apiUrl || process.env.TEACHREPO_API_URL || 'https://teachrepo.com';
+  // ── Resolve credentials ───────────────────────────────────────────────────
+  const apiKey = resolveApiKey(opts);
+  const existingConfig = readConfig(cwd);
+  const apiUrl = resolveApiUrl(opts, existingConfig);
 
-  // Normalize URL
-  const normalizedUrl = apiUrl.replace(/\/$/, '');
-
-  // Test connectivity
-  console.log(`\n🔗 Linking to ${normalizedUrl} ...`);
-
-  try {
-    const res = await fetch(`${normalizedUrl}/api/import`, {
-      method: 'GET',
-    });
-    // 401 is expected (no auth) — just verifying the server is reachable
-    if (res.status !== 401 && res.status !== 405 && !res.ok) {
-      console.error(`❌ Could not reach ${normalizedUrl} (HTTP ${res.status})`);
-      console.error('   Make sure the API URL is correct and the server is running.');
-      process.exit(1);
-    }
-  } catch (err) {
-    console.error(`❌ Connection failed: ${err instanceof Error ? err.message : String(err)}`);
-    console.error(`   Is ${normalizedUrl} reachable?`);
+  if (!apiKey) {
+    console.error('❌ No API key provided.');
+    console.error('   Pass --api-key <key> or set TEACHREPO_API_KEY env var.');
+    console.error('');
+    console.error('   Get your API key at: ' + apiUrl + '/dashboard/settings');
     process.exit(1);
   }
 
-  // Write config
-  const configDir = path.join(cwd, '.teachrepo');
-  fs.mkdirSync(configDir, { recursive: true });
-
-  const config: TeachRepoConfig = {
-    apiUrl: normalizedUrl,
-    linkedAt: new Date().toISOString(),
-  };
-
-  fs.writeFileSync(
-    path.join(configDir, 'config.json'),
-    JSON.stringify(config, null, 2) + '\n',
-    'utf-8',
-  );
-
-  // Add .teachrepo/config.json to .gitignore if not already there
-  const gitignorePath = path.join(cwd, '.gitignore');
-  if (fs.existsSync(gitignorePath)) {
-    const existing = fs.readFileSync(gitignorePath, 'utf-8');
-    if (!existing.includes('.teachrepo')) {
-      fs.appendFileSync(gitignorePath, '\n# TeachRepo local config\n.teachrepo/\n');
-    }
+  // ── Read course.yml ───────────────────────────────────────────────────────
+  const courseYmlPath = path.join(cwd, 'course.yml');
+  if (!fs.existsSync(courseYmlPath)) {
+    console.error('❌ course.yml not found. Run `teachrepo init` first.');
+    process.exit(1);
   }
 
-  console.log(`✅ Linked to ${normalizedUrl}`);
-  console.log(`   Config saved to .teachrepo/config.json`);
+  const courseData = readCourseYml(cwd);
+  const slug = courseData.slug || '';
+  const title = courseData.title || '';
+
+  if (!slug) {
+    console.error('❌ course.yml is missing "slug" field.');
+    process.exit(1);
+  }
+
+  console.log('');
+  console.log('🔗 teachrepo link');
+  console.log('──────────────────────────────────────────────────────');
+  console.log('   API:   ' + apiUrl);
+  console.log('   Slug:  ' + slug);
+  console.log('   Title: ' + title);
+  console.log('');
+
+  // ── POST /api/courses/link — create or retrieve course ────────────────────
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}/api/courses/link`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({ slug, title, courseYml: fs.readFileSync(courseYmlPath, 'utf-8') }),
+    });
+  } catch (err) {
+    console.error(`❌ Connection failed: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`   Is ${apiUrl} reachable?`);
+    process.exit(1);
+  }
+
+  let courseId = '';
+  let courseSlug = slug;
+
+  if (response.ok) {
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+    courseId = (body.courseId || body.id || '') as string;
+    courseSlug = (body.slug || slug) as string;
+    console.log('✅ Course linked: ' + apiUrl + '/courses/' + courseSlug);
+    if (courseId) console.log('   Course ID: ' + courseId);
+  } else if (response.status === 404) {
+    // /api/courses/link not implemented — store config anyway for push
+    console.log('⚠️  /api/courses/link not found — storing config for push.');
+    console.log('   Course will be created on first `teachrepo push`.');
+  } else if (response.status === 409) {
+    // Already exists
+    const body = await response.json().catch(() => ({})) as Record<string, unknown>;
+    courseId = (body.courseId || body.id || '') as string;
+    console.log('✅ Course already exists: ' + apiUrl + '/courses/' + courseSlug);
+  } else {
+    const text = await response.text().catch(() => '');
+    console.error(`❌ Link failed (HTTP ${response.status}): ${text.slice(0, 200)}`);
+    process.exit(1);
+  }
+
+  // ── Write .coursekitrc ────────────────────────────────────────────────────
+  writeConfig({
+    apiUrl,
+    apiKey,
+    courseId: courseId || undefined,
+    courseSlug,
+    linkedAt: new Date().toISOString(),
+  }, cwd);
+
+  console.log('✅ Saved .coursekitrc');
   console.log('');
   console.log('Next steps:');
-  console.log('   Set your API key: export TEACHREPO_API_KEY=<your-key>');
-  console.log('   Push your course: teachrepo push');
+  console.log('   teachrepo push          — push your course content');
+  console.log('   teachrepo validate      — check for errors');
   console.log('');
 }

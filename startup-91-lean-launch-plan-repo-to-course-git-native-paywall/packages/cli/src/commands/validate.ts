@@ -1,12 +1,5 @@
 /**
- * teachrepo validate
- *
- * Validates the course structure in the current directory:
- *  - course.yml is present and has required fields
- *  - All lessons have required frontmatter (title, slug, order, access)
- *  - quiz_id references resolve to existing quizzes/
- *  - Quiz YAML has valid structure
- *  - No duplicate lesson slugs
+ * teachrepo validate — local course structure validation
  */
 
 import fs from 'fs';
@@ -19,38 +12,34 @@ interface FrontmatterData {
   access?: string;
   quiz_id?: string;
   estimated_minutes?: number;
-  description?: string;
 }
 
-function parseFrontmatter(raw: string): { data: FrontmatterData; content: string } {
-  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
-  if (!match) return { data: {}, content: raw };
-
+function parseFrontmatter(raw: string): FrontmatterData {
+  const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (!match) return {};
   const data: FrontmatterData = {};
   for (const line of match[1].split('\n')) {
-    const kv = line.match(/^(\w[\w_-]*):\s*"?([^"#]*)"?\s*(?:#.*)?$/);
-    if (kv) {
-      const [, key, val] = kv;
-      const trimmed = val.trim();
-      if (key === 'order') (data as Record<string, unknown>)[key] = parseInt(trimmed, 10);
-      else (data as Record<string, unknown>)[key] = trimmed;
-    }
+    const m = line.match(/^(\w[\w_-]*):\s*"?([^"#\n]*)"?/);
+    if (!m) continue;
+    const [, k, v] = m;
+    const val = v.trim();
+    if (k === 'order') (data as Record<string, unknown>)[k] = parseInt(val, 10);
+    else (data as Record<string, unknown>)[k] = val;
   }
-  return { data, content: match[2] };
+  return data;
 }
 
-function parseYamlBasic(raw: string): Record<string, unknown> {
-  const data: Record<string, unknown> = {};
+function parseYamlBasic(raw: string): Record<string, string | number | boolean> {
+  const data: Record<string, string | number | boolean> = {};
   for (const line of raw.split('\n')) {
-    const kv = line.match(/^(\w[\w_-]*):\s*"?([^"#]*)"?\s*(?:#.*)?$/);
-    if (kv) {
-      const [, key, val] = kv;
-      const trimmed = val.trim();
-      if (trimmed === 'true') data[key] = true;
-      else if (trimmed === 'false') data[key] = false;
-      else if (/^\d+$/.test(trimmed)) data[key] = parseInt(trimmed, 10);
-      else data[key] = trimmed;
-    }
+    const m = line.match(/^(\w[\w_-]*):\s*"?([^"#\n]*)"?/);
+    if (!m) continue;
+    const [, k, v] = m;
+    const val = v.trim();
+    if (val === 'true') data[k] = true;
+    else if (val === 'false') data[k] = false;
+    else if (/^\d+$/.test(val)) data[k] = parseInt(val, 10);
+    else data[k] = val;
   }
   return data;
 }
@@ -59,128 +48,91 @@ export async function validateCommand() {
   const cwd = process.cwd();
   const errors: string[] = [];
   const warnings: string[] = [];
-  const log = (msg: string) => console.log(msg);
 
-  log('');
-  log('🔍 teachrepo validate');
-  log('─────────────────────────────────────────────────────────');
+  console.log('');
+  console.log('🔍 teachrepo validate');
+  console.log('──────────────────────────────────────────────────────');
 
-  // ── 1. course.yml ─────────────────────────────────────────────────────────
+  // ── course.yml ──────────────────────────────────────────────────────────
   const courseYmlPath = path.join(cwd, 'course.yml');
   if (!fs.existsSync(courseYmlPath)) {
     errors.push('course.yml not found. Run `teachrepo init` to create one.');
   } else {
-    const courseYml = parseYamlBasic(fs.readFileSync(courseYmlPath, 'utf-8'));
-    const required = ['title', 'slug', 'price_cents', 'currency'];
-    for (const field of required) {
-      if (!courseYml[field] && courseYml[field] !== 0) {
-        errors.push(`course.yml: missing required field "${field}"`);
-      }
+    const yml = parseYamlBasic(fs.readFileSync(courseYmlPath, 'utf-8'));
+    for (const f of ['title', 'slug', 'price_cents', 'currency']) {
+      if (yml[f] === undefined || yml[f] === '') errors.push(`course.yml: missing field "${f}"`);
     }
-    if (courseYml.slug && !/^[a-z0-9-]+$/.test(String(courseYml.slug))) {
-      errors.push(`course.yml: slug "${courseYml.slug}" must be lowercase kebab-case (a-z, 0-9, hyphens only)`);
+    const slug = String(yml.slug || '');
+    if (slug && !/^[a-z0-9-]+$/.test(slug)) {
+      errors.push(`course.yml: slug must be lowercase kebab-case (got "${slug}")`);
     }
-    if (courseYml.price_cents !== undefined && courseYml.price_cents !== '' && Number(courseYml.price_cents) < 0) {
-      errors.push('course.yml: price_cents must be >= 0');
-    }
-    if (courseYml.affiliate_pct !== undefined && (Number(courseYml.affiliate_pct) < 0 || Number(courseYml.affiliate_pct) > 100)) {
-      warnings.push('course.yml: affiliate_pct should be between 0 and 100');
-    }
-    log(`✅ course.yml — title: "${courseYml.title}", slug: "${courseYml.slug}", price: $${(Number(courseYml.price_cents || 0) / 100).toFixed(2)}`);
+    console.log(`✅ course.yml — title: "${yml.title}", slug: "${yml.slug}", price: $${(Number(yml.price_cents || 0) / 100).toFixed(2)}`);
   }
 
-  // ── 2. lessons/ ───────────────────────────────────────────────────────────
+  // ── lessons/ ─────────────────────────────────────────────────────────────
   const lessonsDir = path.join(cwd, 'lessons');
+  const quizIds = new Set<string>();
+
   if (!fs.existsSync(lessonsDir)) {
     errors.push('lessons/ directory not found');
   } else {
-    const lessonFiles = fs.readdirSync(lessonsDir)
-      .filter(f => f.endsWith('.md'))
-      .sort();
-
-    if (lessonFiles.length === 0) {
-      errors.push('lessons/ directory has no .md files');
-    }
+    const files = fs.readdirSync(lessonsDir).filter(f => f.endsWith('.md')).sort();
+    if (files.length === 0) errors.push('lessons/ has no .md files');
 
     const slugsSeen = new Set<string>();
-    for (const file of lessonFiles) {
-      const raw = fs.readFileSync(path.join(lessonsDir, file), 'utf-8');
-      const { data } = parseFrontmatter(raw);
-
-      const required = ['title', 'slug', 'order', 'access'];
-      for (const field of required) {
-        if (!data[field as keyof FrontmatterData]) {
-          errors.push(`lessons/${file}: missing frontmatter field "${field}"`);
-        }
+    for (const file of files) {
+      const data = parseFrontmatter(fs.readFileSync(path.join(lessonsDir, file), 'utf-8'));
+      for (const f of ['title', 'slug', 'order', 'access']) {
+        if (!data[f as keyof FrontmatterData]) errors.push(`lessons/${file}: missing frontmatter field "${f}"`);
       }
-
       if (data.slug) {
-        if (slugsSeen.has(data.slug)) {
-          errors.push(`lessons/${file}: duplicate slug "${data.slug}"`);
-        }
+        if (slugsSeen.has(data.slug)) errors.push(`lessons/${file}: duplicate slug "${data.slug}"`);
         slugsSeen.add(data.slug);
       }
-
       if (data.access && !['free', 'paid'].includes(data.access)) {
         errors.push(`lessons/${file}: access must be "free" or "paid" (got "${data.access}")`);
       }
-
-      if (data.estimated_minutes && Number(data.estimated_minutes) > 120) {
-        warnings.push(`lessons/${file}: estimated_minutes > 120 — consider splitting the lesson`);
-      }
-
-      log(`  📄 ${file} — slug: "${data.slug}", access: ${data.access}, quiz: ${data.quiz_id || 'none'}`);
+      console.log(`  📄 ${file} — slug:${data.slug}, access:${data.access}${data.quiz_id ? ', quiz:' + data.quiz_id : ''}`);
     }
-    log(`✅ lessons/ — ${lessonFiles.length} lesson${lessonFiles.length !== 1 ? 's' : ''}`);
+    console.log(`✅ lessons/ — ${files.length} lesson(s)`);
   }
 
-  // ── 3. quizzes/ ───────────────────────────────────────────────────────────
+  // ── quizzes/ ─────────────────────────────────────────────────────────────
   const quizzesDir = path.join(cwd, 'quizzes');
-  const quizIds = new Set<string>();
-
   if (fs.existsSync(quizzesDir)) {
-    const quizFiles = fs.readdirSync(quizzesDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
-    for (const file of quizFiles) {
-      const quizData = parseYamlBasic(fs.readFileSync(path.join(quizzesDir, file), 'utf-8'));
-      if (!quizData.id) {
-        errors.push(`quizzes/${file}: missing required field "id"`);
-      } else {
-        quizIds.add(String(quizData.id));
-      }
-      if (!quizData.title) warnings.push(`quizzes/${file}: missing "title" field`);
-      log(`  📝 ${file} — id: "${quizData.id}"`);
+    const files = fs.readdirSync(quizzesDir).filter(f => f.endsWith('.yml') || f.endsWith('.yaml'));
+    for (const file of files) {
+      const d = parseYamlBasic(fs.readFileSync(path.join(quizzesDir, file), 'utf-8'));
+      if (!d.id) errors.push(`quizzes/${file}: missing "id" field`);
+      else quizIds.add(String(d.id));
+      if (!d.title) warnings.push(`quizzes/${file}: missing "title" field`);
+      console.log(`  📝 ${file} — id:"${d.id}"`);
     }
-    if (quizFiles.length > 0) log(`✅ quizzes/ — ${quizFiles.length} quiz file${quizFiles.length !== 1 ? 's' : ''}`);
-  } else {
-    log('ℹ️  No quizzes/ directory (optional)');
+    if (files.length > 0) console.log(`✅ quizzes/ — ${files.length} file(s)`);
   }
 
-  // Verify quiz_id references from lessons
+  // Verify quiz_id references
   if (fs.existsSync(lessonsDir)) {
-    const lessonFiles = fs.readdirSync(lessonsDir).filter(f => f.endsWith('.md'));
-    for (const file of lessonFiles) {
-      const raw = fs.readFileSync(path.join(lessonsDir, file), 'utf-8');
-      const { data } = parseFrontmatter(raw);
+    for (const f of fs.readdirSync(lessonsDir).filter(f => f.endsWith('.md'))) {
+      const data = parseFrontmatter(fs.readFileSync(path.join(lessonsDir, f), 'utf-8'));
       if (data.quiz_id && !quizIds.has(data.quiz_id)) {
-        errors.push(`lessons/${file}: quiz_id "${data.quiz_id}" not found in quizzes/`);
+        errors.push(`lessons/${f}: quiz_id "${data.quiz_id}" not found in quizzes/`);
       }
     }
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
-  log('');
-  if (warnings.length > 0) {
-    for (const w of warnings) console.warn(`  ⚠️  ${w}`);
-    log('');
-  }
+  console.log('');
+  for (const w of warnings) console.warn('  ⚠️  ' + w);
+  if (warnings.length) console.log('');
 
   if (errors.length > 0) {
-    console.error(`❌ Validation failed — ${errors.length} error${errors.length !== 1 ? 's' : ''}:`);
-    for (const e of errors) console.error(`  ✗ ${e}`);
-    log('');
+    console.error(`❌ ${errors.length} error(s):`);
+    for (const e of errors) console.error('  ✗ ' + e);
+    console.log('');
     process.exit(1);
   } else {
-    log(`✅ Validation passed${warnings.length > 0 ? ` (${warnings.length} warning${warnings.length !== 1 ? 's' : ''})` : ''}`);
-    log('');
+    console.log(`✅ Validation passed${warnings.length ? ' (' + warnings.length + ' warning(s))' : ''}`);
+    console.log('');
   }
 }

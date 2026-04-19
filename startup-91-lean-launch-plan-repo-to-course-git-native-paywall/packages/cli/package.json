@@ -1,33 +1,39 @@
 {
   "name": "@teachrepo/cli",
-  "version": "0.1.0",
-  "description": "TeachRepo CLI — init, build, and publish courses from your terminal",
+  "version": "0.2.0",
+  "description": "TeachRepo CLI — init, link, push courses from your terminal",
+  "keywords": ["teachrepo", "course", "cli", "git", "paywall"],
+  "homepage": "https://teachrepo.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ErlisK/openclaw-workspace.git",
+    "directory": "startup-91-lean-launch-plan-repo-to-course-git-native-paywall/packages/cli"
+  },
+  "license": "MIT",
   "bin": {
     "teachrepo": "./dist/index.js"
   },
+  "main": "./dist/index.js",
+  "type": "module",
+  "files": [
+    "dist/**",
+    "README.md"
+  ],
   "scripts": {
-    "dev": "tsc --watch",
     "build": "tsc",
+    "dev": "tsc --watch",
     "type-check": "tsc --noEmit",
-    "test": "jest",
-    "lint": "eslint src/"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "commander": "^12.0.0",
-    "chalk": "^5.3.0",
-    "ora": "^8.0.1",
-    "inquirer": "^9.2.12",
-    "gray-matter": "^4.0.3",
-    "js-yaml": "^4.1.0",
-    "node-fetch": "^3.3.2",
-    "@teachrepo/core": "*",
-    "@teachrepo/quiz-engine": "*",
-    "@teachrepo/types": "*"
+    "chalk": "^5.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "@types/js-yaml": "^4.0.9",
-    "@types/inquirer": "^9.0.7",
     "typescript": "^5.4.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

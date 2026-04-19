@@ -233,6 +233,138 @@ const ImportRequestSchema = z.object({
   token: z.string().optional(), // optional PAT for private repos
 });
 
+// Direct-payload schema (CLI push — no GitHub intermediate fetch)
+const DirectImportSchema = z.object({
+  courseYml: z.string().min(1),
+  lessons: z.array(z.object({
+    filename: z.string(),
+    content: z.string(),
+  })).default([]),
+  quizzes: z.array(z.object({
+    filename: z.string(),
+    content: z.string(),
+  })).default([]),
+  gitSha: z.string().optional(),
+  gitBranch: z.string().optional(),
+  repoUrl: z.string().optional(),
+  courseId: z.string().uuid().optional(),
+  draft: z.boolean().default(false),
+});
+
+// ────────────────────────────────────────────────────────────────────────────
+// Direct-payload import handler (CLI push)
+// ────────────────────────────────────────────────────────────────────────────
+
+async function handleDirectImport(
+  data: import('zod').infer<typeof DirectImportSchema>,
+  creatorId: string,
+): Promise<Response> {
+  const serviceSupa = createServiceClient();
+
+  // Parse course.yml
+  const courseData: Record<string, unknown> = {};
+  for (const line of data.courseYml.split('\n')) {
+    const m = line.match(/^(\w[\w_-]*):\s*"?([^"#\n]*)"?/);
+    if (m) {
+      const val = m[2].trim();
+      courseData[m[1]] = /^\d+$/.test(val) ? parseInt(val, 10) : val;
+    }
+  }
+
+  const slug = String(courseData.slug || '');
+  if (!slug) return NextResponse.json({ error: 'course.yml missing slug' }, { status: 400 });
+
+  // Verify creator profile
+  const { data: creator } = await serviceSupa.from('creators').select('id').eq('id', creatorId).single();
+  if (!creator) return NextResponse.json({ error: 'Creator profile not found' }, { status: 403 });
+
+  // Upsert course
+  let courseId = data.courseId || '';
+  if (!courseId) {
+    const existing = await serviceSupa.from('courses').select('id').eq('slug', slug).eq('creator_id', creatorId).maybeSingle();
+    courseId = existing.data?.id || '';
+  }
+
+  const coursePayload = {
+    slug,
+    title: String(courseData.title || slug),
+    description: String(courseData.description || ''),
+    price_cents: Number(courseData.price_cents ?? 0),
+    currency: String(courseData.currency || 'usd'),
+    creator_id: creatorId,
+    published: !data.draft,
+  };
+
+  if (courseId) {
+    await serviceSupa.from('courses').update(coursePayload).eq('id', courseId);
+  } else {
+    const { data: newCourse } = await serviceSupa.from('courses').insert(coursePayload).select('id').single();
+    courseId = newCourse?.id || '';
+  }
+  if (!courseId) return NextResponse.json({ error: 'Failed to upsert course' }, { status: 500 });
+
+  // Record version
+  let versionId = '';
+  if (data.gitSha) {
+    const shortSha = data.gitSha.slice(0, 7);
+    const label = `v-${shortSha}`;
+    const { data: ver } = await serviceSupa.from('course_versions').insert({
+      course_id: courseId,
+      repo_url: data.repoUrl || '',
+      branch: data.gitBranch || 'main',
+      commit_sha: data.gitSha,
+      version_label: label,
+      status: 'ready',
+    }).select('id').single();
+    versionId = ver?.id || '';
+  }
+
+  // Upsert lessons
+  let lessonsImported = 0;
+  for (const { filename, content } of data.lessons) {
+    const fm: Record<string, unknown> = {};
+    const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (fmMatch) {
+      for (const line of fmMatch[1].split('\n')) {
+        const m = line.match(/^(\w[\w_-]*):\s*"?([^"#\n]*)"?/);
+        if (m) {
+          const val = m[2].trim();
+          fm[m[1]] = /^\d+$/.test(val) ? parseInt(val, 10) : val === 'true' ? true : val === 'false' ? false : val;
+        }
+      }
+    }
+    const lessonSlug = String(fm.slug || filename.replace(/^\d+-/, '').replace(/\.mdx?$/, ''));
+    const body = content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '').trim();
+    const payload = {
+      course_id: courseId,
+      slug: lessonSlug,
+      title: String(fm.title || lessonSlug),
+      description: String(fm.description || ''),
+      order_index: Number(fm.order || 0),
+      is_preview: String(fm.access || 'paid') === 'free',
+      estimated_minutes: Number(fm.estimated_minutes || 0) || null,
+      content_md: body,
+      has_quiz: Boolean(fm.quiz_id),
+      quiz_slug: fm.quiz_id ? String(fm.quiz_id) : null,
+    };
+    const existing = await serviceSupa.from('lessons').select('id').eq('course_id', courseId).eq('slug', lessonSlug).maybeSingle();
+    if (existing.data?.id) {
+      await serviceSupa.from('lessons').update(payload).eq('id', existing.data.id);
+    } else {
+      await serviceSupa.from('lessons').insert(payload);
+    }
+    lessonsImported++;
+  }
+
+  return NextResponse.json({
+    success: true,
+    courseId,
+    slug,
+    lessonsImported,
+    versionId: versionId || undefined,
+  });
+}
+
 // ────────────────────────────────────────────────────────────────────────────
 // POST /api/import
 // ────────────────────────────────────────────────────────────────────────────
@@ -248,6 +380,13 @@ export async function POST(req: NextRequest) {
   let body: unknown;
   try { body = await req.json(); } catch {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  // ── Direct payload path (CLI push — no GitHub fetch) ─────────────────────
+  // If the body has courseYml, handle it directly without GitHub fetching.
+  const directParsed = DirectImportSchema.safeParse(body);
+  if (directParsed.success && directParsed.data.courseYml) {
+    return handleDirectImport(directParsed.data, user.id);
   }
 
   const parsed = ImportRequestSchema.safeParse(body);
