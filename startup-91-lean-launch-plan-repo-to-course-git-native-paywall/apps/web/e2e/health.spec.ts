@@ -81,3 +81,16 @@ test.describe('Security: /api/health does not expose sensitive data', () => {
     expect(text).not.toContain('eyJ');      // JWT tokens
   });
 });
+
+test.describe('CSS loads correctly', () => {
+  test('page has stylesheet rules applied', async ({ page }) => {
+    await page.goto('/');
+    const cssRulesCount = await page.evaluate(() => {
+      const sheets = Array.from(document.styleSheets);
+      return sheets.reduce((sum, s) => {
+        try { return sum + (s.cssRules?.length || 0); } catch { return sum; }
+      }, 0);
+    });
+    expect(cssRulesCount).toBeGreaterThan(0);
+  });
+});

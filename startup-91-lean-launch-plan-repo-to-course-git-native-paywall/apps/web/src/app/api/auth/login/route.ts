@@ -26,11 +26,18 @@ export async function POST(req: NextRequest) {
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error || !data.user) {
-    // Generic message — do not reveal whether email exists
     return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
   }
 
-  // Cookies are set automatically by the SSR client via the cookies() store
+  // Block login if email not verified
+  if (!data.user.email_confirmed_at) {
+    await supabase.auth.signOut();
+    return NextResponse.json(
+      { error: 'Email not verified. Please check your inbox for the verification link.' },
+      { status: 403 }
+    );
+  }
+
   return NextResponse.json(
     { user: { id: data.user.id, email: data.user.email } },
     { status: 200 },
