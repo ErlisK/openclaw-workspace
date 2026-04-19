@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -45,12 +46,12 @@ export default async function EnrollSuccessPage({ params, searchParams }: Enroll
 
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-    // In App Router, we can call the route handler internally
-    // This goes through the same auth/entitlement stack
+    // Forward the user's session cookie so /api/enroll can authenticate the request
+    const cookieHeader = headers().get('cookie') ?? '';
     const res = await fetch(
       `${baseUrl}/api/enroll?session_id=${encodeURIComponent(session_id)}`,
       {
-        // Forward cookies for auth — in Server Components, headers() provides them
+        headers: { cookie: cookieHeader },
         cache: 'no-store',
       }
     );
