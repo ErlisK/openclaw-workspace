@@ -22,12 +22,7 @@ export default function LoginPage() {
           <AuthForm mode="login" />
         </div>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          <a href="/auth/forgot-password" className="text-violet-600 hover:underline">
-            Forgot password?
-          </a>
-        </p>
-        <p className="mt-2 text-center text-sm text-gray-600">
+                <p className="mt-4 text-center text-sm text-gray-600">
           Don&apos;t have an account?{' '}
           <a href="/auth/signup" className="font-medium text-violet-600 hover:underline">
             Sign up free

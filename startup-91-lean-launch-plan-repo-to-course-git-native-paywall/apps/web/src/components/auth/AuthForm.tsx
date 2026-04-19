@@ -148,7 +148,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       {mode === 'login' && (
         <p className="text-center text-xs text-gray-500">
-          <a href="/auth/reset-password" className="text-violet-600 hover:underline">
+          <a href="/auth/forgot-password" className="text-violet-600 hover:underline">
             Forgot password?
           </a>
         </p>
