@@ -18,7 +18,7 @@ import { test, expect, APIRequestContext } from '@playwright/test';
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
 const SUPA_URL = 'https://zkwyfjrgmvpgfbaqwxsb.supabase.co';
 const ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inprd3lmanJnbXZwZ2ZiYXF3eHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDM3NzcsImV4cCI6MjA5MjExOTc3N30.5kcjZd7JuOTzqvhfXIvtYvzbvUiZF3oqgkdm0Yuj1sM';
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 const CREATOR_EMAIL = 'importer-test-1776550340@agentmail.to';
 const CREATOR_PASS = 'TestPass123!';

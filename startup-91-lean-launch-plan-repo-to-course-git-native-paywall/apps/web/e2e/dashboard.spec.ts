@@ -1,7 +1,7 @@
 import { test, expect, request as playwrightRequest } from '@playwright/test';
 
 const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://zkwyfjrgmvpgfbaqwxsb.supabase.co';
-const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inprd3lmanJnbXZwZ2ZiYXF3eHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY1NDM3NzcsImV4cCI6MjA5MjExOTc3N30.5kcjZd7JuOTzqvhfXIvtYvzbvUiZF3oqgkdm0Yuj1sM';
+const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 // ── Unauthenticated guards ─────────────────────────────────────────────────────
 

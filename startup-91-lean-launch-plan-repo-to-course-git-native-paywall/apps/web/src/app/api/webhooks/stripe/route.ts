@@ -20,9 +20,8 @@ import { createServiceClient } from '@/lib/supabase/service';
 export async function POST(req: NextRequest) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    // Webhook not yet configured — return 200 to avoid Stripe retries
-    console.warn('[stripe-webhook] STRIPE_WEBHOOK_SECRET not set — skipping verification');
-    return new NextResponse(null, { status: 200 });
+    console.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured — rejecting');
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 400 });
   }
 
   const signature = req.headers.get('stripe-signature');
@@ -118,7 +117,7 @@ export async function POST(req: NextRequest) {
         // Revoke enrollment (soft-delete via revoked_at)
         await serviceSupa
           .from('enrollments')
-          .update({ revoked_at: new Date().toISOString() })
+          .update({ entitlement_revoked_at: new Date().toISOString() })
           .eq('user_id', purchase.user_id)
           .eq('course_id', purchase.course_id)
           .is('revoked_at', null);

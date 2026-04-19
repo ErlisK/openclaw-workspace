@@ -26,10 +26,8 @@ const SimulateSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  // Gate: only allow in non-production or when explicitly enabled for testing
-  const isProduction = process.env.NODE_ENV === 'production';
-  const simulateEnabled = process.env.ENABLE_PURCHASE_SIMULATION === 'true';
-  if (isProduction && !simulateEnabled) {
+  // Gate: ALWAYS disabled in production — no override flag respected
+  if (process.env.NODE_ENV === 'production') {
     return NextResponse.json(
       { error: 'Purchase simulation is disabled in production' },
       { status: 403 },
