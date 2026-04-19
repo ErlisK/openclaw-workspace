@@ -77,8 +77,8 @@ test.describe('1 · Unauthenticated access to locked lesson', () => {
 
   test('course page shows enroll button for paid course', async ({ page }) => {
     await page.goto(`/courses/${PAID_COURSE_SLUG}`);
-    // Should show either checkout link or enroll button
-    const enrollBtn = page.locator('a[href*="/api/checkout"], a[href*="/enroll"], a:has-text("Enroll")').first();
+    // CheckoutButton is a <button data-testid="checkout-button"> (no longer an <a> link)
+    const enrollBtn = page.locator('[data-testid="checkout-button"], button:has-text("Enroll"), a:has-text("Enroll")').first();
     await expect(enrollBtn).toBeVisible({ timeout: 8000 });
   });
 
@@ -268,20 +268,20 @@ test.describe('7 · PaywallGate UI', () => {
   });
 
   test('PaywallGate enroll button links to checkout', async ({ page }) => {
-    // Navigate to paid course and check enroll card has checkout link
+    // Navigate to paid course and check enroll card has checkout button
+    // (CheckoutButton is now a <button> that POSTs, not an <a> link)
     await page.goto(`/courses/${PAID_COURSE_SLUG}`);
-    const checkoutLink = page.locator('a[href*="/api/checkout"]').first();
-    await expect(checkoutLink).toBeVisible({ timeout: 8000 });
-    const href = await checkoutLink.getAttribute('href');
-    expect(href).toContain(`course_id=${PAID_COURSE_ID}`);
+    const checkoutBtn = page.locator('[data-testid="checkout-button"]').first();
+    await expect(checkoutBtn).toBeVisible({ timeout: 8000 });
+    await expect(checkoutBtn).toContainText(/Enroll/i);
   });
 
   test('course page paywall banner shown when redirected from locked lesson', async ({ page }) => {
     await page.goto(`/courses/${PAID_COURSE_SLUG}?paywall=1`);
     await expect(page.locator('text=This lesson requires enrollment')).toBeVisible({ timeout: 8000 });
-    // Enroll button should be visible
-    const enrollBtn = page.locator('a[href*="/api/checkout"]').first();
-    await expect(enrollBtn).toBeVisible();
+    // Enroll button (CheckoutButton) should be visible
+    const enrollBtn = page.locator('[data-testid="checkout-button"], button:has-text("Enroll")').first();
+    await expect(enrollBtn).toBeVisible({ timeout: 5000 });
   });
 });
 
