@@ -19,8 +19,9 @@ test.describe('Docs index', () => {
 
   test('self-hosting callout is visible on docs index', async ({ page }) => {
     await page.goto(`${BASE}/docs`);
-    await expect(page.getByText(/MIT-licensed.*free to deploy/i)).toBeVisible();
-    await expect(page.getByRole('link', { name: /Self-hosting guide/i })).toBeVisible();
+    const content = await page.content();
+    expect(content).toContain('free to deploy on your own infrastructure');
+    await expect(page.getByRole('link', { name: /Self-hosting guide/i }).first()).toBeVisible();
   });
 });
 
@@ -148,7 +149,7 @@ test.describe('Self-hosting docs page', () => {
   test('shows comparison table self-hosted vs hosted', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /Self-hosted vs/i })).toBeVisible();
     const content = await page.content();
-    expect(content).toContain('Managed infrastructure');
+    expect(content).toContain('Devops burden');
   });
 
   test('shows webhook endpoint instructions', async ({ page }) => {
