@@ -36,6 +36,7 @@ export default async function CourseDetailPage({ params }: CourseDetailPageProps
     .select(`
       id, slug, title, description, repo_url, default_branch,
       published, published_at, price_cents, currency, pricing_model,
+      stripe_product_id, stripe_price_id,
       version, created_at, updated_at, creator_id
     `)
     .eq('id', params.courseId)
