@@ -275,6 +275,7 @@ export default async function HomePage() {
             <a href="/marketplace" className="hover:text-white">Marketplace</a>
             <a href="/docs" className="hover:text-white">Docs</a>
             <a href="/blog" className="hover:text-white">Blog</a>
+            <a href="/social" className="hover:text-white">Social</a>
             <a href="/press" className="hover:text-white">Press</a>
             <a href="/pricing" className="hover:text-white">Pricing</a>
             <a href="/docs/self-hosting" className="hover:text-white">Self-Hosting</a>
