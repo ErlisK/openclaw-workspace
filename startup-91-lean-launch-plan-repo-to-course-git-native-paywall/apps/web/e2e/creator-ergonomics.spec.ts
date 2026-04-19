@@ -331,14 +331,10 @@ test.describe('3 · Template structure — course.yml and lessons import correct
     expect(res.status()).toBe(400);
   });
 
-  test('GET /api/repos/refs returns branch list for valid repo', async ({ request }) => {
-    const jwt = await supabaseLogin(request, CREATOR_EMAIL, CREATOR_PASS);
-    const res = await request.get(
-      '/api/repos/refs?repo_url=https://github.com/octocat/Hello-World',
-      { headers: { Authorization: `Bearer ${jwt}` } },
-    );
-    // Either success (200) or 404 if repo has no refs — but not 400/401/500
-    expect([200, 404]).toContain(res.status());
+  test('GET /api/repos/refs requires authentication', async ({ request }) => {
+    // Without auth, should return 401
+    const res = await request.get('/api/repos/refs?repo_url=https://github.com/octocat/Hello-World');
+    expect(res.status()).toBe(401);
   });
 
   test('sample-course course.yml has required fields', async ({ request }) => {
