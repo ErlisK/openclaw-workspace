@@ -314,7 +314,9 @@ async function handleDirectImport(
       branch: data.gitBranch || 'main',
       commit_sha: data.gitSha,
       version_label: label,
-      status: 'ready',
+      version: label,
+      is_current: true,
+      lesson_count: data.lessons.length,
     }).select('id').single();
     versionId = ver?.id || '';
   }
