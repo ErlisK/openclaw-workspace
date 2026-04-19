@@ -4,6 +4,8 @@
  * Returns the sandbox URL for a lesson ONLY if the current user is enrolled
  * (or the course is free, or the lesson is a preview).
  *
+ * Supports both cookie-based auth (SSR pages) and Bearer token auth (API clients).
+ *
  * This endpoint enables client-side sandbox loading without exposing the real
  * URL in server-rendered HTML for unenrolled users.
  *
@@ -17,7 +19,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { checkEntitlement } from '@/lib/entitlement/check';
+import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
 
 function inferProvider(url: string): string {
@@ -53,6 +55,23 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Lesson not found' }, { status: 404 });
   }
 
+  // Fetch course info (for free check + CTA)
+  const { data: course } = await supa
+    .from('courses')
+    .select('slug, price_cents, currency')
+    .eq('id', courseId)
+    .single();
+
+  // Free courses — everyone is enrolled
+  if (course?.price_cents === 0) {
+    return NextResponse.json({
+      enrolled: true,
+      url: lesson.sandbox_url ?? null,
+      provider: lesson.sandbox_url ? inferProvider(lesson.sandbox_url) : null,
+      isFree: true,
+    });
+  }
+
   // Free lessons / previews always get the sandbox
   if (lesson.is_preview) {
     return NextResponse.json({
@@ -63,17 +82,10 @@ export async function GET(req: NextRequest) {
     });
   }
 
-  // Check enrollment
-  const { enrolled } = await checkEntitlement({ courseId });
+  // Resolve authenticated user — supports both cookies AND Bearer token
+  const user = await resolveUser(req);
 
-  if (!enrolled) {
-    // Fetch course slug for CTA
-    const { data: course } = await supa
-      .from('courses')
-      .select('slug, price_cents, currency')
-      .eq('id', courseId)
-      .single();
-
+  if (!user) {
     return NextResponse.json({
       enrolled: false,
       url: null,
@@ -83,6 +95,29 @@ export async function GET(req: NextRequest) {
         ? course.price_cents === 0
           ? 'Free'
           : `$${(course.price_cents / 100).toFixed(0)} ${(course.currency ?? 'usd').toUpperCase()}`
+        : null,
+    });
+  }
+
+  // Check active enrollment
+  const { data: enrollment } = await supa
+    .from('enrollments')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('course_id', courseId)
+    .is('entitlement_revoked_at', null)
+    .maybeSingle();
+
+  const enrolled = !!enrollment;
+
+  if (!enrolled) {
+    return NextResponse.json({
+      enrolled: false,
+      url: null,
+      provider: null,
+      checkoutUrl: course ? `/courses/${course.slug}#enroll` : null,
+      priceDisplay: course
+        ? `$${(course.price_cents / 100).toFixed(0)} ${(course.currency ?? 'usd').toUpperCase()}`
         : null,
     });
   }
