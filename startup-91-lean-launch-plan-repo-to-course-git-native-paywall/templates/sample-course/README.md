@@ -4,6 +4,23 @@
 
 [![TeachRepo](https://img.shields.io/badge/Published%20on-TeachRepo-6366f1)](https://teachrepo.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Validate Course](https://github.com/ErlisK/openclaw-workspace/actions/workflows/publish-course.yml/badge.svg)](https://github.com/ErlisK/openclaw-workspace/actions/workflows/publish-course.yml)
+
+---
+
+## Deploy Your Own TeachRepo Instance
+
+Host this entire platform yourself — course builder, paywall, affiliate tracking, quizzes, and all:
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FErlisK%2Fopenclaw-workspace%2Ftree%2Fmain%2Fstartup-91-lean-launch-plan-repo-to-course-git-native-paywall%2Fapps%2Fweb&project-name=my-teachrepo&repository-name=my-teachrepo&env=NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,SUPABASE_SERVICE_ROLE_KEY,STRIPE_SECRET_KEY,NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,STRIPE_WEBHOOK_SECRET,NEXT_PUBLIC_APP_URL&envDescription=Configure%20Supabase%2C%20Stripe%2C%20and%20your%20app%20URL&envLink=https%3A%2F%2Fteachrepo.com%2Fdocs%2Fself-hosting&demo-title=TeachRepo%20Demo&demo-description=Git-native%20course%20platform%20with%20Stripe%20paywall%20and%20affiliate%20tracking&demo-url=https%3A%2F%2Fteachrepo.com)
+
+**Or publish this course to an existing TeachRepo instance:**
+
+```bash
+npm install -g @teachrepo/cli
+teachrepo link --api-url https://teachrepo.com
+TEACHREPO_API_KEY=<your-key> teachrepo push
+```
 
 ---
 
@@ -34,7 +51,32 @@ sample-course/
 │
 └── .github/
     └── workflows/
-        └── publish-course.yml          ← Auto-publish on git push to main
+        ├── publish-course.yml          ← Auto-publish on git push to main
+        └── static-export.yml           ← Build static site for self-hosters
+```
+
+## CLI Quickstart
+
+```bash
+# Install the TeachRepo CLI
+npm install -g @teachrepo/cli
+
+# Scaffold a new course in the current directory
+mkdir my-course && cd my-course
+teachrepo init
+
+# Validate your course structure
+teachrepo validate
+
+# Link to your TeachRepo instance
+teachrepo link --api-url https://teachrepo.com
+
+# Publish your course
+export TEACHREPO_API_KEY=<your-key>
+teachrepo push
+
+# Generate quiz questions for a lesson with AI
+teachrepo quiz generate lessons/01-introduction.md --num-questions 5
 ```
 
 ## Lesson Features Demonstrated
@@ -57,20 +99,80 @@ repo_url: "https://github.com/example/my-course"
 price_cents: 2900        # $29.00 — 0 = free
 currency: "usd"
 affiliate_pct: 30        # 30% commission to referrers
+slug: "git-workflow-engineers"
 ```
 
 See [docs/course-format.md](../../docs/course-format.md) for the full field reference.
+
+## Lesson Frontmatter
+
+```markdown
+---
+title: "Rebase Without Fear"
+slug: "rebase-without-fear"
+order: 3
+access: paid              # free | paid
+description: "Master interactive rebase and stop fearing git history rewriting."
+estimated_minutes: 12
+quiz_id: "rebase-quiz"   # references quizzes/rebase-quiz.yml
+---
+
+Your lesson content in Markdown...
+```
 
 ## Quiz Format
 
 Quizzes live in `quizzes/{id}.yml` and are referenced from lesson frontmatter via `quiz_id`.
 
 Three question types:
-- `multiple_choice` — choices list + 0-based `answer` index
-- `true_false` — boolean `answer`
-- `short_answer` — string `answer` (case-insensitive match)
 
-Each question supports `points` (default 1) and `explanation` (shown after answering).
+```yaml
+id: "my-quiz"
+title: "My Quiz Title"
+pass_threshold: 70       # % to pass (default: 70)
+ai_generated: false
+
+questions:
+  - type: multiple_choice
+    prompt: "Which command stages changes?"
+    choices:
+      - "git commit"
+      - "git add"
+      - "git push"
+      - "git stash"
+    answer: 1              # 0-based index of correct choice
+    points: 1
+    explanation: "git add copies changes to the staging area (Index)."
+
+  - type: true_false
+    prompt: "A git branch is a copy of all repository files."
+    answer: false
+    points: 1
+    explanation: "A branch is just a named pointer to a commit."
+```
+
+### AI Quiz Generation
+
+```bash
+# Generate quiz questions with AI (requires TEACHREPO_API_KEY)
+teachrepo quiz generate lessons/03-rebase-without-fear.md
+# → writes quizzes/rebase-without-fear-quiz.yml
+
+# Customize the number of questions
+teachrepo quiz generate lessons/03-rebase-without-fear.md --num-questions 5
+```
+
+Or call the API directly:
+
+```bash
+curl -X POST https://teachrepo.com/api/quiz/generate \
+  -H "Authorization: Bearer $TEACHREPO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "lessonContent": "$(cat lessons/03-rebase-without-fear.md)",
+    "numQuestions": 3
+  }'
+```
 
 ## Gated Sandbox Embed
 
@@ -80,46 +182,33 @@ Lesson 5 includes a live StackBlitz sandbox:
 sandbox_url: "https://stackblitz.com/edit/github-actions-ci-starter?embed=1"
 ```
 
-For `access: paid` lessons, TeachRepo **never sends the `sandbox_url` to unenrolled browsers** — the gating is server-side.
+For `access: paid` lessons, TeachRepo **never sends the `sandbox_url` to unenrolled browsers** — the gating is server-side via RLS.
 
-## Publishing Your Course
-
-### Prerequisites
-
-```bash
-npm install -g @teachrepo/cli
-```
-
-### Validate locally
-
-```bash
-teachrepo validate
-# Checks frontmatter, quiz references, duplicate slugs, etc.
-```
-
-### Publish
-
-```bash
-teachrepo publish --token YOUR_TOKEN
-# → Deploys to https://teachrepo.com/your-course-slug
-```
-
-### Auto-publish on git push
+## GitHub Actions: Auto-Publish
 
 The included `.github/workflows/publish-course.yml` re-publishes automatically when you push changes to lessons, quizzes, or `course.yml`.
 
-Set the `TEACHREPO_PUBLISH_TOKEN` secret in your repo's GitHub Settings → Secrets.
+1. Fork this repo
+2. Add `TEACHREPO_API_KEY` secret in GitHub Settings → Secrets → Actions
+3. Push a change — the course publishes automatically
 
-## Using This as a Template
+## GitHub Actions: Static Export (Self-Hosting)
 
-1. Fork this repo (or use it as a GitHub template)
-2. Edit `course.yml` with your title, description, price, and affiliate %
-3. Replace `lessons/*.md` with your own content
-4. Replace `quizzes/*.yml` with your own questions
-5. Run `teachrepo validate`
-6. Run `teachrepo publish`
+Use `.github/workflows/static-export.yml` to build a standalone static site for self-hosting:
 
-That's it. Your course is live.
+1. The workflow runs `next build` with `NEXT_PUBLIC_` vars from GitHub secrets
+2. Artifacts are uploaded and can be deployed to any static host (Cloudflare Pages, S3, Netlify)
+3. Set `VERCEL_TOKEN` + `VERCEL_PROJECT_ID` secrets to auto-deploy to Vercel instead
+
+## Self-Hosting Checklist
+
+- [ ] Fork this repo
+- [ ] Create a Supabase project + run the schema migration
+- [ ] Create a Stripe account + set up webhook endpoint
+- [ ] Click "Deploy with Vercel" button above
+- [ ] Set all required environment variables
+- [ ] Run `teachrepo link --api-url https://your-instance.vercel.app`
+- [ ] Push your first course: `teachrepo push`
 
 ## License
 

@@ -1,4 +1,11 @@
-name: Publish Course
+name: Publish Course to TeachRepo
+
+# Re-publishes your course automatically when you push changes to lessons,
+# quizzes, or course.yml on the main branch.
+#
+# Prerequisites:
+#   1. Add TEACHREPO_API_KEY to your repo's Secrets (Settings → Secrets → Actions)
+#   2. Optionally set TEACHREPO_API_URL if you're self-hosting (default: https://teachrepo.com)
 
 on:
   push:
@@ -7,17 +14,39 @@ on:
       - "lessons/**"
       - "quizzes/**"
       - "course.yml"
+  workflow_dispatch:
+    inputs:
+      draft:
+        description: "Publish as draft"
+        required: false
+        default: "false"
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Validate course
-        run: npx @teachrepo/cli validate
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install TeachRepo CLI
+        run: npm install -g @teachrepo/cli@latest
+
+      - name: Validate course structure
+        run: teachrepo validate
 
       - name: Publish to TeachRepo
-        run: npx @teachrepo/cli publish --token ${{ secrets.TEACHREPO_PUBLISH_TOKEN }}
+        run: |
+          DRAFT_FLAG=""
+          if [ "${{ github.event.inputs.draft }}" = "true" ]; then
+            DRAFT_FLAG="--draft"
+          fi
+          teachrepo push \
+            --api-url "${{ vars.TEACHREPO_API_URL || 'https://teachrepo.com' }}" \
+            $DRAFT_FLAG
         env:
-          TEACHREPO_PUBLISH_TOKEN: ${{ secrets.TEACHREPO_PUBLISH_TOKEN }}
+          TEACHREPO_API_KEY: ${{ secrets.TEACHREPO_API_KEY }}

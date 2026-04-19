@@ -1,0 +1,177 @@
+/**
+ * POST /api/quiz/generate
+ *
+ * Generates quiz questions for a lesson using Vercel AI Gateway.
+ * Called by the TeachRepo CLI (`teachrepo quiz generate`) and the creator dashboard.
+ *
+ * Request body:
+ *   { lessonContent: string, numQuestions?: number, quizId?: string }
+ *
+ * Response:
+ *   { yaml: string, questions: QuizQuestion[], quizId: string }
+ *
+ * Auth: Bearer token (creator must be authenticated)
+ *
+ * AI: Uses Vercel AI Gateway (VERCEL_OIDC_TOKEN auto-injected at runtime).
+ * Only works on deployed Vercel functions — not in local dev.
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import { resolveUser } from '@/lib/auth/resolve-user';
+import { generateObject } from 'ai';
+import { gateway } from '@ai-sdk/gateway';
+import { z } from 'zod';
+
+// ── Input validation ─────────────────────────────────────────────────────────
+const RequestSchema = z.object({
+  lessonContent: z.string().min(50, 'Lesson content must be at least 50 characters').max(50000),
+  numQuestions: z.number().int().min(1).max(10).default(3),
+  quizId: z.string().optional(),
+});
+
+// ── Output schema ────────────────────────────────────────────────────────────
+const QuestionSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('multiple_choice'),
+    prompt: z.string().min(10),
+    choices: z.array(z.string()).length(4),
+    answer: z.number().int().min(0).max(3),
+    points: z.number().int().min(1).max(3).default(1),
+    explanation: z.string().min(10),
+  }),
+  z.object({
+    type: z.literal('true_false'),
+    prompt: z.string().min(10),
+    answer: z.boolean(),
+    points: z.number().int().min(1).max(2).default(1),
+    explanation: z.string().min(10),
+  }),
+]);
+
+const QuizSchema = z.object({
+  title: z.string(),
+  questions: z.array(QuestionSchema).min(1).max(10),
+});
+
+// ── YAML serialiser ───────────────────────────────────────────────────────────
+function questionsToYaml(quizId: string, title: string, questions: z.infer<typeof QuizSchema>['questions']): string {
+  const lines: string[] = [
+    `id: "${quizId}"`,
+    `title: "${title}"`,
+    `pass_threshold: 70`,
+    `ai_generated: true`,
+    ``,
+    `questions:`,
+  ];
+
+  for (const q of questions) {
+    lines.push(`  - type: ${q.type}`);
+    lines.push(`    prompt: "${q.prompt.replace(/"/g, '\\"')}"`);
+
+    if (q.type === 'multiple_choice') {
+      lines.push(`    choices:`);
+      for (const c of q.choices) {
+        lines.push(`      - "${c.replace(/"/g, '\\"')}"`);
+      }
+      lines.push(`    answer: ${q.answer}`);
+    } else if (q.type === 'true_false') {
+      lines.push(`    answer: ${q.answer}`);
+    }
+
+    lines.push(`    points: ${q.points}`);
+    lines.push(`    explanation: "${q.explanation.replace(/"/g, '\\"')}"`);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+// ── Route handler ─────────────────────────────────────────────────────────────
+export async function POST(req: NextRequest) {
+  // ── 1. Auth (creator must be logged in) ──────────────────────────────────
+  const user = await resolveUser(req);
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // ── 2. Parse + validate input ─────────────────────────────────────────────
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  }
+
+  const parsed = RequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: 'Validation failed', details: parsed.error.flatten() },
+      { status: 400 },
+    );
+  }
+
+  const { lessonContent, numQuestions, quizId: inputQuizId } = parsed.data;
+
+  // Extract lesson title from frontmatter (for quiz title)
+  const titleMatch = lessonContent.match(/^---\r?\n[\s\S]*?title:\s*["']?([^"'\n]+)["']?/m);
+  const slugMatch = lessonContent.match(/^---\r?\n[\s\S]*?slug:\s*["']?([^"'\n]+)["']?/m);
+
+  const lessonTitle = titleMatch?.[1]?.trim() || 'Lesson';
+  const lessonSlug = slugMatch?.[1]?.trim() || 'lesson';
+  const quizId = inputQuizId || `${lessonSlug}-quiz`;
+
+  // Strip frontmatter from lesson content for cleaner AI input
+  const lessonBody = lessonContent.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '').trim();
+
+  // ── 3. Generate quiz via AI ───────────────────────────────────────────────
+  try {
+    const { object: quiz } = await generateObject({
+      model: gateway('anthropic/claude-haiku-4-5'),
+      schema: QuizSchema,
+      prompt: `You are a professional course quiz author. Generate exactly ${numQuestions} quiz questions for the following lesson content.
+
+Guidelines:
+- Questions must test understanding of concepts taught in this specific lesson
+- Multiple choice: 4 plausible options, only one clearly correct
+- True/false: use for clear factual statements, not ambiguous ones
+- Vary question difficulty: ~60% medium, ~30% easy, ~10% hard
+- Explanations should be educational (explain WHY the answer is correct)
+- Use the exact terminology from the lesson
+- Never ask trick questions
+- Question types: use a mix of multiple_choice and true_false
+
+Lesson title: "${lessonTitle}"
+
+Lesson content:
+${lessonBody.slice(0, 8000)}
+
+Generate ${numQuestions} quiz questions.`,
+    });
+
+    const yaml = questionsToYaml(quizId, `${lessonTitle} — Check Your Understanding`, quiz.questions);
+
+    return NextResponse.json({
+      yaml,
+      quizId,
+      questions: quiz.questions,
+      title: `${lessonTitle} — Check Your Understanding`,
+      numGenerated: quiz.questions.length,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+
+    // AI Gateway not available in local dev (no VERCEL_OIDC_TOKEN)
+    if (msg.includes('VERCEL_OIDC_TOKEN') || msg.includes('OIDC') || msg.includes('gateway')) {
+      return NextResponse.json(
+        {
+          error: 'AI quiz generation requires a deployed Vercel environment',
+          hint: 'Deploy to Vercel and call this endpoint from there. Local dev does not have VERCEL_OIDC_TOKEN.',
+        },
+        { status: 503 },
+      );
+    }
+
+    console.error('[quiz/generate] AI error:', msg);
+    return NextResponse.json({ error: 'AI generation failed', detail: msg }, { status: 500 });
+  }
+}

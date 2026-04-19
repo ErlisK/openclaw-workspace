@@ -1,0 +1,62 @@
+name: Static Export (Self-Hosting)
+
+# Build a standalone static site that can be deployed to any static host.
+# Triggers on tags like v1.0.0, or manually via workflow_dispatch.
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      deploy_target:
+        description: "Deploy target (vercel | artifact)"
+        required: false
+        default: "artifact"
+
+jobs:
+  build-and-export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
+          NEXT_PUBLIC_APP_URL: ${{ secrets.NEXT_PUBLIC_APP_URL || 'https://teachrepo.com' }}
+        run: npm run build
+
+      - name: Upload static export artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: teachrepo-static-export
+          path: apps/web/.next/
+          retention-days: 7
+
+      # ── Optional: Deploy to Vercel ─────────────────────────────────────────
+      # Uncomment and set VERCEL_TOKEN + VERCEL_PROJECT_ID + VERCEL_ORG_ID
+      # secrets to auto-deploy.
+
+      # - name: Deploy to Vercel
+      #   if: github.event.inputs.deploy_target == 'vercel' || startsWith(github.ref, 'refs/tags/')
+      #   run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
+      #   working-directory: apps/web
+      #   env:
+      #     VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      #     VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
