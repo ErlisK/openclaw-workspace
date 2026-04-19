@@ -1,6 +1,37 @@
 # TeachRepo — Validated Learning Log
 
-_Updated after funnel dashboard implementation. Uses the Build-Measure-Learn cycle._
+_Updated after happy-path synthetic validation run. Uses the Build-Measure-Learn cycle._
+
+---
+
+## Happy Path Run: 2026-04-19
+
+### Validated via live API calls (not seeder)
+
+Each funnel step was triggered by hitting the real API endpoints:
+
+| Step | Event | Result | Notes |
+|---|---|---|---|
+| 1 | `signup_completed` | ✅ Fires | Fixed: was missing from `/api/auth/signup` |
+| 2 | `repo_import_started` | ✅ Fires | 3 events (3 import attempts) |
+| 3 | `repo_import_completed` | ✅ Fires | 1 successful import |
+| 4 | `course_published` | ✅ Fires | PATCH /api/courses/:id/publish |
+| 5 | `checkout_started` | ✅ Fires | Stripe session created, URL returned |
+| 6 | `checkout_completed` | ⚠️ Not testable | Requires Stripe test webhook delivery |
+
+**Dashboard shows correct counts** for steps 1-5 after validation run.
+
+---
+
+## Tracking Gaps Found & Fixed (2026-04-19)
+
+| Gap | Issue | Fix | PR |
+|---|---|---|---|
+| **Gap 1** | `signup_completed` never fired — route had no analytics call | Added `trackSignupCompleted()` to `/api/auth/signup` | commit `0bf5d8d` |
+| **Gap 2** | `/api/checkout` returned empty 500 body when Stripe URL was invalid | Wrapped POST body in try/catch; returns JSON error message | commit `739791b` |
+| **Gap 3** | Build failed: `@upstash/ratelimit` and `@upstash/redis` not installed | Replaced dynamic imports with in-memory fallback; deferred Upstash integration | commit `739791b` |
+| **Gap 4** | `/api/import` returned 422 "Cannot find repo_url column" | Applied schema migration: `ALTER TABLE courses ADD COLUMN IF NOT EXISTS repo_url TEXT` | migration |
+| **Gap 5** | Checkout failing with "Not a valid URL" | `NEXT_PUBLIC_APP_URL` was set to `https://teachrepo.com` (DNS not propagated) — updated to deployed Vercel URL | env update |
 
 ---
 
