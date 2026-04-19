@@ -125,8 +125,35 @@ export async function POST(req: NextRequest) {
     stripePriceId = newPriceId;
   }
 
-  // 8. Read affiliate ID from cookie (set by middleware on ?ref= visits)
-  const affiliateCookie = req.cookies.get('tr_affiliate_ref')?.value ?? '';
+  // 8. Read affiliate code from cookie (set by middleware on ?ref= visits) and resolve to affiliates.id
+  const affiliateCode = req.cookies.get('tr_affiliate_ref')?.value?.trim() ?? '';
+  let affiliateRecordId: string | null = null;
+
+  if (affiliateCode) {
+    // Look up affiliate record by code + course (active affiliates only)
+    const { data: affiliateRecord } = await serviceSupa
+      .from('affiliates')
+      .select('id')
+      .eq('code', affiliateCode)
+      .eq('course_id', courseId)
+      .eq('is_active', true)
+      .maybeSingle();
+
+    if (affiliateRecord) {
+      affiliateRecordId = affiliateRecord.id;
+    } else {
+      // Code might be a raw user_id (legacy format from before affiliates table)
+      // Try by affiliate_user_id as fallback
+      const { data: byUserId } = await serviceSupa
+        .from('affiliates')
+        .select('id')
+        .eq('affiliate_user_id', affiliateCode)
+        .eq('course_id', courseId)
+        .eq('is_active', true)
+        .maybeSingle();
+      affiliateRecordId = byUserId?.id ?? null;
+    }
+  }
 
   // 9. Create Stripe Checkout Session
   const session = await stripe.checkout.sessions.create({
@@ -150,7 +177,8 @@ export async function POST(req: NextRequest) {
       course_id: courseId,
       course_slug: course.slug,
       user_id: user.id,
-      affiliate_id: affiliateCookie,
+      affiliate_id: affiliateRecordId ?? '',
+      affiliate_code: affiliateCode,
     },
 
     // 30-minute expiry
@@ -165,7 +193,7 @@ export async function POST(req: NextRequest) {
     amount_cents: course.price_cents,
     currency: course.currency,
     status: 'pending',
-    affiliate_id: affiliateCookie || null,
+    affiliate_id: affiliateRecordId,
   });
 
   return NextResponse.json({ url: session.url });
