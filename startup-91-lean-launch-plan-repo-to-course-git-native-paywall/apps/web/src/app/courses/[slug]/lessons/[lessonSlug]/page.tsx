@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { createServerClient } from '@/lib/supabase/server';
-import { createServiceClient } from '@/lib/supabase/service';
+
 import { checkEntitlement } from '@/lib/entitlement/check';
 import { compileLessonMdx } from '@/lib/mdx/compile';
 import { Quiz } from '@/components/lesson/Quiz';
@@ -54,7 +54,7 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
 
 export default async function LessonPage({ params, searchParams }: LessonPageProps) {
   const supabase = createServerClient();
-  const serviceSupa = createServiceClient();
+  
 
   // ── 1. Fetch course ──────────────────────────────────────────────────────
   const { data: course } = await supabase
@@ -66,7 +66,7 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   if (!course) notFound();
 
   // ── 2. Fetch lesson ──────────────────────────────────────────────────────
-  const { data: lesson } = await serviceSupa
+  const { data: lesson } = await supabase
     .from('lessons')
     .select('id, slug, title, description, order_index, is_preview, estimated_minutes, content_md, sandbox_url, has_quiz, quiz_slug')
     .eq('course_id', course.id)
@@ -123,7 +123,7 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   }
 
   // ── 4. Sibling lessons for sidebar + nav ─────────────────────────────────
-  const { data: siblings } = await serviceSupa
+  const { data: siblings } = await supabase
     .from('lessons')
     .select('id, slug, title, order_index, is_preview')
     .eq('course_id', course.id)
@@ -151,7 +151,7 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
   } | null = null;
 
   if (lesson.has_quiz && lesson.quiz_slug) {
-    const { data: quiz } = await serviceSupa
+    const { data: quiz } = await supabase
       .from('quizzes')
       .select('id, title, pass_threshold, lesson_id')
       .eq('course_id', course.id)
@@ -159,7 +159,7 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
       .single();
 
     if (quiz) {
-      const { data: questions } = await serviceSupa
+      const { data: questions } = await supabase
         .from('quiz_questions')
         .select('id, question, question_type, options, correct_index, correct_bool, explanation, order_index')
         .eq('quiz_id', quiz.id)
