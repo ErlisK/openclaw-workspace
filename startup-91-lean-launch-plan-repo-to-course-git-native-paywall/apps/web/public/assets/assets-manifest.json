@@ -1,0 +1,30 @@
+{
+  "brand": {
+    "name": "TeachRepo",
+    "tagline": "Git repo \u2192 paywalled course in minutes",
+    "tagline_short": "Turn any GitHub repo into a course.",
+    "description": "TeachRepo converts a GitHub repository or Markdown notes into a paywalled, versioned mini-course site. Built for engineers who prefer code-first workflows.",
+    "url": "https://teachrepo.com",
+    "color_primary": "#7C3AED",
+    "color_secondary": "#6D28D9"
+  },
+  "feature_bullets": [
+    "\ud83d\udcc1 Markdown-native \u2014 write lessons in the same repo as your code",
+    "\ud83d\udd12 Stripe checkout built-in \u2014 sell courses or offer them free",
+    "\ud83e\udde9 Auto-graded quizzes via YAML frontmatter",
+    "\ud83d\udce6 Gated StackBlitz/CodeSandbox embeds \u2014 learners unlock on purchase",
+    "\ud83c\udf3f Git-versioned \u2014 every push updates your course automatically",
+    "\ud83d\udd17 Affiliate tracking built-in \u2014 share revenue with promoters",
+    "\ud83c\udd93 Free tier: self-host, keep 100% of revenue",
+    "\u2601\ufe0f  Hosted SaaS: one-click deploy on Vercel, marketplace listing"
+  ],
+  "assets": {
+    "logo_svg": "/assets/logo.svg",
+    "logo_192": "/assets/logo-192.png",
+    "logo_512": "/assets/logo-512.png",
+    "favicon": "/favicon.ico",
+    "og_cover": "/assets/og-cover.png",
+    "twitter_card": "/assets/twitter-card.png",
+    "screenshot_marketplace": "/assets/screenshot-marketplace.png"
+  }
+}

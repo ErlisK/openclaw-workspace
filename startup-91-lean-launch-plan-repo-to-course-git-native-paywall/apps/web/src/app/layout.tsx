@@ -38,8 +38,9 @@ export const metadata: Metadata = {
     images: [`${BASE_URL}/og-image.png`],
   },
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: [{ url: '/favicon.ico' }, { url: '/assets/favicon-32.png', sizes: '32x32', type: 'image/png' }],
+    apple: [{ url: '/assets/logo-192.png', sizes: '192x192' }],
+    shortcut: '/favicon.ico',
   },
 };
 
