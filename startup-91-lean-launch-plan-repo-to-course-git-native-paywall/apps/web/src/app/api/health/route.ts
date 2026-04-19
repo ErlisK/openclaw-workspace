@@ -39,7 +39,6 @@ interface HealthCheck {
   latency_ms: {
     database: number | null;
   };
-  missing_vars?: string[];  // Only present when environment check fails
 }
 
 // Required environment variables — presence is checked at startup
@@ -107,7 +106,7 @@ export async function GET(): Promise<NextResponse> {
   };
 
   if (missingVars.length > 0) {
-    body.missing_vars = missingVars;
+    console.error('[health] Missing required env vars:', missingVars);
   }
 
   const httpStatus = overallStatus === 'unhealthy' ? 503 : 200;

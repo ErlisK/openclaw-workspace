@@ -5,12 +5,13 @@ import { createServiceClient } from '@/lib/supabase/service';
 import { rateLimitRequest, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const VALID_EVENT_NAMES = [
-  'signup_completed', 'login', 'logout',
+  // NOTE: high-integrity events (checkout_completed, entitlement_granted, course_published,
+  // signup_completed) are intentionally excluded — fire those only from server routes/webhooks.
+  'login', 'logout',
   'onboarding_started',
   'repo_import_started', 'repo_import_completed',
-  'course_created', 'course_published', 'course_unpublished',
-  'checkout_started', 'checkout_initiated', 'checkout_completed',
-  'entitlement_granted',
+  'course_created', 'course_unpublished',
+  'checkout_started', 'checkout_initiated',
   'quiz_submitted', 'quiz_attempted',
   'ai_quiz_generated',
   'lesson_viewed', 'sandbox_viewed', 'sandbox_opened',

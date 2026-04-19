@@ -116,8 +116,7 @@ export async function POST(req: NextRequest) {
       case 'short_answer':
         selectedText = typeof userAnswer === 'string' ? userAnswer : null;
         if (selectedText && q.correct_text) {
-          isCorrect = selectedText.trim().toLowerCase().includes(q.correct_text.toLowerCase()) ||
-            q.correct_text.toLowerCase().includes(selectedText.trim().toLowerCase());
+        isCorrect = selectedText.trim().toLowerCase() === q.correct_text.trim().toLowerCase();
         }
         break;
     }

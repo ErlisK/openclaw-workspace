@@ -25,6 +25,8 @@ const nextConfig = {
       // /dashboard/import -> /dashboard/new (old path redirect)
       { source: '/dashboard/import', destination: '/dashboard/new', permanent: true },
       // Note: /pricing is NOT redirected — the /pricing page is served directly
+      { source: '/terms', destination: '/legal/terms', permanent: true },
+      { source: '/privacy', destination: '/legal/privacy', permanent: true },
     ];
   },
   async headers() {
