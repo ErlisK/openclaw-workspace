@@ -20,6 +20,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { trackAiQuizGenerated } from '@/lib/analytics/server';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { createServiceClient } from '@/lib/supabase/service';
+import { checkCreatorFeature } from '@/lib/entitlement/check';
 
 import { generateObject } from 'ai';
 import { gateway } from '@ai-sdk/gateway';
@@ -96,6 +97,27 @@ export async function POST(req: NextRequest) {
   const user = await resolveUser(req);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  // ── 1b. Check monthly AI quiz quota for free plan ────────────────────
+  const { plan: creatorPlan } = await checkCreatorFeature(user.id, 'aiQuizzesPerMonth');
+  if (creatorPlan === 'free') {
+    // Count AI quizzes this calendar month
+    const supa2 = createServiceClient();
+    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0);
+    const { count } = await supa2
+      .from('events')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('event_name', 'ai_quiz_generated')
+      .gte('created_at', monthStart.toISOString());
+    if ((count ?? 0) >= 3) {
+      return NextResponse.json({
+        error: 'Free plan limit: 3 AI quiz generations per month. Upgrade to Creator for unlimited.',
+        upgradeUrl: '/pricing',
+        plan: creatorPlan,
+      }, { status: 402 });
+    }
   }
 
   // ── 2. Parse + validate input ─────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe/client';
 import { createServiceClient } from '@/lib/supabase/service';
+import { syncSubscription } from '@/lib/subscription/server';
 
 /**
  * POST /api/webhooks/stripe
@@ -125,6 +126,41 @@ export async function POST(req: NextRequest) {
         console.log(
           `[stripe-webhook] charge.refunded: revoked enrollment user=${purchase.user_id} course=${purchase.course_id}`
         );
+      }
+      break;
+    }
+
+    case 'customer.subscription.created':
+    case 'customer.subscription.updated': {
+      const sub = stripeEvent.data.object as {
+        id: string; status: string; customer: string;
+        current_period_end: number; metadata?: Record<string,string>;
+        items: { data: Array<{ price: { id: string } }> };
+      };
+      const userId = sub.metadata?.user_id;
+      if (userId) {
+        await syncSubscription(userId, {
+          id: sub.id, status: sub.status, customer: sub.customer as string,
+          current_period_end: sub.current_period_end,
+          price_id: sub.items?.data?.[0]?.price?.id,
+        });
+        console.log(`[stripe-webhook] subscription ${stripeEvent.type}: user=${userId} status=${sub.status}`);
+      }
+      break;
+    }
+
+    case 'customer.subscription.deleted': {
+      const sub = stripeEvent.data.object as {
+        id: string; status: string; customer: string;
+        current_period_end: number; metadata?: Record<string,string>;
+      };
+      const userId = sub.metadata?.user_id;
+      if (userId) {
+        await syncSubscription(userId, {
+          id: sub.id, status: 'canceled', customer: sub.customer as string,
+          current_period_end: sub.current_period_end,
+        });
+        console.log(`[stripe-webhook] subscription deleted: user=${userId}`);
       }
       break;
     }

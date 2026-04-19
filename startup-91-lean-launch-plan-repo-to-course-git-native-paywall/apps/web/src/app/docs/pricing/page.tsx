@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Pricing & Billing — TeachRepo Docs',
-  description: 'TeachRepo pricing tiers, revenue share, and paywall mechanics explained.',
+  description: 'TeachRepo pricing tiers — Free self-hosted, Hosted Creator ($29/mo), Enterprise. Subscription flow, plan limits, and self-hosting details.',
 };
 
 export default function PricingDocsPage() {
@@ -16,119 +16,125 @@ export default function PricingDocsPage() {
 
       <h1 className="mb-4 text-4xl font-bold tracking-tight text-gray-900">Pricing & Billing</h1>
       <p className="mb-12 text-lg text-gray-600">
-        TeachRepo is free to self-host. The hosted SaaS tier handles infrastructure,
-        payments, and marketplace distribution for you.
+        TeachRepo is free to self-host forever (MIT licensed). The Hosted Creator plan adds managed
+        infrastructure, marketplace discovery, and unlimited AI quiz generation for $29/month.
       </p>
 
-      {/* Tiers */}
-      <div className="mb-12 grid gap-4 sm:grid-cols-2">
-        {[
-          {
-            name: 'Free / Self-Hosted',
-            price: '$0',
-            sub: 'forever',
-            color: 'border-gray-200',
-            features: [
-              'Full source code access',
-              'Self-deploy on Vercel/Netlify/etc.',
-              'Your own Stripe account (0% platform fee)',
-              'Unlimited courses & students',
-              'Git-native import workflow',
-              'AI quiz generation (bring your own key)',
-              'Community support',
-            ],
-          },
-          {
-            name: 'Pro (Hosted)',
-            price: '$29',
-            sub: '/month',
-            color: 'border-violet-300 ring-2 ring-violet-500/20',
-            features: [
-              'Everything in Free',
-              'Hosted on teachrepo.com',
-              'Marketplace listing & discovery',
-              'Built-in Stripe checkout (5% platform fee)',
-              'Analytics dashboard',
-              'AI quiz generation (included)',
-              'Custom domain support',
-              'Priority support',
-            ],
-          },
-        ].map((tier) => (
-          <div key={tier.name} className={`rounded-xl border bg-white p-6 shadow-sm ${tier.color}`}>
-            <h2 className="mb-1 text-lg font-bold text-gray-900">{tier.name}</h2>
-            <div className="mb-4">
-              <span className="text-3xl font-bold text-gray-900">{tier.price}</span>
-              <span className="text-gray-500 text-sm">{tier.sub}</span>
-            </div>
-            <ul className="space-y-2">
-              {tier.features.map((f) => (
-                <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                  <span className="text-violet-500 mt-0.5">✓</span>
-                  {f}
-                </li>
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Plan overview</h2>
+        <div className="overflow-x-auto rounded-xl border border-gray-200">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left font-semibold text-gray-700">Feature</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">Free</th>
+                <th className="px-4 py-3 text-center font-semibold text-violet-700">Creator ($29/mo)</th>
+                <th className="px-4 py-3 text-center font-semibold text-gray-700">Enterprise</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {[
+                ['Max courses', '3', 'Unlimited', 'Unlimited'],
+                ['Max lessons / course', '10', 'Unlimited', 'Unlimited'],
+                ['AI quiz generation', '3/month', 'Unlimited', 'Unlimited'],
+                ['Custom domain', '✗', '✓', '✓'],
+                ['Marketplace listing', '✗', '✓', '✓'],
+                ['Analytics retention', '7 days', '90 days', '1 year'],
+                ['Priority support', '✗', '✓', 'Dedicated'],
+                ['White-label', '✗', '✗', '✓'],
+              ].map(([f, free, creator, ent]) => (
+                <tr key={f} className="hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-700 font-medium">{f}</td>
+                  <td className="px-4 py-3 text-center text-gray-500">{free}</td>
+                  <td className="px-4 py-3 text-center text-violet-700 font-medium">{creator}</td>
+                  <td className="px-4 py-3 text-center text-gray-500">{ent}</td>
+                </tr>
               ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      {/* Revenue / Paywall */}
-      <h2 className="mb-4 text-2xl font-bold text-gray-900">How Paywall & Revenue Works</h2>
-
-      <div className="mb-8 space-y-6 text-gray-700">
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="mb-2 font-semibold text-gray-900">1. You set the price</h3>
-          <p className="text-sm">
-            In <code className="bg-gray-100 px-1 rounded text-xs">course.yml</code>, set{' '}
-            <code className="bg-gray-100 px-1 rounded text-xs">price_cents</code> (e.g. <code>2900</code> for $29).
-            Set to <code>0</code> for a free course.
-            Lessons with <code>access: free</code> are always visible as a preview.
-          </p>
+            </tbody>
+          </table>
         </div>
+        <p className="mt-3 text-sm text-gray-500">
+          Full interactive pricing at <a href="/pricing" className="text-violet-600 hover:underline">/pricing</a>.
+        </p>
+      </section>
 
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="mb-2 font-semibold text-gray-900">2. Stripe handles checkout</h3>
-          <p className="text-sm">
-            When a student clicks Enroll, TeachRepo creates a Stripe Checkout session.
-            Payment is processed by Stripe directly — we never store card details.
-            After payment, the student is automatically enrolled and locked lessons unlock instantly.
-          </p>
-        </div>
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Subscribing to Creator</h2>
+        <ol className="space-y-3 text-gray-700 list-decimal list-inside">
+          <li>Sign in at <a href="/auth/signup" className="text-violet-600 hover:underline">/auth/signup</a></li>
+          <li>Go to <a href="/pricing" className="text-violet-600 hover:underline">/pricing</a> and click <strong>Start Creator plan</strong></li>
+          <li>Complete the Stripe checkout (test card: <code className="rounded bg-gray-100 px-1">4242 4242 4242 4242</code>)</li>
+          <li>You are redirected to <code className="rounded bg-gray-100 px-1">/dashboard/billing</code> with Creator plan active</li>
+        </ol>
+      </section>
 
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="mb-2 font-semibold text-gray-900">3. Platform fee</h3>
-          <p className="text-sm">
-            On the hosted Pro tier, TeachRepo takes a <strong>5% platform fee</strong> on each sale.
-            Stripe processes the payment and deposits <code>(price × 0.95) − Stripe fees</code> to your bank account.
-            On the free/self-hosted tier, <strong>0% platform fee</strong> — pay only Stripe fees directly.
-          </p>
-        </div>
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Managing your subscription</h2>
+        <p className="mb-3 text-gray-700">
+          Visit <a href="/dashboard/billing" className="text-violet-600 hover:underline">/dashboard/billing</a> to:
+        </p>
+        <ul className="space-y-2 text-gray-700 list-disc list-inside">
+          <li>View your current plan and next renewal date</li>
+          <li>Switch between monthly and annual billing</li>
+          <li>Cancel or pause your subscription</li>
+          <li>Download invoices</li>
+        </ul>
+        <p className="mt-3 text-sm text-gray-500">
+          Cancellation takes effect at the end of the current billing period. Your courses remain live.
+        </p>
+      </section>
 
-        <div className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-          <h3 className="mb-2 font-semibold text-gray-900">4. Affiliate / referral tracking</h3>
-          <p className="text-sm">
-            Set <code className="bg-gray-100 px-1 rounded text-xs">affiliate_pct</code> in course.yml to enable
-            affiliate links. Affiliates get a unique link; TeachRepo tracks referrals via a 30-day cookie.
-            Commission is paid manually via Stripe transfer — TeachRepo surfaces the affiliate report in your dashboard.
-          </p>
-        </div>
-      </div>
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Course paywall vs. Creator subscription</h2>
+        <p className="mb-3 text-gray-700">
+          There are two separate payment flows in TeachRepo:
+        </p>
+        <ul className="space-y-3 text-gray-700 list-disc list-inside">
+          <li>
+            <strong>Course paywall</strong> — a <em>buyer</em> pays for access to your course.
+            This is a one-time Stripe Checkout Session. You keep 100% (minus Stripe fees).
+            Works on both Free and Creator plans.
+          </li>
+          <li>
+            <strong>Creator subscription</strong> — <em>you</em> (the creator) pay $29/mo for
+            managed hosting, unlimited features, and marketplace listing.
+          </li>
+        </ul>
+      </section>
 
-      {/* FAQ */}
-      <h2 className="mb-4 text-2xl font-bold text-gray-900">FAQ</h2>
-      <div className="space-y-4">
-        {[
-          ['Can I move from self-hosted to the Pro tier?', 'Yes. Import your courses to teachrepo.com at any time. Student enrollments are tied to Stripe — contact support to migrate purchase history.'],
-          ['What payment methods does Stripe support?', 'Cards, Apple Pay, Google Pay, SEPA, iDEAL, and more. Availability depends on your Stripe account settings.'],
-          ['Can students get refunds?', 'Refunds are issued directly via your Stripe dashboard. TeachRepo revokes enrollment when you mark an order as refunded.'],
-          ['Is there a free trial for Pro?', '14-day free trial, no credit card required. After trial, $29/month or cancel any time.'],
-        ].map(([q, a]) => (
-          <details key={q as string} className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-            <summary className="cursor-pointer font-medium text-gray-900">{q}</summary>
-            <p className="mt-3 text-sm text-gray-600">{a as string}</p>
-          </details>
-        ))}
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Marketplace rev-share</h2>
+        <p className="text-gray-700 mb-3">
+          If you opt into the TeachRepo marketplace, we take <strong>10%</strong> of each sale
+          made through marketplace discovery. Sales from your own direct links have a
+          <strong>0% platform fee</strong> — you only pay Stripe&apos;s ~2.9% + 30¢.
+        </p>
+        <p className="text-gray-700">
+          Marketplace opt-in is per-course, controlled in the course settings.
+          Enterprise plans negotiate custom rev-share rates.
+        </p>
+      </section>
+
+      <section className="mb-12">
+        <h2 className="mb-4 text-2xl font-bold text-gray-900">Self-hosting</h2>
+        <p className="text-gray-700 mb-3">
+          See the full <a href="/docs/self-hosting" className="text-violet-600 hover:underline">Self-Hosting Guide</a>.
+          Self-hosted deployments have no plan limits — you control your own infrastructure,
+          Stripe account, and Supabase project.
+        </p>
+        <p className="text-gray-700">
+          The plan limits above only apply to the hosted TeachRepo SaaS.
+        </p>
+      </section>
+
+      <div className="rounded-xl bg-violet-50 border border-violet-100 p-6">
+        <h3 className="font-semibold text-gray-900 mb-2">Questions?</h3>
+        <p className="text-sm text-gray-600">
+          Email <a href="mailto:hello@teachrepo.com" className="text-violet-600 hover:underline">hello@teachrepo.com</a> or{' '}
+          <a href="https://github.com/ErlisK/teachrepo-template/issues" target="_blank" rel="noopener noreferrer" className="text-violet-600 hover:underline">
+            open an issue on GitHub
+          </a>.
+        </p>
       </div>
     </div>
   );

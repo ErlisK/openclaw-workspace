@@ -1,11 +1,10 @@
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
+import { getCreatorPlan } from '@/lib/subscription/server';
+import { PLANS, planHasFeature, type CreatorPlan } from '@/lib/subscription/plans';
 
 /**
- * Check if the current authenticated user is enrolled in a course.
- * Returns enrolled=true if:
- *   - The course is free (price_cents=0)
- *   - The user has an active enrollment (entitlement not revoked)
+ * Check if the current authenticated user is enrolled in a course (buyer entitlement).
  */
 export async function checkEntitlement(options: { courseId: string }): Promise<{
   enrolled: boolean;
@@ -14,7 +13,6 @@ export async function checkEntitlement(options: { courseId: string }): Promise<{
   const supabase = createServerClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Check if course is free — free courses are always "enrolled"
   const serviceSupa = createServiceClient();
   const { data: course } = await serviceSupa
     .from('courses')
@@ -23,13 +21,11 @@ export async function checkEntitlement(options: { courseId: string }): Promise<{
     .single();
 
   if (course?.price_cents === 0) {
-    // Free course — everyone has access
     return { enrolled: true, userId: user?.id ?? null };
   }
 
   if (!user) return { enrolled: false, userId: null };
 
-  // Check enrollment row (entitlement_revoked_at IS NULL = still active)
   const { data } = await serviceSupa
     .from('enrollments')
     .select('id')
@@ -40,3 +36,21 @@ export async function checkEntitlement(options: { courseId: string }): Promise<{
 
   return { enrolled: !!data, userId: user.id };
 }
+
+/**
+ * Check if the authenticated user (as creator) has access to a plan feature.
+ * Used to gate premium creator features (AI quiz, analytics, custom domain, etc.)
+ */
+export async function checkCreatorFeature(
+  userId: string,
+  feature: keyof typeof PLANS['free']['limits']
+): Promise<{ allowed: boolean; plan: CreatorPlan; upgradeRequired: boolean }> {
+  const plan = await getCreatorPlan(userId);
+  const allowed = planHasFeature(plan, feature);
+  return { allowed, plan, upgradeRequired: !allowed };
+}
+
+/**
+ * Returns the creator's current plan — convenience wrapper.
+ */
+export { getCreatorPlan };
