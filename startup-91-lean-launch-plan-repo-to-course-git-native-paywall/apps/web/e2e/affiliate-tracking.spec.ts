@@ -420,10 +420,16 @@ test.describe('7 · E2E — ref landing → cookie → purchase simulation', () 
     });
     const { referralUrl, code } = await res.json() as { referralUrl: string; code: string };
 
-    // Navigate to the referral URL
-    await page.goto(referralUrl);
+    // The referralUrl points to teachrepo.com but we test against BASE_URL
+    // Extract the path+query and navigate to BASE_URL + path
+    const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
+    const urlObj = new URL(referralUrl);
+    const localUrl = `${baseUrl}${urlObj.pathname}${urlObj.search}`;
 
-    // Cookie should be set
+    // Navigate to the local referral URL
+    await page.goto(localUrl);
+
+    // Cookie should be set with the correct code
     const cookies = await page.context().cookies();
     const refCookie = cookies.find((c) => c.name === 'tr_affiliate_ref');
     expect(refCookie?.value).toBe(code);
