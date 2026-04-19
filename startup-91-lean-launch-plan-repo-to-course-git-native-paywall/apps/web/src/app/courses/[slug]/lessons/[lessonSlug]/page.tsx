@@ -177,8 +177,9 @@ export default async function LessonPage({ params, searchParams }: LessonPagePro
                   return (
                     <li key={l.id}>
                       <a
-                        href={isLocked ? `#` : `/courses/${params.slug}/lessons/${l.slug}`}
-                        onClick={isLocked ? (e) => e.preventDefault() : undefined}
+                        href={isLocked ? `#locked` : `/courses/${params.slug}/lessons/${l.slug}`}
+                        aria-disabled={isLocked || undefined}
+                        tabIndex={isLocked ? -1 : undefined}
                         className={`group flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                           isCurrent
                             ? 'bg-violet-100 font-semibold text-violet-800'
