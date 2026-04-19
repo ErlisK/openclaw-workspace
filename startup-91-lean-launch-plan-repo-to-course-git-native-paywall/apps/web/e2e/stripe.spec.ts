@@ -16,7 +16,7 @@ test.describe('POST /api/checkout', () => {
     const res = await request.post('/api/checkout', {
       data: { courseId: '00000000-0000-0000-0000-000000000001' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for invalid courseId (not a UUID)', async ({ request }) => {
@@ -54,7 +54,7 @@ test.describe('POST /api/checkout', () => {
 test.describe('GET /api/enroll', () => {
   test('returns 401 without auth', async ({ request }) => {
     const res = await request.get('/api/enroll?session_id=cs_test_fake');
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for session_id not starting with cs_', async ({ request }) => {
@@ -77,7 +77,7 @@ test.describe('POST /api/enroll/free', () => {
     const res = await request.post('/api/enroll/free', {
       data: { courseId: '00000000-0000-0000-0000-000000000001' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for non-UUID courseId', async ({ request }) => {

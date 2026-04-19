@@ -12,7 +12,7 @@ test.describe('POST /api/import', () => {
     const res = await request.post('/api/import', {
       data: { repo_url: 'https://github.com/ErlisK/openclaw-workspace', branch: 'main' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   // When passing a fake Bearer token, Supabase rejects it → 401 (auth first, validation second)

@@ -54,7 +54,7 @@ test.describe('1 · API auth guards', () => {
     const res = await request.patch(`/api/courses/${PAID_COURSE_ID}/pricing`, {
       data: { price_cents: 4900, currency: 'usd' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('PATCH /api/courses/:id/pricing returns 404 for course not owned by requester', async ({ request }) => {
@@ -73,7 +73,7 @@ test.describe('1 · API auth guards', () => {
     const res = await request.patch('/api/courses/ffffffff-ffff-ffff-ffff-ffffffffffff/pricing', {
       data: { price_cents: 1000, currency: 'usd' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 });
 

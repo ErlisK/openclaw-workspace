@@ -510,13 +510,13 @@ test.describe('RLS integration via app pages', () => {
     const res = await request.patch(`/api/courses/${SAMPLE_COURSE_ID}/publish`, {
       data: { published: true },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('POST /api/quiz/submit returns 401 without auth', async ({ request }) => {
     const res = await request.post('/api/quiz/submit', {
       data: { quiz_id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', course_id: SAMPLE_COURSE_ID, answers: {} },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 });

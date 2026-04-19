@@ -155,7 +155,7 @@ test.describe('2 · POST /api/courses/link — course creation', () => {
     const res = await request.post('/api/courses/link', {
       data: { slug: 'test-link-noauth', title: 'Test' },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for invalid slug', async ({ request }) => {

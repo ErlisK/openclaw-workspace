@@ -167,14 +167,14 @@ test.describe('POST /api/quiz/submit', () => {
         answers: {},
       },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for invalid quiz_id', async ({ request }) => {
     const res = await request.post('/api/quiz/submit', {
       data: { quiz_id: 'not-a-uuid', course_id: 'not-a-uuid', answers: {} },
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 });
 

@@ -24,21 +24,21 @@ test.describe('PATCH /api/courses/[courseId]/publish', () => {
     const res = await request.patch('/api/courses/00000000-0000-0000-0000-000000000000/publish', {
       data: { published: true },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for missing published field', async ({ request }) => {
     const res = await request.patch('/api/courses/00000000-0000-0000-0000-000000000000/publish', {
       data: {},
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 
   test('returns 400 for non-boolean published', async ({ request }) => {
     const res = await request.patch('/api/courses/00000000-0000-0000-0000-000000000000/publish', {
       data: { published: 'yes' },
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 });
 

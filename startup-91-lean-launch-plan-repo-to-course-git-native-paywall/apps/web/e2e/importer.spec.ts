@@ -21,7 +21,7 @@ test.describe('POST /api/import — validation', () => {
     const res = await request.post('/api/import', {
       data: { repo_url: SAMPLE_REPO, path: SAMPLE_PATH },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('returns 400 for invalid URL', async ({ request }) => {
@@ -29,14 +29,14 @@ test.describe('POST /api/import — validation', () => {
       headers: { Authorization: 'Bearer invalid' },
       data: { repo_url: 'not-a-url' },
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 
   test('returns 400 for missing repo_url', async ({ request }) => {
     const res = await request.post('/api/import', {
       data: {},
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 });
 

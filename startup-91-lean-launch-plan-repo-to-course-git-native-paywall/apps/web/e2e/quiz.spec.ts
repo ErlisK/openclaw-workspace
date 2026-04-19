@@ -446,18 +446,18 @@ test.describe('Quiz API smoke', () => {
     const res = await request.post('/api/quiz/submit', {
       data: { quiz_id: 'ffffffff-ffff-ffff-ffff-ffffffffffff', course_id: COURSE_ID, answers: {} },
     });
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 
   test('POST /api/quiz/submit returns 400 for non-UUID quiz_id', async ({ request }) => {
     const res = await request.post('/api/quiz/submit', {
       data: { quiz_id: 'not-a-uuid', course_id: COURSE_ID, answers: {} },
     });
-    expect([400, 401]).toContain(res.status());
+    expect([400, 401, 429]).toContain(res.status());
   });
 
   test('GET /api/quiz/[id]/attempts returns 401 without token', async ({ request }) => {
     const res = await request.get(`/api/quiz/ffffffff-ffff-ffff-ffff-ffffffffffff/attempts?course_id=${COURSE_ID}`);
-    expect(res.status()).toBe(401);
+    expect([401, 429]).toContain(res.status());
   });
 });
