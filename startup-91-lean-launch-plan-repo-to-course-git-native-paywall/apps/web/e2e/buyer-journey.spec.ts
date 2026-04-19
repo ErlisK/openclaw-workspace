@@ -83,30 +83,33 @@ async function fillStripeCheckout(page: Page) {
   await page.waitForTimeout(1500); // Let payment method list render
 
   // Step 1: Select "Card" as payment method if not already selected
-  const cardRadio = page.locator('input[value="card"], [data-testid*="card"], label:has-text("Card")').first();
   const payWithCardBtn = page.locator('button:has-text("Pay with card")').first();
-  
   if (await payWithCardBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
     await payWithCardBtn.click();
-    await page.waitForTimeout(1000);
-  } else if (await cardRadio.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await cardRadio.click();
-    await page.waitForTimeout(1000);
+    // Wait for card form to expand
+    await page.waitForTimeout(2000);
   }
 
-  // Step 2: Fill card number — Stripe uses nested iframes for card fields
-  // The outer iframe contains inner card-specific iframes
+  // Step 2: Fill "Full name on card" if present (appears after Pay with card click)
+  const nameOnCard = page.locator('input[placeholder*="Full name on card"], input[name="billingName"], input[placeholder*="Name"]').first();
+  if (await nameOnCard.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await nameOnCard.click();
+    await nameOnCard.fill('Test Buyer');
+    await page.waitForTimeout(500);
+  }
+
+  // Step 3: Fill card number in Stripe Elements iframes
   await fillCardInFrames(page);
 
-  // Step 3: Billing ZIP/postal (US) — appears in main page after card selection
+  // Step 4: Billing ZIP/postal (US)
   const zipField = page.locator('input[name="billingPostalCode"], input[placeholder*="ZIP"], input[autocomplete="postal-code"]').first();
   if (await zipField.isVisible({ timeout: 2000 }).catch(() => false)) {
     await zipField.click();
     await zipField.fill('94564');
   }
 
-  // Step 4: Submit payment
-  await page.waitForTimeout(500);
+  // Step 5: Submit payment
+  await page.waitForTimeout(800);
   const payBtn = page.locator('button:has-text("Pay"), button[type="submit"]').first();
   if (await payBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
     await payBtn.click();
