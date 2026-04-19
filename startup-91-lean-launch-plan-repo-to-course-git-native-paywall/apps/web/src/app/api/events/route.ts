@@ -3,8 +3,16 @@ import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 
+const VALID_EVENT_NAMES = [
+  'signup_completed', 'login', 'logout',
+  'repo_import_started', 'repo_import_completed',
+  'course_published', 'course_unpublished',
+  'checkout_started', 'checkout_completed',
+  'quiz_submitted', 'lesson_viewed', 'sandbox_viewed',
+] as const;
+
 const EventSchema = z.object({
-  event_name: z.string().min(1).max(100),
+  event_name: z.enum(VALID_EVENT_NAMES),
   course_id: z.string().uuid().optional().nullable(),
   lesson_id: z.string().uuid().optional().nullable(),
   quiz_id: z.string().uuid().optional().nullable(),

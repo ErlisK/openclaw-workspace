@@ -24,7 +24,7 @@ const CREATOR_PASS = 'TestPass123!';
 const QUIZZES = {
   gitBasics: {
     id: null as string | null, // resolved at runtime
-    slug: 'git-basics-quiz',
+    slug: 'intro-quiz',
     passThreshold: 70,
     lessonSlug: 'intro-to-git',
     questions: {
@@ -38,7 +38,7 @@ const QUIZZES = {
   },
   branching: {
     id: null as string | null,
-    slug: 'branching-merging-quiz',
+    slug: 'branching-quiz',
     passThreshold: 70,
     lessonSlug: 'branching-and-merging',
     questions: {
@@ -150,7 +150,7 @@ test.describe('Quiz grading — API level', () => {
     branchingLessonId = lessons.find((l) => l.slug === QUIZZES.branching.lessonSlug)?.id ?? '';
 
     if (!gitBasicsQuizId) throw new Error('git-basics-quiz not found in DB');
-    if (!branchingQuizId) throw new Error('branching-merging-quiz not found in DB');
+    if (!branchingQuizId) throw new Error('branching-quiz not found in DB');
   });
 
   // ── Authentication guard ────────────────────────────────────────────────
