@@ -12,18 +12,16 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { resolveUser } from '@/lib/auth/resolveUser';
+import { resolveUser } from '@/lib/auth/resolve-user';
 import { createClient } from '@supabase/supabase-js';
-
-const serviceSupabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-);
 
 export async function GET(req: NextRequest) {
   // ── 1. Auth ──────────────────────────────────────────────────────────────
-  const { userId, jwt, error: authError } = await resolveUser(req);
-  if (authError || !userId) {
+  const authHeader = req.headers.get('Authorization') ?? '';
+  const jwt = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
+  const user = await resolveUser(req);
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -38,11 +36,12 @@ export async function GET(req: NextRequest) {
   // ── 3. Call security-definer RPC with creator's JWT ───────────────────────
   // The function internally checks auth.uid() = creator_id — so we must call it
   // with the user's JWT (not service role) to enforce creator scope.
-  const { createClient: createUserClient } = await import('@supabase/supabase-js');
-  const userSupabase = createUserClient(
+  const userSupabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { global: { headers: { Authorization: `Bearer ${jwt}` } } },
+    jwt
+      ? { global: { headers: { Authorization: `Bearer ${jwt}` } } }
+      : {},
   );
 
   const { data, error } = await userSupabase.rpc('get_creator_purchasers', {
