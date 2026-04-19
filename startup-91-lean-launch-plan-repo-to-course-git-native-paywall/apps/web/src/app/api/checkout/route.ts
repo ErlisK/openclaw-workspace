@@ -10,6 +10,13 @@ const CheckoutRequestSchema = z.object({
   courseId: z.string().uuid(),
 });
 
+function normalizeBody(body: unknown): unknown {
+  if (body && typeof body === 'object' && !('courseId' in body) && 'course_id' in (body as Record<string, unknown>)) {
+    return { ...body as Record<string, unknown>, courseId: (body as Record<string, unknown>).course_id };
+  }
+  return body;
+}
+
 /**
  * POST /api/checkout
  *
@@ -34,7 +41,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const parsed = CheckoutRequestSchema.safeParse(body);
+  const parsed = CheckoutRequestSchema.safeParse(normalizeBody(body));
   if (!parsed.success) {
     return NextResponse.json(
       { error: 'Validation error', details: parsed.error.errors },

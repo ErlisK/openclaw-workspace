@@ -93,6 +93,22 @@ export default async function HomePage() {
   return (
     <main className="flex min-h-screen flex-col">
 
+      {/* ── Top Nav ──────────────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+          <a href="/" className="text-lg font-bold text-violet-600">📚 TeachRepo</a>
+          <nav className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
+            <a href="/marketplace" className="hover:text-gray-900">Marketplace</a>
+            <a href="/docs" className="hover:text-gray-900">Docs</a>
+            <a href="/docs/pricing" className="hover:text-gray-900">Pricing</a>
+          </nav>
+          <div className="flex items-center gap-3">
+            <a href="/auth/login" className="text-sm font-medium text-gray-700 hover:text-violet-600">Sign in</a>
+            <a href="/auth/signup" className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-700">Get started</a>
+          </div>
+        </div>
+      </header>
+
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="flex flex-col items-center justify-center px-6 py-24 text-center bg-gradient-to-b from-white to-violet-50">
         <div className="max-w-4xl">
@@ -259,9 +275,11 @@ export default async function HomePage() {
             <a href="/docs" className="hover:text-white">Docs</a>
             <a href="/docs/pricing" className="hover:text-white">Pricing</a>
             <a href="/docs/self-hosting" className="hover:text-white">Self-Hosting</a>
+            <a href="/legal/terms" className="hover:text-white">Terms</a>
+            <a href="/legal/privacy" className="hover:text-white">Privacy</a>
             <a href="mailto:hello@teachrepo.com" className="hover:text-white">Contact</a>
           </nav>
-          <div className="text-xs text-gray-600">© 2025 TeachRepo. All rights reserved.</div>
+          <div className="text-xs text-gray-600">&copy; {new Date().getFullYear()} TeachRepo. All rights reserved.</div>
         </div>
       </footer>
 

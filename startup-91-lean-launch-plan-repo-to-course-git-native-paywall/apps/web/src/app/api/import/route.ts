@@ -218,6 +218,17 @@ function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 }
 
+function validateSandboxUrl(u: unknown): string | null {
+  if (!u || typeof u !== 'string') return null;
+  try {
+    const url = new URL(u);
+    const allowed = ['https://stackblitz.com', 'https://codesandbox.io', 'https://codepen.io', 'https://replit.com'];
+    if (url.protocol !== 'https:') return null;
+    if (!allowed.some(a => u.startsWith(a))) return null;
+    return u;
+  } catch { return null; }
+}
+
 function isSemVer(s: string): boolean {
   return /^\d+\.\d+(\.\d+)?/.test(s);
 }
@@ -599,8 +610,8 @@ export async function POST(req: NextRequest) {
           is_preview: fm.access === 'free' || fm.is_preview === true,
           estimated_minutes: typeof fm.estimated_minutes === 'number' ? fm.estimated_minutes : null,
           has_quiz: !!quizId,
-          has_sandbox: !!(fm.sandbox_url),
-          sandbox_url: (fm.sandbox_url as string) ?? null,
+          has_sandbox: !!(validateSandboxUrl(fm.sandbox_url)),
+          sandbox_url: validateSandboxUrl(fm.sandbox_url),
           quiz_slug: quizId ? slugify(quizId) : null,
           updated_at: new Date().toISOString(),
         });
