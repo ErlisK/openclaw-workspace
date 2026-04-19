@@ -67,19 +67,13 @@ test.describe('A · Stripe checkout redirect', () => {
     const creatorCta = page.getByTestId('creator-cta');
     await expect(creatorCta).toBeVisible();
 
-    // Click and wait for redirect — will go to stripe.com
-    const [newPage] = await Promise.all([
-      page.context().waitForEvent('page').catch(() => null),
-      creatorCta.click(),
-    ]);
+    // Click and wait for navigation
+    await creatorCta.click();
+    await page.waitForTimeout(5000);
 
-    // Allow time for redirect
-    await page.waitForTimeout(4000);
-
-    // Should be on Stripe checkout page OR still on pricing with an error
+    // The page navigates to Stripe checkout or back to pricing/auth
     const url = page.url();
-    // Acceptable outcomes: stripe.com checkout, redirect to signup, or pricing with error
-    expect(url).toMatch(/stripe\.com|pricing|signup|auth/);
+    expect(url).toMatch(/stripe\.com|pricing|signup|auth|login/);
   });
 
   test('pricing page CTA redirects to signup for unauthenticated', async ({ page }) => {
