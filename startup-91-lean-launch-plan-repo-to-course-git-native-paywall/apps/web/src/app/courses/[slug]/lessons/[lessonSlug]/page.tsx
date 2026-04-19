@@ -6,9 +6,11 @@ import { checkEntitlement } from '@/lib/entitlement/check';
 import { compileLessonMdx } from '@/lib/mdx/compile';
 import { Quiz } from '@/components/lesson/Quiz';
 import { SandboxEmbed } from '@/components/lesson/SandboxEmbed';
+import { PaywallGate } from '@/components/lesson/PaywallGate';
 
 interface LessonPageProps {
   params: { slug: string; lessonSlug: string };
+  searchParams: { unlocking?: string; session_id?: string };
 }
 
 export async function generateMetadata({ params }: LessonPageProps): Promise<Metadata> {
@@ -34,7 +36,7 @@ export async function generateMetadata({ params }: LessonPageProps): Promise<Met
   };
 }
 
-export default async function LessonPage({ params }: LessonPageProps) {
+export default async function LessonPage({ params, searchParams }: LessonPageProps) {
   const supabase = createServerClient();
   const serviceSupa = createServiceClient();
 
@@ -60,8 +62,38 @@ export default async function LessonPage({ params }: LessonPageProps) {
   // ── 3. Entitlement check ─────────────────────────────────────────────────
   const { enrolled } = await checkEntitlement({ courseId: course.id });
 
-  // Redirect to course overview paywall if not enrolled and not a free preview
+  // Determine if user just returned from Stripe Checkout
+  const returningFromCheckout = !!searchParams.unlocking || !!searchParams.session_id;
+
+  // If the lesson is locked:
+  // - Returning from checkout: render inline PaywallGate with polling spinner
+  // - Otherwise: redirect to course overview paywall
   if (!lesson.is_preview && !enrolled) {
+    if (returningFromCheckout) {
+      // Stay on the lesson page — PaywallGate will poll and reload when enrolled
+      const isFree = course.price_cents === 0;
+      const priceDisplay = isFree ? 'Free' : `$${(course.price_cents / 100).toFixed(0)} ${course.currency?.toUpperCase()}`;
+      const checkoutHref = isFree
+        ? `/api/enroll/free?course_id=${course.id}`
+        : `/api/checkout?course_id=${course.id}`;
+
+      return (
+        <div className="min-h-screen bg-white">
+          <div className="mx-auto max-w-3xl px-4 py-16">
+            <a href={`/courses/${params.slug}`} className="mb-6 inline-flex items-center gap-2 text-sm text-gray-500 hover:text-violet-600">
+              ← {course.title}
+            </a>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{lesson.title}</h1>
+            <PaywallGate
+              courseId={course.id}
+              priceDisplay={priceDisplay}
+              checkoutHref={checkoutHref}
+              polling={true}
+            />
+          </div>
+        </div>
+      );
+    }
     redirect(`/courses/${params.slug}?paywall=1`);
   }
 

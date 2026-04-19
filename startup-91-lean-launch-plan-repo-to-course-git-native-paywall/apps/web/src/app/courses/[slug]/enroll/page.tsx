@@ -100,7 +100,7 @@ function EnrollSuccessUI({
         Let&apos;s get started.
       </p>
       <a
-        href={`/courses/${courseSlug}/lessons/${firstLessonSlug}`}
+        href={`/courses/${courseSlug}/lessons/${firstLessonSlug}?unlocking=1`}
         className="rounded-xl bg-violet-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg transition-colors hover:bg-violet-700"
       >
         Start learning →
