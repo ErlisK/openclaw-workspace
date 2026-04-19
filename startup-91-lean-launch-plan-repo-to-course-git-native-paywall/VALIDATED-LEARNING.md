@@ -120,3 +120,52 @@ Each funnel step was triggered by hitting the real API endpoints:
 ---
 
 *Built with the validated learning framework. Update this doc after each weekly funnel review.*
+
+---
+
+## Creator Flow Friction Analysis (2026-04-19)
+
+### Top Friction Points Identified
+
+| Rank | Issue | Source | Severity |
+|---|---|---|---|
+| 1 | **Missing frontmatter delimiters** (`---`) | Import errors log | High — silently skips frontmatter |
+| 2 | **Invalid `access:` value** (e.g. `gated`, `premium` instead of `free`/`paid`) | Linter spec + import route | High — lesson gating fails |
+| 3 | **Slug contains spaces or uppercase** | Schema validation | High — import 422 |
+| 4 | **price_cents as float** (e.g. `19.00` instead of `1900`) | Import parse | Medium — Stripe rejects |
+| 5 | **Tabs instead of spaces** in YAML | YAML parse failures | Medium — silent parse failure |
+| 6 | **Missing description** | Not caught before | Low — SEO impact |
+| 7 | **quiz_id doesn't match filename** | Quiz linking failure | Medium — quiz not linked |
+
+### Fixes Shipped
+
+1. **`/api/lint` endpoint** — POST batch linting of course.yml / lesson .md / quiz .yml with structured errors, fix hints, and doc links
+2. **Inline `FrontmatterLinter` component** — embeds in `/dashboard/new` as "Check before importing" panel; supports both repo-scan and paste-and-check modes
+3. **`InlineLinter` component** — standalone paste-mode linter in the "Check frontmatter" tab
+4. **Categorised import error messages** — import errors now map to human-friendly descriptions + doc links + fix instructions (not just raw error strings)
+5. **E2E tests** — 30+ tests covering all linter rules, severity levels, doc link presence, batch linting, repo-based scan
+
+### Micro-Iterations Released (5 total)
+
+| # | Description | Commit |
+|---|---|---|
+| 1 | 6-step creator funnel dashboard | `c30110d` |
+| 2 | `/api/admin/funnel` + seed events | `c30110d` |
+| 3 | Signup tracking + checkout error boundary | `739791b` |
+| 4 | Happy path E2E validation | `76bac56` |
+| **5** | **In-UI frontmatter linter + error categorisation** | _(this release)_ |
+
+### Pivot / Persevere Signals
+
+**Persevere:**
+- Import pipeline (steps 2-4) is working end-to-end
+- Checkout step 5 produces valid Stripe sessions
+- Linter catches all known error patterns before they hit the import API
+
+**Watch:**
+- Step 1 (`signup_completed`) conversion from landing page — need real user traffic to measure
+- Import retry rate — are creators running lint check before importing, or still hitting the import API with broken YAML?
+- Lesson `access: gated` typo is the most common error pattern in the linter spec — add it to the docs prominently
+
+**Pivot signals:**
+- If import-to-publish rate stays < 30% after linter ships → investigate whether the repo format itself is too complex → consider wizard-based course creation (no git required)
