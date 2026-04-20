@@ -49,6 +49,14 @@ export default function OnboardingPage() {
     router.push('/dashboard')
   }
 
+  async function handleSkipToDashboard() {
+    // Mark onboarding completed so the user isn't re-routed next time
+    try {
+      await fetch('/api/user/complete-onboarding', { method: 'POST' })
+    } catch {}
+    router.push('/dashboard')
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
@@ -139,7 +147,7 @@ export default function OnboardingPage() {
                 {demoLoading ? 'Loading demo…' : 'Load demo data instead'}
               </button>
               <button
-                onClick={() => router.push('/dashboard')}
+                onClick={handleSkipToDashboard}
                 className="w-full text-gray-400 text-sm hover:text-gray-600 py-1"
               >
                 Skip for now → Go to dashboard

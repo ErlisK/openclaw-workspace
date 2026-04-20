@@ -128,6 +128,12 @@ export async function POST() {
   const { error: teErr } = await supabase.from("time_entries").insert(teRows);
   if (teErr) return NextResponse.json({ error: teErr.message }, { status: 500 });
 
+  // Mark onboarding as completed so users don't get re-routed
+  await supabase
+    .from('profiles')
+    .update({ onboarding_completed: true })
+    .eq('id', user.id)
+
   captureServerEvent(user.id, 'demo_data_loaded', {
     streams: streamIds.length,
     transactions: txRows.length,

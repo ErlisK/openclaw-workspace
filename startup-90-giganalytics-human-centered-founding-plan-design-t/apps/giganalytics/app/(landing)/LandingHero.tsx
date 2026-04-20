@@ -149,7 +149,16 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         </div>
 
         {/* Social proof */}
-        <p className="text-sm text-gray-400 mb-12">{variant.social_proof}</p>
+        <p className="text-sm text-gray-400 mb-4">{variant.social_proof}</p>
+
+        {/* Trust signals */}
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-12 text-xs text-gray-400">
+          <span className="flex items-center gap-1">✅ No credit card required</span>
+          <span className="text-gray-200">|</span>
+          <span className="flex items-center gap-1">⚡ First ROI dashboard in ~11 min</span>
+          <span className="text-gray-200">|</span>
+          <span className="flex items-center gap-1">🔒 Privacy-first · your data stays yours</span>
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 max-w-2xl mx-auto mb-16">
