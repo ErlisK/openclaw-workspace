@@ -80,8 +80,8 @@ export const PLANS: Record<CreatorPlan, PlanDefinition> = {
 };
 
 export const STRIPE_PRICE_IDS = {
-  creator_monthly: process.env.CREATOR_PRICE_MONTHLY ?? 'price_1TNvxxGt92XrRvUuDafkteHv',
-  creator_annual:  process.env.CREATOR_PRICE_ANNUAL  ?? 'price_1TNvxxGt92XrRvUuC8P0nQ81',
+  creator_monthly: process.env.CREATOR_PRICE_MONTHLY ?? 'price_1TOLK7Gt92XrRvUu3EzdIX1U',
+  creator_annual:  process.env.CREATOR_PRICE_ANNUAL  ?? 'price_1TOLK7Gt92XrRvUunvrrv4A6',
 };
 
 /** Returns true if the user's plan grants access to a feature */

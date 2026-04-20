@@ -196,6 +196,33 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Social proof stats bar ── */}
+      <section className="border-t border-white/5 bg-white/[0.02] px-6 py-8">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-black text-white">150<span className="text-violet-400">+</span></span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Creators signed up</span>
+            </div>
+            <div className="hidden sm:block h-10 w-px bg-white/10" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-black text-white">13<span className="text-violet-400">+</span></span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Courses published</span>
+            </div>
+            <div className="hidden sm:block h-10 w-px bg-white/10" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-black text-white">&lt;15<span className="text-violet-400">min</span></span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Avg. time to first deploy</span>
+            </div>
+            <div className="hidden sm:block h-10 w-px bg-white/10" />
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl font-black text-white">0<span className="text-violet-400">%</span></span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Platform fee on self-hosted</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ── */}
       <section className="px-6 py-24 border-t border-white/5">
         <div className="mx-auto max-w-5xl">
@@ -360,6 +387,46 @@ export default async function HomePage() {
               <a href="/docs/cli" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">CLI docs →</a>
               <a href="/docs/self-hosting" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Self-hosting guide →</a>
               <a href="https://github.com/ErlisK/teachrepo-template" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors">Clone template →</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Referral / Affiliate CTA ── */}
+      <section className="px-6 py-20 border-t border-white/5">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex flex-col lg:flex-row items-center gap-10 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 p-10">
+            <div className="flex-1">
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-400">
+                💸 Referral Program
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-3">Earn $10 for every creator you refer</h2>
+              <p className="text-gray-400 leading-relaxed mb-6">
+                Share your unique referral link. When a creator you refer upgrades to the Creator plan, you get <span className="text-emerald-400 font-semibold">$10 cash</span> — no cap, no expiry. Top referrers also get a marketplace badge that boosts course discoverability.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a href="/auth/signup?utm_source=referral_cta&utm_medium=homepage" className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-500 transition-all">
+                  Get your referral link
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                </a>
+                <a href="/docs/referrals" className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-6 py-3 text-sm font-medium text-gray-300 hover:bg-white/10 transition-all">
+                  How it works
+                </a>
+              </div>
+            </div>
+            <div className="flex-shrink-0 grid grid-cols-1 gap-4 w-full lg:w-64">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
+                <div className="text-3xl font-black text-white mb-1">$10</div>
+                <div className="text-xs text-gray-400">per successful referral</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
+                <div className="text-3xl font-black text-white mb-1">∞</div>
+                <div className="text-xs text-gray-400">no cap on earnings</div>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-5 text-center">
+                <div className="text-3xl font-black text-white mb-1">🏅</div>
+                <div className="text-xs text-gray-400">top referrers get marketplace badge</div>
+              </div>
             </div>
           </div>
         </div>
