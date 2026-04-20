@@ -117,6 +117,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-500 px-3 py-2 text-sm outline-none focus:border-violet-500/50 focus:bg-white/10 transition-colors"
             placeholder="you@example.com"
+            data-testid="auth-email-input"
           />
         </div>
         <div>
@@ -130,6 +131,7 @@ export function AuthForm({ mode }: AuthFormProps) {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-lg border border-white/10 bg-white/5 text-white placeholder-gray-500 px-3 py-2 text-sm outline-none focus:border-violet-500/50 focus:bg-white/10 transition-colors"
             placeholder={mode === 'signup' ? 'Min. 8 characters' : ''}
+            data-testid="auth-password-input"
           />
         </div>
         {error && (
@@ -138,6 +140,7 @@ export function AuthForm({ mode }: AuthFormProps) {
         <button
           type="submit"
           disabled={loading}
+          data-testid="auth-submit-btn"
           className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white hover:bg-violet-500 disabled:opacity-60 transition-colors"
         >
           {loading
