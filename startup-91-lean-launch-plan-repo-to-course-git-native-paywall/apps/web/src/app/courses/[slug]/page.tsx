@@ -163,7 +163,7 @@ export default async function CoursePage({ params, searchParams }: CoursePagePro
             <div className="flex-1">
               <div className="mb-3 flex items-center gap-2">
                 <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-xs font-medium text-violet-300">
-                  v{course.version ?? '1.0.0'}
+                  {(course.version ?? '1.0.0').replace(/^v/, '')  ? `v${(course.version ?? '1.0.0').replace(/^v/, '')}` : 'v1.0.0'}
                 </span>
                 {isFree && (
                   <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-400">

@@ -3,6 +3,7 @@ import { createServerClient } from '@/lib/supabase/server';
 import { createServiceClient } from '@/lib/supabase/service';
 import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 import { PlanBadge } from '@/components/dashboard/PlanBadge';
+import { CopyReferralButton } from '@/components/dashboard/CopyReferralButton';
 import { getCreatorPlan } from '@/lib/subscription/server';
 import { PLANS } from '@/lib/subscription/plans';
 
@@ -121,7 +122,7 @@ export default async function DashboardPage() {
 
                 {/* Meta */}
                 <div className="flex items-center gap-2 text-xs text-gray-500">
-                  {c.version && <span className="font-mono">v{c.version}</span>}
+                  {c.version && <span className="font-mono">v{c.version.replace(/^v/, '')}</span>}
                   {c.version && <span>·</span>}
                   <span>{c.price_cents === 0 ? 'Free' : `$${(c.price_cents / 100).toFixed(0)} ${c.currency?.toUpperCase()}`}</span>
                 </div>
@@ -147,6 +148,23 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* ── Affiliate / Referral Link ── */}
+      <div className="mx-auto max-w-6xl px-6 pb-16">
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-white mb-1 flex items-center gap-2">
+                <span>🔗</span> Your referral link
+              </h3>
+              <p className="text-sm text-gray-400">
+                Share this link. When a creator you refer upgrades to a paid plan, you earn <span className="text-emerald-400 font-semibold">$10</span> — no cap, no expiry.
+              </p>
+            </div>
+            <CopyReferralButton referralUrl={`https://teachrepo.com/?ref=${user.id.slice(0, 8)}`} />
+          </div>
+        </div>
       </div>
     </div>
   );

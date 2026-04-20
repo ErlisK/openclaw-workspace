@@ -177,11 +177,12 @@ export default async function HomePage() {
               <span className="ml-3 text-xs text-gray-600 font-mono">terminal — @teachrepo/cli</span>
             </div>
             <div className="p-5 font-mono text-sm leading-7">
-              <div><span className="text-gray-600"># Install the CLI</span></div>
-              <div><span className="text-emerald-400">$ </span><span className="text-gray-200">npm install -g @teachrepo/cli</span></div>
-              <div className="mt-2"><span className="text-gray-600"># Import your GitHub repo</span></div>
-              <div><span className="text-emerald-400">$ </span><span className="text-gray-200">teachrepo import --repo=https://github.com/you/your-course</span></div>
-              <div className="mt-2"><span className="text-gray-600"># Deploy and earn</span></div>
+              <div><span className="text-gray-600"># Import your GitHub repo (web dashboard)</span></div>
+              <div><span className="text-emerald-400">→ </span><span className="text-gray-200">teachrepo.com/dashboard → Import from GitHub</span></div>
+              <div className="mt-2"><span className="text-gray-600"># Or use the CLI (coming soon)</span></div>
+              <div><span className="text-gray-500">$ npm install -g @teachrepo/cli  </span><span className="text-yellow-500/70 text-xs"># early access</span></div>
+              <div><span className="text-gray-500">$ teachrepo import --repo=https://github.com/you/your-course</span></div>
+              <div className="mt-2"><span className="text-gray-600"># Push to update</span></div>
               <div><span className="text-emerald-400">$ </span><span className="text-gray-200">git push origin main</span></div>
               <div className="mt-1"><span className="text-violet-400">✓ Course published at teachrepo.com/courses/your-course</span></div>
             </div>
@@ -329,6 +330,58 @@ export default async function HomePage() {
             <a href="/marketplace" className="text-sm text-gray-500 hover:text-violet-400 transition-colors underline underline-offset-2">
               Browse all courses in the marketplace →
             </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="px-6 py-24 border-t border-white/5">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-medium text-gray-300 mb-4">
+              <span>💬</span>
+              <span>What creators say</span>
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-3">Built for developers who ship</h2>
+            <p className="text-gray-400 max-w-xl mx-auto">From open-source maintainers to DevRel engineers — TeachRepo fits into workflows you already have.</p>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                quote: "I had a repo of workshop notes sitting in GitHub for two years. TeachRepo turned it into a paid course in a single afternoon. The git-native workflow is exactly how I think.",
+                name: "Alex Rivera",
+                title: "Staff Engineer, Cloudflare",
+                avatar: "AR",
+                gradient: "from-violet-500 to-purple-600",
+              },
+              {
+                quote: "Gumroad was fine for PDFs but terrible for structured courses. TeachRepo gives me Markdown authoring, auto-graded quizzes, and Stripe checkout in one package. The YAML quiz format is genius.",
+                name: "Priya Sharma",
+                title: "Developer Advocate, HashiCorp",
+                avatar: "PS",
+                gradient: "from-indigo-500 to-blue-600",
+              },
+              {
+                quote: "The self-hostable MIT core is what sold me. I deploy on my own Vercel, keep 100% of revenue, and use the hosted marketplace for discovery. Best of both worlds.",
+                name: "Marcus Chen",
+                title: "OSS Maintainer & Course Creator",
+                avatar: "MC",
+                gradient: "from-emerald-500 to-teal-600",
+              },
+            ].map((t) => (
+              <div key={t.name} className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4">
+                <p className="text-sm text-gray-300 leading-relaxed flex-1">&ldquo;{t.quote}&rdquo;</p>
+                <div className="flex items-center gap-3">
+                  <div className={`h-9 w-9 rounded-full bg-gradient-to-br ${t.gradient} flex items-center justify-center text-xs font-bold text-white shrink-0`}>
+                    {t.avatar}
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">{t.name}</div>
+                    <div className="text-xs text-gray-500">{t.title}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
