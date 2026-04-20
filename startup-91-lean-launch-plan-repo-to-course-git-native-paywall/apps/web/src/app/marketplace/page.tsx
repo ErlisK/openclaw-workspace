@@ -351,7 +351,7 @@ function CourseCardUI({ course }: { course: CourseCard }) {
         {course.version && (
           <div className="absolute right-3 top-3">
             <span className="rounded-full bg-black/30 px-2 py-0.5 text-xs font-mono text-white backdrop-blur-sm">
-              v{course.version}
+              {course.version}
             </span>
           </div>
         )}
