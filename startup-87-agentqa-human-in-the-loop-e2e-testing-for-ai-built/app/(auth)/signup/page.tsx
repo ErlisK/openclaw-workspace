@@ -74,6 +74,12 @@ function SignupForm() {
           body: JSON.stringify({ code: referralCode }),
         }).catch(() => {})
       }
+      // Notify founder via Slack
+      fetch('/api/notify-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      }).catch(() => {})
       router.push('/dashboard?welcome=1')
     } else {
       setSuccess(true)

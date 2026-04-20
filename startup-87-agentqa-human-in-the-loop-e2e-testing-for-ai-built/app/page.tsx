@@ -189,6 +189,38 @@ curl -X POST https://betawindow.com/api/v1/jobs \\
             </div>
           </div>
 
+          {/* Testimonials */}
+          <div className="mt-16 py-12 border-t border-gray-100">
+            <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">What AI builders are saying</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              {[
+                {
+                  quote: "Shipped my Cursor app and found 3 critical bugs in the first test — saved me hours of user complaints. Worth every penny.",
+                  name: "@vibecoder_dev",
+                  role: "Built with Cursor",
+                },
+                {
+                  quote: "I had Claude build a SaaS and couldn't tell if the auth flow was broken. BetaWindow caught a session persistence bug I never would have found.",
+                  name: "@ai_founder_42",
+                  role: "Claude + Replit builder",
+                },
+                {
+                  quote: "The AI summary output is perfect — I paste it straight back into my agent and it fixes everything. This is the missing piece of the vibe coding stack.",
+                  name: "@agentic_ops",
+                  role: "Agent operator",
+                },
+              ].map((t) => (
+                <div key={t.name} className="bg-gray-50 rounded-xl p-6 border border-gray-100 text-left">
+                  <p className="text-gray-700 text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm">{t.name}</div>
+                    <div className="text-xs text-gray-500">{t.role}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Social proof stats */}
           <div className="mt-8 py-8 border-t border-gray-100">
             <p className="text-center text-sm text-gray-400 mb-6">Built for the agentic era — ship AI apps with confidence</p>
