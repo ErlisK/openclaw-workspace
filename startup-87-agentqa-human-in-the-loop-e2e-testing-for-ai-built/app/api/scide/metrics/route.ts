@@ -2,6 +2,8 @@
  * GET /api/scide/metrics
  * Protected metrics endpoint for ScIDE daily operations monitoring.
  * Auth: Authorization: Bearer $SCIDE_METRICS_TOKEN
+ *
+ * Returns real data only — null for any metric that cannot be determined.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
@@ -9,35 +11,22 @@ import Stripe from 'stripe'
 
 export const runtime = 'nodejs'
 
-interface UserRow {
-  id: string
-  email: string
-  is_test_account: boolean | null
-  created_at?: string
-}
-
 // Test-account email patterns
 const TEST_EMAIL_PREFIXES = ['test-', 'e2e-', 'playwright-', 'cypress-', 'bot-', 'qa-']
 const TEST_EMAIL_CONTAINS = ['+test@', '+e2e@', '+bot@', '+qa@']
 const TEST_EMAIL_DOMAINS = ['example.com', 'test.com', 'mailinator.com', 'guerrillamail.com', 'tempmail.com']
 
 function isTestEmail(email: string): boolean {
-  const lower = email.toLowerCase()
+  const lower = (email ?? '').toLowerCase()
   if (TEST_EMAIL_PREFIXES.some(p => lower.startsWith(p))) return true
   if (TEST_EMAIL_CONTAINS.some(c => lower.includes(c))) return true
   if (TEST_EMAIL_DOMAINS.some(d => lower.endsWith('@' + d))) return true
   return false
 }
 
-function isRealUser(u: UserRow): boolean {
-  return u.is_test_account !== true && !isTestEmail(u.email ?? '')
-}
-
 export async function GET(request: NextRequest) {
-  // Auth
   const authHeader = request.headers.get('authorization')
   const token = authHeader?.replace('Bearer ', '').trim()
-
   if (!token || token !== process.env.SCIDE_METRICS_TOKEN) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
@@ -45,35 +34,49 @@ export async function GET(request: NextRequest) {
   const collected_at = new Date().toISOString()
   const supabase = createAdminClient()
 
-  // Total users (excluding test accounts)
+  // ── Total users ───────────────────────────────────────────────────────────
+  // Try with is_test_account column first; fall back without it if column missing
   let total_users: number | null = null
-  try {
-    const { data, error } = await supabase
-      .from('users')
-      .select('id, email, is_test_account')
-    if (!error && data) {
-      total_users = (data as UserRow[]).filter(isRealUser).length
-    }
-  } catch {}
-
-  // New signups in last 24h
   let new_signups_24h: number | null = null
   try {
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-    const { data, error } = await supabase
+    const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+
+    // Attempt to select is_test_account (may not exist in DB yet)
+    const { data: allData, error: allError } = await supabase
       .from('users')
-      .select('id, email, is_test_account')
-      .gte('created_at', since)
-    if (!error && data) {
-      new_signups_24h = (data as UserRow[]).filter(isRealUser).length
+      .select('id, email, is_test_account, created_at')
+
+    if (!allError && allData) {
+      const realUsers = allData.filter(
+        (u: Record<string, unknown>) =>
+          u['is_test_account'] !== true && !isTestEmail((u['email'] as string) ?? '')
+      )
+      total_users = realUsers.length
+      new_signups_24h = realUsers.filter(
+        (u: Record<string, unknown>) => (u['created_at'] as string) >= since24h
+      ).length
+    } else if (allError) {
+      // Column may not exist — retry without is_test_account
+      const { data: fallback, error: fbError } = await supabase
+        .from('users')
+        .select('id, email, created_at')
+      if (!fbError && fallback) {
+        const realUsers = fallback.filter(
+          (u: Record<string, unknown>) => !isTestEmail((u['email'] as string) ?? '')
+        )
+        total_users = realUsers.length
+        new_signups_24h = realUsers.filter(
+          (u: Record<string, unknown>) => (u['created_at'] as string) >= since24h
+        ).length
+      }
     }
   } catch {}
 
-  // Churned users: null — no last_login/last_active column in schema
+  // ── Churn: null — no last_login / last_active column in schema ────────────
   const churned_users_24h: number | null = null
   const attrition_rate: number | null = null
 
-  // Monthly revenue via Stripe
+  // ── Monthly revenue via Stripe ────────────────────────────────────────────
   let monthly_revenue: number | null = null
   let revenue_source: string | null = null
   try {
@@ -88,12 +91,8 @@ export async function GET(request: NextRequest) {
       let startingAfter: string | undefined = undefined
 
       while (hasMore) {
-        const params: Stripe.ChargeListParams = {
-          created: { gte: monthStartTs },
-          limit: 100,
-        }
+        const params: Stripe.ChargeListParams = { created: { gte: monthStartTs }, limit: 100 }
         if (startingAfter) params.starting_after = startingAfter
-
         const charges = await stripe.charges.list(params)
         for (const charge of charges.data) {
           if (charge.paid && !charge.refunded && charge.status === 'succeeded') {
@@ -101,13 +100,11 @@ export async function GET(request: NextRequest) {
           }
         }
         hasMore = charges.has_more
-        if (hasMore && charges.data.length > 0) {
-          startingAfter = charges.data[charges.data.length - 1].id
-        } else {
-          hasMore = false
-        }
+        startingAfter = hasMore && charges.data.length > 0
+          ? charges.data[charges.data.length - 1].id
+          : undefined
+        if (!startingAfter) hasMore = false
       }
-
       monthly_revenue = parseFloat((totalCents / 100).toFixed(2))
       revenue_source = 'stripe:charges (current calendar month, succeeded, paginated)'
     }
@@ -133,7 +130,7 @@ export async function GET(request: NextRequest) {
       net_profit: null,
     },
     sources: {
-      total_users: 'database:users (all rows, email-pattern + is_test_account filtered)',
+      total_users: 'database:users (email-pattern + is_test_account filtered, fallback without column)',
       new_signups_24h: 'database:users WHERE created_at > NOW() - INTERVAL 24h (test-filtered)',
       churned_users_24h: null,
       attrition_rate: null,
