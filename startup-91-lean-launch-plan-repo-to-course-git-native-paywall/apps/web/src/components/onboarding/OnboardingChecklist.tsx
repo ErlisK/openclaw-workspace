@@ -46,6 +46,13 @@ const CHECKLIST: ChecklistItem[] = [
     href: '/dashboard',
     linkText: 'Dashboard',
   },
+  {
+    id: 'share',
+    label: 'Share with your audience',
+    description: 'Copy your referral link and share it on Twitter, LinkedIn, or your newsletter to earn 20% on every referral.',
+    href: '/dashboard/settings',
+    linkText: 'Get referral link',
+  },
 ];
 
 const STORAGE_KEY = 'teachrepo_onboarding_v1';
@@ -165,6 +172,12 @@ export function OnboardingChecklist() {
           );
         })}
       </ul>
+
+      {allDone && (
+        <div className="mt-5 rounded-xl bg-violet-50 border border-violet-200 px-4 py-3 text-sm text-violet-800">
+          🎉 <strong>You're fully set up!</strong> Share your referral link to earn <strong>20% commission</strong> on every new creator you bring in.
+        </div>
+      )}
 
       {allDone && (
         <div className="mt-5 flex gap-3">

@@ -90,6 +90,26 @@ export default async function DashboardPage() {
           </div>
         )}
 
+        {/* Revenue opportunity nudge for free creators with published courses */}
+        {creatorPlan === 'free' && courses && courses.some((c) => c.published) && (
+          <div className="mb-6 rounded-xl border border-violet-500/30 bg-gradient-to-r from-violet-900/30 to-purple-900/20 px-5 py-4" data-testid="revenue-nudge">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-violet-300">💰 You’re leaving revenue on the table</p>
+                <p className="mt-1 text-xs text-gray-400">
+                  Upgrade to <strong className="text-white">Creator ($29/mo)</strong> to unlock custom domains, marketplace discovery, AI quiz generation, and affiliate tracking — all the tools that convert browsers into buyers.
+                </p>
+              </div>
+              <a
+                href="/pricing"
+                className="shrink-0 rounded-lg bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-500 transition-colors whitespace-nowrap"
+              >
+                Upgrade now →
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Courses */}
         {(!courses || courses.length === 0) ? (
           <div className="rounded-2xl border border-dashed border-white/10 py-24 text-center">

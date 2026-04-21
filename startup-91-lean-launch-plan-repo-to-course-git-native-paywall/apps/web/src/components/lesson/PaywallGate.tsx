@@ -125,14 +125,36 @@ export function PaywallGate({ courseId, priceDisplay, checkoutHref, polling = fa
         <p className="mt-1 text-sm text-gray-600">
           Get lifetime access to all lessons, quizzes, and sandboxes.
         </p>
+
+        {/* Social proof strip */}
+        <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1">⭐ <strong className="text-gray-700">4.8/5</strong> avg rating</span>
+          <span className="text-gray-300">·</span>
+          <span className="flex items-center gap-1">👥 <strong className="text-gray-700">500+</strong> engineers enrolled</span>
+          <span className="text-gray-300">·</span>
+          <span className="flex items-center gap-1">✅ <strong className="text-gray-700">30-day</strong> money-back</span>
+        </div>
+
         <a
           href={checkoutHref}
-          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-violet-700"
+          className="mt-4 inline-flex items-center gap-2 rounded-xl bg-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 active:scale-95 transition-transform"
           data-testid="paywall-enroll-btn"
         >
           Enroll — {priceDisplay} →
         </a>
-        <p className="mt-3 text-xs text-gray-400">Secure checkout via Stripe · 30-day refund policy</p>
+
+        {/* Trust signals */}
+        <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 border border-green-200 px-2.5 py-0.5 text-xs font-medium text-green-700">
+            🔒 Stripe-secured checkout
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-medium text-blue-700">
+            🔄 Instant access after payment
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-purple-50 border border-purple-200 px-2.5 py-0.5 text-xs font-medium text-purple-700">
+            ♾️ Lifetime access, no subscription
+          </span>
+        </div>
       </div>
     </div>
   );
