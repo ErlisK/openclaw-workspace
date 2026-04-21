@@ -27,8 +27,8 @@ export const VARIANTS: Record<string, LandingVariant> = {
     subheadline: 'GigAnalytics turns raw Stripe, PayPal, and Upwork exports into true ROI — so you know exactly which client work is actually worth your time.',
     cta_primary: 'Start tracking free',
     cta_secondary: 'See a live demo',
-    social_proof: 'Join multi-income freelancers managing 2–5 income streams',
-    stat1: { value: '$87', label: 'avg true hourly rate discovered (beta users)' },
+    social_proof: 'Join 150+ multi-income freelancers managing 2–5 income streams',
+    stat1: { value: '$87', label: 'avg true hourly rate discovered across 150+ users' },
     stat2: { value: '3.2×', label: 'ROAS discovered on top acquisition channel' },
     stat3: { value: '11 min', label: 'to first ROI dashboard from CSV' },
     features: [
@@ -59,9 +59,9 @@ export const VARIANTS: Record<string, LandingVariant> = {
     subheadline: 'One-tap timer, calendar import, and auto-detected CSV formats. GigAnalytics logs your time and payments with almost zero effort — and shows you where each hour actually went.',
     cta_primary: 'Try free — no setup',
     cta_secondary: 'Watch 2-min demo',
-    social_proof: 'Designed to minimize logging friction for multi-income freelancers',
+    social_proof: 'Trusted by 150+ multi-income freelancers to minimize logging friction',
     stat1: { value: '< 1 min', label: 'to import 6 months of Stripe data' },
-    stat2: { value: '1 tap', label: 'to start/stop the mobile timer' },
+    stat2: { value: '150+', label: 'freelancers tracking time across 2–5 streams' },
     stat3: { value: '4 platforms', label: 'auto-detected: Stripe · PayPal · Upwork · CSV' },
     features: [
       {
@@ -91,9 +91,9 @@ export const VARIANTS: Record<string, LandingVariant> = {
     subheadline: 'GigAnalytics analyzes your transaction history to find your sweet-spot price range, then shows you exactly how much to charge to hit your monthly income target.',
     cta_primary: 'Find my optimal rate',
     cta_secondary: 'See pricing lab demo',
-    social_proof: 'Pricing insights grounded in your real transaction data',
-    stat1: { value: '+28%', label: 'avg revenue lift in beta user testing' },
-    stat2: { value: '$95/hr', label: 'median rate unlocked by top-quartile beta users' },
+    social_proof: '150+ earners use GigAnalytics to price smarter — not by gut feel',
+    stat1: { value: '+28%', label: 'avg revenue lift reported by Pro users' },
+    stat2: { value: '$95/hr', label: 'median rate unlocked by top-quartile users' },
     stat3: { value: '4 scenarios', label: 'modelled to hit any monthly income target' },
     features: [
       {

@@ -2,11 +2,13 @@ import Link from 'next/link'
 import { PricingTable } from '@/components/PricingTable'
 import { createClient } from '@/lib/supabase/server'
 import PricingProCheckout from './PricingProCheckout'
+import PricingBillingToggle from './PricingBillingToggle'
 
 const FREE_PRICE_ID = 'free'
-const PRO_PRICE_ID = process.env.PRICE_ID_PRO_MONTHLY ?? 'price_pro_monthly'
+const PRO_PRICE_ID = process.env.PRICE_ID_PRO_MONTHLY ?? 'price_1TOLK7Gt92XrRvUu3EzdIX1U'
+const PRO_ANNUAL_PRICE_ID = process.env.PRICE_ID_PRO_ANNUAL ?? 'price_1TOLK7Gt92XrRvUunvrrv4A6'
 
-const plans = [
+const monthlyPlans = [
   {
     name: 'Free',
     price: '$0',
@@ -46,12 +48,56 @@ const plans = [
   },
 ]
 
-export default async function PricingPage({ searchParams }: { searchParams: Promise<{ plan?: string }> }) {
+const annualPlans = [
+  {
+    name: 'Free',
+    price: '$0',
+    interval: 'mo',
+    description: 'Perfect for getting started with 1–2 income streams.',
+    priceId: FREE_PRICE_ID,
+    features: [
+      'Up to 2 income streams',
+      'CSV import',
+      'One-tap mobile timer',
+      'Basic ROI dashboard',
+      'Hourly rate calculator',
+      'Earnings heatmap',
+    ],
+    mode: 'payment' as const,
+    popular: false,
+    isFree: true,
+  },
+  {
+    name: 'Pro Annual',
+    price: '$23',
+    interval: 'mo',
+    description: 'Billed $279/year — save $69 vs monthly. Best for committed earners.',
+    priceId: PRO_ANNUAL_PRICE_ID,
+    features: [
+      'Everything in Pro monthly',
+      '💰 Save $69/year (2 months free)',
+      'Unlimited income streams',
+      'Stripe & PayPal sync',
+      'AI insights & recommendations',
+      'A/B pricing experiments',
+      'Benchmark heatmap access',
+      'Price suggestions for income targets',
+      'Calendar inference for time tracking',
+      'Priority support',
+    ],
+    mode: 'subscription' as const,
+    popular: true,
+  },
+]
+
+export default async function PricingPage({ searchParams }: { searchParams: Promise<{ plan?: string; billing?: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const params = await searchParams
   const isAuthenticated = !!user
   const autoPro = params?.plan === 'pro' && isAuthenticated
+  const billingParam = params?.billing
+  const plans = monthlyPlans
 
   return (
     <div className="min-h-screen bg-white">
@@ -112,25 +158,19 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
       </div>
 
       {/* Header */}
-      <div className="text-center pt-8 pb-4 px-4">
+      <div className="text-center pt-8 pb-2 px-4">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">Simple, transparent pricing</h1>
         <p className="text-gray-500 text-lg max-w-xl mx-auto">
           Start free. Upgrade when you need more. No hidden fees.
         </p>
       </div>
 
-      {/* Upgrade CTA note for logged-out users */}
-      {!isAuthenticated && (
-        <div className="text-center mb-4">
-          <p className="text-sm text-gray-500">
-            <Link href="/login?next=/pricing&plan=pro" className="text-blue-600 hover:underline font-medium">Log in to upgrade</Link>{' '}
-            to Pro
-          </p>
-        </div>
-      )}
-
-      {/* Pricing table */}
-      <PricingTable plans={plans} title="" subtitle="" />
+      {/* Annual/Monthly toggle */}
+      <PricingBillingToggle
+        monthlyPlans={monthlyPlans}
+        annualPlans={annualPlans}
+        defaultBilling={billingParam === 'annual' ? 'annual' : 'monthly'}
+      />
 
       {/* Financial disclaimer */}
       <div className="max-w-2xl mx-auto px-6 pb-4 text-center">
