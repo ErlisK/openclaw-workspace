@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -18,6 +18,14 @@ export default function NewJobPage() {
   const [instructions, setInstructions] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [creditBalance, setCreditBalance] = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch('/api/credits')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d?.balance !== undefined) setCreditBalance(d.balance) })
+      .catch(() => {})
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -58,9 +66,25 @@ export default function NewJobPage() {
       <main className="max-w-2xl mx-auto px-6 py-10">
         <div className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
           <h1 className="text-2xl font-bold text-gray-900 mb-1">Create a Test Job</h1>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-gray-500 mb-4">
             A human tester will walk through your app and report bugs, UX issues, and broken flows.
           </p>
+          {creditBalance !== null && (
+            <div className={`mb-6 flex items-center gap-3 px-4 py-3 rounded-xl border ${
+              creditBalance > 0
+                ? 'bg-green-50 border-green-200 text-green-800'
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            }`}>
+              <span className="text-lg">{creditBalance > 0 ? '🎁' : '💳'}</span>
+              <div className="text-sm">
+                {creditBalance > 0 ? (
+                  <><strong>You have ${creditBalance} in credits</strong> — ready to use on this test. {creditBalance >= 5 && tier === 'quick' ? 'Your Quick test is fully covered!' : ''}</>
+                ) : (
+                  <><strong>No credits remaining</strong> — you&apos;ll be charged when you publish this job.</>
+                )}
+              </div>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5" data-testid="new-job-form">
             {/* Title */}
@@ -129,7 +153,7 @@ export default function NewJobPage() {
 
               <button type="submit" disabled={loading} data-testid="job-save-button"
                 className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors">
-                {loading ? 'Creating…' : 'Save as Draft'}
+                {loading ? 'Creating…' : 'Save Draft & Review →'}
               </button>
             </div>
           </form>

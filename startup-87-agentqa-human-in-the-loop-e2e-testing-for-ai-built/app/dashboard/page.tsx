@@ -283,11 +283,19 @@ function DashboardContent() {
                 <p className="text-sm text-gray-500 mb-6 max-w-sm mx-auto">
                   Submit your app URL and a real human will test it in a live Chrome session — network logs, console errors, and a plain-English bug report included.
                 </p>
+                {credits !== null && credits > 0 && (
+                  <div className="mb-5 inline-flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 text-green-800 rounded-full text-sm font-semibold">
+                    <span>🎁</span>
+                    <span>You have ${credits} in free credits — your first test is on us!</span>
+                  </div>
+                )}
+                <div className="block">
                 <a href="/jobs/new"
                   className="inline-block px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm">
-                  Start your first test — from $5
+                  {credits && credits > 0 ? 'Use your free credit →' : 'Start your first test — from $5'}
                 </a>
-                <p className="mt-3 text-xs text-gray-400">Use code <strong>LAUNCH</strong> for a free Quick test this week</p>
+                </div>
+                <p className="mt-3 text-xs text-gray-400">Results typically within 4 hours</p>
                 {/* Referral nudge */}
                 <div className="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl max-w-sm mx-auto">
                   <p className="text-sm font-semibold text-amber-800 mb-1">🎁 Earn free test credits</p>

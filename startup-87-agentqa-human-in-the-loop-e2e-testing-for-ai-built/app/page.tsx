@@ -26,7 +26,7 @@ export default function HomePage() {
           {/* Launch promo banner */}
           <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 text-sm font-semibold bg-amber-50 border border-amber-200 text-amber-800 rounded-full">
             <span>🎉</span>
-            <span>Launch week: <strong>first Quick test FREE</strong> — auto-applied when you sign up (no code needed)</span>
+            <span>Launch offer: <strong>first Quick test FREE</strong> — auto-applied at signup (no code needed) · <strong>Expires Apr 30</strong></span>
           </div>
           <div className="inline-block mb-6 px-3 py-1 text-xs font-semibold tracking-wide uppercase bg-indigo-100 text-indigo-700 rounded-full">
             Built for vibe coders &amp; AI agent operators
@@ -227,7 +227,7 @@ curl -X POST https://betawindow.com/api/v1/jobs \\
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
                 <div className="text-3xl font-bold text-gray-900">$5</div>
-                <div className="text-sm text-gray-500 mt-1">First Quick test — use code <span className="font-semibold text-amber-600">LAUNCH</span></div>
+                <div className="text-sm text-gray-500 mt-1">First Quick test free — <span className="font-semibold text-amber-600">auto-applied at signup</span> · expires Apr 30</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>
