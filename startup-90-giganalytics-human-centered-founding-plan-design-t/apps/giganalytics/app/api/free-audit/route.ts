@@ -11,6 +11,13 @@ const AuditSchema = z.object({
   hourlyRate: z.string().max(200).optional(),
   message: z.string().max(2000).optional(),
   fileName: z.string().max(200).optional(),
+  // UTM attribution
+  utm_source: z.string().max(100).optional(),
+  utm_medium: z.string().max(100).optional(),
+  utm_campaign: z.string().max(200).optional(),
+  utm_content: z.string().max(200).optional(),
+  utm_term: z.string().max(200).optional(),
+  referrer: z.string().max(500).optional(),
 })
 
 export async function POST(request: NextRequest) {
@@ -46,6 +53,13 @@ export async function POST(request: NextRequest) {
       message: data.message,
       file_name: data.fileName,
       status: 'pending',
+      // UTM attribution
+      utm_source: data.utm_source,
+      utm_medium: data.utm_medium,
+      utm_campaign: data.utm_campaign,
+      utm_content: data.utm_content,
+      utm_term: data.utm_term,
+      referrer: data.referrer,
     })
 
     if (error) {

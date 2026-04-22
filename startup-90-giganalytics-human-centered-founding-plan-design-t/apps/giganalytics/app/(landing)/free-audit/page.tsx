@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { getPersistedUTM, type UTMParams } from '@/lib/utm'
 
 export default function FreeAuditPage() {
   const [form, setForm] = useState({
@@ -15,6 +16,16 @@ export default function FreeAuditPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [utm, setUtm] = useState<UTMParams>({})
+
+  useEffect(() => {
+    const persisted = getPersistedUTM()
+    if (persisted) setUtm(persisted)
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ;(window as any).plausible?.('free_audit_viewed')
+    } catch { /* best-effort */ }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -24,11 +35,31 @@ export default function FreeAuditPage() {
       const res = await fetch('/api/free-audit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, fileName: file?.name }),
+        body: JSON.stringify({
+          ...form,
+          fileName: file?.name,
+          ...utm,
+          referrer: typeof document !== 'undefined' ? (document.referrer || undefined) : undefined,
+        }),
       })
       const data = await res.json()
       if (res.ok) {
         setStatus('success')
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).plausible?.('audit_requested', { props: { source: utm.utm_source ?? 'direct' } })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).rdt?.('track', 'Lead')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const gtag = (window as any).gtag
+          if (typeof gtag === 'function' && process.env.NEXT_PUBLIC_GTAG_CONVERSION_ID) {
+            gtag('event', 'conversion', {
+              send_to: `${process.env.NEXT_PUBLIC_GTAG_CONVERSION_ID}/audit_lead`,
+              event_category: 'lead',
+              event_label: 'free_audit',
+            })
+          }
+        } catch { /* best-effort */ }
       } else {
         setStatus('error')
         setErrorMsg(data.message ?? 'Something went wrong. Please try again.')

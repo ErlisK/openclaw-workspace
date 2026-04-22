@@ -123,3 +123,22 @@ export function trackCheckoutInitiated(props: {
     period: props.period,
   })
 }
+
+/** 11. Free audit requested */
+export function trackAuditRequested(props: { source?: string }): void {
+  capture('audit_requested', { source: props.source ?? 'direct' })
+}
+
+/** 12. Signup started (user began filling the signup form) */
+export function trackSignupStarted(props: { source?: string; campaign?: string }): void {
+  capture('signup_started', { source: props.source, campaign: props.campaign })
+}
+
+/** 13. Subscription started (paid conversion) */
+export function trackSubscriptionStarted(props: {
+  plan: string
+  price: number
+  source?: string
+}): void {
+  capture('subscription_started', { plan: props.plan, price: props.price, source: props.source })
+}
