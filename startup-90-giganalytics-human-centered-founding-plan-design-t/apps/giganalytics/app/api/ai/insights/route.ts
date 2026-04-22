@@ -295,12 +295,12 @@ Constraints:
     }).catch(() => {})
 
     // Persist to recommendations for rate limiting tracking + caching
-    supabase.from('recommendations').insert({
+    void supabase.from('recommendations').insert({
       user_id: user.id,
       insight_type: insightType,
       payload: JSON.stringify(filtered),
       generated_at: new Date().toISOString(),
-    }).then(() => {}).catch(() => {})
+    })
 
     return NextResponse.json({
       insights: filtered,
