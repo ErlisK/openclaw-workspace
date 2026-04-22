@@ -34,7 +34,8 @@ export default function PricingBillingToggle({ monthlyPlans, annualPlans, defaul
             billing === 'monthly'
               ? 'bg-blue-600 text-white shadow'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
+          }`}>
+          Monthly
         </button>
         <button
           onClick={() => setBilling('annual')}
@@ -43,6 +44,8 @@ export default function PricingBillingToggle({ monthlyPlans, annualPlans, defaul
               ? 'bg-blue-600 text-white shadow'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
+        >
+          Annual
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
             billing === 'annual' ? 'bg-white text-blue-600' : 'bg-green-100 text-green-700'
           }`}>
