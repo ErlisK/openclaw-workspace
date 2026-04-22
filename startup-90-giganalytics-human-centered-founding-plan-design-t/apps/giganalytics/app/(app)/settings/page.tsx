@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import BenchmarkOptIn from './BenchmarkOptIn'
+import { DeleteAccountButton } from '@/components/DeleteAccountButton'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -51,6 +52,16 @@ export default async function SettingsPage() {
           Your individual data is never shared. Only aggregated percentiles with ≥10 contributors are published.{' '}
           <Link href="/privacy" className="text-blue-500 hover:underline">Privacy Policy</Link>
         </p>
+      </div>
+
+      {/* Danger zone — account deletion (GDPR Art. 17 / CCPA §1798.105) */}
+      <div className="bg-white rounded-xl border border-red-200 p-6 mb-4">
+        <h2 className="text-sm font-semibold text-red-700 uppercase tracking-wide mb-2">Danger Zone</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Permanently delete your account and all associated data, including imported transactions,
+          time entries, income streams, and OAuth connections. This action cannot be undone.
+        </p>
+        <DeleteAccountButton />
       </div>
     </div>
   )

@@ -92,9 +92,12 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">9. Dispute Resolution</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">9. Dispute Resolution &amp; Governing Law</h2>
             <p>
-              These Terms are governed by the laws of the State of California, USA. Any disputes shall first be attempted to be resolved informally by contacting us. If unresolved, disputes shall be submitted to binding arbitration under the AAA Consumer Arbitration Rules in San Francisco, CA, except that either party may seek injunctive relief in court.
+              These Terms are governed by the laws of the State of California, USA. Any disputes shall first
+              be attempted to be resolved informally by contacting us. If unresolved, disputes shall be submitted
+              to binding arbitration under the AAA Consumer Arbitration Rules in San Francisco, CA, except that
+              either party may seek injunctive relief in court.
             </p>
           </section>
 

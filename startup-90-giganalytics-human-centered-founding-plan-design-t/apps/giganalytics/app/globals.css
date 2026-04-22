@@ -25,3 +25,14 @@ body {
     text-wrap: balance;
   }
 }
+
+/* Accessibility: visible focus ring for keyboard navigation (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Remove focus ring for mouse users only */
+:focus:not(:focus-visible) {
+  outline: none;
+}
