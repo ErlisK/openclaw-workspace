@@ -119,7 +119,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
   const plans = monthlyPlans
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Auto-checkout trigger for authenticated ?plan=pro */}
       {autoPro && <PricingProCheckout priceId={PRO_PRICE_ID} />}
 
@@ -200,7 +200,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
 
       {/* Trust signals */}
       <div className="max-w-3xl mx-auto px-6 pb-6">
-        <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           {[
             { icon: '🔒', label: 'Bank-grade encryption', sub: 'AES-256 at rest & in transit' },
             { icon: '↩️', label: '14-day money-back', sub: 'Full refund, no questions asked' },

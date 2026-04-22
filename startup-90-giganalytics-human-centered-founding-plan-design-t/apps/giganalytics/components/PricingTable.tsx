@@ -63,8 +63,9 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
         </div>
       )}
       <div
-        className="grid gap-8 max-w-5xl mx-auto"
-        style={{ gridTemplateColumns: `repeat(${Math.min(plans.length, 3)}, minmax(0, 1fr))` }}
+        className={`grid gap-8 max-w-5xl mx-auto grid-cols-1 ${
+          plans.length === 2 ? 'md:grid-cols-2' : 'md:grid-cols-3'
+        }`}
       >
         {plans.map((plan) => (
           <div
