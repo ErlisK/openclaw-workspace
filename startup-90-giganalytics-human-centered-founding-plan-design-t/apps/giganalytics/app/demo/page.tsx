@@ -155,7 +155,7 @@ export default function DemoPage() {
 
         {/* ROI Table */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Stream ROI Breakdown</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4" data-testid="demo-roi-breakdown">Stream ROI Breakdown</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>

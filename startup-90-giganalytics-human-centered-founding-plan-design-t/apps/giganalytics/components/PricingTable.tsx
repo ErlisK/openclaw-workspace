@@ -81,7 +81,7 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
                 Most Popular
               </span>
             )}
-            <h3 className="text-xl font-semibold mb-2 text-gray-900">{plan.name}</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900" data-testid={`pricing-tier-${plan.name.toLowerCase().replace(/\s+/g, '-')}`}>{plan.name}</h3>
             {plan.description && (
               <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
             )}
