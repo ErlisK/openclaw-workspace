@@ -28,6 +28,14 @@ export async function GET(request: NextRequest) {
     )
     const { data } = await supabase.auth.exchangeCodeForSession(code)
 
+    // Update last_login_at for churn tracking
+    if (data?.user) {
+      await supabase
+        .from('profiles')
+        .update({ last_login_at: new Date().toISOString() })
+        .eq('id', data.user.id)
+    }
+
     // For new users (no existing streams), redirect to onboarding
     if (data?.user && safePath === '/dashboard') {
       const { count } = await supabase
