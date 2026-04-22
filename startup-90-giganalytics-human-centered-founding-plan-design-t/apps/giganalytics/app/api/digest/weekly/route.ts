@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
  * TODO: Integrate with Resend (https://resend.com) to send actual emails:
  *   import { Resend } from 'resend'
  *   const resend = new Resend(process.env.RESEND_API_KEY)
- *   await resend.emails.send({ from: 'GigAnalytics <digest@giganalytics.app>', to: user.email, ... })
+ *   await resend.emails.send({ from: 'GigAnalytics <hello@hourlyroi.com>', to: user.email, ... })
  */
 export async function GET(request: NextRequest) {
   const secret = request.headers.get('x-cron-secret') ?? request.nextUrl.searchParams.get('secret')

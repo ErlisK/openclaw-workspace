@@ -158,7 +158,7 @@ export default function MediaKitPage() {
         <div className="bg-gray-900 text-white rounded-2xl p-8">
           <h2 className="text-2xl font-bold mb-2">Contact</h2>
           <p className="text-gray-400 mb-4">For partnership inquiries, features, reviews, or podcast appearances:</p>
-          <div className="text-blue-400 font-mono">hello@giganalytics.app</div>
+          <div className="text-blue-400 font-mono">hello@hourlyroi.com</div>
           <p className="text-gray-500 text-sm mt-4">We respond to all genuine partnership and press inquiries within 48 hours.</p>
         </div>
       </div>

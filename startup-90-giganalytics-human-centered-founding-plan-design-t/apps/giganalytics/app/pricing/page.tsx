@@ -234,7 +234,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <div className="text-center mt-10">
           <p className="text-sm text-gray-400">
             Questions?{' '}
-            <a href="mailto:hello@giganalytics.app" className="text-blue-600 hover:underline">Contact us</a>
+            <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">Contact us</a>
           </p>
         </div>
       </div>

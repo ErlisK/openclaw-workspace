@@ -30,8 +30,8 @@ export async function GET() {
     <link>${baseUrl}/changelog</link>
     <description>New features, fixes, and improvements to GigAnalytics — the ROI dashboard for multi-income freelancers.</description>
     <language>en-us</language>
-    <managingEditor>hello@giganalytics.app (GigAnalytics)</managingEditor>
-    <webMaster>hello@giganalytics.app (GigAnalytics)</webMaster>
+    <managingEditor>hello@hourlyroi.com (GigAnalytics)</managingEditor>
+    <webMaster>hello@hourlyroi.com (GigAnalytics)</webMaster>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
     <atom:link href="${baseUrl}/api/rss" rel="self" type="application/rss+xml"/>
     <image>

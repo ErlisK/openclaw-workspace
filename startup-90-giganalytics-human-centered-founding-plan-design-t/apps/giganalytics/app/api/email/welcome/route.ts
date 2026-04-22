@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 const AGENTMAIL_API_KEY = process.env.AGENTMAIL_API_KEY
-const FROM_INBOX = 'hello-giganalytics@agentmail.to'
+const FROM_INBOX = 'hello@hourlyroi.com'
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 </ol>
 <p><a href="https://giganalytics.com/dashboard" style="background:#4F46E5;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;">Get started now</a></p>
 <p>If you hit any snags or have questions, just reply to this email. We read every one.</p>
-<p>— The GigAnalytics Team<br><a href="mailto:support-giganalytics@agentmail.to">support-giganalytics@agentmail.to</a></p>
+<p>— The GigAnalytics Team<br><a href="mailto:hello@hourlyroi.com">hello@hourlyroi.com</a></p>
 </body></html>`
 
     const res = await fetch(`https://api.agentmail.to/v0/inboxes/${FROM_INBOX}/messages`, {

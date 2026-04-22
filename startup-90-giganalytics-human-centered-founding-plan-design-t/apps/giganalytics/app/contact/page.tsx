@@ -107,8 +107,8 @@ export default function ContactPage() {
 
             <p className="text-xs text-gray-400 text-center">
               Or email us directly at{' '}
-              <a href="mailto:support@giganalytics.io" className="text-blue-600 hover:underline">
-                support@giganalytics.io
+              <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">
+                hello@hourlyroi.com
               </a>
             </p>
           </form>

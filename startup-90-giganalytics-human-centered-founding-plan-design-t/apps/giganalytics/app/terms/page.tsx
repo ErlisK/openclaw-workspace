@@ -56,7 +56,7 @@ export default function TermsPage() {
               <strong>Cancellation:</strong> You may cancel at any time from your account settings. Cancellation takes effect at the end of the current billing period; no partial refunds are issued for unused time.
             </p>
             <p className="mt-2">
-              <strong>Refunds:</strong> Refund requests within 7 days of initial purchase may be considered on a case-by-case basis. Contact us at support@giganalytics.io.
+              <strong>Refunds:</strong> Refund requests within 7 days of initial purchase may be considered on a case-by-case basis. Contact us at hello@hourlyroi.com.
             </p>
           </section>
 
@@ -112,8 +112,8 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">11. Contact</h2>
             <p>
               Questions about these Terms? Contact us at{' '}
-              <a href="mailto:support@giganalytics.io" className="text-blue-600 hover:underline">
-                support@giganalytics.io
+              <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">
+                hello@hourlyroi.com
               </a>
             </p>
           </section>

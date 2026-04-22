@@ -22,7 +22,7 @@ export default function PrivacyPage() {
             We turn raw payments and minimal time inputs into actionable ROI decisions, while handling your
             financial data with the strictest care.
           </p>
-          <p className="mt-2">Contact: <a href="mailto:privacy@giganalytics.app" className="underline">privacy@giganalytics.app</a></p>
+          <p className="mt-2">Contact: <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a></p>
         </div>
 
         {/* 2 */}
@@ -154,7 +154,7 @@ export default function PrivacyPage() {
             <li>Opt out of usage analytics (clear <code className="bg-gray-100 dark:bg-gray-800 px-1 rounded">ph_</code> local storage keys)</li>
           </ul>
           <p className="mt-3">
-            To exercise these rights: <a href="mailto:privacy@giganalytics.app" className="underline">privacy@giganalytics.app</a>
+            To exercise these rights: <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a>
           </p>
         </div>
 
@@ -199,7 +199,7 @@ export default function PrivacyPage() {
           <h2 className="text-base font-semibold mb-2">11. Contact</h2>
           <p>
             Questions or data requests:{' '}
-            <a href="mailto:privacy@giganalytics.app" className="underline">privacy@giganalytics.app</a>
+            <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a>
           </p>
         </div>
 

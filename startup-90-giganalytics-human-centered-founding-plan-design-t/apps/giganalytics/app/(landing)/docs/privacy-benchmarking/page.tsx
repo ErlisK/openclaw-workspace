@@ -312,7 +312,7 @@ So published median may differ from true median by ±~$10.`}
               },
               {
                 action: 'GDPR right to be forgotten',
-                how: 'Email privacy@giganalytics.app',
+                how: 'Email hello@hourlyroi.com',
                 effect: 'We\'ll confirm deletion of your account and raw data within 30 days per GDPR Article 17.',
               },
             ].map(({ action, how, effect }) => (
@@ -378,7 +378,7 @@ So published median may differ from true median by ±~$10.`}
             ))}
           </div>
           <div className="mt-6 bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm text-gray-700">
-            <strong>Responsible disclosure:</strong> Found a security issue? Email <a href="mailto:security@giganalytics.app" className="text-blue-600 hover:underline">security@giganalytics.app</a>. We follow a 90-day disclosure timeline and offer recognition for valid reports.
+            <strong>Responsible disclosure:</strong> Found a security issue? Email <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">hello@hourlyroi.com</a>. We follow a 90-day disclosure timeline and offer recognition for valid reports.
           </div>
         </Section>
 

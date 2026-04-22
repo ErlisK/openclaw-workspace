@@ -339,7 +339,7 @@ export default function IntegrationRoadmapPage() {
             <h2 className="text-2xl font-bold text-gray-900">Under Research</h2>
             <StatusBadge status="researching" />
           </div>
-          <p className="text-sm text-gray-500 mb-4">These integrations are being evaluated for feasibility and demand. Vote by emailing <a href="mailto:roadmap@giganalytics.app" className="text-blue-600 hover:underline">roadmap@giganalytics.app</a> with the integration name.</p>
+          <p className="text-sm text-gray-500 mb-4">These integrations are being evaluated for feasibility and demand. Vote by emailing <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">hello@hourlyroi.com</a> with the integration name.</p>
           <div className="grid md:grid-cols-3 gap-4">
             {researching.map(intg => (
               <div key={intg.name} className="border border-purple-100 bg-purple-50/30 rounded-xl p-4">
@@ -358,7 +358,7 @@ export default function IntegrationRoadmapPage() {
         <div className="bg-gray-900 text-white rounded-2xl p-8 mb-8">
           <h2 className="text-xl font-bold mb-2">Request an integration</h2>
           <p className="text-gray-400 mb-4">Missing a platform you use? Tell us and we'll add it to the research list. High-demand integrations move up the roadmap.</p>
-          <a href="mailto:roadmap@giganalytics.app" className="inline-block bg-blue-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-blue-400 transition-colors">
+          <a href="mailto:hello@hourlyroi.com" className="inline-block bg-blue-500 text-white px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-blue-400 transition-colors">
             Request via email →
           </a>
         </div>

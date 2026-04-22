@@ -13,7 +13,7 @@ export default function FeedbackButton({ userEmail }: FeedbackButtonProps) {
   const mailtoBody = encodeURIComponent(
     `Hi GigAnalytics team,\n\nI have feedback about:\n\n[describe your feedback here]\n\n---\nPage: ${typeof window !== 'undefined' ? window.location.pathname : '(unknown)'}\nUser: ${userEmail ?? '(not logged in)'}`
   )
-  const mailtoUrl = `mailto:feedback@giganalytics.app?subject=${mailtoSubject}&body=${mailtoBody}`
+  const mailtoUrl = `mailto:hello@hourlyroi.com?subject=${mailtoSubject}&body=${mailtoBody}`
 
   const githubBugUrl =
     'https://github.com/ErlisK/openclaw-workspace/issues/new?template=bug_report.md&labels=giganalytics'
@@ -55,7 +55,7 @@ export default function FeedbackButton({ userEmail }: FeedbackButtonProps) {
               <span>✉️</span>
               <div>
                 <p className="font-medium">Email support</p>
-                <p className="text-gray-400">feedback@giganalytics.app</p>
+                <p className="text-gray-400">hello@hourlyroi.com</p>
               </div>
             </a>
 

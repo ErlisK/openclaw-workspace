@@ -112,7 +112,7 @@ export default function DocsIndexPage() {
         <h2 className="font-medium mb-2 text-sm">Still have questions?</h2>
         <div className="flex flex-wrap gap-3 text-sm">
           <a
-            href="mailto:support@giganalytics.app?subject=GigAnalytics%20Support"
+            href="mailto:hello@hourlyroi.com?subject=GigAnalytics%20Support"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 hover:border-blue-400 transition-colors"
           >
             ✉️ Email support

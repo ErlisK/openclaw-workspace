@@ -26,6 +26,6 @@ test.describe('Email API routes', () => {
 
   test('404 page shows support email', async ({ page }) => {
     await page.goto(`${BASE_URL}/this-page-does-not-exist-xyz`)
-    await expect(page.locator('text=support-giganalytics@agentmail.to')).toBeVisible()
+    await expect(page.locator('text=hello@hourlyroi.com')).toBeVisible()
   })
 })
