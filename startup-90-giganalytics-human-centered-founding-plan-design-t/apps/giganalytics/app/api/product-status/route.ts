@@ -9,6 +9,9 @@ import { NextResponse } from 'next/server'
  *
  * Returns 200 always — no auth required.
  */
+
+const BASE = process.env.NEXT_PUBLIC_APP_URL ?? 'https://www.hourlyroi.com'
+
 export async function GET() {
   return NextResponse.json({
     status: 'live',
@@ -17,10 +20,10 @@ export async function GET() {
     waitlist: false,
     coming_soon: false,
     free_plan: true,
-    production_url: 'https://startup-90-giganalytics-human-cente.vercel.app',
-    signup_url: 'https://startup-90-giganalytics-human-cente.vercel.app/signup',
-    demo_url: 'https://startup-90-giganalytics-human-cente.vercel.app/demo',
-    pricing_url: 'https://startup-90-giganalytics-human-cente.vercel.app/pricing',
+    production_url: BASE,
+    signup_url: `${BASE}/signup`,
+    demo_url: `${BASE}/demo`,
+    pricing_url: `${BASE}/pricing`,
     checked_at: new Date().toISOString(),
     routes: {
       '/': 'live',

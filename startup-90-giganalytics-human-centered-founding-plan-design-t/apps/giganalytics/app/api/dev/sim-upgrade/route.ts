@@ -32,8 +32,8 @@ function getServiceClient() {
 export async function POST(req: NextRequest) {
   if (!isDevSimEnabled()) {
     return NextResponse.json(
-      { error: "dev-sim only available when ENABLE_DEV_SIM=true in test mode" },
-      { status: 403 }
+      {},
+      { status: 404 }
     );
   }
 
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   if (!isDevSimEnabled()) {
-    return NextResponse.json({ error: "dev-sim only available when ENABLE_DEV_SIM=true in test mode" }, { status: 403 });
+    return NextResponse.json({}, { status: 404 });
   }
 
   const supabase = await createClient();

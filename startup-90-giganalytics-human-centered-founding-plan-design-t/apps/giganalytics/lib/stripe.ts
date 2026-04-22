@@ -5,6 +5,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2026-03-25.dahlia",
+  // Pin to the latest stable GA version; the SDK default (2026-03-25.dahlia) is a beta release
+  apiVersion: "2024-11-20.acacia" as "2026-03-25.dahlia",
   typescript: true,
 });

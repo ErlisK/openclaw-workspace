@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { isRateLimited } from '@/lib/rate-limit'
 
 const AuditSchema = z.object({
   name: z.string().min(1).max(100),
@@ -14,6 +15,15 @@ const AuditSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    // Persistent rate limiting (survives cold starts)
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
+    if (await isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'rate_limited', message: 'Too many requests. Try again later.' },
+        { status: 429, headers: { 'Retry-After': '3600' } }
+      )
+    }
+
     const body = await request.json()
     const parsed = AuditSchema.safeParse(body)
     if (!parsed.success) {

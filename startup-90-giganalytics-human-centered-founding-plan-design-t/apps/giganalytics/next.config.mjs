@@ -31,20 +31,8 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://js.stripe.com https://app.posthog.com https://plausible.io",
-              "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https://app.posthog.com https://plausible.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
-              "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://api.stripe.com https://app.posthog.com https://plausible.io",
-              "frame-src https://js.stripe.com",
-              "object-src 'none'",
-              "base-uri 'self'",
-            ].join('; '),
-          },
+          // CSP is set dynamically per-request in middleware.ts (nonce-based)
+          // to avoid 'unsafe-inline' — see middleware.ts for the full policy.
         ],
       },
     ];

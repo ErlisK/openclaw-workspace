@@ -1,23 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
+import { isRateLimited } from '@/lib/rate-limit'
 
-// ─── Simple in-memory rate limiter (per IP, resets on cold start) ─────────────
-const ipCallMap = new Map<string, { count: number; windowStart: number }>()
-const RATE_LIMIT = 5
-const RATE_WINDOW_MS = 60 * 60 * 1000 // 1 hour
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now()
-  const entry = ipCallMap.get(ip)
-  if (!entry || now - entry.windowStart > RATE_WINDOW_MS) {
-    ipCallMap.set(ip, { count: 1, windowStart: now })
-    return false
-  }
-  if (entry.count >= RATE_LIMIT) return true
-  entry.count++
-  return false
-}
+// In-memory rate limiter replaced with persistent Supabase-backed limiter
+// that survives serverless cold starts (see lib/rate-limit.ts)
 
 // ─── Validation schema ────────────────────────────────────────────────────────
 const ContactSchema = z.object({
@@ -33,7 +20,7 @@ export async function POST(request: NextRequest) {
   try {
     // Rate limit by IP
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
-    if (isRateLimited(ip)) {
+    if (await isRateLimited(ip)) {
       return NextResponse.json(
         { error: 'rate_limited', message: 'Too many requests. Try again later.' },
         { status: 429, headers: { 'Retry-After': '3600' } }
