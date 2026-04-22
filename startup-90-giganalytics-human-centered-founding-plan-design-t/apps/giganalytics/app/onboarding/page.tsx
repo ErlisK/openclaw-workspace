@@ -10,7 +10,7 @@ const PLATFORMS = [
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const [step, setStep] = useState(1)
+  const [step, setStep] = useState(0)  // 0 = welcome, 1 = add stream, 2 = import
   const [streamName, setStreamName] = useState('')
   const [platform, setPlatform] = useState('')
   const [loading, setLoading] = useState(false)
@@ -50,21 +50,85 @@ export default function OnboardingPage() {
   }
 
   async function handleSkipToDashboard() {
-    // Mark onboarding completed so the user isn't re-routed next time
     try {
       await fetch('/api/user/complete-onboarding', { method: 'POST' })
     } catch {}
     router.push('/dashboard')
   }
 
+  const totalSteps = 2
+  const currentStepForProgress = Math.max(step - 1, 0)
+
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
-        {/* Progress */}
-        <div className="flex items-center gap-2 mb-6">
-          <div className={`h-2 flex-1 rounded-full ${step >= 1 ? 'bg-blue-600' : 'bg-gray-200'}`} />
-          <div className={`h-2 flex-1 rounded-full ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`} />
-        </div>
+
+        {/* Step 0: Welcome — show value BEFORE asking for data */}
+        {step === 0 && (
+          <>
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-3">📊</div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to GigAnalytics</h1>
+              <p className="text-gray-500 text-sm">
+                Find out which of your income streams is actually worth your time —
+                true hourly rate, after all fees.
+              </p>
+            </div>
+
+            {/* Value props */}
+            <div className="space-y-2 mb-6">
+              {[
+                { icon: '💰', text: 'True hourly rate across all streams' },
+                { icon: '📉', text: 'Acquisition ROI: ads, fees, platform cuts' },
+                { icon: '🗂️', text: 'Import Stripe, PayPal, or CSV in seconds' },
+                { icon: '⏱️', text: 'One-tap mobile timer for quick tracking' },
+              ].map(({ icon, text }) => (
+                <div key={text} className="flex items-center gap-3 text-sm text-gray-700">
+                  <span className="text-lg">{icon}</span>
+                  <span>{text}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleLoadDemo}
+                disabled={demoLoading}
+                className="w-full bg-blue-600 text-white rounded-lg px-4 py-3 font-medium text-sm hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {demoLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    Loading demo…
+                  </>
+                ) : (
+                  <>
+                    🚀 Explore with sample data
+                    <span className="text-xs opacity-70 ml-1">(see full dashboard instantly)</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={() => setStep(1)}
+                className="w-full border border-gray-300 text-gray-700 rounded-lg px-4 py-3 font-medium text-sm hover:bg-gray-50"
+              >
+                📥 Connect my own data
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Steps 1 & 2: progress bar */}
+        {step > 0 && (
+          <div className="flex items-center gap-2 mb-6">
+            <button onClick={() => setStep(0)} className="text-xs text-gray-400 hover:text-gray-600 mr-1">← Back</button>
+            <div className={`h-2 flex-1 rounded-full ${currentStepForProgress >= 1 ? 'bg-blue-600' : 'bg-gray-200'}`} />
+            <div className={`h-2 flex-1 rounded-full ${currentStepForProgress >= totalSteps ? 'bg-blue-600' : 'bg-gray-200'}`} />
+          </div>
+        )}
 
         {step === 1 && (
           <>

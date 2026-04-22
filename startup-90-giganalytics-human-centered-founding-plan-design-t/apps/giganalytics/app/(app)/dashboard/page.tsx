@@ -6,6 +6,8 @@ import OnboardingChecklist from './OnboardingChecklist'
 import FinancialDisclaimer from '@/components/FinancialDisclaimer'
 import { captureServerEvent } from '@/lib/posthog/server'
 import { getCachedDashboardData } from '@/lib/cache/dashboard'
+import { TaxEstimateWidget } from '@/components/TaxEstimateWidget'
+import { ShareRateCard } from '@/components/ShareRateCard'
 
 function StatCard({ label, value, sub, color = 'blue' }: {
   label: string; value: string; sub?: string; color?: string
@@ -171,6 +173,9 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {/* Tax estimate widget — only shown when user has data */}
+      {hasData && <TaxEstimateWidget monthlyNetRevenue={monthlyNet} />}
+
       {/* Aggregate stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatCard label="Net Revenue" value={fmt$(agg.netRevenue)}
@@ -304,7 +309,17 @@ export default async function DashboardPage() {
 
       <FinancialDisclaimer compact />
 
-      {/* Re-engagement / Referral nudge — shown to all dashboard users */}
+      {/* Share Your Rate — personalized social card */}
+      {hasData && (
+        <ShareRateCard
+          hourlyRate={agg.trueHourlyRate}
+          streamCount={roi.streams.length}
+          netRevenue={agg.netRevenue}
+          periodDays={days}
+        />
+      )}
+
+      {/* Re-engagement / Referral nudge */}
       <div className="mt-6 bg-gradient-to-r from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center gap-4">
         <div className="text-3xl flex-shrink-0">🤝</div>
         <div className="flex-1 text-center sm:text-left">

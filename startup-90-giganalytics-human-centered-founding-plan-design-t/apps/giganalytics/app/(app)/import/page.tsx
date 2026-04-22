@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import Papa from 'papaparse'
 import { detectCsvPlatform, mapCsvRows, type ColumnMapping, type TransactionRow } from '@/lib/csv-mappers'
+import { getPlatformFee } from '@/lib/platform-fees'
 
 type ParsedRow = Record<string, string>
 type Platform = ReturnType<typeof detectCsvPlatform>
@@ -393,6 +394,25 @@ export default function ImportPage() {
           </div>
         </div>
       )}
+
+      {/* Platform fee info banner — shown when platform is detected */}
+      {headers.length > 0 && platform !== 'generic' && (() => {
+        const feeInfo = getPlatformFee(platform.replace('_balance', '').replace('_charges', '').replace('_activity', ''))
+        if (!feeInfo || feeInfo.feePercent === 0) return null
+        return (
+          <div className="mb-4 bg-green-50 border border-green-200 rounded-xl p-3 flex items-start gap-3">
+            <div className="text-lg">💰</div>
+            <div>
+              <div className="text-sm font-medium text-green-800">
+                {feeInfo.name} fees auto-calculated: {feeInfo.feePercent}%{feeInfo.fixedFee ? ` + $${feeInfo.fixedFee}` : ''}
+              </div>
+              <div className="text-xs text-green-600 mt-0.5">
+                {feeInfo.notes} — We’ll show your true take-home after all fees.
+              </div>
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Detection result + preview */}
       {headers.length > 0 && (
