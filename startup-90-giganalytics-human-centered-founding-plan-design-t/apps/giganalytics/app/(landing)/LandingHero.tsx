@@ -170,6 +170,72 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           ))}
         </div>
 
+        {/* Product Dashboard Preview */}
+        <div className="max-w-4xl mx-auto mb-16">
+          <p className="text-xs text-gray-400 uppercase tracking-widest text-center mb-4">What your dashboard looks like</p>
+          <div className="rounded-2xl border border-gray-200 shadow-xl overflow-hidden bg-white">
+            {/* Browser chrome */}
+            <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-red-400" />
+                <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+              </div>
+              <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-400 text-center border border-gray-200">
+                app.hourlyroi.com/dashboard
+              </div>
+            </div>
+            {/* Dashboard content */}
+            <div className="p-5 bg-gray-50">
+              {/* Stats row */}
+              <div className="grid grid-cols-4 gap-3 mb-4">
+                {[
+                  { label: 'Total Revenue', value: '$8,420', color: 'blue' },
+                  { label: 'True Hourly Rate', value: '$53.97/hr', color: 'green' },
+                  { label: 'Hours Tracked', value: '156h', color: 'purple' },
+                  { label: 'Best Stream', value: '$87.50/hr', color: 'orange' },
+                ].map(s => (
+                  <div key={s.label} className={`bg-${s.color}-50 border border-${s.color}-100 rounded-xl p-3`}>
+                    <div className="text-xs text-gray-400 mb-0.5">{s.label}</div>
+                    <div className="text-base font-bold text-gray-900">{s.value}</div>
+                  </div>
+                ))}
+              </div>
+              {/* Mini ROI table */}
+              <div className="bg-white rounded-xl border border-gray-200 p-4">
+                <div className="text-xs font-semibold text-gray-700 mb-3">Stream ROI Breakdown</div>
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-gray-400 border-b border-gray-100">
+                      <th className="text-left pb-2">Stream</th>
+                      <th className="text-right pb-2">Revenue</th>
+                      <th className="text-right pb-2">Net Rate</th>
+                      <th className="text-right pb-2">ROI Score</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: 'Direct Clients', rev: '$3,400', rate: '$73.91/hr', roi: 97, color: 'green' },
+                      { name: 'Upwork Development', rev: '$3,200', rate: '$37.78/hr', roi: 88, color: 'blue' },
+                      { name: 'Fiverr Design', rev: '$1,820', rate: '$38.32/hr', roi: 82, color: 'blue' },
+                    ].map(r => (
+                      <tr key={r.name} className="border-b border-gray-50 last:border-0">
+                        <td className="py-2 font-medium text-gray-700">{r.name}</td>
+                        <td className="py-2 text-right text-gray-600">{r.rev}</td>
+                        <td className="py-2 text-right font-semibold text-blue-700">{r.rate}</td>
+                        <td className="py-2 text-right">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium bg-${r.color}-100 text-${r.color}-700`}>{r.roi}/100</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-3">Your real data — not a spreadsheet. Connect Stripe, PayPal, or import CSV in minutes.</p>
+        </div>
+
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-5 text-left max-w-4xl mx-auto mb-16">
           {variant.features.map((f, i) => (

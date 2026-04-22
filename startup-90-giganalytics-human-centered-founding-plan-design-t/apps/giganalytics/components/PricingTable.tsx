@@ -38,7 +38,7 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
         body: JSON.stringify({ priceId: plan.priceId, mode: plan.mode || "subscription" }),
       });
       if (res.status === 401) {
-        router.push('/login?next=/pricing&plan=pro');
+        router.push(`/signup?priceId=${encodeURIComponent(plan.priceId)}`);
         return;
       }
       const data = await res.json();

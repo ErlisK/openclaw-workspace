@@ -22,7 +22,7 @@ const monthlyPlans = [
       'One-tap mobile timer',
       'Basic ROI dashboard',
       'Hourly rate calculator',
-      'Earnings heatmap',
+      'Earnings heatmap (last 30 days)',
     ],
     mode: 'payment' as const,
     popular: false,
@@ -38,7 +38,7 @@ const monthlyPlans = [
       'Up to 5 income streams',
       'Stripe & PayPal sync',
       'True hourly rate calculator',
-      'Earnings heatmap (full access)',
+      'Earnings heatmap (full 90-day rolling + export)',
       'CSV import (unlimited)',
       'One-tap mobile timer',
       'Email support',
@@ -80,7 +80,7 @@ const annualPlans = [
       'One-tap mobile timer',
       'Basic ROI dashboard',
       'Hourly rate calculator',
-      'Earnings heatmap',
+      'Earnings heatmap (last 30 days)',
     ],
     mode: 'payment' as const,
     popular: false,
@@ -190,6 +190,46 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         annualPlans={annualPlans}
         defaultBilling={billingParam === 'annual' ? 'annual' : 'monthly'}
       />
+
+      {/* Feature Comparison Table */}
+      <div className="max-w-4xl mx-auto px-6 pb-12">
+        <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">Feature comparison</h2>
+        <div className="overflow-x-auto rounded-2xl border border-gray-200">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="text-left py-3 px-4 font-medium text-gray-600">Feature</th>
+                <th className="text-center py-3 px-4 font-medium text-gray-600">Free</th>
+                <th className="text-center py-3 px-4 font-medium text-blue-700 bg-blue-50">Starter <span className="text-xs text-blue-400">$19/mo</span></th>
+                <th className="text-center py-3 px-4 font-medium text-gray-600">Pro <span className="text-xs text-gray-400">$29/mo</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                { feature: 'Income streams', free: 'Up to 2', starter: 'Up to 5', pro: 'Unlimited' },
+                { feature: 'CSV import', free: '✓', starter: '✓ Unlimited', pro: '✓ Unlimited' },
+                { feature: 'True hourly rate calculator', free: '✓', starter: '✓', pro: '✓' },
+                { feature: 'One-tap mobile timer', free: '✓', starter: '✓', pro: '✓' },
+                { feature: 'Earnings heatmap', free: 'Last 30 days', starter: 'Full 90-day + export', pro: 'Full 90-day + export' },
+                { feature: 'Stripe & PayPal sync', free: '—', starter: '✓', pro: '✓' },
+                { feature: 'ROI Score per stream', free: '✓', starter: '✓', pro: '✓' },
+                { feature: 'AI insights & recommendations', free: '—', starter: '—', pro: '✓' },
+                { feature: 'A/B pricing experiments', free: '—', starter: '—', pro: '✓' },
+                { feature: 'Calendar inference', free: '—', starter: '—', pro: '✓' },
+                { feature: 'Benchmark comparisons', free: '—', starter: '—', pro: '✓' },
+                { feature: 'Priority support', free: '—', starter: 'Email', pro: 'Priority email' },
+              ].map((row, i) => (
+                <tr key={i} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? '' : 'bg-gray-50/50'}`}>
+                  <td className="py-3 px-4 text-gray-700">{row.feature}</td>
+                  <td className="py-3 px-4 text-center text-gray-500">{row.free}</td>
+                  <td className="py-3 px-4 text-center text-blue-700 bg-blue-50/30 font-medium">{row.starter}</td>
+                  <td className="py-3 px-4 text-center text-gray-700">{row.pro}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* Financial disclaimer */}
       <div className="max-w-2xl mx-auto px-6 pb-4 text-center">
