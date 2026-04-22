@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
   title: 'BetaWindow — Human QA Testing for AI-Built Apps',
@@ -8,9 +9,47 @@ export const metadata: Metadata = {
 }
 
 
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://betawindow.com/#organization',
+      name: 'BetaWindow',
+      url: 'https://betawindow.com',
+      description: 'Platform for human QA testing of AI-built apps. Real testers check your app in a live Chrome session with network log and console capture.',
+      sameAs: [],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://betawindow.com/#website',
+      url: 'https://betawindow.com',
+      name: 'BetaWindow',
+      publisher: { '@id': 'https://betawindow.com/#organization' },
+    },
+    {
+      '@type': 'Service',
+      '@id': 'https://betawindow.com/#service',
+      name: 'Human QA Testing for AI-Built Apps',
+      provider: { '@id': 'https://betawindow.com/#organization' },
+      description: 'Submit your AI-built app URL. A real human tests it in a live Chrome session with network logs and console capture.',
+      offers: [
+        { '@type': 'Offer', name: 'Quick Test', price: '5', priceCurrency: 'USD', description: '10-minute QA test — single user flow' },
+        { '@type': 'Offer', name: 'Standard Test', price: '10', priceCurrency: 'USD', description: '20-minute QA test — up to 3 user flows' },
+        { '@type': 'Offer', name: 'Deep Test', price: '15', priceCurrency: 'USD', description: '30-minute QA test — comprehensive exploratory pass' },
+      ],
+    },
+  ],
+}
+
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
+      <Script
+        id="structured-data"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <span className="text-lg font-bold text-gray-900">BetaWindow</span>
@@ -26,7 +65,7 @@ export default function HomePage() {
           {/* Launch promo banner */}
           <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 text-sm font-semibold bg-amber-50 border border-amber-200 text-amber-800 rounded-full">
             <span>🎉</span>
-            <span>Launch offer: <strong>first Quick test FREE</strong> — auto-applied at signup (no code needed) · <strong>Expires Apr 30</strong></span>
+            <span>Launch offer: <strong>first Quick test FREE</strong> — auto-applied at signup (no code needed) · <strong>Expires May 31</strong></span>
           </div>
           <div className="inline-block mb-6 px-3 py-1 text-xs font-semibold tracking-wide uppercase bg-indigo-100 text-indigo-700 rounded-full">
             Built for vibe coders &amp; AI agent operators
@@ -227,7 +266,7 @@ curl -X POST https://betawindow.com/api/v1/jobs \\
             <div className="grid grid-cols-3 gap-6 text-center">
               <div>
                 <div className="text-3xl font-bold text-gray-900">$5</div>
-                <div className="text-sm text-gray-500 mt-1">First Quick test free — <span className="font-semibold text-amber-600">auto-applied at signup</span> · expires Apr 30</div>
+                <div className="text-sm text-gray-500 mt-1">First Quick test free — <span className="font-semibold text-amber-600">auto-applied at signup</span> · expires May 31</div>
               </div>
               <div>
                 <div className="text-3xl font-bold text-gray-900">&lt;4 hrs</div>
