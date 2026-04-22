@@ -161,6 +161,23 @@ export async function POST(request: NextRequest) {
   const { isPro } = await getUserTier(supabase, user.id)
   if (!isPro) return proRequiredResponse('ai_insights')
 
+  // Rate limiting: max 10 AI calls per hour per user
+  const RATE_LIMIT_CALLS = 10
+  const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000 // 1 hour
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString()
+  const { count: recentCalls } = await supabase
+    .from('recommendations')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('generated_at', windowStart)
+  if ((recentCalls ?? 0) >= RATE_LIMIT_CALLS) {
+    const retryAfter = Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)
+    return NextResponse.json(
+      { error: 'rate_limited', message: `AI insights limit: ${RATE_LIMIT_CALLS}/hour. Try again later.` },
+      { status: 429, headers: { 'Retry-After': String(retryAfter) } }
+    )
+  }
+
   const body = await request.json().catch(() => ({})) as {
     insightType?: 'all' | 'weekly_summary' | 'price_suggestion' | 'schedule_suggestion'
     days?: number
@@ -276,6 +293,14 @@ Constraints:
       funnel: 'activation',
       funnel_step: 6,
     }).catch(() => {})
+
+    // Persist to recommendations for rate limiting tracking + caching
+    supabase.from('recommendations').insert({
+      user_id: user.id,
+      insight_type: insightType,
+      payload: JSON.stringify(filtered),
+      generated_at: new Date().toISOString(),
+    }).then(() => {}).catch(() => {})
 
     return NextResponse.json({
       insights: filtered,

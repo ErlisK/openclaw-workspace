@@ -37,7 +37,7 @@ const nextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' https://js.stripe.com https://app.posthog.com https://plausible.io",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https:",
+              "img-src 'self' data: https://app.posthog.com https://plausible.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://app.posthog.com https://plausible.io",
               "frame-src https://js.stripe.com",

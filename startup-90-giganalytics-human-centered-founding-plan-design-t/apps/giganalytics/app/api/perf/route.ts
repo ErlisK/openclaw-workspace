@@ -9,6 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
 const CORE_ROUTES = [
   { name: 'health', path: '/api/health', expectStatus: 200 },
@@ -24,6 +25,15 @@ const P95_TARGET_MS = 200
 const TIMEOUT_MS = 5000
 
 export async function GET(request: NextRequest) {
+  // Auth check — require a valid session or internal bearer token
+  const internalToken = request.headers.get('x-internal-token')
+  const validInternalToken = process.env.PERF_PROBE_TOKEN
+  if (!internalToken || !validInternalToken || internalToken !== validInternalToken) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const startTotal = Date.now()
   const baseUrl = new URL(request.url).origin
 

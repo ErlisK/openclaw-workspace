@@ -1,5 +1,5 @@
 -- GigAnalytics Full Schema Migration
--- Applied to: weofiforpfamjdtvvmgu.supabase.co
+-- Applied to: [SUPABASE_PROJECT_URL]
 -- Date: 2026-04-18
 -- Tables: 11 | RLS: all | Indexes: 21
 

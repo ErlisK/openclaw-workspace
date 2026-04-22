@@ -31,6 +31,16 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Admin-only: check is_admin flag on profile
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('id', user.id)
+    .single()
+  if (!profile?.is_admin) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   // Query via service role (to read pg_tables metadata)
   const service = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

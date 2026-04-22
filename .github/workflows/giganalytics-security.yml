@@ -1,0 +1,31 @@
+name: GigAnalytics Security Audit
+
+on:
+  push:
+    paths:
+      - 'startup-90-giganalytics-human-centered-founding-plan-design-t/**'
+  pull_request:
+    paths:
+      - 'startup-90-giganalytics-human-centered-founding-plan-design-t/**'
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: startup-90-giganalytics-human-centered-founding-plan-design-t/apps/giganalytics
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: startup-90-giganalytics-human-centered-founding-plan-design-t/apps/giganalytics/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Security audit
+        run: npm audit --audit-level=high
