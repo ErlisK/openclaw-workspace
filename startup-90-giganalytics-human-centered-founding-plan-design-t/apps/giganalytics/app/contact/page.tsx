@@ -106,9 +106,14 @@ export default function ContactPage() {
             </button>
 
             <p className="text-xs text-gray-400 text-center">
-              Or email us directly at{' '}
+              General inquiries:{' '}
               <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">
                 hello@hourlyroi.com
+              </a>
+              <br />
+              Billing &amp; support:{' '}
+              <a href="mailto:support@hourlyroi.com" className="text-blue-600 hover:underline">
+                support@hourlyroi.com
               </a>
             </p>
           </form>

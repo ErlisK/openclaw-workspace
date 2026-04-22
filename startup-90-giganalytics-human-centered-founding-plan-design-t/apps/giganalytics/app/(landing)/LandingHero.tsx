@@ -319,6 +319,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <Link href="/privacy" className="hover:text-gray-600">Privacy</Link>
           <Link href="/contact" className="hover:text-gray-600">Contact</Link>
           <a href="mailto:hello@hourlyroi.com" className="hover:text-gray-600">hello@hourlyroi.com</a>
+          <a href="mailto:support@hourlyroi.com" className="hover:text-gray-600">support@hourlyroi.com</a>
         </div>
       </footer>
     </div>

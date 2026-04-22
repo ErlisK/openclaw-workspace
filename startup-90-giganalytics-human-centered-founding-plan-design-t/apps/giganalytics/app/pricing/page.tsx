@@ -263,7 +263,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
             { q: 'Can I cancel anytime?', a: 'Yes. Cancel anytime from your billing settings. No questions asked.' },
             { q: 'What counts as an income stream?', a: 'Any income source — Upwork, Fiverr, Stripe, direct clients, consulting, etc. Free plan supports 2, Pro is unlimited.' },
             { q: 'Is my financial data secure?', a: 'Yes. All data is encrypted at rest and in transit. We never sell your data. See our Privacy Policy for details.' },
-            { q: 'Do you offer refunds?', a: "If you're not satisfied within 14 days, contact us for a full refund." },
+            { q: 'Do you offer refunds?', a: "If you're not satisfied within 14 days, email support@hourlyroi.com for a full refund. No questions asked." },
           ].map(({ q, a }, i) => (
             <div key={i} className="border border-gray-200 rounded-xl p-4">
               <div className="font-semibold text-gray-800 mb-1 text-sm">{q}</div>
@@ -273,8 +273,8 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </div>
         <div className="text-center mt-10">
           <p className="text-sm text-gray-400">
-            Questions?{' '}
-            <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">Contact us</a>
+            Questions? <a href="mailto:hello@hourlyroi.com" className="text-blue-600 hover:underline">hello@hourlyroi.com</a>{' '}·{' '}
+            Billing &amp; support: <a href="mailto:support@hourlyroi.com" className="text-blue-600 hover:underline">support@hourlyroi.com</a>
           </p>
         </div>
       </div>
