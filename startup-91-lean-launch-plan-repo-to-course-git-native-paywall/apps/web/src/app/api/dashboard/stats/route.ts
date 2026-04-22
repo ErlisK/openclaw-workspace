@@ -4,6 +4,8 @@ import { createServiceClient } from '@/lib/supabase/service';
 
 export const dynamic = 'force-dynamic';
 
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/dashboard/stats
  *
@@ -65,8 +67,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
       }
     }
 
+    const revenueUSD = parseFloat((revenueCents / 100).toFixed(2));
     return NextResponse.json(
-      { courseCount, enrollments, revenueCents, currency },
+      { courseCount, enrollments, revenueCents, revenueUSD, currency },
       {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
