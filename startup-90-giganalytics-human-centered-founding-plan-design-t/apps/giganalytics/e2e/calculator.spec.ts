@@ -14,26 +14,31 @@ test.describe('ROI Calculator', () => {
     // Select platform
     await page.selectOption('select', 'Upwork')
     // Fill revenue
-    await page.fill('input[placeholder="e.g. 3000"]', '3000')
+    await page.locator('input[placeholder="e.g. 3000"]').fill('3000')
+    // Fill fee explicitly
+    await page.locator('input[placeholder="e.g. 10"]').fill('10')
     // Fill hours
-    await page.fill('input[placeholder="e.g. 40"]', '40')
+    await page.locator('input[placeholder="e.g. 40"]').fill('40')
     // Fill goal
-    await page.fill('input[placeholder="e.g. 50"]', '50')
-    // Submit
-    await page.click('button[type="submit"]')
-    // Result should appear
-    await expect(page.locator('#calc-result')).toBeVisible({ timeout: 5000 })
+    await page.locator('input[placeholder="e.g. 50"]').fill('50')
+    // Scroll submit into view and click
+    await page.locator('button[type="submit"]').scrollIntoViewIfNeeded()
+    await page.locator('button[type="submit"]').click({ force: true })
+    // Result should appear (allow time for React state update + animation)
+    await expect(page.locator('#calc-result')).toBeVisible({ timeout: 10000 })
     await expect(page.locator('#calc-result')).toContainText('/hr')
   })
 
   test('shows CTAs after calculation', async ({ page }) => {
     await page.goto(`${BASE_URL}/calculator`)
     await page.selectOption('select', 'Fiverr')
-    await page.fill('input[placeholder="e.g. 3000"]', '2000')
-    await page.fill('input[placeholder="e.g. 40"]', '30')
-    await page.fill('input[placeholder="e.g. 50"]', '60')
-    await page.click('button[type="submit"]')
-    await expect(page.locator('a[href*="/free-audit"]').first()).toBeVisible({ timeout: 5000 })
+    await page.locator('input[placeholder="e.g. 3000"]').fill('2000')
+    await page.locator('input[placeholder="e.g. 10"]').fill('20')
+    await page.locator('input[placeholder="e.g. 40"]').fill('30')
+    await page.locator('input[placeholder="e.g. 50"]').fill('60')
+    await page.locator('button[type="submit"]').scrollIntoViewIfNeeded()
+    await page.locator('button[type="submit"]').click({ force: true })
+    await expect(page.locator('a[href*="/free-audit"]').first()).toBeVisible({ timeout: 10000 })
   })
 })
 

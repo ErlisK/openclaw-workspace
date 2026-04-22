@@ -16,6 +16,18 @@ const PLATFORMS = [
   { name: 'Other', fee: 0 },
 ]
 
+type Result = {
+  trueRate: number
+  netEarnings: number
+  platformFeeAmount: number
+  adSpendAmount: number
+  gap: number
+  platform: string
+  revenue: number
+  fee: number
+  verdict: { emoji: string; text: string; color: string }
+}
+
 function getVerdict(trueRate: number, goal: number): { emoji: string; text: string; color: string } {
   const pct = goal > 0 ? trueRate / goal : 1
   if (pct >= 1.2) return { emoji: '🚀', text: 'Excellent — this stream beats your goal!', color: 'text-green-700 bg-green-50 border-green-200' }
@@ -25,34 +37,25 @@ function getVerdict(trueRate: number, goal: number): { emoji: string; text: stri
 }
 
 export default function CalculatorForm() {
-  const [platform, setPlatform] = useState('Upwork')
-  const [revenue, setRevenue] = useState('')
-  const [fee, setFee] = useState('10')
-  const [hours, setHours] = useState('')
-  const [adSpend, setAdSpend] = useState('')
-  const [goal, setGoal] = useState('')
-  const [result, setResult] = useState<null | {
-    trueRate: number
-    netEarnings: number
-    platformFeeAmount: number
-    adSpendAmount: number
-    gap: number
-    verdict: ReturnType<typeof getVerdict>
-  }>(null)
+  const [selectedPlatform, setSelectedPlatform] = useState('Upwork')
+  const [defaultFee, setDefaultFee] = useState('10')
+  const [result, setResult] = useState<Result | null>(null)
 
   function handlePlatformChange(name: string) {
-    setPlatform(name)
+    setSelectedPlatform(name)
     const p = PLATFORMS.find(p => p.name === name)
-    if (p) setFee(String(p.fee))
+    if (p) setDefaultFee(String(p.fee))
   }
 
-  function calculate(e: React.FormEvent) {
+  function calculate(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    const rev = parseFloat(revenue) || 0
-    const feeP = parseFloat(fee) || 0
-    const hrs = parseFloat(hours) || 1
-    const ads = parseFloat(adSpend) || 0
-    const goalRate = parseFloat(goal) || 50
+    const fd = new FormData(e.currentTarget)
+    const platform = String(fd.get('platform') || selectedPlatform)
+    const rev = parseFloat(String(fd.get('revenue'))) || 0
+    const feeP = parseFloat(String(fd.get('fee'))) || 0
+    const hrs = parseFloat(String(fd.get('hours'))) || 1
+    const ads = parseFloat(String(fd.get('adSpend'))) || 0
+    const goalRate = parseFloat(String(fd.get('goal'))) || 50
 
     const platformFeeAmount = rev * (feeP / 100)
     const netEarnings = rev - platformFeeAmount - ads
@@ -65,9 +68,12 @@ export default function CalculatorForm() {
       platformFeeAmount,
       adSpendAmount: ads,
       gap,
+      platform,
+      revenue: rev,
+      fee: feeP,
       verdict: getVerdict(trueRate, goalRate),
     })
-    // Scroll to result
+
     setTimeout(() => {
       document.getElementById('calc-result')?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }, 50)
@@ -80,7 +86,8 @@ export default function CalculatorForm() {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1.5">Platform</label>
           <select
-            value={platform}
+            name="platform"
+            value={selectedPlatform}
             onChange={e => handlePlatformChange(e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
           >
@@ -98,10 +105,9 @@ export default function CalculatorForm() {
             </label>
             <input
               type="number"
+              name="revenue"
               required
               min="0"
-              value={revenue}
-              onChange={e => setRevenue(e.target.value)}
               placeholder="e.g. 3000"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
             />
@@ -112,12 +118,13 @@ export default function CalculatorForm() {
             </label>
             <input
               type="number"
+              name="fee"
               required
               min="0"
               max="100"
               step="0.1"
-              value={fee}
-              onChange={e => setFee(e.target.value)}
+              key={defaultFee}
+              defaultValue={defaultFee}
               placeholder="e.g. 10"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
             />
@@ -132,11 +139,10 @@ export default function CalculatorForm() {
             </label>
             <input
               type="number"
+              name="hours"
               required
               min="0.5"
               step="0.5"
-              value={hours}
-              onChange={e => setHours(e.target.value)}
               placeholder="e.g. 40"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
             />
@@ -147,9 +153,9 @@ export default function CalculatorForm() {
             </label>
             <input
               type="number"
+              name="adSpend"
               min="0"
-              value={adSpend}
-              onChange={e => setAdSpend(e.target.value)}
+              defaultValue="0"
               placeholder="0"
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
             />
@@ -163,10 +169,9 @@ export default function CalculatorForm() {
           </label>
           <input
             type="number"
+            name="goal"
             required
             min="1"
-            value={goal}
-            onChange={e => setGoal(e.target.value)}
             placeholder="e.g. 50"
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-400"
           />
@@ -174,6 +179,7 @@ export default function CalculatorForm() {
 
         <button
           type="submit"
+          data-testid="calc-submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 rounded-xl text-base transition-colors shadow-sm"
         >
           Calculate my true hourly rate →
@@ -182,20 +188,20 @@ export default function CalculatorForm() {
 
       {/* Result */}
       {result && (
-        <div id="calc-result" className="mt-10 animate-fade-in">
+        <div id="calc-result" data-testid="calc-result" className="mt-10">
           <div className="bg-gray-50 rounded-2xl border border-gray-200 p-6 mb-4">
-            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-4">Your Results — {platform}</p>
+            <p className="text-xs text-gray-400 uppercase tracking-wide font-semibold mb-4">Your Results — {result.platform}</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
               <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
-                <p className="text-2xl font-bold text-blue-600">${result.trueRate.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-blue-600" data-testid="true-rate">${result.trueRate.toFixed(2)}/hr</p>
                 <p className="text-xs text-gray-500 mt-1">True hourly rate</p>
               </div>
               <div className="bg-white rounded-xl border border-gray-100 p-4 text-center">
                 <p className="text-2xl font-bold text-gray-800">${result.netEarnings.toFixed(0)}</p>
                 <p className="text-xs text-gray-500 mt-1">Net monthly earnings</p>
               </div>
-              <div className={`bg-white rounded-xl border border-gray-100 p-4 text-center col-span-2 sm:col-span-1`}>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 text-center col-span-2 sm:col-span-1">
                 <p className={`text-2xl font-bold ${result.gap >= 0 ? 'text-green-600' : 'text-red-500'}`}>
                   {result.gap >= 0 ? '+' : ''}{result.gap.toFixed(0)}%
                 </p>
@@ -207,10 +213,10 @@ export default function CalculatorForm() {
             <div className="text-sm text-gray-600 space-y-1.5 mb-5 border-t border-gray-100 pt-4">
               <div className="flex justify-between">
                 <span>Gross revenue</span>
-                <span className="font-medium text-gray-800">${parseFloat(revenue).toFixed(0)}</span>
+                <span className="font-medium text-gray-800">${result.revenue.toFixed(0)}</span>
               </div>
               <div className="flex justify-between text-red-500">
-                <span>Platform fees ({fee}%)</span>
+                <span>Platform fees ({result.fee}%)</span>
                 <span>−${result.platformFeeAmount.toFixed(0)}</span>
               </div>
               {result.adSpendAmount > 0 && (
