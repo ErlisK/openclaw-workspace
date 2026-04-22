@@ -191,6 +191,25 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           investment advice. Individual results vary.
         </p>
 
+        {/* Free Audit CTA */}
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-8 mb-6">
+          <div className="text-2xl mb-3">🎯</div>
+          <h2 className="font-bold text-gray-800 text-lg mb-2">
+            Not ready to sign up? Get a free manual audit
+          </h2>
+          <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+            Tell us your income streams and we&apos;ll personally calculate your true hourly rate across each one — free, no account needed. Most people are surprised by which stream actually wins.
+          </p>
+          <Link
+            href="/free-audit"
+            onClick={() => handleCtaClick('free_audit_cta')}
+            className="inline-block px-6 py-3 rounded-xl text-sm font-semibold transition-colors bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            Request my free ROI audit →
+          </Link>
+          <p className="text-xs text-gray-400 mt-3">🔒 Private · No spam · We delete your data after analysis</p>
+        </div>
+
         {/* Sample data CTA */}
         <div className="bg-gray-50 border border-gray-200 rounded-2xl p-8 mb-16">
           <div className="text-2xl mb-3">🎲</div>
@@ -215,10 +234,11 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
           <span>© {new Date().getFullYear()} GigAnalytics</span>
           <Link href="/pricing" className="hover:text-gray-600">Pricing</Link>
+          <Link href="/free-audit" className="hover:text-gray-600">Free Audit</Link>
+          <Link href="/integrations" className="hover:text-gray-600">Integrations</Link>
           <Link href="/demo" className="hover:text-gray-600">Demo</Link>
           <Link href="/blog" className="hover:text-gray-600">Blog</Link>
           <Link href="/launch" className="hover:text-gray-600">Launch</Link>
-          <Link href="/social" className="hover:text-gray-600">Social</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>
           <Link
             href="/signup?utm_source=landing&utm_medium=footer&utm_campaign=organic"

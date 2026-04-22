@@ -5,6 +5,7 @@ import PricingProCheckout from './PricingProCheckout'
 import PricingBillingToggle from './PricingBillingToggle'
 
 const FREE_PRICE_ID = 'free'
+const STARTER_PRICE_ID = process.env.PRICE_ID_STARTER_MONTHLY ?? 'price_1TOqYsGt92XrRvUuvtY7lgJi'
 const PRO_PRICE_ID = process.env.PRICE_ID_PRO_MONTHLY ?? 'price_1TOLK7Gt92XrRvUu3EzdIX1U'
 const PRO_ANNUAL_PRICE_ID = process.env.PRICE_ID_PRO_ANNUAL ?? 'price_1TOLK7Gt92XrRvUunvrrv4A6'
 
@@ -28,6 +29,24 @@ const monthlyPlans = [
     isFree: true,
   },
   {
+    name: 'Starter',
+    price: '$19',
+    interval: 'mo',
+    description: 'For freelancers with 3–5 active income streams.',
+    priceId: STARTER_PRICE_ID,
+    features: [
+      'Up to 5 income streams',
+      'Stripe & PayPal sync',
+      'True hourly rate calculator',
+      'Earnings heatmap (full access)',
+      'CSV import (unlimited)',
+      'One-tap mobile timer',
+      'Email support',
+    ],
+    mode: 'subscription' as const,
+    popular: true,
+  },
+  {
     name: 'Pro',
     price: '$29',
     interval: 'mo',
@@ -35,7 +54,7 @@ const monthlyPlans = [
     priceId: PRO_PRICE_ID,
     features: [
       'Unlimited income streams',
-      'Stripe & PayPal sync',
+      'Everything in Starter, plus:',
       'AI insights & recommendations',
       'A/B pricing experiments',
       'Benchmark heatmap access',
@@ -44,7 +63,7 @@ const monthlyPlans = [
       'Priority support',
     ],
     mode: 'subscription' as const,
-    popular: true,
+    popular: false,
   },
 ]
 
