@@ -8,7 +8,7 @@ export async function middleware(request: NextRequest) {
 
   const cspHeader = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://js.stripe.com https://app.posthog.com https://plausible.io`,
+    `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://app.posthog.com https://plausible.io`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https://app.posthog.com https://plausible.io https://lh3.googleusercontent.com https://avatars.githubusercontent.com",
     "font-src 'self' data:",
