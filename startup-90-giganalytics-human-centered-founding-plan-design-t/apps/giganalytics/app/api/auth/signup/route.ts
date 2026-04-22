@@ -20,6 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'signup_failed', message: error.message }, { status: 400 })
     }
     if (data.user) {
+      // Fire welcome email asynchronously (don't block signup)
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+      fetch(`${baseUrl}/api/email/welcome`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.user.email, name: email.split('@')[0] }),
+      }).catch(() => {})
+
       captureServerEvent(data.user.id, 'signup_completed', {
         funnel: 'activation',
         funnel_step: 3,

@@ -25,6 +25,12 @@ export default function NotFound() {
             View Demo
           </Link>
         </div>
+        <p className="mt-6 text-sm text-gray-400">
+          Need help? Email{' '}
+          <a href="mailto:support-giganalytics@agentmail.to" className="text-blue-600 hover:underline">
+            support-giganalytics@agentmail.to
+          </a>
+        </p>
       </div>
     </div>
   )
