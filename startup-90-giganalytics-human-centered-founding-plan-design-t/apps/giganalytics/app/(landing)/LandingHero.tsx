@@ -79,6 +79,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <div className="font-bold text-gray-900 text-lg">GigAnalytics</div>
         <div className="flex items-center gap-3">
+          <Link href="/calculator" className="text-sm text-gray-600 hover:text-gray-900">Calculator</Link>
           <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
           <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900">Pricing</Link>
           <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</Link>
@@ -304,6 +305,8 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           <Link href="/integrations" className="hover:text-gray-600">Integrations</Link>
           <Link href="/demo" className="hover:text-gray-600">Demo</Link>
           <Link href="/blog" className="hover:text-gray-600">Blog</Link>
+          <Link href="/calculator" className="hover:text-gray-600">Calculator</Link>
+          <Link href="/for-creators" className="hover:text-gray-600">For Creators</Link>
           <Link href="/launch" className="hover:text-gray-600">Launch</Link>
           <Link href="/login" className="hover:text-gray-600">Log in</Link>
           <Link
