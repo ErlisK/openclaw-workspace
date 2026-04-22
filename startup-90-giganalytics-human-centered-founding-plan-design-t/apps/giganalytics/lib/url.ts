@@ -5,4 +5,4 @@ if (typeof window === 'undefined' && !APP_URL) {
   console.warn('NEXT_PUBLIC_APP_URL not configured, falling back to giganalytics.app')
 }
 
-export const SAFE_APP_URL = APP_URL || 'https://giganalytics.app'
+export const SAFE_APP_URL = APP_URL || 'https://www.hourlyroi.com'

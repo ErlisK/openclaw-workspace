@@ -146,7 +146,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           <div className="text-3xl">⏳</div>
           <div className="flex-1">
             <p className="text-sm font-bold text-amber-900">
-              Early Adopter Pricing — <span className="line-through text-amber-500">$49/mo</span> <span className="text-amber-700">$29/mo</span> while we&apos;re in beta
+              Early Adopter Pricing — <span className="line-through text-amber-700">$49/mo</span> <span className="text-amber-700">$29/mo</span> while we&apos;re in beta
             </p>
             <p className="text-xs text-amber-700 mt-0.5">Lock in this rate forever · Price increases once we exit beta · 14-day money-back guarantee</p>
           </div>

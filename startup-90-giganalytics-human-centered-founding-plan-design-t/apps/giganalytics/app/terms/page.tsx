@@ -73,7 +73,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-lg font-semibold text-gray-900 mb-2">6. Benchmark Data &amp; Privacy</h2>
             <p>
-              You may optionally opt in to contribute anonymized, aggregated data to our community benchmark layer. Participation is entirely voluntary and can be toggled off at any time in Settings. We apply k-anonymity thresholds (minimum group size of 5) before any aggregate is served. We never share individual-level data.
+              You may optionally opt in to contribute anonymized, aggregated data to our community benchmark layer. Participation is entirely voluntary and can be toggled off at any time in Settings. We apply k-anonymity thresholds (minimum group size of 10) before any aggregate is served. We never share individual-level data.
             </p>
           </section>
 

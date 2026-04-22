@@ -2,6 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { captureServerEvent } from '@/lib/posthog/server'
 
+// Parse a CSV string into an array of objects using the first row as headers
+function parseCSV(text: string): ImportRow[] {
+  const lines = text.split(/\r?\n/).filter(Boolean)
+  if (lines.length < 2) return []
+  const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, '').toLowerCase())
+  return lines.slice(1).map((line) => {
+    const values = line.split(',').map((v) => v.trim().replace(/^"|"$/g, ''))
+    const row: Record<string, string> = {}
+    headers.forEach((h, i) => { row[h] = values[i] ?? '' })
+    // Normalise common CSV header variants
+    return {
+      date: row['date'] ?? row['transaction_date'] ?? row['created'] ?? row['created_at'] ?? undefined,
+      amount: row['amount'] ?? row['gross'] ?? row['gross_amount'] ?? undefined,
+      net_amount: row['net'] ?? row['net_amount'] ?? row['payout'] ?? undefined,
+      fee_amount: row['fee'] ?? row['fee_amount'] ?? row['fees'] ?? undefined,
+      description: row['description'] ?? row['subject'] ?? row['note'] ?? undefined,
+      source_id: row['transaction_id'] ?? row['id'] ?? row['reference'] ?? undefined,
+      currency: row['currency'] ?? row['currency_code'] ?? 'usd',
+    } as ImportRow
+  })
+}
+
 interface ImportRow {
   date?: string
   amount?: string | number
@@ -33,13 +55,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-    let body: { rows?: ImportRow[]; streamId?: string; platform?: string; streamName?: string } = {}
-  try {
-    body = await request.json()
-  } catch {
-    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  let rows: ImportRow[] | undefined
+  let streamId: string | undefined
+  let platform: string | undefined
+  let streamName: string | undefined
+
+  const contentType = request.headers.get('content-type') ?? ''
+  if (contentType.includes('multipart/form-data')) {
+    // Handle CSV file upload
+    try {
+      const formData = await request.formData()
+      const file = formData.get('file') as File | null
+      streamId = (formData.get('stream_id') as string) ?? (formData.get('streamId') as string) ?? undefined
+      platform = (formData.get('platform') as string) ?? undefined
+      streamName = (formData.get('stream_name') as string) ?? (formData.get('streamName') as string) ?? undefined
+      if (!file) {
+        return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+      }
+      const text = await file.text()
+      rows = parseCSV(text)
+    } catch {
+      return NextResponse.json({ error: 'Failed to parse CSV file' }, { status: 400 })
+    }
+  } else {
+    let body: { rows?: ImportRow[]; streamId?: string; stream_id?: string; platform?: string; streamName?: string } = {}
+    try {
+      body = await request.json()
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+    rows = body.rows
+    streamId = body.streamId ?? body.stream_id
+    platform = body.platform
+    streamName = body.streamName
   }
-  const { rows, streamId, platform, streamName } = body
 
   const MAX_IMPORT_ROWS = 5000
   if ((rows?.length ?? 0) > MAX_IMPORT_ROWS) {
@@ -49,7 +98,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No rows provided' }, { status: 400 })
   }
 
-  // Resolve or create stream
+  // Resolve or create stream — use provided streamId if given, only create if not
   let resolvedStreamId = streamId
   if (!resolvedStreamId) {
     const name = streamName || (platform === 'stripe' ? 'Stripe' : platform === 'paypal' ? 'PayPal' : platform === 'upwork' ? 'Upwork' : 'Imported')

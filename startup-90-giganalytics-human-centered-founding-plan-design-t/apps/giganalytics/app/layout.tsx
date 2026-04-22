@@ -18,7 +18,7 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
-const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://startup-90-giganalytics-human-cente.vercel.app").replace(/\/$/, "");
+const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hourlyroi.com").replace(/\/$/, "");
 const APP_TITLE = "GigAnalytics — ROI Dashboard for Multi-Income Freelancers";
 const APP_DESC =
   "Turn raw Stripe, PayPal, and CSV payments into true hourly rates, acquisition ROI, A/B pricing experiments, and earnings heatmaps. Built for people juggling 2–5 income streams.";
@@ -149,7 +149,7 @@ export default function RootLayout({
         {/* Plausible Analytics — privacy-first, no cookies required */}
         <Script
           defer
-          data-domain="startup-90-giganalytics-human-cente.vercel.app"
+          data-domain="hourlyroi.com"
           src="https://plausible.io/js/script.tagged-events.js"
           strategy="afterInteractive"
         />
