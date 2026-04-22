@@ -81,21 +81,21 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
                 Most Popular
               </span>
             )}
-            <h3 className="text-xl font-semibold mb-2">{plan.name}</h3>
+            <h3 className="text-xl font-semibold mb-2 text-gray-900">{plan.name}</h3>
             {plan.description && (
-              <p className="text-gray-500 text-sm mb-4">{plan.description}</p>
+              <p className="text-gray-600 text-sm mb-4">{plan.description}</p>
             )}
             <div className="mb-6">
-              <span className="text-4xl font-bold">{plan.price}</span>
+              <span className="text-4xl font-bold text-gray-900">{plan.price}</span>
               {plan.interval && (
-                <span className="text-gray-500 ml-1">/{plan.interval}</span>
+                <span className="text-gray-600 ml-1">/{plan.interval}</span>
               )}
             </div>
             <ul className="space-y-3 mb-8 flex-grow">
               {plan.features.map((feature, i) => (
                 <li key={i} className="flex items-start gap-2">
                   <svg
-                    className="w-5 h-5 text-green-500 shrink-0 mt-0.5"
+                    className="w-5 h-5 text-green-600 shrink-0 mt-0.5"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -103,7 +103,7 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-sm">{feature}</span>
+                  <span className="text-sm text-gray-700">{feature}</span>
                 </li>
               ))}
             </ul>
