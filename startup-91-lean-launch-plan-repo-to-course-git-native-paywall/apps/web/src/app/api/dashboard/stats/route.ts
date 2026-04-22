@@ -4,8 +4,6 @@ import { createServiceClient } from '@/lib/supabase/service';
 
 export const dynamic = 'force-dynamic';
 
-export const dynamic = 'force-dynamic';
-
 /**
  * GET /api/dashboard/stats
  *
