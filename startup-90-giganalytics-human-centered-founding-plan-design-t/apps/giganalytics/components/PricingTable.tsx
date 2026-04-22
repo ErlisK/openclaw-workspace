@@ -70,7 +70,7 @@ export function PricingTable({ plans, title, subtitle }: PricingTableProps) {
         {plans.map((plan) => (
           <div
             key={plan.priceId}
-            className={`rounded-2xl border p-8 flex flex-col ${
+            className={`rounded-2xl border p-4 sm:p-8 flex flex-col ${
               plan.popular
                 ? "border-blue-500 ring-2 ring-blue-500 shadow-lg relative"
                 : "border-gray-200"

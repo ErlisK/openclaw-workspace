@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { CookieConsent } from "@/components/CookieConsent";
 import { UTMTracker } from "@/components/UTMTracker";
+import { RedditPixel } from "@/components/RedditPixel";
+import { GoogleTag } from "@/components/GoogleTag";
 import Script from "next/script";
 
 const geistSans = localFont({
@@ -153,6 +155,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <RedditPixel />
+        <GoogleTag />
         <CookieConsent />
         <UTMTracker />
         {children}

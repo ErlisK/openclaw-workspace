@@ -51,6 +51,35 @@ export default function SignupPage() {
           setError(data.message ?? 'Could not create your account. Please try again.')
         }
       } else {
+        // Fire conversion events on successful signup
+        try {
+          // Reddit pixel
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ;(window as any).rdt?.('track', 'SignUp')
+        } catch { /* best-effort */ }
+        try {
+          // Google Ads conversion
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const gtag = (window as any).gtag
+          if (typeof gtag === 'function' && process.env.NEXT_PUBLIC_GTAG_CONVERSION_ID) {
+            gtag('event', 'conversion', {
+              send_to: process.env.NEXT_PUBLIC_GTAG_CONVERSION_ID,
+              value: 0,
+              currency: 'USD',
+            })
+          }
+        } catch { /* best-effort */ }
+        try {
+          // PostHog
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const ph = (window as any).posthog
+          if (ph?.capture) {
+            const utmRaw = sessionStorage.getItem('utm_params')
+            const utm = utmRaw ? JSON.parse(utmRaw) : {}
+            ph.capture('signup_completed', { source: utm.utm_source })
+          }
+        } catch { /* best-effort */ }
+
         if (data.autoConfirmed) {
           // Auto-confirmed: redirect directly to onboarding
           router.push('/onboarding')
