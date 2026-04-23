@@ -23,6 +23,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: url('/blog/ab-pricing-gig-work'), lastModified: new Date('2025-04-03'), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/blog/five-income-streams'), lastModified: new Date('2025-03-27'), changeFrequency: 'monthly', priority: 0.7 },
     { url: url('/blog/csv-import-guide'), lastModified: new Date('2025-04-18'), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/blog/true-hourly-rate-formula'), lastModified: new Date('2025-04-23'), changeFrequency: 'monthly', priority: 0.9 },
+    { url: url('/blog/freelance-income-tracker-comparison'), lastModified: new Date('2025-04-25'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: url('/blog/upwork-vs-direct-clients-roi'), lastModified: new Date('2025-04-27'), changeFrequency: 'monthly', priority: 0.8 },
     // Launch
     { url: url('/launch'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     // Social

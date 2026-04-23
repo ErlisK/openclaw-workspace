@@ -20,9 +20,9 @@ const geistMono = localFont({
 });
 
 const APP_URL = (process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.hourlyroi.com").replace(/\/$/, "");
-const APP_TITLE = "GigAnalytics — ROI Dashboard for Multi-Income Freelancers";
+const APP_TITLE = "GigAnalytics — True Hourly Rate Dashboard for Multi-Income Freelancers";
 const APP_DESC =
-  "Turn raw Stripe, PayPal, and CSV payments into true hourly rates, acquisition ROI, A/B pricing experiments, and earnings heatmaps. Built for people juggling 2–5 income streams.";
+  "See your real hourly rate across every income stream. Import Stripe, PayPal, or CSV, track time with one tap, and know exactly which side income is worth your effort.";
 const OG_IMAGE = "/og-image.png"; // relative — resolved via metadataBase
 
 export const metadata: Metadata = {
@@ -43,6 +43,10 @@ export const metadata: Metadata = {
     "freelancer earnings",
     "income stream tracker",
     "pricing experiments",
+    "freelance income tracker",
+    "multiple income streams tracker",
+    "gig worker analytics dashboard",
+    "freelance ROI calculator",
   ],
   authors: [{ name: "GigAnalytics" }],
   creator: "GigAnalytics",

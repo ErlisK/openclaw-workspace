@@ -13,6 +13,33 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: 'upwork-vs-direct-clients-roi',
+    date: '2025-04-27',
+    title: 'Upwork vs Direct Clients: True ROI Comparison (With Real Numbers)',
+    excerpt:
+      "Upwork looks competitive by revenue — but once you factor in fees and proposal time, direct clients often pay 25–40% more per hour of effort. Here's the math.",
+    readMin: 6,
+    tags: ['Upwork', 'ROI', 'Freelance'],
+  },
+  {
+    slug: 'freelance-income-tracker-comparison',
+    date: '2025-04-25',
+    title: 'Freelance Income Tracker: 5 Methods Compared (Spreadsheet to SaaS)',
+    excerpt:
+      'From Google Sheets to purpose-built SaaS — we compare 5 ways to track income across multiple freelance streams and find which actually helps you optimize ROI.',
+    readMin: 7,
+    tags: ['Tools', 'Tracking', 'Freelance'],
+  },
+  {
+    slug: 'true-hourly-rate-formula',
+    date: '2025-04-23',
+    title: 'How to Calculate Your True Hourly Rate as a Freelancer (The Real Formula)',
+    excerpt:
+      "Most freelancers calculate hourly rate wrong. Here's the real formula that accounts for platform fees, unpaid admin time, and acquisition hours — with step-by-step examples.",
+    readMin: 8,
+    tags: ['ROI', 'Pricing', 'Freelance', 'Calculator'],
+  },
+  {
     slug: 'csv-import-guide',
     date: '2025-04-18',
     title: 'How to Import Your Stripe & PayPal Payments into GigAnalytics (CSV Guide)',
