@@ -24,10 +24,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const body = await req.json()
-  const { title, url, tier = 'quick', instructions = '', project_id } = body
+  // Accept flow_description as an alias for instructions (used by the submit form)
+  const rawInstructions = body.instructions ?? body.flow_description ?? ''
+  const { url, tier = 'quick', project_id } = body
+  // Auto-derive title from URL hostname when not provided
+  let title: string = body.title ?? ''
+  if (!title && url) {
+    try { title = new URL(url).hostname.replace(/^www\./, '') } catch { /* will fail validation below */ }
+  }
+  const instructions: string = typeof rawInstructions === 'string' ? rawInstructions : ''
 
   if (!url || !title) {
-    return NextResponse.json({ error: 'title and url are required' }, { status: 400 })
+    return NextResponse.json({ error: 'url is required' }, { status: 400 })
   }
 
   // Input length limits
@@ -74,5 +82,5 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   // Track job draft creation
   captureServerEvent('create_job_draft', user.id, { job_id: data.id, tier: data.tier, title: data.title }).catch(() => {})
-  return NextResponse.json({ job: data }, { status: 201 })
+  return NextResponse.json({ job: data, job_id: data.id }, { status: 201 })
 }
