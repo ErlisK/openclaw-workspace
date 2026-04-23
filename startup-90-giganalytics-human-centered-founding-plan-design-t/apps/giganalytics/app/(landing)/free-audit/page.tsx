@@ -86,7 +86,7 @@ export default function FreeAuditPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            🎯 Limited — accepting 10 audit requests at a time
+            🎯 Reviewed personally — allow 2–3 business days for your results
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4 leading-tight">
             Get your free<br />
@@ -269,6 +269,13 @@ export default function FreeAuditPage() {
               🔒 Your data is private, never sold, deleted after analysis. 
               No spam — just your audit results.
             </p>
+
+            <div className="text-xs text-gray-500 mt-2 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <strong>Privacy notice:</strong> Your name, email, income stream details, and any uploaded CSV are used
+              solely to prepare your manual ROI analysis. Data is deleted within 14 days of sending your results.
+              We never sell your data or share it with third parties.{' '}
+              <Link href="/privacy" className="underline hover:text-gray-700">Full Privacy Policy →</Link>
+            </div>
           </form>
         )}
 

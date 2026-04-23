@@ -52,7 +52,8 @@ export function CookieConsent() {
     localStorage.setItem(CONSENT_KEY, 'accepted')
     setVisible(false)
     initPosthog()
-    // Also fire UTM capture now that PostHog is ready
+    // Notify ConditionalTracking to load advertising pixels
+    window.dispatchEvent(new Event('ga_consent_changed'))
     setTimeout(captureUTMIfPresent, 100)
   }
 
@@ -60,29 +61,35 @@ export function CookieConsent() {
     localStorage.setItem(CONSENT_KEY, 'declined')
     setVisible(false)
     try { posthog.opt_out_capturing() } catch {}
+    window.dispatchEvent(new Event('ga_consent_changed'))
   }
 
   if (!visible) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg px-6 py-4">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg px-6 py-5">
       <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <p className="text-sm text-gray-600 flex-1">
-          We use analytics cookies to improve GigAnalytics.{' '}
-          <Link href="/privacy#cookies" className="text-blue-600 hover:underline">Learn more</Link>
-        </p>
+        <div className="flex-1">
+          <p className="text-sm text-gray-800 font-medium mb-1">We use cookies to improve your experience</p>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            We use <strong>PostHog</strong> (product analytics), <strong>Plausible</strong> (privacy-friendly web analytics,
+            no cookies), and — if you accept — <strong>Google Analytics</strong> and <strong>Reddit Pixel</strong> for
+            advertising and campaign measurement. Essential cookies are always active.{' '}
+            <Link href="/privacy#cookies" className="text-blue-600 hover:underline">Learn more in our Privacy Policy</Link>
+          </p>
+        </div>
         <div className="flex gap-3 shrink-0">
           <button
             onClick={decline}
             className="text-sm px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50"
           >
-            Decline
+            Essential only
           </button>
           <button
             onClick={accept}
             className="text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Accept
+            Accept all
           </button>
         </div>
       </div>

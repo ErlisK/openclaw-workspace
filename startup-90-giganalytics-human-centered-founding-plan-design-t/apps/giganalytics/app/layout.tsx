@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { CookieConsent } from "@/components/CookieConsent";
+import { CookieConsent } from '@/components/CookieConsent'
+import { ConditionalTracking } from '@/components/ConditionalTracking'
 import { UTMTracker } from "@/components/UTMTracker";
 import { RedditPixel } from "@/components/RedditPixel";
 import { GoogleTag } from "@/components/GoogleTag";
@@ -155,9 +156,8 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <RedditPixel />
-        <GoogleTag />
         <CookieConsent />
+        <ConditionalTracking />
         <UTMTracker />
         {children}
       </body>

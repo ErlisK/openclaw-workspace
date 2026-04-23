@@ -23,6 +23,7 @@ export default function PrivacyPage() {
             financial data with the strictest care.
           </p>
           <p className="mt-2">Contact: <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a></p>
+          <p className="mt-1">Address: 2298 Johanna Court, Pinole, CA 94564</p>
         </div>
 
         {/* 2 */}
@@ -44,6 +45,9 @@ export default function PrivacyPage() {
                 ['Monthly income target', '"What-if" pricing suggestions'],
                 ['Subscription billing info', 'Processed by Stripe; we never store card numbers'],
                 ['Anonymous usage events (PostHog)', 'Product improvement (opt-out in Settings)'],
+                ['Behavioral/analytics data (Google Analytics)', 'Website traffic analysis — only with consent'],
+                ['Conversion tracking data (Reddit Pixel)', 'Advertising campaign measurement — only with consent'],
+                ['Free audit: name, email, platforms, optional CSV', 'One-time ROI analysis — deleted within 14 days'],
               ].map(([d, w]) => (
                 <tr key={d} className="odd:bg-white even:bg-gray-50 dark:odd:bg-gray-900 dark:even:bg-gray-800/50">
                   <td className="px-3 py-2 border border-gray-200 dark:border-gray-700 font-mono">{d}</td>
@@ -175,15 +179,28 @@ export default function PrivacyPage() {
 
         {/* 8 */}
         <div>
-          <h2 className="text-base font-semibold mb-2">8. Cookies &amp; Analytics</h2>
-          <p>
-            We use <strong>PostHog</strong> for product analytics. Events capture anonymous actions
-            (e.g., "import completed") without PII. No advertising cookies are set. No third-party ad trackers.
-          </p>
+          <h2 id="cookies" className="text-base font-semibold mb-2">8. Cookies &amp; Analytics</h2>
+          <p className="mb-3">We use the following analytics and advertising tools:</p>
+          <ul className="list-disc list-inside space-y-2 mb-3">
+            <li><strong>Plausible Analytics</strong> — privacy-friendly, cookieless page analytics. No PII collected. <a href="https://plausible.io/privacy" className="underline">Plausible Privacy Policy</a></li>
+            <li><strong>PostHog</strong> — product analytics for feature improvement. Events capture anonymous actions (e.g., &quot;import completed&quot;) without PII. You can opt out in Settings → Privacy.</li>
+            <li><strong>Google Analytics (gtag.js)</strong> — website analytics to understand traffic sources. Google may set cookies. <a href="https://policies.google.com/privacy" className="underline">Google Privacy Policy</a> | <a href="https://tools.google.com/dlpage/gaoptout" className="underline">Opt out</a></li>
+            <li><strong>Reddit Pixel</strong> — conversion tracking for Reddit advertising campaigns. Reddit may set cookies. <a href="https://www.reddit.com/policies/privacy-policy" className="underline">Reddit Privacy Policy</a> | <a href="https://www.reddit.com/settings/privacy" className="underline">Reddit Ad Preferences</a></li>
+          </ul>
+          <p>Non-essential cookies (analytics, advertising) are only activated after you provide consent via our cookie banner. Plausible is cookieless and always active as it collects no PII.</p>
         </div>
 
         {/* 9 */}
         <div>
+          <h2 className="text-base font-semibold mb-2">8b. Free Audit Data Collection</h2>
+          <p className="mb-2">
+            When you request a free manual ROI audit at <strong>/free-audit</strong>, we collect your name, email,
+            income stream details, and any optional payment CSV you choose to upload. This data is used solely to
+            prepare your personalized ROI analysis, is never shared with third parties, and is deleted within
+            14 days of delivering your results. You may request deletion sooner by emailing{' '}
+            <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a>.
+          </p>
+
           <h2 className="text-base font-semibold mb-2">9. Children</h2>
           <p>GigAnalytics is not directed at children under 13. We do not knowingly collect data from children.</p>
         </div>
@@ -201,6 +218,7 @@ export default function PrivacyPage() {
             Questions or data requests:{' '}
             <a href="mailto:hello@hourlyroi.com" className="underline">hello@hourlyroi.com</a>
           </p>
+          <p className="mt-2">GigAnalytics · 2298 Johanna Court, Pinole, CA 94564</p>
         </div>
 
       </section>

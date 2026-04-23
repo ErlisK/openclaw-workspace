@@ -116,6 +116,7 @@ export default function TermsPage() {
                 hello@hourlyroi.com
               </a>
             </p>
+            <p className="mt-2">GigAnalytics · 2298 Johanna Court, Pinole, CA 94564</p>
           </section>
 
         </div>

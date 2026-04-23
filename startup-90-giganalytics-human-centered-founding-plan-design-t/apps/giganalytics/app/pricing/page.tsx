@@ -146,7 +146,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           <div className="text-3xl">⏳</div>
           <div className="flex-1">
             <p className="text-sm font-bold text-amber-900">
-              Early Adopter Pricing — <span className="line-through text-amber-700">$49/mo</span> <span className="text-amber-700">$29/mo</span> while we&apos;re in beta
+              Early Adopter Pricing — <span className="text-amber-700">$29/mo</span> while we&apos;re in beta
             </p>
             <p className="text-xs text-amber-700 mt-0.5">Lock in this rate forever · Price increases once we exit beta · 14-day money-back guarantee</p>
           </div>
@@ -165,6 +165,10 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           <div className="flex-1">
             <p className="text-sm font-semibold text-blue-800">
               Pro users find an average of <span className="text-blue-600">$340/mo in hidden earnings</span> within their first 30 days
+            </p>
+            <p className="text-xs text-blue-600 mt-1 leading-relaxed">
+              Based on aggregate data from opted-in Pro users. Individual results vary significantly.
+              This is not a guarantee of earnings. Results depend on income streams, hours tracked, and platform fees unique to each user.
             </p>
             <p className="text-xs text-blue-600 mt-0.5">Based on aggregate benchmark data from opted-in users · 14-day money-back guarantee</p>
           </div>

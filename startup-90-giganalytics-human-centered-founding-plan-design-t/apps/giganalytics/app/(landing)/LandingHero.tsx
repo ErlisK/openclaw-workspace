@@ -96,7 +96,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
       {/* Experiment badge — dev only */}
       {process.env.NODE_ENV !== 'production' && (
         <div className="bg-gray-50 border-b border-gray-100 py-1 px-6 text-center">
-          <span className="text-xs text-gray-400 font-mono">
+          <span className="text-xs text-gray-500 font-mono">
             variant={variant.id} · {variant.name}
             {' '}·{' '}
             <span className="text-gray-300">try ?v=1 ?v=2 ?v=3</span>
@@ -150,10 +150,10 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         </div>
 
         {/* Social proof */}
-        <p className="text-sm text-gray-400 mb-4">{variant.social_proof}</p>
+        <p className="text-sm text-gray-500 mb-4">{variant.social_proof}</p>
 
         {/* Trust signals */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-12 text-xs text-gray-400">
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-12 text-xs text-gray-500">
           <span className="flex items-center gap-1">✅ No credit card required</span>
           <span className="text-gray-200">|</span>
           <span className="flex items-center gap-1">⚡ First ROI dashboard in ~11 min</span>
@@ -173,7 +173,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
 
         {/* Product Dashboard Preview */}
         <div className="max-w-4xl mx-auto mb-16">
-          <p className="text-xs text-gray-400 uppercase tracking-widest text-center mb-4">What your dashboard looks like</p>
+          <p className="text-xs text-gray-500 uppercase tracking-widest text-center mb-4">What your dashboard looks like</p>
           <div className="rounded-2xl border border-gray-200 shadow-xl overflow-hidden bg-white">
             {/* Browser chrome */}
             <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
                 <div className="w-3 h-3 rounded-full bg-yellow-400" />
                 <div className="w-3 h-3 rounded-full bg-green-400" />
               </div>
-              <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-400 text-center border border-gray-200">
+              <div className="flex-1 bg-white rounded-md px-3 py-1 text-xs text-gray-500 text-center border border-gray-200">
                 app.hourlyroi.com/dashboard
               </div>
             </div>
@@ -197,7 +197,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
                   { label: 'Best Stream', value: '$87.50/hr', color: 'orange' },
                 ].map(s => (
                   <div key={s.label} className={`bg-${s.color}-50 border border-${s.color}-100 rounded-xl p-3`}>
-                    <div className="text-xs text-gray-400 mb-0.5">{s.label}</div>
+                    <div className="text-xs text-gray-500 mb-0.5">{s.label}</div>
                     <div className="text-base font-bold text-gray-900">{s.value}</div>
                   </div>
                 ))}
@@ -207,7 +207,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
                 <div className="text-xs font-semibold text-gray-700 mb-3">Stream ROI Breakdown</div>
                 <table className="w-full text-xs">
                   <thead>
-                    <tr className="text-gray-400 border-b border-gray-100">
+                    <tr className="text-gray-500 border-b border-gray-100">
                       <th className="text-left pb-2">Stream</th>
                       <th className="text-right pb-2">Revenue</th>
                       <th className="text-right pb-2">Net Rate</th>
@@ -234,7 +234,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
               </div>
             </div>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-3">Your real data — not a spreadsheet. Connect Stripe, PayPal, or import CSV in minutes.</p>
+          <p className="text-center text-xs text-gray-500 mt-3">Your real data — not a spreadsheet. Connect Stripe, PayPal, or import CSV in minutes.</p>
         </div>
 
         {/* Features */}
@@ -253,7 +253,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         </div>
 
         {/* Financial disclaimer */}
-        <p className="text-xs text-gray-400 max-w-xl mx-auto mb-10 leading-relaxed">
+        <p className="text-xs text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
           GigAnalytics provides data analytics tools only and does not provide financial, tax, or
           investment advice. Individual results vary.
         </p>
@@ -274,7 +274,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           >
             Request my free ROI audit →
           </Link>
-          <p className="text-xs text-gray-400 mt-3">🔒 Private · No spam · We delete your data after analysis</p>
+          <p className="text-xs text-gray-500 mt-3">🔒 Private · No spam · We delete your data after analysis</p>
         </div>
 
         {/* Sample data CTA */}
@@ -297,7 +297,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-100 py-6 px-6 text-center text-xs text-gray-400">
+      <footer className="border-t border-gray-100 py-6 px-6 text-center text-xs text-gray-500">
         <div className="max-w-4xl mx-auto flex flex-wrap justify-center gap-4">
           <span>© {new Date().getFullYear()} GigAnalytics</span>
           <Link href="/pricing" className="hover:text-gray-600">Pricing</Link>
