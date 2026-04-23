@@ -28,6 +28,7 @@ BEGIN
        AND email NOT ILIKE '%@mailinator.com'
        AND email NOT ILIKE '%@guerrillamail.com'
        AND email NOT ILIKE '%@tempmail.com'
+       AND email NOT ILIKE '%@agentmail.to'
     ) AS total_users,
 
     (SELECT COUNT(*)::BIGINT FROM profiles
@@ -46,6 +47,7 @@ BEGIN
        AND email NOT ILIKE '%@example.com'
        AND email NOT ILIKE '%@test.com'
        AND email NOT ILIKE '%@mailinator.com'
+       AND email NOT ILIKE '%@agentmail.to'
     ) AS new_signups_24h,
 
     (SELECT
@@ -68,6 +70,7 @@ BEGIN
           AND email NOT ILIKE '%@example.com'
           AND email NOT ILIKE '%@test.com'
           AND email NOT ILIKE '%@mailinator.com'
+          AND email NOT ILIKE '%@agentmail.to'
       )
       ELSE NULL
       END
