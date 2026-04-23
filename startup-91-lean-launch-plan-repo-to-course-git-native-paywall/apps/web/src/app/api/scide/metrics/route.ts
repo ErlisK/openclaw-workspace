@@ -59,9 +59,16 @@ export async function GET(req: NextRequest) {
   try {
     const supa = createServiceClient();
 
-    // Fetch all users via auth admin API
-    const { data: usersData } = await supa.auth.admin.listUsers({ perPage: 1000 });
-    const allUsers = usersData?.users ?? [];
+    // Fetch all users via auth admin API — paginate to handle > 1000 users
+    const allUsers: { email?: string; created_at?: string }[] = [];
+    let page = 1;
+    while (true) {
+      const { data: usersData } = await supa.auth.admin.listUsers({ perPage: 1000, page });
+      const batch = usersData?.users ?? [];
+      allUsers.push(...batch);
+      if (batch.length < 1000) break;
+      page++;
+    }
     const realUsers = allUsers.filter((u) => !isTestEmail(u.email ?? ''));
     metrics.total_users = realUsers.length;
 

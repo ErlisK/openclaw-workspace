@@ -75,12 +75,16 @@ const HOW_IT_WORKS = [
 
 export default async function HomePage() {
   const serviceSupa = createServiceClient();
-  const { data: rawCourses } = await serviceSupa
-    .from('courses')
-    .select('id, slug, title, description, price_cents, lessons(id, is_preview)')
-    .eq('published', true)
-    .order('published_at', { ascending: false })
-    .limit(2);
+  const [{ data: rawCourses }, { count: totalUsers }, { count: totalCourses }] = await Promise.all([
+    serviceSupa
+      .from('courses')
+      .select('id, slug, title, description, price_cents, lessons(id, is_preview)')
+      .eq('published', true)
+      .order('published_at', { ascending: false })
+      .limit(2),
+    serviceSupa.from('profiles').select('id', { count: 'exact', head: true }),
+    serviceSupa.from('courses').select('id', { count: 'exact', head: true }).eq('published', true),
+  ]);
 
   const demoCourses = (rawCourses ?? []).map((c, i) => {
     const lessons = (c.lessons as { id: string; is_preview: boolean }[]) ?? [];
@@ -202,12 +206,12 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
             <div className="flex flex-col items-center gap-1">
-              <span className="text-3xl font-black text-white">150<span className="text-violet-400">+</span></span>
+              <span className="text-3xl font-black text-white">{totalUsers ?? 0}<span className="text-violet-400">+</span></span>
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Creators signed up</span>
             </div>
             <div className="hidden sm:block h-10 w-px bg-white/10" />
             <div className="flex flex-col items-center gap-1">
-              <span className="text-3xl font-black text-white">13<span className="text-violet-400">+</span></span>
+              <span className="text-3xl font-black text-white">{totalCourses ?? 0}<span className="text-violet-400">+</span></span>
               <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Courses published</span>
             </div>
             <div className="hidden sm:block h-10 w-px bg-white/10" />
