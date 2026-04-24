@@ -772,7 +772,7 @@ test.describe('Rollback Flow', () => {
   });
 
   test('TC-ROLLBACK-006: Rollback API endpoint returns 401 without auth', async ({ request }) => {
-    const resp = await request.post(`${BASE_URL}/api/experiments/test-id/rollback`);
+    const resp = await request.post(`${BASE_URL}/api/experiments/00000000-0000-0000-0000-000000000099/rollback`);
     expect(resp.status()).toBe(401);
   });
 
