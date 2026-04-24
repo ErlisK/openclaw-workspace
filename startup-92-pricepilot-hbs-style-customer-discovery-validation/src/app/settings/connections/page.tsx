@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 
 interface StripeConn {
   connected: boolean
@@ -53,6 +54,7 @@ export default function ConnectionsPage() {
 
   const handleImport = async () => {
     setImporting(true); setError(''); setImportResult(null)
+    track('import_started', { source: 'stripe-api' })
     const r = await fetch('/api/connections/stripe/import', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -61,6 +63,7 @@ export default function ConnectionsPage() {
     const data = await r.json()
     setImporting(false)
     if (!r.ok) { setError(data.error || 'Import failed'); return }
+    track('import_completed', { source: 'stripe-api', rows_imported: data.imported ?? 0 })
     setImportResult(data)
     setStripeConn(prev => prev ? { ...prev, import_count: data.imported, last_imported_at: new Date().toISOString() } : prev)
   }

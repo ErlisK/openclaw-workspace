@@ -2,6 +2,7 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { track } from '@/lib/analytics'
 
 type Step = 'upload' | 'mapping' | 'importing' | 'done'
 
@@ -61,6 +62,7 @@ export default function ImportPage() {
     if (!file) return
     setStep('importing')
     setLoading(true); setError('')
+    track('import_started', { source: 'csv', filename: file.name, size: file.size })
     const fd = new FormData()
     fd.append('file', file)
     fd.append('mapping', JSON.stringify(userMapping))
@@ -68,6 +70,7 @@ export default function ImportPage() {
     const data = await resp.json()
     setLoading(false)
     if (!resp.ok) { setError(data.error || 'Import failed'); setStep('mapping'); return }
+    track('import_completed', { source: 'csv', rows_imported: data.imported ?? 0, rows_skipped: data.skipped ?? 0 })
     setResult(data)
     setStep('done')
   }

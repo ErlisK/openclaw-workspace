@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
 
 const FREE_FEATURES = [
@@ -29,6 +30,7 @@ export default function PricingPage() {
 
   const handleUpgrade = async () => {
     setLoading(true); setError('')
+    track('upgrade_clicked', { source: 'pricing_page' })
     const resp = await fetch('/api/checkout', { method: 'POST' })
     const data = await resp.json()
     setLoading(false)

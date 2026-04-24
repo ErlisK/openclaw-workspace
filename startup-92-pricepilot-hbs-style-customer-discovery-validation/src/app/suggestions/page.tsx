@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
 
 interface Suggestion {
@@ -37,7 +38,11 @@ export default function SuggestionsPage() {
     setRunning(true)
     const resp = await fetch('/api/engine/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
     setRunning(false)
-    if (resp.ok) fetchSuggestions()
+    if (resp.ok) {
+      const data = await resp.json().catch(() => ({}))
+      track('suggestion_created', { count: Array.isArray(data) ? data.length : 1 })
+      fetchSuggestions()
+    }
   }
 
   const dismiss = async (id: string) => {
@@ -59,7 +64,10 @@ export default function SuggestionsPage() {
       }),
     })
     const data = await resp.json()
-    if (resp.ok) router.push(`/experiments/${data.id}`)
+    if (resp.ok) {
+      track('experiment_published', { experiment_id: data.id, product_id: s.product_id, price_a: s.current_price_cents, price_b: s.suggested_price_cents })
+      router.push(`/experiments/${data.id}`)
+    }
     else alert(data.error || 'Failed to create experiment')
   }
 

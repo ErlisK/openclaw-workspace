@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
 
 interface Experiment {
@@ -34,6 +35,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
 
   const doRollback = async () => {
     setRolling(true)
+    track('rollback_clicked', { experiment_id: expId })
     const resp = await fetch(`/api/experiments/${expId}/rollback`, { method: 'POST' })
     setRolling(false)
     if (resp.ok) {

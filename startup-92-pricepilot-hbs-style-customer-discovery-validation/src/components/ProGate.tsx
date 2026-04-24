@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 
 interface ProGateProps {
   feature: string
@@ -26,6 +27,7 @@ export default function ProGate({ feature, description }: ProGateProps) {
       )}
       <Link
         href="/pricing"
+        onClick={() => track('upgrade_clicked', { source: 'pro_gate', feature })}
         style={{
           display: 'inline-block',
           background: '#6c47ff',
