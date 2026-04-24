@@ -2090,7 +2090,8 @@ test.describe('Billing Flow — End-to-End', () => {
   }
 
   // ── Helper: grant or revoke Pro via test endpoint ─────────────────────────
-  async function grantPro(request: ReturnType<typeof test.info>['project'] extends never ? never : import('@playwright/test').APIRequestContext, cookieHeader: string, action: 'grant' | 'revoke' = 'grant') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function grantPro(request: any, cookieHeader: string, action: 'grant' | 'revoke' = 'grant') {
     const r = await request.post(`${BASE_URL}/api/test/grant-pro`, {
       headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
       data: { action },
