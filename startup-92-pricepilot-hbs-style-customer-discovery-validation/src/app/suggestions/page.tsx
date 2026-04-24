@@ -140,10 +140,13 @@ export default function SuggestionsPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
               <button className="btn btn-primary btn-sm" onClick={() => startExperiment(s)}>
                 Start experiment →
               </button>
+              <a href={`/ai-tools?explain=${s.id}`} className="btn btn-secondary btn-sm" data-testid="explain-btn">
+                💡 Explain this
+              </a>
               <button className="btn btn-secondary btn-sm" onClick={() => dismiss(s.id)}
                 disabled={dismissing === s.id} data-testid="dismiss-suggestion">
                 {dismissing === s.id ? 'Dismissing…' : 'Dismiss'}

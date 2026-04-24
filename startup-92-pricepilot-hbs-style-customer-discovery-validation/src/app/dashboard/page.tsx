@@ -48,6 +48,7 @@ export default async function DashboardPage() {
             <Link href="/import">Import</Link>
             <Link href="/suggestions">Suggestions</Link>
             <Link href="/experiments">Experiments</Link>
+            <Link href="/ai-tools">AI Tools</Link>
             <form action={logout}>
               <button type="submit" className="btn btn-secondary btn-sm" data-testid="logout-btn">Sign out</button>
             </form>

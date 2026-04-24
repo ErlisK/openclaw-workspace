@@ -1082,3 +1082,173 @@ test.describe('RLS — Cross-user data isolation', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 10: AI WRITING TOOLS
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('AI Writing Tools', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await login(page, USERS.maya);
+  });
+
+  test('TC-AI-001: /ai-tools page renders with three tabs', async ({ page }) => {
+    await page.goto(`${BASE_URL}/ai-tools`);
+    await expect(page.locator('[data-testid="tab-explain"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('[data-testid="tab-comms"]')).toBeVisible();
+    await expect(page.locator('[data-testid="tab-copy"]')).toBeVisible();
+  });
+
+  test('TC-AI-002: /api/ai/explain returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/ai/explain`, {
+      data: { suggestion: { current_price_cents: 1200, suggested_price_cents: 1500 } },
+    });
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-AI-003: /api/ai/comms returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/ai/comms`, {
+      data: { product_name: 'Test', new_price: '15' },
+    });
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-AI-004: /api/ai/copy returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/ai/copy`, {
+      data: { product_name: 'Test' },
+    });
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-AI-005: /api/ai/explain returns valid explanation schema', async ({ request, page }) => {
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/ai/explain`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        suggestion: {
+          products: { name: 'Notion Dashboard' },
+          current_price_cents: 1200,
+          suggested_price_cents: 1500,
+          confidence_score: 0.72,
+          proj_monthly_lift_p50: 4200,
+          rationale: 'Demand is inelastic',
+          caveats: [],
+        },
+      },
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body).toHaveProperty('explanation');
+    expect(body).toHaveProperty('key_points');
+    expect(body).toHaveProperty('action');
+    expect(typeof body.explanation).toBe('string');
+    expect(body.explanation.length).toBeGreaterThan(20);
+    expect(Array.isArray(body.key_points)).toBe(true);
+    expect(body.key_points.length).toBeGreaterThanOrEqual(1);
+  });
+
+  test('TC-AI-006: /api/ai/comms returns email + tweet + blog_intro', async ({ request, page }) => {
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/ai/comms`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_name: 'Notion Dashboard',
+        old_price: '12',
+        new_price: '15',
+        seller_name: 'Alex',
+      },
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body).toHaveProperty('email');
+    expect(body).toHaveProperty('tweet');
+    expect(body).toHaveProperty('blog_intro');
+    expect(body.email).toHaveProperty('subject');
+    expect(body.email).toHaveProperty('body');
+    expect(body.tweet.length).toBeGreaterThan(10);
+    expect(body.blog_intro.length).toBeGreaterThan(20);
+  });
+
+  test('TC-AI-007: /api/ai/copy returns all 7 copy fields', async ({ request, page }) => {
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/ai/copy`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_name: 'Notion Dashboard',
+        price_a: '12',
+        price_b: '15',
+        description: 'A Notion template for productivity',
+        audience: 'Notion power users',
+      },
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    const fields = ['headline', 'subheadline', 'description', 'cta_text', 'variant_a_label', 'variant_b_label', 'trust_line'];
+    for (const f of fields) {
+      expect(body).toHaveProperty(f);
+      expect(typeof body[f]).toBe('string');
+      expect(body[f].length).toBeGreaterThan(0);
+    }
+  });
+
+  test('TC-AI-008: Explain tab generate button produces output on page', async ({ page }) => {
+    await page.goto(`${BASE_URL}/ai-tools`);
+
+    // Fill in the form
+    await page.fill('input[placeholder="Ultimate Notion Dashboard"]', 'My Notion Template');
+    await page.fill('input[placeholder="12.00"]', '12');
+    await page.fill('input[placeholder="15.00"]', '15');
+    await page.fill('input[placeholder="72"]', '72');
+
+    await page.click('[data-testid="explain-generate-btn"]');
+
+    // Wait for output
+    await expect(page.locator('[data-testid="explain-output"]')).toBeVisible({ timeout: 20_000 });
+    const text = await page.locator('[data-testid="explain-output"]').textContent();
+    expect(text?.length).toBeGreaterThan(50);
+  });
+
+  test('TC-AI-009: Comms tab generate button produces email + tweet + blog', async ({ page }) => {
+    await page.goto(`${BASE_URL}/ai-tools`);
+    await page.click('[data-testid="tab-comms"]');
+
+    await page.fill('input[placeholder="Ultimate Notion Dashboard"]', 'My Product');
+    await page.fill('input[placeholder="12.00"]', '12');
+    await page.fill('input[placeholder="15.00"]', '15');
+
+    await page.click('[data-testid="comms-generate-btn"]');
+    await expect(page.locator('[data-testid="comms-output"]')).toBeVisible({ timeout: 20_000 });
+    const text = await page.locator('[data-testid="comms-output"]').textContent();
+    expect(text?.length).toBeGreaterThan(100);
+  });
+
+  test('TC-AI-010: Copy tab generate button produces headline and CTA', async ({ page }) => {
+    await page.goto(`${BASE_URL}/ai-tools`);
+    await page.click('[data-testid="tab-copy"]');
+
+    await page.fill('input[placeholder="Ultimate Notion Dashboard"]', 'My Template');
+    await page.fill('input[placeholder="12.00"]', '12');
+    await page.fill('input[placeholder="15.00"]', '15');
+
+    await page.click('[data-testid="copy-generate-btn"]');
+    await expect(page.locator('[data-testid="copy-output"]')).toBeVisible({ timeout: 20_000 });
+    const text = await page.locator('[data-testid="copy-output"]').textContent();
+    expect(text?.length).toBeGreaterThan(100);
+  });
+
+  test('TC-AI-011: Suggestions page shows "Explain this" button per card', async ({ page }) => {
+    await page.goto(`${BASE_URL}/suggestions`);
+    await page.waitForTimeout(3000);
+    const cards = page.locator('[data-testid="suggestion-card"]');
+    if (await cards.count() === 0) { test.skip(); return; }
+    await expect(page.locator('[data-testid="explain-btn"]').first()).toBeVisible();
+  });
+
+});
