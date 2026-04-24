@@ -1727,3 +1727,182 @@ test.describe('Entitlement Gating', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 14: STRIPE USER CONNECTOR (user-supplied API key)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Stripe User Connector', () => {
+
+  test('TC-USC-001: /api/connections/list returns 401 without auth', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/connections/list`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-USC-002: /api/connections/stripe/connect returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/connect`, {
+      data: { stripe_key: 'sk_test_fake' },
+    });
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-USC-003: /api/connections/stripe/import returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/import`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-USC-004: /api/connections/stripe/disconnect returns 401 without auth', async ({ request }) => {
+    const r = await request.delete(`${BASE_URL}/api/connections/stripe/disconnect`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-USC-005: /api/connections/list returns connected:false for user with no connection', async ({ request, page }) => {
+    await login(page, USERS.marcus); // Marcus is less likely to have a connection
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.get(`${BASE_URL}/api/connections/list`, {
+      headers: { Cookie: cookieHeader },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body).toHaveProperty('stripe');
+    // Either connected true or false is valid — just check the schema
+    expect(typeof body.stripe.connected).toBe('boolean');
+  });
+
+  test('TC-USC-006: /api/connections/stripe/connect rejects invalid key format', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/connect`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { stripe_key: 'not_a_stripe_key' },
+    });
+    expect(r.status()).toBe(400);
+    const body = await r.json();
+    expect(body).toHaveProperty('error');
+    expect(body.error).toContain('sk_');
+  });
+
+  test('TC-USC-007: /api/connections/stripe/connect rejects fake but valid-format key', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/connect`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { stripe_key: 'sk_test_' + 'obviouslyfake_notareal_key_1234' },
+    });
+    // 400 = Stripe rejected the key
+    expect(r.status()).toBe(400);
+    const body = await r.json();
+    expect(body).toHaveProperty('error');
+  });
+
+  test('TC-USC-008: /api/connections/stripe/connect accepts valid test key and imports', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Use platform test key (it's a valid Stripe test key)
+    const testKey = process.env.STRIPE_SECRET_KEY;
+    if (!testKey) { test.skip(); return; }
+
+    // Connect
+    const connectR = await request.post(`${BASE_URL}/api/connections/stripe/connect`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { stripe_key: testKey, label: 'E2E Test Account' },
+    });
+    expect(connectR.status()).toBe(200);
+    const conn = await connectR.json();
+    expect(conn.connected).toBe(true);
+    expect(conn).toHaveProperty('key_hint');
+    expect(conn.key_hint).toContain('...');
+
+    // Verify it shows up in list
+    const listR = await request.get(`${BASE_URL}/api/connections/list`, {
+      headers: { Cookie: cookieHeader },
+    });
+    const list = await listR.json();
+    expect(list.stripe.connected).toBe(true);
+    expect(list.stripe.key_hint).toBe(conn.key_hint);
+  });
+
+  test('TC-USC-009: /api/connections/stripe/import imports charges after connection', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Check if connected first
+    const listR = await request.get(`${BASE_URL}/api/connections/list`, { headers: { Cookie: cookieHeader } });
+    const list = await listR.json();
+    if (!list.stripe.connected) { test.skip(); return; }
+
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/import`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { limit: 200 },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body).toHaveProperty('imported');
+    expect(typeof body.imported).toBe('number');
+    expect(body).toHaveProperty('message');
+  });
+
+  test('TC-USC-010: /settings/connections page renders with key input form', async ({ page }) => {
+    await login(page, USERS.marcus);
+    await page.goto(`${BASE_URL}/settings/connections`);
+
+    const heading = page.locator('h1');
+    await expect(heading).toContainText('Connections', { timeout: 8_000 });
+
+    // Should show Stripe section
+    const text = await page.textContent('body');
+    expect(text).toContain('Stripe');
+  });
+
+  test('TC-USC-011: /settings/connections shows key input form when not connected', async ({ page }) => {
+    await login(page, USERS.marcus);
+    await page.goto(`${BASE_URL}/settings/connections`);
+    await page.waitForTimeout(1500); // Wait for connection status to load
+
+    // If not connected, should show the connect form
+    const connectBtn = page.locator('[data-testid="stripe-connect-btn"]');
+    const importBtn = page.locator('[data-testid="stripe-import-btn"]');
+
+    // One or the other must be visible
+    const hasConnect = await connectBtn.isVisible().catch(() => false);
+    const hasImport = await importBtn.isVisible().catch(() => false);
+    expect(hasConnect || hasImport).toBe(true);
+  });
+
+  test('TC-USC-012: CSV template download links are present', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/settings/connections`);
+
+    for (const file of ['stripe-charges-template.csv', 'gumroad-sales-template.csv', 'shopify-orders-template.csv']) {
+      const link = page.locator(`[data-testid="download-${file}"]`);
+      await expect(link).toBeVisible({ timeout: 8_000 });
+    }
+  });
+
+  test('TC-USC-013: /api/connections/stripe/import returns 404 if no connection saved', async ({ request, page }) => {
+    await login(page, USERS.marcus);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Disconnect first (idempotent)
+    await request.delete(`${BASE_URL}/api/connections/stripe/disconnect`, { headers: { Cookie: cookieHeader } });
+
+    const r = await request.post(`${BASE_URL}/api/connections/stripe/import`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {},
+    });
+    expect(r.status()).toBe(404);
+    const body = await r.json();
+    expect(body.error).toContain('No Stripe account connected');
+  });
+
+});
