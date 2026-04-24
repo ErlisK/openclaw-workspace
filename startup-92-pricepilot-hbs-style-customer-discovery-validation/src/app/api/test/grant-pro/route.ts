@@ -38,13 +38,12 @@ export async function POST(request: Request) {
     stripe_subscription_id: 'test_sub_e2e',
     plan_expires_at: new Date(Date.now() + 30 * 86400000).toISOString(),
     experiments_limit: null,
-    // Pro feature flags
     ai_suggestions_enabled: true,
     email_templates_enabled: true,
     audit_log_enabled: true,
     api_access_enabled: true,
     stripe_connect_enabled: true,
-    max_active_experiments: null,
+    max_active_experiments: 9999,
     updated_at: new Date().toISOString(),
   } : {
     user_id: user.id,
