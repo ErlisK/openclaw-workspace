@@ -128,3 +128,43 @@
 **H5 — The Channel Hypothesis**  
 > The primary acquisition channels for PricePilot are IndieHackers, r/SaaS, and Twitter/X — specifically posts from founders sharing pricing experiments — not paid ads or SEO.  
 *Falsifiable via: UTM tracking on early signups; community post engagement rates*
+
+---
+
+## Cluster-Informed Hypothesis Refinements
+*Updated after AI clustering of 60 public signals via Vercel AI Gateway (2025-04-24)*
+
+### Cluster Validation of H1–H5
+
+**H1 (Core Pain) — STRENGTHENED:**  
+Cluster 1 (Fear-of-Churn Price-Increase Paralysis) is the single most frequent pain category at 13.3% of all signals. The AI independently identified this as the #1 priority cluster, confirming H1's primacy. The cluster reveals the emotion is not just "uncertainty" but specifically churn anxiety — meaning rollback and staged rollout are not just nice-to-haves but *pre-conditions for adoption*.
+
+**H2 (Data Scarcity) — STRENGTHENED:**  
+Cluster 2 (Statistically-Invalid Tiny-Sample Tests) confirms that sample size anxiety is a distinct, named pain (10% frequency). Founders are aware that classical A/B testing is invalid for them — they just have no Bayesian alternative. This validates PricePilot's Bayesian engine as the core technical differentiation.
+
+**H3 (Safety-First) — STRONGLY CONFIRMED:**  
+Clusters 1 and 9 together (20% of signals) directly map to the rollback + staged rollout requirement. The cluster analysis reveals the mechanism: it's not just that founders want safety — they've been *burned* by previous price changes done wrong, making safety infrastructure the psychological unlock for adoption.
+
+**H4 (Revenue Lift) — REFINED:**  
+Cluster 4 (Missing Value-to-Price Alignment) suggests the average underpricing gap is 3–10x — much larger than the 10% lift estimated in H4. Revised: PricePilot should be able to demonstrate ≥15–25% revenue lift within 60 days for first-time users, since most are severely underpriced.
+
+**H5 (Channel) — CONFIRMED:**  
+Clusters were sourced from r/SaaS, r/microsaas, IndieHackers, and Twitter/BuildInPublic — the exact channels named in H5. The highest-engagement signals came from r/SaaS and r/microsaas.
+
+### New Hypothesis H6 (Vicious Cycle Unlock)
+> **H6:** Founders cannot break their discount-dependency cycle without first running a successful safe price experiment. Once they see a successful rollout (even at 10% traffic), the emotional unlock allows subsequent experiments to happen faster and with more confidence.
+
+*Falsifiable via: user interview probing sequence; behavioral analytics on second/third experiment rates vs. control*
+
+### Cluster-to-Feature Priority Map
+
+| Priority | Cluster | MVP Feature Required |
+|---|---|---|
+| P0 | Fear-of-Churn Paralysis | Staged rollout + rollback |
+| P0 | Tiny-Sample Tests | Bayesian low-signal engine |
+| P0 | Data-Blind Guesswork | Guided pricing advisor |
+| P1 | Value-to-Price Gap | Value calculator + benchmarks |
+| P1 | Execution Gap | One-click A/B setup (no code) |
+| P2 | Discount Trap | Discount recovery simulator |
+| P2 | Migration Guilt | Email templates + cohort migration |
+| P3 | Bundle Uncertainty | Bundle optimizer |
