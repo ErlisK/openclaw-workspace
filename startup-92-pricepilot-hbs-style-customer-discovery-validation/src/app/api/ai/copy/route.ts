@@ -5,14 +5,16 @@
  * Returns: { headline, subheadline, description, cta_text, variant_a_label, variant_b_label, trust_line }
  */
 import { NextResponse } from 'next/server'
+import { requirePro } from '@/lib/entitlements'
 import { createClient } from '@/lib/supabase'
 
 export const maxDuration = 30
 
 export async function POST(request: Request) {
+  const entResult = await requirePro()
+  if (entResult instanceof NextResponse) return entResult
+  const user = entResult.user
   const supabase = await createClient()
-  const { data: { user }, error: authErr } = await supabase.auth.getUser()
-  if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
   let { product_name, price_a, price_b, description, audience } = body

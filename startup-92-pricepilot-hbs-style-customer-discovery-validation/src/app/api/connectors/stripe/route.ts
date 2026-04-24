@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { stripe } from '@/lib/stripe'
+import { requirePro, getEntitlement } from '@/lib/entitlements'
 
 export const maxDuration = 60
 
 export async function POST(request: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user }, error: authErr } = await supabase.auth.getUser()
-  if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
   const source = request.nextUrl.searchParams.get('source') || 'api'
-  if (source === 'csv') return handleCSVImport(request, supabase, user.id)
-  return handleAPIImport(request, supabase, user.id)
+
+  if (source === 'csv') {
+    // CSV import is available on all plans
+    const supabase = await createClient()
+    const { data: { user }, error: authErr } = await supabase.auth.getUser()
+    if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return handleCSVImport(request, supabase, user.id)
+  }
+
+  // Live Stripe API pull requires Pro
+  const entResult = await requirePro()
+  if (entResult instanceof NextResponse) return entResult
+
+  const supabase = await createClient()
+  return handleAPIImport(request, supabase, entResult.user.id)
 }
 
 async function handleAPIImport(request: NextRequest, supabase: any, userId: string) {

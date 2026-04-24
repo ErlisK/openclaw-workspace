@@ -1,6 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ProGate from '@/components/ProGate'
 
 type Tab = 'explain' | 'comms' | 'copy'
 
@@ -350,11 +351,19 @@ function CopyTab() {
 
 export default function AIToolsPage() {
   const [tab, setTab] = useState<Tab>('explain')
+  const [isPro, setIsPro] = useState<boolean | null>(null)
 
-  const tabs: { id: Tab; label: string; icon: string }[] = [
+  useEffect(() => {
+    fetch('/api/billing/status')
+      .then(r => r.json())
+      .then(d => setIsPro(d.is_pro ?? false))
+      .catch(() => setIsPro(false))
+  }, [])
+
+  const tabs: { id: Tab; label: string; icon: string; pro?: boolean }[] = [
     { id: 'explain', label: 'Explain recommendation', icon: '💡' },
-    { id: 'comms', label: 'Roll-out templates', icon: '✉️' },
-    { id: 'copy', label: 'Experiment page copy', icon: '✍️' },
+    { id: 'comms', label: 'Roll-out templates', icon: '✉️', pro: true },
+    { id: 'copy', label: 'Experiment page copy', icon: '✍️', pro: true },
   ]
 
   return (
@@ -390,15 +399,23 @@ export default function AIToolsPage() {
                 color: tab === t.id ? 'var(--brand)' : 'var(--text)',
                 cursor: 'pointer',
               }}>
-              {t.icon} {t.label}
+              {t.icon} {t.label}{t.pro && isPro === false && <span style={{ marginLeft: '0.35rem', fontSize: '0.65rem', background: '#6c47ff', color: '#fff', borderRadius: 4, padding: '0.1rem 0.3rem', verticalAlign: 'middle' }}>Pro</span>}
             </button>
           ))}
         </div>
 
         <div className="card">
           {tab === 'explain' && <ExplainTab />}
-          {tab === 'comms' && <CommsTab />}
-          {tab === 'copy' && <CopyTab />}
+          {tab === 'comms' && (
+            isPro === false
+              ? <ProGate feature="Roll-out Communications" description="AI-generated email, tweet, and blog templates for announcing your price change." />
+              : <CommsTab />
+          )}
+          {tab === 'copy' && (
+            isPro === false
+              ? <ProGate feature="Experiment Copy Generator" description="AI-generated headlines, CTAs, and landing page copy for your A/B experiment pages." />
+              : <CopyTab />
+          )}
         </div>
       </main>
     </div>

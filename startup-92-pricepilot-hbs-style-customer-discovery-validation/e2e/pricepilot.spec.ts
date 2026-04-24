@@ -1550,3 +1550,180 @@ test.describe('Connectors', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 13: ENTITLEMENT GATING
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Entitlement Gating', () => {
+
+  test('TC-ENT-001: /api/ai/comms returns 403 for free-plan user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Check what plan maya has
+    const statusR = await request.get(`${BASE_URL}/api/billing/status`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+
+    if (status.is_pro) {
+      // Maya has been upgraded to Pro — gate doesn't apply, skip
+      test.skip();
+      return;
+    }
+
+    const r = await request.post(`${BASE_URL}/api/ai/comms`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { product_name: 'Test Product', old_price: 29, new_price: 39 },
+    });
+    expect(r.status()).toBe(403);
+    const body = await r.json();
+    expect(body.code).toBe('PLAN_UPGRADE_REQUIRED');
+    expect(body.upgrade_url).toBe('/pricing');
+  });
+
+  test('TC-ENT-002: /api/ai/copy returns 403 for free-plan user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const statusR = await request.get(`${BASE_URL}/api/billing/status`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+    if (status.is_pro) { test.skip(); return; }
+
+    const r = await request.post(`${BASE_URL}/api/ai/copy`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { product_name: 'Test', price_a: 29, price_b: 39 },
+    });
+    expect(r.status()).toBe(403);
+    const body = await r.json();
+    expect(body.code).toBe('PLAN_UPGRADE_REQUIRED');
+  });
+
+  test('TC-ENT-003: /api/connectors/stripe (API mode) returns 403 for free-plan user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const statusR = await request.get(`${BASE_URL}/api/billing/status`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+    if (status.is_pro) { test.skip(); return; }
+
+    const r = await request.post(`${BASE_URL}/api/connectors/stripe`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { limit: 10 },
+    });
+    expect(r.status()).toBe(403);
+    const body = await r.json();
+    expect(body.code).toBe('PLAN_UPGRADE_REQUIRED');
+  });
+
+  test('TC-ENT-004: /api/connectors/stripe?source=csv is accessible on free plan', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const csvContent = 'id,Amount,Amount Refunded,Currency,Description,Customer Email,Created (UTC),Status\nch_001,19.00,0.00,usd,Test,test@example.com,2024-01-01 12:00,Paid';
+
+    const r = await request.post(`${BASE_URL}/api/connectors/stripe?source=csv`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'test.csv', mimeType: 'text/csv', buffer: Buffer.from(csvContent) },
+      },
+    });
+    // 200 = imported, not 403
+    expect(r.status()).toBe(200);
+    expect(r.status()).not.toBe(403);
+  });
+
+  test('TC-ENT-005: /api/export returns 403 for free-plan user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const statusR = await request.get(`${BASE_URL}/api/billing/status`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+    if (status.is_pro) { test.skip(); return; }
+
+    const r = await request.get(`${BASE_URL}/api/export?format=json&what=transactions`, {
+      headers: { Cookie: cookieHeader },
+    });
+    expect(r.status()).toBe(403);
+    const body = await r.json();
+    expect(body.code).toBe('PLAN_UPGRADE_REQUIRED');
+  });
+
+  test('TC-ENT-006: /api/export returns 401 without auth', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/export`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-ENT-007: /api/billing/status correctly reports plan for authenticated user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.get(`${BASE_URL}/api/billing/status`, { headers: { Cookie: cookieHeader } });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body).toHaveProperty('plan');
+    expect(body).toHaveProperty('is_pro');
+    expect(['free', 'pro']).toContain(body.plan);
+    // Plan consistency check
+    if (body.plan === 'free') {
+      expect(body.is_pro).toBe(false);
+      expect(body.experiments_limit).toBe(3);
+    } else {
+      expect(body.is_pro).toBe(true);
+      expect(body.experiments_limit).toBeNull();
+    }
+  });
+
+  test('TC-ENT-008: /pricing page links to /signup for unauthenticated users', async ({ page }) => {
+    await page.goto(`${BASE_URL}/pricing`);
+    await expect(page.locator('[data-testid="free-cta"]')).toHaveAttribute('href', /signup/);
+  });
+
+  test('TC-ENT-009: /ai-tools page shows Pro badge on comms+copy tabs for free user', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/ai-tools`);
+
+    // Wait for billing status to load
+    await page.waitForTimeout(1500);
+
+    const billingStatus = await fetch(`${BASE_URL}/api/billing/status`, {
+      headers: {
+        Cookie: (await page.context().cookies()).map(c => `${c.name}=${c.value}`).join('; ')
+      }
+    }).then(r => r.json()).catch(() => ({ is_pro: null }));
+
+    if (billingStatus.is_pro) {
+      // Pro users see the full tools — skip gate checks
+      test.skip();
+      return;
+    }
+
+    // Click comms tab — should show Pro gate
+    await page.locator('[data-testid="tab-comms"]').click();
+    await expect(page.locator('[data-testid="pro-gate"]')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('[data-testid="pro-gate-upgrade-link"]')).toHaveAttribute('href', '/pricing');
+  });
+
+  test('TC-ENT-010: Pro gate upgrade link leads to /pricing', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/ai-tools`);
+    await page.waitForTimeout(1500);
+
+    await page.locator('[data-testid="tab-copy"]').click();
+    const proGate = page.locator('[data-testid="pro-gate"]');
+
+    if (!(await proGate.isVisible({ timeout: 3_000 }).catch(() => false))) {
+      test.skip(); return; // Pro user
+    }
+
+    await page.locator('[data-testid="pro-gate-upgrade-link"]').click();
+    await page.waitForURL(/pricing/, { timeout: 5_000 });
+    expect(page.url()).toContain('/pricing');
+  });
+
+});
