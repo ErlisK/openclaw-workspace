@@ -139,7 +139,6 @@ Also provide an mvp_recommendation specifying which 2 personas to focus the firs
       model: gateway('anthropic/claude-sonnet-4-6'),
       schema: PersonaSchema,
       prompt,
-      maxTokens: 8000,
     });
 
     return Response.json({
