@@ -23,8 +23,12 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const protectedPaths = ['/dashboard', '/import', '/suggestions', '/experiments', '/billing', '/settings']
-  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p))
+  const protectedPaths = ['/dashboard', '/import', '/suggestions', '/experiments', '/settings']
+  // /billing/success and /billing/cancel are public (post-checkout); rest of /billing requires auth
+  const isProtected = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p)) ||
+    (request.nextUrl.pathname.startsWith('/billing') &&
+     !request.nextUrl.pathname.startsWith('/billing/success') &&
+     !request.nextUrl.pathname.startsWith('/billing/cancel'))
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()

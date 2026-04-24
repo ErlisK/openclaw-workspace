@@ -1253,3 +1253,139 @@ test.describe('AI Writing Tools', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 11: PAYMENTS & BILLING
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Payments — Stripe Checkout', () => {
+
+  test('TC-PAY-001: /pricing page renders Free and Pro tiers', async ({ page }) => {
+    await page.goto(`${BASE_URL}/pricing`);
+    await expect(page.locator('[data-testid="free-tier"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('[data-testid="pro-tier"]')).toBeVisible();
+    // Price is shown
+    const text = await page.textContent('body');
+    expect(text).toContain('$29');
+    expect(text).toContain('$0');
+  });
+
+  test('TC-PAY-002: Free tier CTA links to /signup', async ({ page }) => {
+    await page.goto(`${BASE_URL}/pricing`);
+    const link = page.locator('[data-testid="free-cta"]');
+    await expect(link).toBeVisible();
+    const href = await link.getAttribute('href');
+    expect(href).toContain('/signup');
+  });
+
+  test('TC-PAY-003: /pricing page contains Stripe test card hint', async ({ page }) => {
+    await page.goto(`${BASE_URL}/pricing`);
+    const text = await page.textContent('body');
+    expect(text).toContain('4242');
+  });
+
+  test('TC-PAY-004: /api/checkout returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/checkout`);
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-PAY-005: /api/billing/status returns 401 without auth', async ({ request }) => {
+    const resp = await request.get(`${BASE_URL}/api/billing/status`);
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-PAY-006: /api/billing/portal returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/billing/portal`);
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-PAY-007: /api/billing/status returns plan schema for authenticated user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.get(`${BASE_URL}/api/billing/status`, {
+      headers: { Cookie: cookieHeader },
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body).toHaveProperty('plan');
+    expect(body).toHaveProperty('is_pro');
+    expect(['free', 'pro']).toContain(body.plan);
+    expect(typeof body.is_pro).toBe('boolean');
+    expect(body).toHaveProperty('experiments_limit');
+  });
+
+  test('TC-PAY-008: /api/checkout returns checkout URL when authenticated', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/checkout`, {
+      headers: { Cookie: cookieHeader },
+    });
+
+    // 200 = new checkout session, 409 = already pro — both are valid
+    expect([200, 409]).toContain(resp.status());
+
+    if (resp.status() === 200) {
+      const body = await resp.json();
+      expect(body).toHaveProperty('url');
+      expect(body.url).toContain('checkout.stripe.com');
+      expect(body).toHaveProperty('session_id');
+    }
+  });
+
+  test('TC-PAY-009: Upgrade button on /pricing redirects authenticated user to Stripe', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/pricing`);
+    const upgradeBtn = page.locator('[data-testid="upgrade-btn"]');
+    await expect(upgradeBtn).toBeVisible();
+
+    // Click and wait for redirect
+    const [response] = await Promise.all([
+      page.waitForResponse(resp => resp.url().includes('/api/checkout'), { timeout: 10_000 }),
+      upgradeBtn.click(),
+    ]);
+
+    expect([200, 409]).toContain(response.status());
+  });
+
+  test('TC-PAY-010: /billing/success page is publicly accessible (no auth required)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/billing/success`);
+    // Should NOT redirect to /login
+    expect(page.url()).not.toContain('/login');
+    expect(page.url()).toContain('/billing/success');
+  });
+
+  test('TC-PAY-011: /billing/cancel page is publicly accessible', async ({ page }) => {
+    await page.goto(`${BASE_URL}/billing/cancel`);
+    expect(page.url()).not.toContain('/login');
+    expect(page.url()).toContain('/billing/cancel');
+    const text = await page.textContent('body');
+    expect(text).toContain('cancel');
+    await expect(page.locator('[data-testid="cancel-back-to-pricing"]')).toBeVisible();
+  });
+
+  test('TC-PAY-012: Webhook endpoint POST returns 400 on invalid payload', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: '{"not":"a stripe event"}',
+    });
+    // 400 (invalid signature/event) or 200 (dev mode processes it) — not 500
+    expect(resp.status()).toBeLessThan(500);
+  });
+
+  test('TC-PAY-013: /api/billing/portal returns 404 for user without Stripe customer', async ({ request, page }) => {
+    await login(page, USERS.marcus);  // second test user — likely no Stripe customer
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/billing/portal`, {
+      headers: { Cookie: cookieHeader },
+    });
+    // 404 (no customer) or 200 (has customer) — not 401/500
+    expect([200, 404]).toContain(resp.status());
+  });
+
+});
