@@ -103,7 +103,7 @@ test.describe('Auth — Email/Password', () => {
     await page.waitForTimeout(2000);
     expect(page.url()).toContain('/login');
     // Error message visible
-    const errorEl = page.locator('[data-testid="auth-error"], .error-message, [role="alert"]');
+    const errorEl = page.locator('[data-testid="auth-error"], .error-message, [role="alert"]').first();
     await expect(errorEl).toBeVisible();
   });
 
