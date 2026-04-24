@@ -500,6 +500,97 @@ test.describe('Engine — Produce Suggestions', () => {
     expect(newCardCount).toBeLessThanOrEqual(initialCardCount);
   });
 
+  // ── NEW: /api/elasticity specific tests ──────────────────────────────────
+
+  test('TC-ENGINE-008: /api/elasticity returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/elasticity`);
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-ENGINE-009: /api/elasticity GET returns 401 without auth', async ({ request }) => {
+    const resp = await request.get(`${BASE_URL}/api/elasticity`);
+    expect(resp.status()).toBe(401);
+  });
+
+  test('TC-ENGINE-010: /api/elasticity POST returns valid schema with tiers', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/elasticity`, {
+      headers: { Cookie: cookieHeader },
+      data: {},
+    });
+
+    expect([200]).toContain(resp.status());
+    const body = await resp.json();
+
+    // Schema: { products: [...], generated_at: string }
+    expect(body).toHaveProperty('products');
+    expect(body).toHaveProperty('generated_at');
+    expect(Array.isArray(body.products)).toBe(true);
+
+    if (body.products.length > 0) {
+      const p = body.products[0];
+      expect(p).toHaveProperty('product_id');
+      expect(p).toHaveProperty('action');
+      expect(p).toHaveProperty('tiers');
+      expect(Array.isArray(p.tiers)).toBe(true);
+
+      // If actionable, tiers should have confidence + ROI
+      if (p.action === 'test_higher' && p.tiers.length > 0) {
+        const tier = p.tiers[0];
+        expect(tier).toHaveProperty('price');
+        expect(tier).toHaveProperty('confidence');
+        expect(tier).toHaveProperty('roi_p50_cents');
+        expect(tier).toHaveProperty('confidence_label');
+        expect(tier).toHaveProperty('rationale');
+        expect(tier.price).toBeGreaterThan(0);
+        expect(tier.confidence).toBeGreaterThanOrEqual(0);
+        expect(tier.confidence).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  test('TC-ENGINE-011: /api/elasticity returns elasticity posterior fields', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.post(`${BASE_URL}/api/elasticity`, {
+      headers: { Cookie: cookieHeader },
+      data: {},
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+
+    if (body.products.length > 0 && body.products[0].action !== 'insufficient_data') {
+      const p = body.products[0];
+      expect(p).toHaveProperty('elasticity');
+      const ε = p.elasticity;
+      if (ε) {
+        expect(ε).toHaveProperty('mean');
+        expect(ε).toHaveProperty('sd');
+        expect(ε).toHaveProperty('n_observations');
+        expect(ε).toHaveProperty('confidence_label');
+      }
+    }
+  });
+
+  test('TC-ENGINE-012: /api/elasticity GET returns persisted suggestions list', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const resp = await request.get(`${BASE_URL}/api/elasticity`, {
+      headers: { Cookie: cookieHeader },
+    });
+    expect(resp.status()).toBe(200);
+    const body = await resp.json();
+    expect(body).toHaveProperty('suggestions');
+    expect(Array.isArray(body.suggestions)).toBe(true);
+  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
