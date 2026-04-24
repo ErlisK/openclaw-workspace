@@ -68,7 +68,7 @@ const PersonaSchema = z.object({
     pain_clusters_ranked: z.array(z.object({
       cluster_id: z.string(),
       cluster_name: z.string(),
-      relevance: z.enum(['primary', 'secondary', 'not_relevant'),
+      relevance: z.enum(['primary', 'secondary', 'not_relevant']),
     })),
     channel_footprint: z.object({
       daily_reads: z.array(z.string()),
