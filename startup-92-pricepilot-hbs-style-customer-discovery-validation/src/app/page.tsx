@@ -7,6 +7,7 @@ export default function HomePage() {
         <div className="container nav-inner">
           <span className="nav-logo">🚀 PricePilot</span>
           <div className="nav-links">
+            <Link href="/pricing">Pricing</Link>
             <Link href="/login">Sign in</Link>
             <Link href="/signup" className="btn btn-primary btn-sm" data-testid="hero-signup-btn">Start free</Link>
           </div>
