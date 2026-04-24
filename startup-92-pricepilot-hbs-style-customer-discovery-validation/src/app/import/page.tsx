@@ -147,7 +147,7 @@ export default function ImportPage() {
                 {file ? file.name : 'Drop your CSV here or click to browse'}
               </p>
               <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
-                Gumroad, Stripe, Shopify, or any sales CSV
+                Gumroad, Stripe, Shopify, or any sales CSV — <a href="/import/guide" style={{ color: 'var(--brand)' }}>column guide →</a>
               </p>
               <input ref={fileRef} type="file" accept=".csv,text/csv" style={{ display: 'none' }}
                 onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />

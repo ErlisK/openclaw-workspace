@@ -1906,3 +1906,171 @@ test.describe('Stripe User Connector', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 15: CSV MAPPING GUIDE + VALIDATION ENDPOINT
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('CSV Mapping Guide & Validation', () => {
+
+  test('TC-CSV-001: /import/guide page renders for all 3 platforms', async ({ page }) => {
+    await page.goto(`${BASE_URL}/import/guide`);
+    const text = await page.textContent('body');
+    expect(text).toContain('Gumroad');
+    expect(text).toContain('Shopify');
+    expect(text).toContain('Stripe');
+    expect(text).toContain('Column Mappings');
+  });
+
+  test('TC-CSV-002: /import/guide shows required column markers', async ({ page }) => {
+    await page.goto(`${BASE_URL}/import/guide`);
+    const text = await page.textContent('body');
+    expect(text).toContain('Required');
+    // Gumroad required: Sale Date, Product Name, Price
+    expect(text).toContain('Sale Date');
+    expect(text).toContain('Product Name');
+    // Shopify required: Name, Total
+    expect(text).toContain('Financial Status');
+  });
+
+  test('TC-CSV-003: /import/guide has template download links', async ({ page }) => {
+    await page.goto(`${BASE_URL}/import/guide`);
+    for (const file of ['gumroad-sales-template.csv', 'shopify-orders-template.csv', 'stripe-charges-template.csv']) {
+      const link = page.locator(`a[href="/templates/${file}"]`).first();
+      await expect(link).toBeVisible({ timeout: 5_000 });
+    }
+  });
+
+  test('TC-CSV-004: /import/guide links to /import', async ({ page }) => {
+    await page.goto(`${BASE_URL}/import/guide`);
+    const importLink = page.locator('a[href="/import"]').first();
+    await expect(importLink).toBeVisible();
+  });
+
+  test('TC-CSV-005: /api/connectors/validate returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-CSV-006: /api/connectors/validate rejects unknown platform', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const csv = 'col1,col2\nval1,val2';
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'test.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+        platform: 'unknown_platform',
+      },
+    });
+    expect(r.status()).toBe(400);
+  });
+
+  test('TC-CSV-007: Validate endpoint detects missing required Gumroad columns', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // CSV with wrong headers
+    const csv = 'Date,Name,Amount\n2024-01-01,Product A,29';
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'bad.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+        platform: 'gumroad',
+      },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.valid).toBe(false);
+    expect(body.errors.length).toBeGreaterThan(0);
+    expect(body.errors[0]).toContain('Missing required');
+  });
+
+  test('TC-CSV-008: Validate endpoint passes valid Gumroad CSV', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const header = 'Sale Date,Product Name,Seller,Email,Price,Currency,Refunded';
+    const rows = ['2024-01-01,Landing Page Template,me@test.com,buyer@test.com,29,USD,false'];
+    for (let i = 2; i <= 10; i++) rows.push(`2024-01-${String(i).padStart(2,'0')},Product ${i},me@test.com,buyer${i}@test.com,${i*5},USD,false`);
+    const csv = [header, ...rows].join('\n');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'gumroad.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+        platform: 'gumroad',
+      },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.valid).toBe(true);
+    expect(body.rows_valid).toBeGreaterThanOrEqual(1);
+    expect(body.preview.length).toBeGreaterThanOrEqual(1);
+    expect(body.schema).toHaveProperty('required_columns');
+    expect(body.schema).toHaveProperty('export_instructions');
+  });
+
+  test('TC-CSV-009: Validate endpoint passes valid Shopify CSV', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const csv = [
+      'Name,Email,Financial Status,Fulfillment Status,Currency,Subtotal,Shipping,Taxes,Total,Created at,Lineitem name',
+      '#1001,buyer@test.com,paid,fulfilled,USD,29,0,2.32,31.32,2024-01-15 12:00:00 +0000,Analytics Pro',
+      '#1002,buyer2@test.com,paid,fulfilled,USD,49,0,3.92,52.92,2024-01-16 12:00:00 +0000,SEO Pack',
+    ].join('\n');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'shopify.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+        platform: 'shopify',
+      },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.valid).toBe(true);
+    expect(body.rows_valid).toBe(2);
+    expect(body.errors).toHaveLength(0);
+  });
+
+  test('TC-CSV-010: Validate endpoint returns preview rows (max 3)', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const header = 'id,Amount,Currency,Status,Customer Email,Created (UTC)';
+    const rows = Array.from({ length: 10 }, (_, i) =>
+      `ch_${String(i+1).padStart(5,'0')},${(i+1)*10}.00,usd,Paid,buyer${i+1}@test.com,2024-01-${String(i+1).padStart(2,'0')} 12:00`
+    );
+    const csv = [header, ...rows].join('\n');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/validate`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'stripe.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+        platform: 'stripe',
+      },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.valid).toBe(true);
+    expect(body.preview.length).toBeLessThanOrEqual(3);
+    expect(body.rows_found).toBe(10);
+    expect(body.message).toContain('valid rows');
+  });
+
+  test('TC-CSV-011: /import page has column guide link', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/import`);
+    const guideLink = page.locator('a[href="/import/guide"]');
+    await expect(guideLink).toBeVisible({ timeout: 5_000 });
+  });
+
+});
