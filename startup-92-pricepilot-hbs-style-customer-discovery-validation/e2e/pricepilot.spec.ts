@@ -413,20 +413,16 @@ test.describe('Engine — Produce Suggestions', () => {
     const cookies = await page.context().cookies();
     const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
 
-    // Hit the recommend endpoint
-    const resp = await request.post(`${BASE_URL}/api/engine/recommend`, {
+    // Hit the elasticity endpoint (canonical engine route)
+    const resp = await request.post(`${BASE_URL}/api/elasticity`, {
       headers: { Cookie: cookieHeader },
-      data: { /* product_id will be inferred from user's first product */ },
+      data: {},
     });
 
-    // Accept 200 (recommendation) or 422 (insufficient data) — both are valid
-    expect([200, 422, 400]).toContain(resp.status());
-
-    if (resp.status() === 200) {
-      const body = await resp.json();
-      expect(body).toHaveProperty('action');
-      expect(['test_higher', 'test_lower', 'stable', 'insufficient_data']).toContain(body.action);
-    }
+    expect([200]).toContain(resp.status());
+    const body = await resp.json();
+    expect(body).toHaveProperty('products');
+    expect(Array.isArray(body.products)).toBe(true);
   });
 
   test('TC-ENGINE-003: Suggestions page shows at least one card after data import', async ({ page }) => {
