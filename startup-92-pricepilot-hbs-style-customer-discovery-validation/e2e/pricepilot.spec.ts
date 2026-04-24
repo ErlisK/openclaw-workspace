@@ -1389,3 +1389,164 @@ test.describe('Payments — Stripe Checkout', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 12: CONNECTORS — STRIPE / GUMROAD / SHOPIFY
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Connectors', () => {
+
+  test('TC-CON-001: /api/connectors/stripe returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connectors/stripe`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-CON-002: /api/connectors/gumroad returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connectors/gumroad`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-CON-003: /api/connectors/shopify returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/connectors/shopify`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-CON-004: Stripe CSV connector imports 50+ transactions', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Read the template CSV
+    const fs = require('fs');
+    const path = require('path');
+    // Use inline CSV with 55 rows to avoid fs dependency
+    const header = 'id,Amount,Amount Refunded,Currency,Description,Customer Email,Created (UTC),Status,Card Brand,Card Last4,Metadata: product_name';
+    const csvRows = [header];
+    const products = ['Landing Page Template','SEO Email Pack','SaaS Onboarding Kit','Figma UI Kit','Notion Dashboard'];
+    const prices = ['19.00','29.00','49.00','79.00','9.90'];
+    for (let i = 0; i < 55; i++) {
+      const prod = products[i % 5];
+      const price = prices[i % 5];
+      const dt = `2024-${String(Math.floor(i/30)+1).padStart(2,'0')}-${String((i%28)+1).padStart(2,'0')} 12:00`;
+      csvRows.push(`ch_test_${String(i+1).padStart(5,'0')},${price},0.00,usd,PricePilot test: ${prod},buyer${i+1}@example.com,${dt},Paid,Visa,4242,${prod}`);
+    }
+    const csvContent = csvRows.join('\n');
+
+    const formData = new FormData();
+    formData.append('file', new Blob([csvContent], { type: 'text/csv' }), 'stripe-charges.csv');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/stripe?source=csv`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'stripe-charges.csv', mimeType: 'text/csv', buffer: Buffer.from(csvContent) },
+      },
+    });
+
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.imported).toBeGreaterThanOrEqual(50);
+    expect(body.source).toBe('stripe-csv');
+  });
+
+  test('TC-CON-005: Gumroad CSV connector imports 50+ transactions', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const header = 'Sale Date,Product Name,Seller,Email,Price,Currency,Refunded,Partial Refund,Discover Fee,Gumroad Fee,Taxes,Net Total,Zip/Postal Code,Country,IP Country';
+    const csvRows = [header];
+    const products = ['Landing Page Template','SEO Email Pack','SaaS Onboarding Kit','Figma UI Kit','Notion Dashboard'];
+    const prices = [19,29,49,79,99];
+    for (let i = 0; i < 55; i++) {
+      const prod = products[i % 5];
+      const price = prices[i % 5];
+      const dt = `2024-${String(Math.floor(i/30)+1).padStart(2,'0')}-${String((i%28)+1).padStart(2,'0')}`;
+      csvRows.push(`${dt},${prod},creator@example.com,buyer${i+1}@example.com,${price},USD,false,,0,${(price*0.03).toFixed(2)},0,${(price*0.92).toFixed(2)},94105,United States,US`);
+    }
+    const csvContent = csvRows.join('\n');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/gumroad`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'gumroad.csv', mimeType: 'text/csv', buffer: Buffer.from(csvContent) },
+      },
+    });
+
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.imported).toBeGreaterThanOrEqual(50);
+    expect(body.source).toBe('gumroad');
+  });
+
+  test('TC-CON-006: Shopify CSV connector imports 50+ transactions', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const header = 'Name,Email,Financial Status,Fulfillment Status,Currency,Subtotal,Shipping,Taxes,Total,Discount Code,Discount Amount,Created at,Lineitem quantity,Lineitem name,Lineitem price,Lineitem SKU';
+    const csvRows = [header];
+    const products = ['Dev Tools Sub','Analytics Pro','Content Calendar','Link Builder','Form Builder'];
+    const prices = [29,49,79,99,149];
+    for (let i = 0; i < 55; i++) {
+      const prod = products[i % 5];
+      const price = prices[i % 5];
+      const dt = `2024-${String(Math.floor(i/30)+1).padStart(2,'0')}-${String((i%28)+1).padStart(2,'0')} 12:00:00 +0000`;
+      csvRows.push(`#${1000+i},customer${i+1}@example.com,paid,fulfilled,USD,${price},0,${(price*0.08).toFixed(2)},${(price*1.08).toFixed(2)},,0,${dt},1,${prod},${price},SKU-${String(i+1).padStart(4,'0')}`);
+    }
+    const csvContent = csvRows.join('\n');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/shopify`, {
+      headers: { Cookie: cookieHeader },
+      multipart: {
+        file: { name: 'shopify.csv', mimeType: 'text/csv', buffer: Buffer.from(csvContent) },
+      },
+    });
+
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.imported).toBeGreaterThanOrEqual(50);
+    expect(body.source).toBe('shopify');
+  });
+
+  test('TC-CON-007: Stripe API connector returns 200 when authenticated', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.post(`${BASE_URL}/api/connectors/stripe`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { limit: 10 },
+    });
+
+    // 200 = success (even 0 imported is ok), not 401/500
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body).toHaveProperty('imported');
+  });
+
+  test('TC-CON-008: Template CSVs are publicly accessible', async ({ request }) => {
+    const files = [
+      '/templates/stripe-charges-template.csv',
+      '/templates/gumroad-sales-template.csv',
+      '/templates/shopify-orders-template.csv',
+    ];
+    for (const f of files) {
+      const r = await request.get(`${BASE_URL}${f}`);
+      expect(r.status()).toBe(200);
+      const text = await r.text();
+      expect(text.split('\n').length).toBeGreaterThan(50); // 60 rows + header
+    }
+  });
+
+  test('TC-CON-009: Webhook endpoint is live and reachable', async ({ request }) => {
+    // POST an invalid event — should get 400 (bad signature) not 404/500
+    const r = await request.post(`${BASE_URL}/api/webhooks/stripe`, {
+      headers: { 'Content-Type': 'application/json', 'stripe-signature': 'invalid' },
+      data: JSON.stringify({ type: 'test', data: {} }),
+    });
+    // 400 = signature rejected (correct), not 404 or 500
+    expect(r.status()).toBeLessThan(500);
+    expect(r.status()).not.toBe(404);
+  });
+
+});
