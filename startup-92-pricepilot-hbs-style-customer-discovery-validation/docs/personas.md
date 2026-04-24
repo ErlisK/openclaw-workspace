@@ -1,234 +1,286 @@
 # PricePilot — Persona Briefs & Priority Stack
-*HBS Discovery Phase — Steps 1–2*
+*Cluster-informed, AI-assisted via Vercel AI Gateway (Claude Sonnet 4.6)*
+*Source data: 95 public signals, 10 pain clusters*
 *Last updated: 2025-04-24*
 
 ---
 
-## Priority Stack Rank
+## MVP Priority Summary
 
-| Rank | Persona | MRR Range | Pain Intensity | Willingness to Pay | Ease of Reach | ICP Score |
-|---|---|---|---|---|---|---|
-| **#1** | Micro-SaaS Founder | $2k–$8k | 🔥🔥🔥🔥🔥 | High ($49–$99/mo) | High (IH, r/SaaS, X) | ★★★★★ |
-| **#2** | Course Creator | $1k–$5k | 🔥🔥🔥🔥 | Medium ($29–$79/mo) | Medium (Twitter, Teachable groups) | ★★★★☆ |
-| **#3** | Template / Digital Asset Seller | $500–$3k | 🔥🔥🔥 | Low-Medium ($19–$49/mo) | High (Gumroad community, Twitter) | ★★★☆☆ |
-| **#4** | Indie Consultant (Productized) | $3k–$10k | 🔥🔥🔥🔥 | High ($49–$99/mo) | Low (harder to find, less community) | ★★★☆☆ |
+| Rank | Persona | Platform | MRR | ICP Priority |
+|---|---|---|---|---|
+| **#1 PRIMARY** | Maya — Template Seller | Gumroad | $600–$2.8k | ⭐⭐⭐⭐⭐ Build first |
+| **#2 PRIMARY** | Marcus — Micro-SaaS | Stripe (subscriptions) | $2k–$8k | ⭐⭐⭐⭐⭐ Build second |
+| **#3 V2** | Sofia — Course Creator | Gumroad/Teachable | $1k–$5k | ⭐⭐⭐⭐ Post-MVP |
+| **#4 V2** | Devon — Shopify Digital | Shopify + Stripe | $1k–$6k | ⭐⭐⭐ Post-MVP |
+| **#5 V2** | Alexei — Productized Consultant | Stripe payment links | $3k–$10k | ⭐⭐⭐ Post-MVP |
 
-**Rationale for Rank #1 (Micro-SaaS):** Highest pain, most familiar with data-driven thinking, most active in PricePilot's discovery channels, highest WTP due to recurring revenue dependence on pricing decisions.
+**MVP Positioning Statement (AI-generated):**
+> *"PricePilot is the pricing experiment tool for solo creators and micro-SaaS founders who want to safely test a higher price — without needing a data team, a statistics degree, or an enterprise analytics budget."*
+
+**First 60 Days Focus:**
+Build one core flow: connect Gumroad or Stripe → pick a product → set two prices → get a split test URL → receive a plain-English verdict when confidence crosses 90%. Ship Gumroad integration first (weeks 1–2), Stripe recurring second (weeks 3–4). Do 10 manual onboarding calls with Gumroad creators from r/Notion and IndieHackers. Instrument two north-star events: "started a test" and "saw a verdict." Do not build dashboards, cohort analysis, or tier optimization until both P0 personas have hit success metric at least 20 times.
 
 ---
 
-## Persona #1: Marcus — The Micro-SaaS Founder ⭐ PRIMARY ICP
+## Persona #1 (P0 PRIMARY): Maya — Notion Template Seller ⭐
 
-**"I know I'm underpriced but every time I think about raising prices I get cold feet."**
+> *"I downloaded my Gumroad CSV, spent three hours in Google Sheets trying to figure out if I should charge more, and walked away knowing absolutely nothing. I just need someone to tell me the right price."*
+
+### Profile
+- **Age:** 24–32
+- **Background:** Ex-designer or productivity nerd turned creator. Learned by doing. No formal business education.
+- **Product:** Notion/Figma/Obsidian/Excel templates, icon packs, UI kits
+- **MRR (equivalent):** $600–$2,800 (mostly one-time spikes around launches or Reddit posts going viral)
+- **Customer count:** 200–2,000 lifetime; 50–150 active in any given month
+- **Time at current price:** 8–24 months — set on launch day by looking at what similar creators charged
+
+### Platform Stack
+| Layer | Tool |
+|---|---|
+| **Primary payment** | Gumroad |
+| **Storefront** | Gumroad product page + Notion landing page |
+| **Email** | ConvertKit (free tier) |
+| **Analytics** | Gumroad native dashboard + manual Google Sheets exports |
+| **Social** | Twitter/X, r/Notion, Pinterest |
+
+### Trigger Moment
+A Reddit post or tweet about their Notion template goes viral, driving 300 sales in 48 hours at $12. Two days later the traffic dies and they realize: *"If I'd just charged $29 I'd have made $5,100 instead of $1,800 and those same people would have bought."* They open Gumroad analytics, stare at a bar chart showing sales volume, find no conversion rate, no price sensitivity data, nothing. They Google "how to test pricing on Gumroad" and find nothing useful.
+
+### Decision Context
+- **What they know:** Their product sells. The price feels arbitrary. Other creators charge 2–3x more for similar templates. A price change is theoretically reversible.
+- **What they don't know:** Their true conversion rate at current price. Whether a higher price would hurt volume or hurt it slightly. What their customer LTV looks like. Whether buyers are price-sensitive or just need a nudge.
+- **What they fear:** Raising the price and watching their next viral moment produce zero sales. Public embarrassment of a flopped launch. Losing the few loyal customers who've been buying their whole catalog.
+- **What would unlock action:** A clear, non-technical way to test $12 vs $29 on real traffic with a verdict in plain English. Bonus: seeing a case study from another Gumroad creator who tried it.
+
+### Pain Clusters (Primary)
+- **C3** — Data-Blind Pricing Guesswork (can't make sense of Gumroad CSV)
+- **C10** — Payment Platform Analytics Gap (Gumroad shows nothing useful)
+- **C2** — Statistically-Invalid Tiny-Sample Tests (doesn't know about Bayesian)
+- **C4** — Missing Value-to-Price Alignment (severely underpriced, knows it, can't quantify)
+
+### Channel Footprint
+- **Daily reads:** r/Notion, r/passive_income, IndieHackers, Creator Wizard newsletter, Traf's blog
+- **Posts in:** r/Notion, r/sidehustle, Gumroad Creator Facebook Group, Notion Creator Discord
+- **Follows on Twitter:** @traf, @thomas_frank, @hahnbee, @JohnRush_x, @marc_louvion
+- **Buys from:** other Gumroad creators, Gumroad community recommendations
+
+### PricePilot Adoption Journey
+| Stage | What Happens |
+|---|---|
+| **Discovery** | Sees a tweet from another Gumroad creator: "Used PricePilot to test $12 vs $29 on my template — $29 won and I doubled revenue with same traffic." Clicks the link out of acute FOMO. |
+| **Evaluation question** | "Does this actually work with Gumroad or do I need to set up custom code?" Checks the landing page within 90 seconds for "works with Gumroad" signal. Leaves if not obvious. |
+| **Activation moment** | Connects Gumroad account, selects best-selling template, sets Test A at $12 and Test B at $29, clicks "Start Experiment." Gets a shareable test link she can drop in her next tweet. |
+| **Success metric** | PricePilot tells her "Test B ($29) is performing 23% better in revenue per visitor with 94% confidence." She raises the price with one click. Revenue goes up. She posts about it on Twitter. |
+| **Churn risk** | Setup takes >10 minutes or requires any code. Gets no traffic for 30 days (no traffic = no signal = no value). Tool doesn't show results clearly enough for a non-analytical person. |
+
+### Willingness to Pay
+- **Comfortable:** $9–$15/mo
+- **Stretch:** $19/mo
+- **Preferred model:** Monthly cancel-anytime OR one-time $49–$79 "lifetime" fee (feels safer for creator psyche)
+- **Objection:** *"My whole product makes $600/mo, I can't spend $50/mo on a tool. It has to pay for itself in one experiment."*
+
+---
+
+## Persona #2 (P0 PRIMARY): Marcus — Micro-SaaS Founder ⭐
+
+> *"I know I'm underpriced but every time I think about raising prices I get cold feet. I need data that tells me it's safe, not just Twitter anecdotes from survivors."*
 
 ### Profile
 - **Age:** 28–38
 - **Background:** Ex-software engineer or product manager; went indie 1–3 years ago
-- **Product:** Single-feature B2B or B2D SaaS tool (e.g., an SEO checker, invoice generator, screenshot API, uptime monitor, Slack bot)
-- **MRR:** $2,000–$8,000 (typically 30–200 paying customers)
-- **Platform:** Stripe (recurring billing), often self-hosted or Vercel + Supabase
-- **Time at current price:** 8–24 months — price was set "kind of randomly" at launch
+- **Product:** Single-feature B2B or B2D SaaS (SEO checker, invoice generator, screenshot API, uptime monitor, Slack bot)
+- **MRR:** $2,000–$8,000 (typically 30–200 paying customers on recurring Stripe billing)
+- **Customer count:** 30–200 active subscriptions
+- **Time at current price:** 8–24 months — set "kind of randomly" at launch by copying a competitor
 
-### Current Pricing Approach
-- Set price at launch by copying a competitor or using gut feel
-- Has tiered plans (Free, $9, $29) but tiers were designed for conversion, not value capture
-- Has thought about raising prices "many times" but keeps delaying
-- Knows about A/B testing but "doesn't have enough traffic to make it work"
+### Platform Stack
+| Layer | Tool |
+|---|---|
+| **Primary payment** | Stripe (recurring subscriptions) |
+| **Storefront** | Self-hosted Next.js / Vercel landing page |
+| **Email** | Loops, Postmark, or Resend for transactional; Beehiiv or ConvertKit for newsletters |
+| **Analytics** | PostHog or Mixpanel; occasionally Baremetrics (but it's pricey) |
+| **Infra** | Vercel + Supabase or PlanetScale |
 
-### Top 5 Pain Points
-1. **Paralysis by analysis:** Spends hours reading pricing threads but can't translate advice into action for *his* specific product and customer base
-2. **Sample size anxiety:** Reads about "statistical significance" and concludes he can never run a proper experiment
-3. **Churn fear:** Has 2–3 customers who email every time anything changes — dreads mass cancellation
-4. **Leaving money on table:** Knows his customers save/make far more than his $29/mo price; suspects he could charge $79–$149 but has no data to confirm
-5. **No rollback path:** If he raises prices and it goes badly, there's no clean way to revert without awkward customer communication
+### Trigger Moment
+Hits $5k MRR, realizes the business is "real money" now. Opens a spreadsheet, calculates that if he could charge $49 instead of $29 he'd make an extra $2k/mo — life-changing at this scale. Spends an hour reading pricing threads on IndieHackers. Closes the laptop having decided nothing. Repeats this monthly for 6 months. Then a customer emails saying "I'd pay twice as much for this, please don't shut it down" — and that's the moment he starts actively looking for a way to test.
 
-### Jobs to Be Done
-- **Functional:** Get a data-backed price recommendation with confidence score for my specific product + customer cohort
-- **Emotional:** Feel confident and "professional" about a price change rather than anxious
-- **Social:** Be able to say "I ran an experiment" not "I just guessed"
+### Decision Context
+- **What they know:** Subscription revenue model, basic churn tracking, that A/B testing exists, that their competitors charge more.
+- **What they don't know:** What his specific cohort's price elasticity is. Whether new subscribers are more price-sensitive than existing ones. How to run a price experiment without breaking Stripe's billing setup.
+- **What they fear:** Losing existing customers with a price increase. Technical complexity of routing users to different price IDs. Angry email threads from long-term customers.
+- **What would unlock action:** A Bayesian confidence score on his own data that says "72% chance raising to $49 increases revenue." Plus a staged rollout so new signups see $49 first while existing customers stay grandfathered.
 
-### Channels & Watering Holes
-- IndieHackers (daily reader, occasional poster)
-- Twitter/X: follows @levelsio, @marc_louvion, @shl, @patio11
-- r/SaaS, r/microsaas (lurker, occasional commenter)
-- MicroConf (aspirational), MegaMaker (community member)
-- Hacker News (Show HN launches)
+### Pain Clusters (Primary)
+- **C1** — Fear-of-Churn Price-Increase Paralysis (the dominant cluster for this persona)
+- **C2** — Statistically-Invalid Tiny-Sample Tests (100 customers ≠ enough for frequentist tests)
+- **C6** — Existing-Customer Migration Guilt (grandfathered early adopters at $9/mo)
+- **C9** — Low-Friction Test Execution Gap (knows what to do, can't wire up Stripe split easily)
 
-### Trust Signals That Would Drive Adoption
-- "Built by an indie founder for indie founders" positioning
-- Specific case study: "Marcus raised his $29/mo tool to $49/mo, kept 92% of customers, added $1,200/mo"
-- Founder on Twitter sharing his own pricing experiment results
-- Transparent methodology (Bayesian, not black-box)
-- Free trial / freemium so he can see insights before committing
+### Channel Footprint
+- **Daily reads:** IndieHackers, r/SaaS, r/microsaas, HackerNews (Show HN), Marc Lou's blog
+- **Posts in:** IndieHackers (product updates), r/SaaS (advice threads), Twitter/X (BuildInPublic)
+- **Follows on Twitter:** @levelsio, @marc_louvion, @patio11, @shl, @dannypostmaa, @tibo_maker
+- **Buys from:** other indie tools, AppSumo LTDs, Gumroad starter kits
 
-### Objections
-- *"I don't have enough data"* → PricePilot's Bayesian engine is specifically designed for low sample sizes
-- *"What if I lose customers"* → Staged rollout (20% of new visitors first), instant rollback
-- *"This is too expensive"* → "One price increase will pay for 6 months of PricePilot"
-- *"I can do this myself in a spreadsheet"* → Show time savings + statistical rigor comparison
+### PricePilot Adoption Journey
+| Stage | What Happens |
+|---|---|
+| **Discovery** | Sees PricePilot on IndieHackers "What are you working on this week?" thread. Or a Show HN post. Clicks through because the title mentions "Bayesian pricing for small SaaS." |
+| **Evaluation question** | "Does this work with Stripe subscriptions, not just one-time sales? Can I test $29 vs $49 on new signups only, while keeping existing customers at $29?" |
+| **Activation moment** | Connects Stripe, selects the $29/mo plan, sets up a price experiment showing $49/mo to 25% of new visitors, gets a tracking URL to swap on his pricing page. |
+| **Success metric** | After 3 weeks: "New customers on $49 plan are converting at 78% the rate of the $29 cohort, but revenue per new customer is up 42%. Projected 60-day revenue lift: +$1,100/mo at 80% confidence." Raises price on new signups. |
+| **Churn risk** | If Stripe integration is flaky or requires more than a few minutes of setup. If the experiment runs for 4+ weeks with no statistical signal. |
 
 ### Willingness to Pay
-- **Comfortable range:** $29–$79/mo
-- **Would pay $99/mo** if proven ROI (needs social proof first)
-- **Prefers annual plan** at 2 months free once he trusts the tool
-- **Hard ceiling:** Will not pay $150+/mo without enterprise-level features
+- **Comfortable:** $29–$49/mo
+- **Stretch:** $79/mo if ROI is clearly demonstrated
+- **Preferred model:** Monthly initially; would commit to annual at 2 months free once he trusts it
+- **Objection:** *"If this costs $99/mo and only adds 10% revenue lift at my current MRR, that's barely worth it. It has to pay for itself by month 1."*
 
 ---
 
-## Persona #2: Sofia — The Course Creator
+## Persona #3 (P1 SECONDARY / V2): Sofia — Course Creator
 
-**"I launched at $197 to get my first students. Now I have 300 students and no idea if I should be charging $497 or $997."**
+> *"I launched at $197 to get my first students. Now I have 400 students and no idea if I should be charging $497 or $997. I've been at $197 for 14 months."*
 
 ### Profile
 - **Age:** 30–45
-- **Background:** Domain expert turned educator (designer, marketer, developer, copywriter)
+- **Background:** Domain expert turned educator — designer, marketer, developer, copywriter
 - **Product:** Self-paced video course or cohort-based program; possibly a bundle with templates/ebooks
-- **MRR (Equivalent):** $1,000–$5,000 (varies heavily with launch cycles; not purely recurring)
+- **MRR (equivalent):** $1,000–$5,000 (varies heavily with launch cycles; not purely recurring)
 - **Platform:** Gumroad, Podia, Teachable, or Kajabi; email list 1,000–10,000
-- **Pricing history:** Launched low "to get proof," hasn't raised since despite growing reputation
 
-### Current Pricing Approach
-- Relies on launch discounts ("Black Friday 40% off") to drive volume
-- Knows discounting trains buyers to wait for sales
-- Has considered raising base price but fears alienating her existing audience
-- Has never run a structured price test; monitors refund rates as a proxy for "too expensive"
+### Platform Stack
+| Layer | Tool |
+|---|---|
+| **Primary payment** | Gumroad or Teachable (Stripe-powered) |
+| **Storefront** | Course platform + custom landing page (Webflow/Carrd) |
+| **Email** | ConvertKit or Mailchimp |
+| **Analytics** | Platform native + email open rates |
 
-### Top 5 Pain Points
-1. **Launch-cycle dependency:** Revenue is spiky (high during launches, near-zero between); wants to smooth with higher base prices and evergreen funnels
-2. **Discount trap:** Increasingly reliant on sales/coupons; feels like she's devaluing her work
-3. **Refund anxiety:** Doesn't know if a higher price will spike refunds; no way to test without risking reputation
-4. **Competitor confusion:** Sees courses priced from $47–$2,997 in her niche; has no framework to position her price
-5. **Bundle complexity:** Wants to add a "templates + course" bundle but doesn't know what to charge
+### Trigger Moment
+Plans a "price increase before cohort closes" announcement for the next launch. Writes the email 3 times and deletes it. Realizes she has no data to justify the number she picked. Needs to know: "If I say $297 instead of $197, will I get 30% fewer students or 5% fewer?" No tool exists to tell her this for launch-model courses.
 
-### Channels & Watering Holes
-- Twitter/X: Follows course creator influencers (@NathanBarry, @JustinWelsh, @AliAbdaal)
-- ConvertKit Creator Community
-- Facebook Groups for course creators
-- Creator Economy newsletters (The Information, Every.to)
+### Pain Clusters (Primary)
+- **C5** — Discount-Trap Revenue Ceiling (heavy reliance on launch discounts)
+- **C3** — Data-Blind Pricing Guesswork (no framework for course pricing)
+- **C8** — Tier & Bundle Structure Uncertainty (solo vs. bundle pricing)
+- **C6** — Existing-Customer Migration Guilt (alumni pricing on next cohort)
 
-### Trust Signals
-- Before/after: "Sofia tested $197 vs $397 for 90 days and average revenue per launch went up 31%"
-- Integration with ConvertKit/Mailchimp for audience-segment-aware pricing
-- Refund rate tracking built in (key fear mitigation)
-
-### Objections
-- *"My audience is price-sensitive"* → Data often shows this is wrong; bundles and tiering solve it
-- *"I already use Gumroad analytics"* → Show what Gumroad analytics can't tell her
-- *"This doesn't apply to launch-model businesses"* → PricePilot can model launch vs evergreen separately
+### Channel Footprint
+- **Daily reads:** Twitter/X (course creator community), ConvertKit Creator Community, Every.to
+- **Follows on Twitter:** @NathanBarry, @JustinWelsh, @AliAbdaal, @dangellareed
+- **Discovery trigger:** Twitter thread from another course creator: "I used PricePilot to test two launch prices. Here's what the data showed."
 
 ### Willingness to Pay
-- **Comfortable range:** $29–$59/mo
-- More likely to pay for a one-time "pricing audit" product ($49–$149 one-time) than SaaS
-- **Insight:** Course creators think in launches, not subscriptions; pricing model should reflect this
+- **Comfortable:** $29–$59/mo OR $79–$149 one-time audit
+- **Preferred model:** One-time "pricing audit" more appealing than SaaS subscription — thinks in launches, not months
 
 ---
 
-## Persona #3: Jamie — The Template / Digital Asset Seller
+## Persona #4 (P1 SECONDARY / V2): Devon — Shopify Digital Product Seller
 
-**"I sell Notion templates. I have 400+ sales at $19. Am I leaving money on the table? Almost certainly."**
+> *"I sell Shopify themes and digital downloads through my own Shopify store. Shopify gives me a ton of flexibility but zero insight into whether my prices are right."*
 
 ### Profile
-- **Age:** 22–35
-- **Background:** Designer, productivity enthusiast, or developer turned creator
-- **Product:** Notion templates, Figma UI kits, icon packs, Obsidian vaults, Webflow templates
-- **MRR (Equivalent):** $500–$3,000 (mostly one-time purchases; some bundle subscriptions)
-- **Platform:** Gumroad (primary), Etsy (secondary), personal site
-- **Transaction volume:** 50–800 sales total; pricing rarely changed after initial launch
+- **Age:** 26–40
+- **Background:** Freelance web developer turned product creator
+- **Product:** Shopify themes, digital downloads, Webflow templates, possibly a small SaaS add-on sold through the Shopify App Store
+- **MRR (equivalent):** $1,000–$6,000
+- **Platform:** Shopify (storefront) + Stripe or Shopify Payments; sometimes Gumroad for digital downloads
 
-### Current Pricing Approach
-- Priced by looking at top Gumroad sellers in category
-- Often priced low intentionally to "get reviews and social proof first"
-- Has increased price 1–2x total, usually by $5–$10 increments, "because it felt safe"
-- No data to support changes; no rollback ever needed because changes were tiny
+### Platform Stack
+| Layer | Tool |
+|---|---|
+| **Primary payment** | Shopify Payments or Stripe |
+| **Storefront** | Own Shopify store + Shopify App Store listing |
+| **Email** | Klaviyo or Mailchimp |
+| **Analytics** | Shopify Analytics (limited pricing insight) |
 
-### Top 5 Pain Points
-1. **Race to the bottom:** Competing against free templates and $5 competitors on Gumroad
-2. **Bundle confusion:** Has 8+ products; doesn't know which bundle combinations would add value without cannibalizing individual sales
-3. **Traffic seasonality:** Big spikes from Reddit/Twitter posts; long dry spells; hard to test pricing during dry spells
-4. **No MRR stability:** All one-time sales; wants to convert buyers to a $9–$19/mo "template club" but doesn't know how to price the upgrade
-5. **Volume vs. price trade-off:** Scared that doubling price will halve volume even though margin math suggests it's worth it
+### Trigger Moment
+Looks at Shopify analytics, sees traffic is up 40% this month but revenue is up only 15%. Conversion rate dropped slightly. Wonders if the new price they set last month is the culprit, or whether it's something else entirely. Has no way to isolate the pricing variable.
 
-### Channels & Watering Holes
-- Twitter/X: Notion creator community, #BuildInPublic
-- r/Notion, r/ObsidianMD, ProductHunt
-- Gumroad Discovery page
-- Newsletter communities (Trends.vc, The Hustle)
+### Pain Clusters (Primary)
+- **C3** — Data-Blind Pricing Guesswork
+- **C9** — Low-Friction Test Execution Gap (Shopify A/B apps are clunky)
+- **C10** — Payment Platform Analytics Gap
+- **C8** — Tier & Bundle Structure Uncertainty
 
-### Trust Signals
-- Simple, visual ROI calculator ("At $500/mo with 50 sales, a 20% price increase = $100/mo more")
-- Works with Gumroad natively — huge trust signal for this community
-- Low barrier: free tier or $0 first experiment
-
-### Objections
-- *"My products are too cheap to care about pricing optimization"* → Reinforce unit economics: even $500/mo MRR at 20% lift = $100/mo = $1,200/yr
-- *"I already know what prices competitors charge"* → Competitor pricing ≠ optimal pricing for your audience
+### Channel Footprint
+- **Daily reads:** r/shopify, Shopify Community forums, IndieHackers, r/webdev
+- **Discovery trigger:** Shopify App Store listing or a tweet from a Shopify developer community member
 
 ### Willingness to Pay
-- **Comfortable range:** $0–$29/mo
-- **Highest WTP:** $19/mo if it paid for itself in one pricing change
-- **Likely activation:** Free tier → paid when first experiment proves lift
+- **Comfortable:** $19–$39/mo
+- **Preferred model:** Monthly; expects Shopify-native feel
 
 ---
 
-## Persona #4: Alexei — The Productized Consultant
+## Persona #5 (P2 / V2): Alexei — Productized Consultant
 
-**"I charge $3k/month for my retainer. I've never changed it. I have no idea if I could charge $5k."**
+> *"I charge $3k/month for my SEO retainer. Been the same rate for 3 years. Inflation alone justifies raising it but I freeze every time I think about the conversation."*
 
 ### Profile
 - **Age:** 32–50
 - **Background:** Agency founder, ex-consultant, or senior operator gone independent
-- **Product:** Fixed-scope monthly retainer (SEO, paid ads, copywriting, dev ops, financial modeling)
+- **Product:** Fixed-scope monthly retainer (SEO, paid ads, copywriting, dev ops)
 - **MRR:** $3,000–$10,000 (typically 3–8 clients at $500–$2k/retainer)
-- **Platform:** Stripe for invoicing; proposals via Notion or Proposify
-- **Pricing history:** Set rates early in career; raised once or twice; unsure about market positioning
+- **Platform:** Stripe payment links for invoicing; proposals via Notion or Proposify
 
-### Current Pricing Approach
-- Prices based on "what feels like a lot to ask for" or market rate surveys (e.g., freelancer.com data)
-- Does not think about pricing experimentation — it's a service, not a product
-- Has raised rates with new clients but "grandfathered" old clients at old rates
-- Knows grandfathering is revenue-limiting but fears losing anchor clients
+### Platform Stack
+| Layer | Tool |
+|---|---|
+| **Primary payment** | Stripe (one-time payment links or manual invoices) |
+| **Storefront** | Personal website + LinkedIn |
+| **Email** | Gmail or HEY |
+| **Analytics** | None / gut feel / spreadsheet |
 
-### Top 5 Pain Points
-1. **Grandfathering trap:** 40–60% of revenue is from clients at old, lower rates; afraid to address it
-2. **Anchor bias:** Stuck at round numbers ($2,500, $3,000) due to arbitrary initial pricing
-3. **Packaging confusion:** Should I charge per deliverable? Per hour? Per outcome? Unsure what the market wants
-4. **No data:** Unlike SaaS, no transaction volume to analyze; decisions are entirely judgment-based
-5. **Capacity cliff:** Can't raise revenue by acquiring more clients (time-limited); must raise prices — but doesn't know by how much
+### Trigger Moment
+Loses a client unexpectedly, dropping from $7k to $4k MRR in one month. Realizes all revenue is vulnerable to single-client churn. Needs to raise rates to rebuild margin. Opens a spreadsheet to model "what if I charged $4k instead of $3k" — gets overwhelmed by variables. Starts Googling "how to raise consulting rates without losing clients."
 
-### Channels & Watering Holes
-- Twitter/X: Consulting/freelance community (@JonathanStark, @BrennanDunn)
-- Brennan Dunn's Double Your Freelancing community
-- r/freelance, r/consulting
-- LinkedIn (both content and lurking)
-- Local co-working spaces; Slack groups for agency owners
+### Pain Clusters (Primary)
+- **C1** — Fear-of-Churn Price-Increase Paralysis (rate increase = existential fear)
+- **C6** — Existing-Customer Migration Guilt (grandfathered long-term clients)
+- **C3** — Data-Blind Pricing Guesswork
+- **C4** — Missing Value-to-Price Alignment (LTV >>> monthly rate)
 
-### Trust Signals
-- "I don't have 200 customers — can this actually help me?" → Explicit messaging for service businesses
-- Scenario planning: "Here's what happens if you raise your $3k retainer to $4k with 2 churned clients vs. 0"
-- WTP analysis for productized services (not just software)
-
-### Objections
-- *"This is for software businesses, not consultants"* → PricePilot can model service revenue too
-- *"My clients are all different; there's no pattern"* → Cohort by service type, client size, tenure
+### Channel Footprint
+- **Daily reads:** Twitter/X consulting community, Brennan Dunn's Double Your Freelancing, r/freelance
+- **Follows on Twitter:** @JonathanStark, @BrennanDunn, @philipmorgancpa
+- **Discovery trigger:** Brennan Dunn newsletter or a Twitter thread about consulting pricing
 
 ### Willingness to Pay
-- **Comfortable range:** $49–$99/mo
-- **High WTP if ROI is clear:** Would pay $199/mo if it helped justify a $500/mo rate increase with one client
-- **One-time audit option** also attractive: $299 for a comprehensive "raise my rates" analysis
+- **Comfortable:** $49–$79/mo
+- **Preferred model:** Would also pay $299 for a one-time "raise my rates" analysis
+- **Challenge:** Hardest to build for — services have no transaction data volume; simulation-heavy approach needed
 
 ---
 
 ## Cross-Persona Insights
 
-### Shared Truths Across All 4 Personas:
-1. **Fear > logic:** All four know they're probably underpriced. Fear of losing revenue keeps them stuck.
-2. **Time scarcity:** All will abandon any tool requiring more than 90 minutes of setup
-3. **Proof requirements:** All need a case study from someone like them before trusting a new tool
-4. **Rollback = trust:** The ability to undo a price change instantly is a must-have, not a nice-to-have
-5. **ROI framing required:** The tool must pay for itself in its first recommendation
+### Shared Truths (All 5 Personas)
+1. **Fear > Logic** — All know they're likely underpriced; fear of churn is the emotional blocker
+2. **Time poverty** — Will abandon any tool requiring >90 minutes of setup
+3. **Proof required** — Need a case study from someone just like them before trusting
+4. **Rollback = trust signal** — Ability to undo instantly is a must-have, not a nice-to-have
+5. **ROI framing required** — The tool must visibly pay for itself in its first result
 
-### Key Differentiation by Persona:
-- **Marcus (#1):** Wants data + confidence score + Bayesian rigor
-- **Sofia (#2):** Wants launch-model support + refund tracking + one-time purchase option
-- **Jamie (#3):** Wants free tier + visual ROI calculator + Gumroad-native feel
-- **Alexei (#4):** Wants scenario modeling for services + grandfathering strategy
+### Key Differentiation by Persona
+| Persona | Primary Need | Secondary Need | Hard No |
+|---|---|---|---|
+| Maya (Gumroad) | Works with Gumroad, no code needed | Simple visual results | Any code requirement |
+| Marcus (Stripe SaaS) | Bayesian engine + staged rollout | Migration toolkit | Setup >15 min |
+| Sofia (Course) | Launch-model simulation | Refund rate tracking | Subscription-only framing |
+| Devon (Shopify) | Shopify-native feel | Price isolation testing | Requires leaving Shopify ecosystem |
+| Alexei (Consulting) | Scenario modeling for services | Email templates | "This is only for SaaS" messaging |
+
+### MVP Scope (P0 Only — Maya + Marcus)
+
+Build for these two first. Do not touch P1/P2 until:
+- 20+ successful experiments completed by Maya-type users (Gumroad)
+- 20+ successful experiments completed by Marcus-type users (Stripe)
+- Both have referred at least one other person to the tool
+
+**Gumroad integration is the unlock** — it addresses the largest analytically-underserved segment (4M+ Gumroad creators) with zero existing competition. Ship that first.
