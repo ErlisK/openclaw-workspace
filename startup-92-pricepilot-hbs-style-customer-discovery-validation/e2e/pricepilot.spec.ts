@@ -2494,3 +2494,344 @@ test.describe('Billing Flow — End-to-End', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE 17: ONBOARDING, BLOG, DOCS, SEO
+// ─────────────────────────────────────────────────────────────────────────────
+
+test.describe('Onboarding Checklist', () => {
+
+  test('TC-OB-001: /onboarding page renders checklist', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/onboarding`);
+    expect(page.url()).toContain('/onboarding');
+    await expect(page.locator('[data-testid^="onboarding-step-"]').first()).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/Connect|Import|Engine|Experiment/i);
+  });
+
+  test('TC-OB-002: Onboarding shows progress bar', async ({ page }) => {
+    await login(page, USERS.maya);
+    await page.goto(`${BASE_URL}/onboarding`);
+    await expect(page.locator('[data-testid="onboarding-progress-bar"]')).toBeVisible({ timeout: 8_000 });
+  });
+
+  test('TC-OB-003: /api/onboarding returns all 5 steps for authenticated user', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.get(`${BASE_URL}/api/onboarding`, { headers: { Cookie: cookieHeader } });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.steps).toHaveLength(5);
+    expect(body.total).toBe(5);
+    expect(body.totalRequired).toBe(4); // 4 required, 1 optional (upgrade)
+    const keys = body.steps.map((s: { key: string }) => s.key);
+    expect(keys).toContain('connect_source');
+    expect(keys).toContain('run_engine');
+    expect(keys).toContain('create_experiment');
+    expect(keys).toContain('preview_rollback');
+    expect(keys).toContain('upgrade_pro');
+  });
+
+  test('TC-OB-004: /api/onboarding returns 401 for unauthenticated', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/onboarding`);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-OB-005: Marking a step complete persists via API', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Reset first
+    await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'connect_source', action: 'reset' },
+    });
+
+    // Mark complete
+    const r = await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'connect_source', action: 'complete' },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.step).toBe('connect_source');
+    expect(body.action).toBe('complete');
+    expect(body.done).toBe(true);
+
+    // Verify it persists
+    const statusR = await request.get(`${BASE_URL}/api/onboarding`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+    const step = status.steps.find((s: { key: string }) => s.key === 'connect_source');
+    expect(step.completed).toBe(true);
+
+    // Cleanup
+    await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'connect_source', action: 'reset' },
+    });
+  });
+
+  test('TC-OB-006: Skipping a step updates state correctly', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // Reset
+    await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'run_engine', action: 'reset' },
+    });
+
+    // Skip
+    const r = await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'run_engine', action: 'skip' },
+    });
+    expect(r.status()).toBe(200);
+
+    // Verify
+    const statusR = await request.get(`${BASE_URL}/api/onboarding`, { headers: { Cookie: cookieHeader } });
+    const status = await statusR.json();
+    const step = status.steps.find((s: { key: string }) => s.key === 'run_engine');
+    expect(step.skipped).toBe(true);
+    expect(step.completed).toBe(false);
+
+    // Cleanup
+    await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'run_engine', action: 'reset' },
+    });
+  });
+
+  test('TC-OB-007: Completing all required steps shows completion banner', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const requiredSteps = ['connect_source', 'run_engine', 'create_experiment', 'preview_rollback'];
+    for (const step of requiredSteps) {
+      await request.post(`${BASE_URL}/api/onboarding`, {
+        headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+        data: { step, action: 'complete' },
+      });
+    }
+
+    await page.goto(`${BASE_URL}/onboarding`);
+    await expect(page.locator('[data-testid="onboarding-complete-banner"]')).toBeVisible({ timeout: 8_000 });
+
+    // Cleanup
+    for (const step of requiredSteps) {
+      await request.post(`${BASE_URL}/api/onboarding`, {
+        headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+        data: { step, action: 'reset' },
+      });
+    }
+  });
+
+  test('TC-OB-008: Invalid step returns 400', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const r = await request.post(`${BASE_URL}/api/onboarding`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { step: 'nonexistent_step', action: 'complete' },
+    });
+    expect(r.status()).toBe(400);
+  });
+
+});
+
+test.describe('Blog & Docs Pages', () => {
+
+  test('TC-BLOG-001: /blog listing page returns 200 with 2 posts', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog`);
+    expect(page.url()).toContain('/blog');
+    const text = await page.textContent('body');
+    expect(text).toMatch(/Price Test|Bayesian/i);
+    // Both posts present
+    await expect(page.locator('[data-testid="blog-post-how-to-run-a-price-test-without-losing-customers"]')).toBeVisible();
+    await expect(page.locator('[data-testid="blog-post-the-bayesian-advantage-why-we-dont-use-traditional-ab-tests"]')).toBeVisible();
+  });
+
+  test('TC-BLOG-002: First blog post page renders correctly', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog/how-to-run-a-price-test-without-losing-customers`);
+    await expect(page.locator('[data-testid="blog-post-content"]')).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/price test|customers/i);
+    // Has CTA
+    const ctaLink = page.locator('a[href="/signup"]');
+    await expect(ctaLink.first()).toBeVisible();
+  });
+
+  test('TC-BLOG-003: Second blog post page renders correctly', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests`);
+    await expect(page.locator('[data-testid="blog-post-content"]')).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/Bayesian|frequentist|A\/B/i);
+  });
+
+  test('TC-BLOG-004: Unknown blog slug returns 404', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/blog/this-post-does-not-exist`);
+    expect(r.status()).toBe(404);
+  });
+
+  test('TC-DOCS-001: /docs listing page returns 200', async ({ page }) => {
+    await page.goto(`${BASE_URL}/docs`);
+    await expect(page.locator('[data-testid="docs-page-quickstart"]')).toBeVisible({ timeout: 8_000 });
+    await expect(page.locator('[data-testid="docs-page-csv-guide"]')).toBeVisible();
+  });
+
+  test('TC-DOCS-002: /docs/quickstart renders content', async ({ page }) => {
+    await page.goto(`${BASE_URL}/docs/quickstart`);
+    await expect(page.locator('[data-testid="docs-post-content"]')).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/Connect|Import|Experiment|Engine/i);
+  });
+
+  test('TC-DOCS-003: Unknown docs slug returns 404', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/docs/not-a-real-doc`);
+    expect(r.status()).toBe(404);
+  });
+
+});
+
+test.describe('SEO & Sitemap', () => {
+
+  test('TC-SEO-001: /sitemap.xml returns valid XML with expected URLs', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/sitemap.xml`);
+    expect(r.status()).toBe(200);
+    const text = await r.text();
+    expect(text).toContain('<?xml');
+    expect(text).toContain('<urlset');
+    expect(text).toContain('/blog');
+    expect(text).toContain('/docs');
+    expect(text).toContain('/pricing');
+    expect(text).toContain('/signup');
+  });
+
+  test('TC-SEO-002: /robots.txt is reachable and has sitemap reference', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/robots.txt`);
+    expect(r.status()).toBe(200);
+    const text = await r.text();
+    expect(text).toContain('Sitemap:');
+    expect(text).toContain('sitemap.xml');
+    expect(text).toMatch(/User-agent/i);
+  });
+
+  test('TC-SEO-003: Homepage has title and meta description', async ({ page }) => {
+    await page.goto(`${BASE_URL}/`);
+    const title = await page.title();
+    expect(title).toMatch(/PricePilot/i);
+    const desc = await page.getAttribute('meta[name="description"]', 'content');
+    expect(desc).toBeTruthy();
+    expect(desc!.length).toBeGreaterThan(20);
+  });
+
+  test('TC-SEO-004: Blog post has unique title', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog/how-to-run-a-price-test-without-losing-customers`);
+    const title = await page.title();
+    expect(title).toContain('PricePilot');
+    expect(title).toMatch(/Price Test|Customers/i);
+  });
+
+  test('TC-SEO-005: All marketing pages return 200', async ({ request }) => {
+    const pages = ['/', '/pricing', '/blog', '/docs', '/signup', '/login',
+      '/blog/how-to-run-a-price-test-without-losing-customers',
+      '/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests',
+      '/docs/quickstart', '/import/guide', '/onboarding'];
+    for (const p of pages) {
+      const r = await request.get(`${BASE_URL}${p}`);
+      expect(r.status(), `Expected 200 for ${p}, got ${r.status()}`).toBe(200);
+    }
+  });
+
+});
+
+test.describe('A/B Messaging Variants', () => {
+
+  test('TC-ABM-001: /api/ab-variant?experiment=hero returns a variant', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/ab-variant?experiment=hero`);
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body).toHaveProperty('experiment', 'hero');
+    expect(body).toHaveProperty('variant');
+    expect(body).toHaveProperty('headline');
+    expect(body).toHaveProperty('cta_text');
+    expect(['control', 'variant_b', 'variant_c']).toContain(body.variant);
+  });
+
+  test('TC-ABM-002: /api/ab-variant?experiment=cta_section returns a variant', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/ab-variant?experiment=cta_section`);
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(['control', 'urgency']).toContain(body.variant);
+    expect(body.headline).toBeTruthy();
+    expect(body.cta_text).toBeTruthy();
+  });
+
+  test('TC-ABM-003: /api/ab-variant is sticky — same variant on repeated calls (cookie)', async ({ request }) => {
+    // First call
+    const r1 = await request.get(`${BASE_URL}/api/ab-variant?experiment=hero`);
+    const b1 = await r1.json();
+    const cookies = r1.headers()['set-cookie'] ?? '';
+
+    // Second call with same cookie
+    const r2 = await request.get(`${BASE_URL}/api/ab-variant?experiment=hero`, {
+      headers: { Cookie: `ab_hero=${b1.variant}` },
+    });
+    const b2 = await r2.json();
+    expect(b2.variant).toBe(b1.variant);
+  });
+
+  test('TC-ABM-004: /api/ab-variant returns 400 without experiment param', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/ab-variant`);
+    expect(r.status()).toBe(400);
+  });
+
+  test('TC-ABM-005: /api/ab-variant returns 404 for unknown experiment', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/ab-variant?experiment=does_not_exist`);
+    expect(r.status()).toBe(404);
+  });
+
+});
+
+test.describe('Analytics Events', () => {
+
+  test('TC-ANA-001: POST /api/analytics with valid event returns ok', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/analytics`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { event: 'test_event_e2e', properties: { page: '/test', source: 'playwright' } },
+    });
+    expect(r.status()).toBe(200);
+    const body = await r.json();
+    expect(body.ok).toBe(true);
+    expect(body.event).toBe('test_event_e2e');
+  });
+
+  test('TC-ANA-002: POST /api/analytics without event returns 400', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/analytics`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { properties: {} },
+    });
+    expect(r.status()).toBe(400);
+  });
+
+  test('TC-ANA-003: Onboarding page fires analytics event on load (network assertion)', async ({ page }) => {
+    await login(page, USERS.maya);
+    const events: string[] = [];
+    page.on('request', req => {
+      if (req.url().includes('/api/analytics') && req.method() === 'POST') {
+        events.push(req.url());
+      }
+    });
+    await page.goto(`${BASE_URL}/onboarding`);
+    await page.waitForTimeout(2000);
+    expect(events.length).toBeGreaterThanOrEqual(1);
+  });
+
+});
