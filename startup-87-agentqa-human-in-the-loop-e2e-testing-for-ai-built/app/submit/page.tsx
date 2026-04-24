@@ -169,11 +169,11 @@ function SubmitForm() {
               onChange={e => setFlows(e.target.value)}
               required
               rows={4}
-              maxLength={1000}
+              maxLength={5000}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
               placeholder="e.g. Visit the homepage, click Get Started, fill in the signup form, and confirm the dashboard loads. Also check that the pricing page shows all 3 tiers."
             />
-            <p className="text-xs text-gray-400 mt-2">{flows.length}/1000 characters</p>
+            <p className="text-xs text-gray-400 mt-2">{flows.length}/5000 characters</p>
           </div>
 
           {/* Tier */}
