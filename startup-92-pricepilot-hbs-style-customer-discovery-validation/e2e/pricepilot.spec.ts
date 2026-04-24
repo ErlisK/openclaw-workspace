@@ -133,13 +133,15 @@ test.describe('Auth — Email/Password', () => {
 
   test('TC-AUTH-008: Auth API endpoints return 401 without session cookie', async ({ request }) => {
     const endpoints = [
-      '/api/engine/recommend',
-      '/api/experiments',
-      '/api/products',
+      { method: 'POST', path: '/api/engine/recommend' },
+      { method: 'GET', path: '/api/experiments' },
+      { method: 'GET', path: '/api/products' },
     ];
     for (const ep of endpoints) {
-      const resp = await request.get(`${BASE_URL}${ep}`);
-      expect(resp.status(), `Expected 401 for ${ep}`).toBe(401);
+      const resp = ep.method === 'POST'
+        ? await request.post(`${BASE_URL}${ep.path}`)
+        : await request.get(`${BASE_URL}${ep.path}`);
+      expect(resp.status(), `Expected 401 for ${ep.path}`).toBe(401);
     }
   });
 
@@ -643,7 +645,9 @@ test.describe('Experiments — Create and Preview', () => {
 
 test.describe('Rollback Flow', () => {
 
-  test.beforeEach(async ({ page }) => {
+  // Note: TC-ROLLBACK-006 uses only `request` (no auth needed) — beforeEach skipped for that test
+  test.beforeEach(async ({ page }, testInfo) => {
+    if (testInfo.title.includes('TC-ROLLBACK-006')) return;  // skip login for auth test
     await login(page, USERS.maya);
   });
 
