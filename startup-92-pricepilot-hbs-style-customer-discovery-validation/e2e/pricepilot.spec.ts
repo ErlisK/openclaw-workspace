@@ -727,6 +727,167 @@ test.describe('Experiments — Create and Preview', () => {
     expect(hasConfidence).toBe(true);
   });
 
+  // ── NEW: Builder, preview toggle, deterministic bucketing ──────────────
+
+  test('TC-EXP-009: /experiments/new page renders the builder form', async ({ page }) => {
+    await page.goto(`${BASE_URL}/experiments/new`);
+    expect(page.url()).toContain('/experiments/new');
+    await expect(page.locator('[data-testid="create-experiment-btn"], button:has-text("Create")')).toBeVisible({ timeout: 8_000 });
+  });
+
+  test('TC-EXP-010: /api/experiments POST creates experiment with correct schema', async ({ request, page }) => {
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    // First get a product
+    const prods = await request.get(`${BASE_URL}/api/products`, { headers: { Cookie: cookieHeader } });
+    const prodData = await prods.json();
+    const products = prodData.products || [];
+    if (products.length === 0) { test.skip(); return; }
+
+    const resp = await request.post(`${BASE_URL}/api/experiments`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_id: products[0].id,
+        variant_a_price_cents: products[0].current_price_cents,
+        variant_b_price_cents: products[0].current_price_cents + 300,
+        split_pct_b: 0.5,
+        headline: 'E2E test experiment',
+      },
+    });
+    expect(resp.status()).toBe(201);
+    const body = await resp.json();
+    expect(body).toHaveProperty('experiment');
+    expect(body.experiment.status).toBe('draft');
+    expect(body).toHaveProperty('preview_url_a');
+    expect(body).toHaveProperty('preview_url_b');
+    expect(body).toHaveProperty('live_url');
+    expect(body.experiment.slug).toBeTruthy();
+  });
+
+  test('TC-EXP-011: Preview URL ?preview=A shows preview banner with variant A', async ({ page }) => {
+    // Create an experiment first
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const prods = await page.request.get(`${BASE_URL}/api/products`, { headers: { Cookie: cookieHeader } });
+    const prodData = await prods.json();
+    if (!prodData.products?.length) { test.skip(); return; }
+
+    const created = await page.request.post(`${BASE_URL}/api/experiments`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_id: prodData.products[0].id,
+        variant_a_price_cents: 1200,
+        variant_b_price_cents: 1500,
+        headline: 'Preview test',
+      },
+    });
+    const expData = await created.json();
+    const slug = expData.experiment?.slug;
+    if (!slug) { test.skip(); return; }
+
+    // Open preview A (no auth needed)
+    await page.goto(`${BASE_URL}/x/${slug}?preview=A`);
+    const banner = page.locator('[data-testid="preview-banner"]');
+    await expect(banner).toBeVisible({ timeout: 8_000 });
+    const bannerText = await banner.textContent();
+    expect(bannerText).toContain('A');
+    expect(bannerText).toContain('Preview');
+
+    // Price shown should be variant A
+    const priceEl = page.locator('[data-testid="exp-price"]');
+    await expect(priceEl).toBeVisible();
+    const priceText = await priceEl.textContent();
+    expect(priceText).toContain('12'); // $12.00
+  });
+
+  test('TC-EXP-012: Preview ?preview=B shows variant B price', async ({ page }) => {
+    // Re-use same slug from a fast API create
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const prods = await page.request.get(`${BASE_URL}/api/products`, { headers: { Cookie: cookieHeader } });
+    const prodData = await prods.json();
+    if (!prodData.products?.length) { test.skip(); return; }
+
+    const created = await page.request.post(`${BASE_URL}/api/experiments`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_id: prodData.products[0].id,
+        variant_a_price_cents: 1200,
+        variant_b_price_cents: 1800,
+        headline: 'Preview B test',
+      },
+    });
+    const expData = await created.json();
+    const slug = expData.experiment?.slug;
+    if (!slug) { test.skip(); return; }
+
+    await page.goto(`${BASE_URL}/x/${slug}?preview=B`);
+    const banner = page.locator('[data-testid="preview-banner"]');
+    await expect(banner).toBeVisible({ timeout: 8_000 });
+    const bannerText = await banner.textContent();
+    expect(bannerText).toContain('B');
+
+    const priceEl = page.locator('[data-testid="exp-price"]');
+    const priceText = await priceEl.textContent();
+    expect(priceText).toContain('18'); // $18.00
+  });
+
+  test('TC-EXP-013: Deterministic bucketing — same visitor_id always gets same variant', async ({ request, page }) => {
+    // We test determinism via the hash function directly
+    // Create experiment, load the page twice with the same pp_vid cookie
+    await login(page, USERS.maya);
+    const cookies = await page.context().cookies();
+    const cookieHeader = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+    const prods = await page.request.get(`${BASE_URL}/api/products`, { headers: { Cookie: cookieHeader } });
+    const prodData = await prods.json();
+    if (!prodData.products?.length) { test.skip(); return; }
+
+    const created = await page.request.post(`${BASE_URL}/api/experiments`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: {
+        product_id: prodData.products[0].id,
+        variant_a_price_cents: 1200,
+        variant_b_price_cents: 1500,
+        headline: 'Bucketing test',
+      },
+    });
+    const expData = await created.json();
+    const slug = expData.experiment?.slug;
+    if (!slug) { test.skip(); return; }
+
+    // Activate the experiment
+    await page.request.patch(`${BASE_URL}/api/experiments/${expData.experiment.id}`, {
+      headers: { Cookie: cookieHeader, 'Content-Type': 'application/json' },
+      data: { status: 'active' },
+    });
+
+    // Visit once to get cookie assigned
+    const context1 = page.context();
+    await context1.addCookies([{ name: 'pp_vid', value: 'test_visitor_abc123', domain: new URL(BASE_URL).hostname, path: '/' }]);
+    await page.goto(`${BASE_URL}/x/${slug}`);
+    const price1 = await page.locator('[data-testid="exp-price"]').textContent();
+
+    // Visit again with same cookie — must get same price
+    await page.goto(`${BASE_URL}/x/${slug}`);
+    const price2 = await page.locator('[data-testid="exp-price"]').textContent();
+
+    expect(price1).toBe(price2);
+  });
+
+  test('TC-EXP-014: /api/experiments POST returns 401 without auth', async ({ request }) => {
+    const resp = await request.post(`${BASE_URL}/api/experiments`, {
+      data: { product_id: 'any', variant_a_price_cents: 1200, variant_b_price_cents: 1500 },
+    });
+    expect(resp.status()).toBe(401);
+  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

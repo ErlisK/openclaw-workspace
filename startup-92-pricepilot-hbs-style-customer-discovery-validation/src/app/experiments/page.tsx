@@ -39,7 +39,7 @@ export default async function ExperimentsPage() {
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Experiments</h1>
             <p style={{ color: 'var(--muted)' }}>A/B price tests with rollback</p>
           </div>
-          <Link href="/suggestions" className="btn btn-primary" data-testid="new-experiment-btn">+ New experiment</Link>
+          <Link href="/experiments/new" className="btn btn-primary" data-testid="new-experiment-btn">+ New experiment</Link>
         </div>
 
         {(!experiments || experiments.length === 0) ? (

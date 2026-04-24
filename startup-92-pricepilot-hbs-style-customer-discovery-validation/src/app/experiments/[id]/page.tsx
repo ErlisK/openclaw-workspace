@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 interface Experiment {
   id: string; slug: string; status: string
   variant_a_price_cents: number; variant_b_price_cents: number
+  variant_a_label: string | null; variant_b_label: string | null
   views_a: number; views_b: number; conversions_a: number; conversions_b: number
   revenue_a_cents: number; revenue_b_cents: number; confidence: number | null
   products: { name: string } | null; started_at: string
@@ -85,6 +86,15 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
               🔁 Rollback
             </button>
           )}
+          {exp.status === 'draft' && (
+            <button className="btn btn-primary btn-sm" data-testid="activate-btn"
+              onClick={async () => {
+                const r = await fetch(`/api/experiments/${expId}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status:'active'}) })
+                if (r.ok) { window.location.reload() }
+              }}>
+              🚀 Activate
+            </button>
+          )}
         </div>
 
         {rolled && (
@@ -130,16 +140,17 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>📎 Share your experiment link</h3>
           <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
-            Share this link on your next tweet, email, or product post. Traffic is split 50/50 automatically.
+            Share this link on your next tweet, email, or product post. Traffic is split automatically.
           </p>
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <code style={{ flex: 1, background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.875rem' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <code style={{ flex: 1, background: 'var(--surface)', padding: '0.5rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.875rem' }} data-testid="exp-live-url">
               {appUrl}/x/{exp.slug}
             </code>
             <button className="btn btn-secondary btn-sm" onClick={() => navigator.clipboard.writeText(`${appUrl}/x/${exp.slug}`)}>
               Copy
             </button>
-            <Link href={`/x/${exp.slug}`} className="btn btn-secondary btn-sm" target="_blank">Preview</Link>
+            <a href={`/x/${exp.slug}?preview=A`} className="btn btn-secondary btn-sm" target="_blank" data-testid="preview-a-link">Preview A</a>
+            <a href={`/x/${exp.slug}?preview=B`} className="btn btn-secondary btn-sm" target="_blank" data-testid="preview-b-link">Preview B</a>
           </div>
         </div>
 
