@@ -213,11 +213,26 @@ export default async function ExperimentPage({
           {ctaText}
         </a>
 
-        {/* Powered by */}
-        <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#d1d5db' }}>
-          Pricing experiment by{' '}
-          <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
+        {/* Trust signal */}
+        <p style={{ marginTop: '1.25rem', fontSize: '0.8rem', color: '#9ca3af' }}>
+          🔒 Secure checkout via seller&apos;s platform
         </p>
+
+        {/* Powered by / What is this */}
+        <div style={{ marginTop: '1.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1rem', fontSize: '0.73rem', color: '#d1d5db', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem' }}>
+          <p>
+            Pricing experiment powered by{' '}
+            <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
+          </p>
+          <details style={{ cursor: 'pointer', textAlign: 'center' }}>
+            <summary style={{ color: '#c4b5fd', fontSize: '0.7rem', listStyle: 'none', userSelect: 'none' }}>What is this page? ▾</summary>
+            <p style={{ marginTop: '0.5rem', color: '#9ca3af', fontSize: '0.7rem', maxWidth: 320, lineHeight: 1.5 }}>
+              This seller is running a safe A/B pricing experiment to find their best price point.
+              You&apos;ve been shown one price variant. Experiment powered by{' '}
+              <a href="/" style={{ color: '#a78bfa' }}>PricePilot</a> — Bayesian pricing for indie founders.
+            </p>
+          </details>
+        </div>
       </div>
     </div>
   )
@@ -244,9 +259,13 @@ function DemoExperiment() {
         <a data-testid="exp-cta" href="/" style={{ display: 'block', width: '100%', padding: '1rem', background: '#6c47ff', color: '#fff', borderRadius: '0.75rem', fontSize: '1.125rem', fontWeight: 700, textDecoration: 'none', textAlign: 'center' }}>
           Get Pro Template Pack
         </a>
-        <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#d1d5db' }}>
-          Pricing experiment by <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
-        </p>
+        <div style={{ marginTop: '1.5rem', borderTop: '1px solid #f3f4f6', paddingTop: '1rem', fontSize: '0.73rem', color: '#d1d5db', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem' }}>
+          <p>Pricing experiment powered by <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a></p>
+          <p style={{ fontSize: '0.7rem', color: '#c4b5fd' }}>
+            This is a demo — sellers A/B test prices to find the best fit.{' '}
+            <a href="/signup" style={{ color: '#c4b5fd', textDecoration: 'underline' }}>Run your own experiment →</a>
+          </p>
+        </div>
       </div>
     </div>
   )

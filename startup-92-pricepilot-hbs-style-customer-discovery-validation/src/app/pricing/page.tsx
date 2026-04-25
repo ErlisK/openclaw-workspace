@@ -95,13 +95,23 @@ export default async function PricingPage() {
               <span style={{ fontSize: '3rem', fontWeight: 900, color: '#111827' }}>$0</span>
             </div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Forever free, no card required</p>
-            <Link href="/signup" style={{
-              display: 'block', textAlign: 'center', padding: '0.75rem',
-              border: '1px solid #e5e7eb', borderRadius: '0.75rem',
-              color: '#374151', textDecoration: 'none', fontWeight: 600, marginBottom: '1.5rem',
-            }}>
-              Get started free
-            </Link>
+            {isAuthed ? (
+              <Link href="/dashboard" style={{
+                display: 'block', textAlign: 'center', padding: '0.75rem',
+                border: '1px solid #e5e7eb', borderRadius: '0.75rem',
+                color: '#374151', textDecoration: 'none', fontWeight: 600, marginBottom: '1.5rem',
+              }}>
+                You&#39;re on Free ✓
+              </Link>
+            ) : (
+              <Link href="/signup" style={{
+                display: 'block', textAlign: 'center', padding: '0.75rem',
+                border: '1px solid #e5e7eb', borderRadius: '0.75rem',
+                color: '#374151', textDecoration: 'none', fontWeight: 600, marginBottom: '1.5rem',
+              }}>
+                Get started free
+              </Link>
+            )}
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {FREE_FEATURES.map(f => (
                 <li key={f} style={{ display: 'flex', gap: '0.5rem', fontSize: '0.9rem', color: '#374151' }}>

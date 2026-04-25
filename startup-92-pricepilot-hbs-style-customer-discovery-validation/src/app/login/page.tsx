@@ -1,15 +1,18 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectMessage = searchParams.get('message')
   const supabase = createClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,6 +67,11 @@ export default function LoginPage() {
             <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
               <Link href="/reset-password" style={{ fontSize: '0.85rem', color: 'var(--brand)' }}>Forgot password?</Link>
             </div>
+            {redirectMessage && (
+              <p style={{ background: '#ede9fe', color: '#6c47ff', padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.875rem', marginBottom: '0.5rem' }} data-testid="redirect-message">
+                🔒 {redirectMessage}
+              </p>
+            )}
             {error && <p className="error-message" data-testid="auth-error">{error}</p>}
             <button className="btn btn-primary" type="submit" disabled={loading} data-testid="login-btn"
               style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
@@ -78,5 +86,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>Loading…</div>}>
+      <LoginForm />
+    </Suspense>
   )
 }

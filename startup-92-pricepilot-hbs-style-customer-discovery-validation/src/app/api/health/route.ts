@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-  return NextResponse.json({
-    status: 'ok',
-    db: 'connected',
-    version: '0.1.0',
-    timestamp: new Date().toISOString(),
-  })
+  // Return minimal info — avoid leaking stack version and DB connection status publicly
+  return NextResponse.json({ status: 'ok' })
 }

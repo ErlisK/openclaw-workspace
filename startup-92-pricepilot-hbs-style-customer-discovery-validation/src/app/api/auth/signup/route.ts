@@ -17,7 +17,15 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { email, password, acceptedTerms } = body
+    const { email, password } = body
+
+    // Accept multiple common field name variants for the terms acceptance field
+    const acceptedTerms =
+      body.acceptedTerms ??
+      body.acceptTerms ??
+      body.agreeToTerms ??
+      body.agree_to_terms ??
+      body.terms
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: 'Valid email is required' }, { status: 400 })
@@ -26,7 +34,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
     if (!acceptedTerms) {
-      return NextResponse.json({ error: 'You must accept the terms' }, { status: 400 })
+      return NextResponse.json(
+        {
+          error: 'You must accept the terms',
+          field: 'acceptedTerms',
+          hint: 'Include acceptedTerms: true in the request body',
+        },
+        { status: 400 }
+      )
     }
 
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || ''
