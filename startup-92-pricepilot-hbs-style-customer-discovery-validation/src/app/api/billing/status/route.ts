@@ -4,7 +4,15 @@ import { createClient } from '@/lib/supabase'
 export async function GET() {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
-  if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (authErr || !user) return NextResponse.json({
+    plan: 'free',
+    is_pro: false,
+    experiments_used: 0,
+    experiments_limit: 3,
+    stripe_customer_id: null,
+    stripe_subscription_id: null,
+    plan_expires_at: null,
+  }, { status: 200 })
 
   const { data: entitlement } = await supabase
     .from('entitlements')

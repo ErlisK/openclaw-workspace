@@ -40,12 +40,18 @@ export async function middleware(request: NextRequest) {
   // Set pp_vid cookie for public experiment pages — httpOnly + HMAC-signed
   if (request.nextUrl.pathname.startsWith('/x/')) {
     const existingVid = request.cookies.get('pp_vid')?.value
-    const secret = process.env.PP_VID_SECRET || 'pp-vid-default-secret-change-in-prod'
+    const secret = process.env.PP_VID_SECRET
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[middleware] CRITICAL: PP_VID_SECRET is not set in production. Visitor tracking HMAC is insecure.')
+      }
+    }
+    const effectiveSecret = secret || 'pp-vid-default-secret-change-in-prod'
     // Validate existing cookie signature (format: <hex_id>.<hex_hmac>)
     let isValid = false
     if (existingVid && existingVid.includes('.')) {
       const [rawId, sig] = existingVid.split('.')
-      const keyData = new TextEncoder().encode(secret)
+      const keyData = new TextEncoder().encode(effectiveSecret)
       const msgData = new TextEncoder().encode(rawId)
       const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'])
       const sigBytes = new Uint8Array(sig.match(/.{2}/g)!.map(b => parseInt(b, 16)))
@@ -55,7 +61,7 @@ export async function middleware(request: NextRequest) {
       const arr = new Uint8Array(16)
       crypto.getRandomValues(arr)
       const rawId = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
-      const keyData = new TextEncoder().encode(secret)
+      const keyData = new TextEncoder().encode(effectiveSecret)
       const msgData = new TextEncoder().encode(rawId)
       const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
       const sigBuffer = await crypto.subtle.sign('HMAC', cryptoKey, msgData)

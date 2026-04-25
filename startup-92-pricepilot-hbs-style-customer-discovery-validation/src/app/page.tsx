@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { SiteFooter } from '@/components/SiteFooter'
 
 export default function HomePage() {
   return (
@@ -34,10 +35,11 @@ export default function HomePage() {
           </div>
 
           <div className="card" style={{ marginTop: '4rem', textAlign: 'left' }}>
+            <p style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Illustrative example — not a real user testimonial</p>
             <p style={{ fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text)', marginBottom: '0.75rem' }}>
-              "Tested $12 vs $29 on my Notion template. PricePilot said $29 wins. Revenue up 41%."
+              &ldquo;I tested two price points on my digital template. The data made the decision obvious — no guesswork needed.&rdquo;
             </p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted)', fontWeight: 600 }}>— Maya, Notion template seller · $2.1k/mo</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--muted)', fontWeight: 600 }}>— Hypothetical scenario for illustration purposes only. Individual results will vary.</p>
           </div>
 
           <div className="grid-3" style={{ marginTop: '3rem', textAlign: 'left' }}>
@@ -59,6 +61,7 @@ export default function HomePage() {
           </p>
         </div>
       </main>
+      <SiteFooter />
     </div>
   )
 }
