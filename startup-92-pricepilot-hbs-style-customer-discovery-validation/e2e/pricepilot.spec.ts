@@ -4272,3 +4272,122 @@ test.describe('Experiment Detail Page', () => {
     expect(page.url()).toMatch(/login/i)
   })
 })
+
+// ─── Admin Funnel Dashboard ───────────────────────────────────────────────
+test.describe('Admin Funnel Dashboard', () => {
+  // Note: admin secret is set via BASE_ADMIN_KEY env var in tests
+  const ADMIN_KEY = process.env.BASE_ADMIN_KEY ?? 'no-key-set'
+
+  test('TC-ADMIN-001: /api/admin/funnel returns 401 without auth', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/admin/funnel`)
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-ADMIN-002: /api/admin/funnel returns 401 with wrong key', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/admin/funnel`, {
+      headers: { Authorization: 'Bearer wrong-key-xyz' }
+    })
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-ADMIN-003: /api/admin/seed-events returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/admin/seed-events`)
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-ADMIN-004: /api/admin/funnel endpoint is routed (not 404)', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/admin/funnel`)
+    expect(r.status()).not.toBe(404)
+  })
+
+  test('TC-ADMIN-005: /api/admin/seed-events endpoint is routed (not 404)', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/admin/seed-events`, { data: {} })
+    expect(r.status()).not.toBe(404)
+  })
+
+  test('TC-ADMIN-006: /admin/funnel shows login form without key', async ({ page }) => {
+    await page.goto(`${BASE_URL}/admin/funnel`)
+    const body = await page.textContent('body')
+    expect(body).toMatch(/admin|secret|key|login/i)
+  })
+
+  test('TC-ADMIN-007: /api/admin/funnel returns funnel structure with valid key', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=30`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(d.funnel).toBeTruthy()
+    expect(Array.isArray(d.funnel)).toBe(true)
+    expect(d.funnel.length).toBe(10)
+    expect(d.summary).toBeTruthy()
+  })
+
+  test('TC-ADMIN-008: funnel has all 10 required steps', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=30`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    const d = await r.json()
+    const steps = d.funnel.map((s: { step: string }) => s.step)
+    expect(steps).toContain('page_view')
+    expect(steps).toContain('signup')
+    expect(steps).toContain('engine_run')
+    expect(steps).toContain('experiment_created')
+    expect(steps).toContain('converted_variant')
+  })
+
+  test('TC-ADMIN-009: funnel summary has all required fields', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=30`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    const d = await r.json()
+    expect(d.summary.total_page_views).toBeDefined()
+    expect(d.summary.total_signups).toBeDefined()
+    expect(d.summary.signup_rate_pct).toBeDefined()
+    expect(d.summary.activation_rate_pct).toBeDefined()
+  })
+
+  test('TC-ADMIN-010: /api/admin/seed-events inserts data with valid key', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.post(`${BASE_URL}/api/admin/seed-events?days=30&users=20`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(d.success).toBe(true)
+    expect(d.rows_inserted).toBeGreaterThan(0)
+  })
+
+  test('TC-ADMIN-011: after seeding, funnel shows non-zero page_views', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=90`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    const d = await r.json()
+    expect(d.summary.total_page_views).toBeGreaterThan(0)
+  })
+
+  test('TC-ADMIN-012: funnel daily_activity has entries', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=30`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    const d = await r.json()
+    expect(Array.isArray(d.daily_activity)).toBe(true)
+    expect(d.daily_activity.length).toBeGreaterThan(0)
+  })
+
+  test('TC-ADMIN-013: funnel returns valid period_days and generated_at', async ({ request }) => {
+    if (ADMIN_KEY === 'no-key-set') test.skip()
+    const r = await request.get(`${BASE_URL}/api/admin/funnel?days=7`, {
+      headers: { Authorization: `Bearer ${ADMIN_KEY}` }
+    })
+    const d = await r.json()
+    expect(d.period_days).toBe(7)
+    expect(d.generated_at).toBeTruthy()
+    expect(new Date(d.generated_at).getFullYear()).toBeGreaterThan(2023)
+  })
+})

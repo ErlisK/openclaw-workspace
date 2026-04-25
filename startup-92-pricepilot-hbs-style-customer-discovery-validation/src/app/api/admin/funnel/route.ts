@@ -58,7 +58,10 @@ export async function GET(request: Request) {
   const byEvent: Record<string, Set<string>> = {}
   for (const e of events) {
     if (!byEvent[e.event]) byEvent[e.event] = new Set()
-    const key = e.user_id ?? (e.properties?.visitor_id as string) ?? `anon-${Math.random()}`
+    // Use user_id if available; fall back to properties.visitor_id for synthetic/anon events
+    const key = e.user_id
+      ?? (e.properties?.visitor_id as string)
+      ?? `anon-${(e.properties as Record<string, unknown>)?.visitor_id ?? Math.random()}`
     byEvent[e.event].add(key)
   }
 

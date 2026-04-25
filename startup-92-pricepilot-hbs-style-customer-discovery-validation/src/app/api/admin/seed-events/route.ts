@@ -99,9 +99,10 @@ export async function POST(request: Request) {
   // Cohort-based funnel for each simulated signed-up user
   for (let u = 0; u < nUsers; u++) {
     const signupDaysAgo = Math.floor(rand() * nDays)
-    // Generate a deterministic UUID-shaped ID for this simulated user
-    const hex = (u * 16807 + 1013904223) >>> 0
-    const userId = `00000000-0000-4000-8000-${hex.toString(16).padStart(12, '0')}`
+    // user_id must be null (FK constraint to auth.users)
+    // Use visitor_id in properties for funnel tracking instead
+    const userId = null
+    const visitorId = `sim-${u.toString().padStart(5, '0')}`
     const referrer = REFERRERS[Math.floor(rand() * REFERRERS.length)]
     const abVariant = AB_VARIANTS[Math.floor(rand() * AB_VARIANTS.length)]
 
@@ -127,7 +128,8 @@ export async function POST(request: Request) {
       const dt = new Date(currentTime)
 
       const properties: Record<string, unknown> = {
-        user_cohort: `cohort-${Math.floor(signupDaysAgo / 7)}w`,  // weekly cohort
+        visitor_id: visitorId,  // used for funnel dedup (user_id is null for synthetic)
+        user_cohort: `cohort-${Math.floor(signupDaysAgo / 7)}w`,
         source: referrer ? new URL(referrer.replace('null', 'https://direct.com')).hostname : 'direct',
       }
 
