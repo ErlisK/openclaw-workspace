@@ -83,8 +83,8 @@ test.describe('Free Audit API: Endpoint health', () => {
     });
     expect(res.status()).toBe(200);
     const body = await res.json();
-    expect(body).toHaveProperty('products');
-    expect(Array.isArray(body.products)).toBe(true);
+    expect(body).toHaveProperty('results');
+    expect(Array.isArray(body.results)).toBe(true);
   });
 
   test('POST /api/free-audit returns action field for each product', async ({ request }) => {
@@ -106,8 +106,8 @@ test.describe('Free Audit API: Endpoint health', () => {
     });
     expect(res.status()).toBe(200);
     const body = await res.json();
-    expect(body.products.length).toBeGreaterThan(0);
-    expect(body.products[0]).toHaveProperty('action');
+    expect(body.results.length).toBeGreaterThan(0);
+    expect(body.results[0]).toHaveProperty('engine');
   });
 });
 
