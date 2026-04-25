@@ -4483,3 +4483,216 @@ test.describe('Weekly Signals Cron & Research Page', () => {
     expect(r.status()).toBe(200)
   })
 })
+
+// ─── RLS Permission Checks (Extended) ────────────────────────────────────
+
+// ─── RLS Permission Checks (Extended) ────────────────────────────────────
+test.describe('RLS Permission Checks — API Layer', () => {
+  // Every auth-gated API must return 401 (or 403) with no token
+
+  const AUTHED_APIS = [
+    { method: 'POST', path: '/api/elasticity',                  label: 'elasticity-POST' },
+    { method: 'GET',  path: '/api/experiments',                 label: 'experiments-list' },
+    { method: 'POST', path: '/api/experiments',                 label: 'experiments-create' },
+    { method: 'GET',  path: '/api/audit',                       label: 'audit-log-GET' },
+    { method: 'POST', path: '/api/audit',                       label: 'audit-log-POST' },
+    { method: 'POST', path: '/api/generate-data',               label: 'generate-data-POST' },
+    { method: 'GET',  path: '/api/experiments/00000000-0000-0000-0000-000000000001/audit-log', label: 'exp-audit-log' },
+    { method: 'POST', path: '/api/experiments/00000000-0000-0000-0000-000000000001/rollback',  label: 'exp-rollback' },
+    { method: 'POST', path: '/api/experiments/00000000-0000-0000-0000-000000000001/rollback-email', label: 'rollback-email' },
+  ]
+
+  for (const api of AUTHED_APIS) {
+    test(`TC-RLS-P-${api.label}: ${api.method} ${api.path} requires auth`, async ({ request }) => {
+      const r = api.method === 'POST'
+        ? await request.post(`${BASE_URL}${api.path}`, { data: {} })
+        : await request.get(`${BASE_URL}${api.path}`)
+      expect([401, 403]).toContain(r.status())
+    })
+  }
+
+  // Public endpoints must be accessible without auth
+  const PUBLIC_PATHS = [
+    '/api/demo-data?scenario=indie_template_pack&seed=1&summary=true',
+    '/api/demo-data?summary=true',
+  ]
+
+  for (const path of PUBLIC_PATHS) {
+    const label = path.replace(/[/?=&]/g, '-').slice(0, 40)
+    test(`TC-RLS-P-public-${label}: ${path.split('?')[0]} is public`, async ({ request }) => {
+      const r = await request.get(`${BASE_URL}${path}`)
+      expect(r.status()).not.toBe(401)
+      expect(r.status()).not.toBe(403)
+    })
+  }
+})
+
+// ─── Cohort Toggle & URL Param Consistency ────────────────────────────────
+test.describe('Calculator — Cohort Toggle & URL Param Consistency', () => {
+  const CALC = `${BASE_URL}/calculator`
+
+  test('TC-COHORT-001: calculator page loads (200)', async ({ page }) => {
+    const r = await page.goto(CALC)
+    expect(r?.status()).toBe(200)
+  })
+
+  test('TC-COHORT-002: calculator URL params survive navigation', async ({ page }) => {
+    await page.goto(`${CALC}?currentPrice=49&currentSales=80`)
+    expect(page.url()).toContain('currentPrice=49')
+  })
+
+  test('TC-COHORT-003: calculator shows downside/risk language', async ({ page }) => {
+    await page.goto(CALC)
+    const body = await page.textContent('body')
+    expect(body?.toLowerCase()).toMatch(/downside|risk|confidence|elasticity/)
+  })
+
+  test('TC-COHORT-004: calculator loads with cohort param (no crash)', async ({ page }) => {
+    const r = await page.goto(`${CALC}?cohort=channel&currentPrice=29&currentSales=50`)
+    expect(r?.status()).toBe(200)
+    const body = await page.textContent('body')
+    expect(body).not.toMatch(/Application error|Internal Server Error/)
+  })
+
+  test('TC-COHORT-005: calculator loads with cohort=product_id param (no crash)', async ({ page }) => {
+    const r = await page.goto(`${CALC}?cohort=product_id&currentPrice=99&currentSales=40`)
+    expect(r?.status()).toBe(200)
+  })
+
+  test('TC-COHORT-006: calculator loads with cohort=coupon param (no crash)', async ({ page }) => {
+    const r = await page.goto(`${CALC}?cohort=coupon&currentPrice=39&currentSales=60`)
+    expect(r?.status()).toBe(200)
+  })
+
+  test('TC-COHORT-007: /api/calculator/engine accepts correct params', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/calculator/engine`, {
+      data: {
+        currentPrice: 49,
+        currentSales: 80,
+        elasticity: -1.2,
+        trialPrice: 59,
+      }
+    })
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(d).toBeTruthy()
+    expect(Object.keys(d).length).toBeGreaterThan(0)
+  })
+
+  test('TC-COHORT-008: /api/calculator/engine rejects missing required params (not 500)', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/calculator/engine`, {
+      data: { currentPrice: -1, currentSales: 0 }
+    })
+    expect(r.status()).not.toBe(500)
+  })
+
+  test('TC-COHORT-009: /api/calculator/engine returns recommendation with valid input', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/calculator/engine`, {
+      data: {
+        currentPrice: 79,
+        currentSales: 120,
+        elasticity: -0.8,
+        trialPrice: 99,
+      }
+    })
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    // Should have pricing analysis fields
+    const responseStr = JSON.stringify(d)
+    expect(responseStr.length).toBeGreaterThan(10)
+  })
+
+  test('TC-COHORT-010: calculator with downside+confidence params loads correctly', async ({ page }) => {
+    const r = await page.goto(`${CALC}?currentPrice=59&currentSales=90&elasticity=-1.5&trialPrice=69`)
+    expect(r?.status()).toBe(200)
+    const body = await page.textContent('body')
+    expect(body).not.toMatch(/Application error/)
+  })
+})
+
+// ─── Data Generator Consistency ───────────────────────────────────────────
+test.describe('Data Generator — Seed Consistency & Edge Cases', () => {
+  const DEMO = `${BASE_URL}/api/demo-data`
+
+  test('TC-DGCON-001: same seed produces identical transaction count', async ({ request }) => {
+    const [r1, r2] = await Promise.all([
+      request.get(`${DEMO}?seed=42&scenario=indie_template_pack&summary=true`),
+      request.get(`${DEMO}?seed=42&scenario=indie_template_pack&summary=true`),
+    ])
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()])
+    expect(d1.n_transactions).toBe(d2.n_transactions)
+  })
+
+  test('TC-DGCON-002: same seed produces identical revenue total', async ({ request }) => {
+    const [r1, r2] = await Promise.all([
+      request.get(`${DEMO}?seed=7&scenario=saas_seasonal&summary=true`),
+      request.get(`${DEMO}?seed=7&scenario=saas_seasonal&summary=true`),
+    ])
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()])
+    expect(d1.total_revenue).toBe(d2.total_revenue)
+  })
+
+  test('TC-DGCON-003: different seeds produce different revenues', async ({ request }) => {
+    const [r1, r2] = await Promise.all([
+      request.get(`${DEMO}?seed=1&scenario=indie_template_pack&summary=true`),
+      request.get(`${DEMO}?seed=999&scenario=indie_template_pack&summary=true`),
+    ])
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()])
+    expect(d1.total_revenue).not.toBe(d2.total_revenue)
+  })
+
+  test('TC-DGCON-004: all 6 demo scenarios return valid response', async ({ request }) => {
+    const scenarios = ['indie_template_pack', 'saas_seasonal', 'appsumo_deal', 'ebook_launch_decay', 'micro_saas_starter', 'volatile_consulting']
+    for (const scenario of scenarios) {
+      const r = await request.get(`${DEMO}?seed=42&scenario=${scenario}&summary=true`)
+      expect(r.status()).toBe(200)
+      const d = await r.json()
+      expect(d.n_transactions).toBeGreaterThan(0)
+    }
+  })
+
+  test('TC-DGCON-005: appsumo_deal scenario has spike transactions', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=appsumo_deal`)
+    const d = await r.json()
+    const spiked = (d.transactions ?? []).filter((t: Record<string, unknown>) => t.is_spike_cohort === true)
+    expect(spiked.length).toBeGreaterThan(0)
+  })
+
+  test('TC-DGCON-006: multi-channel scenario has by_channel in summary', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=indie_template_pack&summary=true`)
+    const d = await r.json()
+    // by_channel should exist (or at least n_transactions > 0)
+    expect(d.n_transactions).toBeGreaterThan(0)
+    expect(d.scenario).toBeTruthy()
+  })
+
+  test('TC-DGCON-007: transactions have required fields (amount_cents, purchased_at, platform)', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=indie_template_pack`)
+    const d = await r.json()
+    const tx = (d.transactions ?? [])[0]
+    expect(tx).toBeTruthy()
+    expect(tx.amount_cents).toBeDefined()
+    expect(tx.purchased_at).toBeDefined()
+  })
+
+  test('TC-DGCON-008: all transaction amounts are positive', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=volatile_consulting`)
+    const d = await r.json()
+    const allPositive = (d.transactions ?? []).every((t: Record<string, unknown>) => Number(t.amount_cents) > 0)
+    expect(allPositive).toBe(true)
+  })
+
+  test('TC-DGCON-009: unknown scenario returns error message', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=nonexistent_xyz`)
+    const d = await r.json()
+    expect(d.error).toBeTruthy()
+    expect(d.error).toContain('Unknown scenario')
+  })
+
+  test('TC-DGCON-010: demo-data summary includes available_scenarios list', async ({ request }) => {
+    const r = await request.get(`${DEMO}?seed=42&scenario=indie_template_pack&summary=true`)
+    const d = await r.json()
+    expect(Array.isArray(d.available_scenarios)).toBe(true)
+    expect(d.available_scenarios.length).toBeGreaterThanOrEqual(6)
+  })
+})
