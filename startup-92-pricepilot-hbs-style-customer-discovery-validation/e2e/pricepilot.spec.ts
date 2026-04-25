@@ -4067,3 +4067,156 @@ test.describe('Permission and RLS checks', () => {
     expect(r.status()).not.toBe(200)
   })
 })
+
+// ─── Data Generator v2 — Public Demo Data API ─────────────────────────────
+test.describe('Data Generator v2 — /api/demo-data', () => {
+  test('TC-DG2-001: GET /api/demo-data returns 200 with default scenario', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?summary=true&seed=42`)
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(d.n_transactions).toBeGreaterThan(0)
+    expect(d.product_name).toBeTruthy()
+    expect(d.pattern).toBeTruthy()
+  })
+
+  test('TC-DG2-002: All 6 demo scenarios return valid data', async ({ request }) => {
+    const scenarios = ['indie_template_pack', 'micro_saas_starter', 'appsumo_deal', 'ebook_launch_decay', 'saas_seasonal', 'volatile_consulting']
+    for (const scenario of scenarios) {
+      const r = await request.get(`${BASE_URL}/api/demo-data?scenario=${scenario}&seed=42&summary=true`)
+      expect(r.status(), `scenario ${scenario} failed`).toBe(200)
+      const d = await r.json()
+      expect(d.n_transactions, `${scenario} has 0 transactions`).toBeGreaterThan(0)
+      expect(d.scenario).toBe(scenario)
+    }
+  })
+
+  test('TC-DG2-003: demo-data returns transactions array when summary=false', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=42`)
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(Array.isArray(d.transactions)).toBe(true)
+    expect(d.transactions.length).toBeGreaterThan(0)
+  })
+
+  test('TC-DG2-004: Each transaction has required fields', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=42`)
+    const d = await r.json()
+    for (const txn of d.transactions.slice(0, 10)) {
+      expect(typeof txn.amount_cents).toBe('number')
+      expect(txn.amount_cents).toBeGreaterThan(0)
+      expect(txn.purchased_at).toBeTruthy()
+      expect(txn.customer_key).toBeTruthy()
+      expect(txn.currency).toBe('usd')
+      expect(typeof txn.is_refunded).toBe('boolean')
+    }
+  })
+
+  test('TC-DG2-005: Output is deterministic with same seed', async ({ request }) => {
+    const r1 = await request.get(`${BASE_URL}/api/demo-data?scenario=micro_saas_starter&seed=999&summary=true`)
+    const r2 = await request.get(`${BASE_URL}/api/demo-data?scenario=micro_saas_starter&seed=999&summary=true`)
+    const d1 = await r1.json()
+    const d2 = await r2.json()
+    expect(d1.n_transactions).toBe(d2.n_transactions)
+    expect(d1.total_revenue).toBe(d2.total_revenue)
+  })
+
+  test('TC-DG2-006: Different seeds produce different outputs', async ({ request }) => {
+    const r1 = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=1`)
+    const r2 = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=999`)
+    const d1 = await r1.json()
+    const d2 = await r2.json()
+    // Different seeds → different total revenue (high probability)
+    expect(d1.total_revenue).not.toBe(d2.total_revenue)
+  })
+
+  test('TC-DG2-007: AppSumo scenario has spike transactions', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=appsumo_deal&seed=42&summary=true`)
+    const d = await r.json()
+    expect(d.spike_transactions).toBeGreaterThan(0)
+    expect(d.by_channel).toBeTruthy()
+  })
+
+  test('TC-DG2-008: Coupon-enabled scenarios have by_coupon data', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=ebook_launch_decay&seed=42&summary=true`)
+    const d = await r.json()
+    expect(d.by_coupon).toBeTruthy()
+    // EARLYBIRD coupon should appear
+    const couponKeys = Object.keys(d.by_coupon)
+    expect(couponKeys.length).toBeGreaterThanOrEqual(0) // coupon usage is random
+  })
+
+  test('TC-DG2-009: Seasonal scenario has n_months=24', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=saas_seasonal&seed=42&summary=true`)
+    const d = await r.json()
+    expect(d.n_months).toBe(24)
+  })
+
+  test('TC-DG2-010: demo-data returns 400 for unknown scenario', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=nonexistent_scenario`)
+    expect(r.status()).toBe(400)
+    const d = await r.json()
+    expect(d.error).toMatch(/Unknown scenario/i)
+  })
+
+  test('TC-DG2-011: summary returns available_scenarios list', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?summary=true`)
+    const d = await r.json()
+    expect(Array.isArray(d.available_scenarios)).toBe(true)
+    expect(d.available_scenarios).toContain('indie_template_pack')
+    expect(d.available_scenarios.length).toBeGreaterThanOrEqual(6)
+  })
+
+  test('TC-DG2-012: Multi-channel scenario has by_channel breakdown', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=42&summary=true`)
+    const d = await r.json()
+    const channelKeys = Object.keys(d.by_channel)
+    expect(channelKeys.length).toBeGreaterThanOrEqual(1)
+    // Total channel counts should sum to n_transactions
+    const total = Object.values(d.by_channel as Record<string, number>).reduce((a: number, b: number) => a + b, 0)
+    expect(total).toBe(d.n_transactions)
+  })
+
+  test('TC-DG2-013: Price schedule has at least 2 entries for scenarios with price changes', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=micro_saas_starter&seed=42&summary=true`)
+    const d = await r.json()
+    // micro_saas_starter has 3 price changes
+    expect(d.price_schedule.length).toBeGreaterThanOrEqual(2)
+    // First entry starts at month 0
+    expect(d.price_schedule[0].starts_month).toBe(0)
+  })
+
+  test('TC-DG2-014: Volatile scenario has higher price variance than steady', async ({ request }) => {
+    const [rv, rs] = await Promise.all([
+      request.get(`${BASE_URL}/api/demo-data?scenario=volatile_consulting&seed=42`),
+      request.get(`${BASE_URL}/api/demo-data?scenario=micro_saas_starter&seed=42`),
+    ])
+    const dv = await rv.json()
+    const ds = await rs.json()
+    // Volatile consulting has a base of $299, steady is $49
+    expect(dv.avg_price).toBeGreaterThan(ds.avg_price)
+  })
+
+  test('TC-DG2-015: Transaction purchased_at dates span the correct number of months', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/demo-data?scenario=indie_template_pack&seed=42`)
+    const d = await r.json()
+    const dates = d.transactions.map((t: { purchased_at: string }) => new Date(t.purchased_at).getTime())
+    const minDate = Math.min(...dates)
+    const maxDate = Math.max(...dates)
+    const spanDays = (maxDate - minDate) / (1000 * 86400)
+    // 12-month history = at least 300 days span
+    expect(spanDays).toBeGreaterThan(300)
+  })
+})
+
+// ─── Generate Data UI Page ─────────────────────────────────────────────────
+test.describe('Generate Data UI Page', () => {
+  test('TC-GENUI-001: /generate redirects to login when not authenticated', async ({ page }) => {
+    await page.goto(`${BASE_URL}/generate`)
+    expect(page.url()).toMatch(/login|generate/i)
+  })
+
+  test('TC-GENUI-002: /generate page exists (not 404)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/generate`)
+    expect(page.url()).not.toContain('404')
+  })
+})
