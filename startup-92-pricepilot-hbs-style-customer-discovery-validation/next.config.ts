@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' https://js.stripe.com",
+              "script-src 'self' https://js.stripe.com https://www.redditstatic.com https://www.googletagmanager.com",
               "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline; no runtime injection risk
               "img-src 'self' data: blob: https:",
               "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.vercel.app https://accounts.google.com https://oauth2.googleapis.com",
