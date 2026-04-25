@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { CookieConsent } from '@/components/CookieConsent'
 
-const BASE_URL = 'https://pricepilot.app'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pricepilot.app'
 
 export const metadata: Metadata = {
   title: { default: 'PricePilot — Safe pricing experiments for solo founders', template: '%s — PricePilot' },

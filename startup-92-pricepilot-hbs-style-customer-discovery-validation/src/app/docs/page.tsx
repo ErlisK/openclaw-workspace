@@ -40,22 +40,7 @@ export default function DocsPage() {
           </Link>
         ))}
 
-        {/* Also link to CSV guide */}
-        <Link
-          href="/import/guide"
-          data-testid="docs-page-csv-guide"
-          style={{
-            border: '1px solid #e5e7eb', borderRadius: 12,
-            padding: '1.25rem', background: '#fff', textDecoration: 'none', color: 'inherit',
-            display: 'block',
-          }}
-        >
-          <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📋</div>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.4rem' }}>CSV Import Guide</h2>
-          <p style={{ color: '#6b7280', fontSize: '0.9rem', margin: 0 }}>
-            Stripe, Gumroad, and Shopify CSV column mappings with template downloads.
-          </p>
-        </Link>
+        {/* CSV Import Guide is available at /docs/csv-import */}
       </div>
 
       <div style={{ marginTop: '2.5rem', padding: '1.25rem', background: '#f9fafb', borderRadius: 10, fontSize: '0.9rem' }}>

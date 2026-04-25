@@ -56,10 +56,13 @@ export default function LoginPage() {
               <input className="input" type="email" name="email" value={email} onChange={e => setEmail(e.target.value)}
                 required placeholder="you@example.com" data-testid="email-input" />
             </div>
-            <div style={{ marginBottom: '1.25rem' }}>
+            <div style={{ marginBottom: '0.5rem' }}>
               <label className="label">Password</label>
               <input className="input" type="password" name="password" value={password} onChange={e => setPassword(e.target.value)}
                 required placeholder="Your password" data-testid="password-input" />
+            </div>
+            <div style={{ textAlign: 'right', marginBottom: '1rem' }}>
+              <Link href="/reset-password" style={{ fontSize: '0.85rem', color: 'var(--brand)' }}>Forgot password?</Link>
             </div>
             {error && <p className="error-message" data-testid="auth-error">{error}</p>}
             <button className="btn btn-primary" type="submit" disabled={loading} data-testid="login-btn"

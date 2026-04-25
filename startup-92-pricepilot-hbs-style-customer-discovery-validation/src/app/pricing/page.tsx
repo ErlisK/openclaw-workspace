@@ -1,12 +1,11 @@
-'use client'
-import { useState } from 'react'
 import Link from 'next/link'
-import { track } from '@/lib/analytics'
-import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 import { SiteFooter } from '@/components/SiteFooter'
 
+export const dynamic = 'force-dynamic'
+
 const FREE_FEATURES = [
-  '3 active experiments',
+  'Up to 3 active experiments',
   'CSV import (up to 500 rows)',
   'Bayesian engine recommendations',
   'Public experiment pages (/x/slug)',
@@ -20,30 +19,14 @@ const PRO_FEATURES = [
   'AI roll-out templates (email, tweet, blog)',
   'AI experiment copy generator',
   'Priority support',
-  'Stripe & Gumroad connectors (coming soon)',
+  'CSV import available now · Stripe/Gumroad connectors coming soon',
   'Export audit log',
 ]
 
-export default function PricingPage() {
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const router = useRouter()
-  const isTestMode = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_test_') ?? true
-
-  const handleUpgrade = async () => {
-    setLoading(true); setError('')
-    track('upgrade_clicked', { source: 'pricing_page' })
-    const resp = await fetch('/api/checkout', { method: 'POST' })
-    const data = await resp.json()
-    setLoading(false)
-    if (!resp.ok) {
-      if (resp.status === 409) { setError('You already have Pro! Manage your plan below.'); return }
-      if (resp.status === 401) { router.push('/login?next=/pricing'); return }
-      setError(data.error || 'Failed to start checkout')
-      return
-    }
-    if (data.url) window.location.href = data.url
-  }
+export default async function PricingPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  const isAuthed = !!user
 
   return (
     <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
@@ -78,9 +61,8 @@ export default function PricingPage() {
             <Link href="/signup" style={{
               display: 'block', textAlign: 'center', padding: '0.75rem',
               border: '1px solid #e5e7eb', borderRadius: '0.75rem',
-              color: '#111827', textDecoration: 'none', fontWeight: 600,
-              marginBottom: '1.5rem',
-            }} data-testid="free-cta">
+              color: '#374151', textDecoration: 'none', fontWeight: 600, marginBottom: '1.5rem',
+            }}>
               Get started free
             </Link>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -111,18 +93,31 @@ export default function PricingPage() {
             </div>
             <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Cancel anytime</p>
 
-            {error && <p style={{ color: '#ef4444', fontSize: '0.875rem', marginBottom: '0.75rem' }}>{error}</p>}
-
-            <button onClick={handleUpgrade} disabled={loading}
-              data-testid="upgrade-btn"
-              style={{
-                display: 'block', width: '100%', padding: '0.75rem',
-                background: loading ? '#a78bfa' : '#6c47ff', color: '#fff', border: 'none',
-                borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem',
-                cursor: loading ? 'not-allowed' : 'pointer', marginBottom: '1.5rem',
-              }}>
-              {loading ? 'Redirecting to checkout…' : 'Upgrade to Pro →'}
-            </button>
+            {isAuthed ? (
+              <form method="post" action="/api/billing/checkout" style={{ marginBottom: '1.5rem' }}>
+                <button type="submit"
+                  data-testid="upgrade-btn"
+                  style={{
+                    display: 'block', width: '100%', padding: '0.75rem',
+                    background: '#6c47ff', color: '#fff', border: 'none',
+                    borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem',
+                    cursor: 'pointer',
+                  }}>
+                  Upgrade to Pro →
+                </button>
+              </form>
+            ) : (
+              <a href="/signup?intent=upgrade" rel="nofollow"
+                data-testid="upgrade-btn"
+                style={{
+                  display: 'block', textAlign: 'center', padding: '0.75rem',
+                  background: '#6c47ff', color: '#fff', borderRadius: '0.75rem',
+                  fontWeight: 700, fontSize: '1rem', textDecoration: 'none',
+                  marginBottom: '1.5rem',
+                }}>
+                Upgrade to Pro →
+              </a>
+            )}
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {PRO_FEATURES.map(f => (
@@ -134,21 +129,18 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Test mode banner - only shown when using Stripe test keys */}
-        {isTestMode && (
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <p style={{ color: '#9ca3af', fontSize: '0.8rem' }}>
-            🔒 Stripe test mode · Use card <code style={{ background: '#f3f4f6', padding: '0.1rem 0.3rem', borderRadius: 4 }}>4242 4242 4242 4242</code> · Any future date · Any CVC
+            💡 CSV import is available now. Stripe &amp; Gumroad direct connectors are coming soon.
           </p>
         </div>
-        )}
 
         {/* FAQ */}
         <div style={{ maxWidth: 600, margin: '3rem auto 0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {[
             ['Can I cancel anytime?', 'Yes — cancel from your billing portal and you keep Pro access until the end of the billing period.'],
             ['What counts as an experiment?', 'One A/B pricing page (/x/slug). Free tier: 3 active at a time. Pro: unlimited.'],
-            ...(isTestMode ? [['Is this really test mode?', 'Yes — no real charges. Use Stripe test card 4242 4242 4242 4242.']] : []),
+            ['Is CSV import available now?', 'Yes! CSV import is live now. Stripe and Gumroad direct connectors are coming soon.'],
           ].map(([q, a]) => (
             <div key={q} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.75rem', padding: '1rem 1.25rem' }}>
               <p style={{ fontWeight: 700, marginBottom: '0.35rem' }}>{q}</p>
@@ -157,7 +149,7 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
-    <SiteFooter />
+      <SiteFooter />
     </div>
   )
 }

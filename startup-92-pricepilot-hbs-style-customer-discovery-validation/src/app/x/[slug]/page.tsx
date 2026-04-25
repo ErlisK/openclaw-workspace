@@ -7,6 +7,7 @@
  * No auth required (public page).
  */
 
+import { notFound } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 import { randomBytes } from 'crypto'
@@ -74,7 +75,7 @@ export default async function ExperimentPage({
   if (!exp) {
     // Static demo fallback for /x/demo
     if (slug === 'demo') return <DemoExperiment />
-    return <NotFound />
+    notFound()
   }
 
   // ── Visitor bucketing ──────────────────────────────────────────────────────
