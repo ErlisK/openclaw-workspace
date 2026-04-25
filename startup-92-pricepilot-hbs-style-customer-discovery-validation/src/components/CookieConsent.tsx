@@ -1,20 +1,27 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const CONSENT_KEY = 'pp_cookie_consent'
 
+// Auth and public pages where the banner must not appear
+const HIDDEN_PATHS = ['/login', '/signup', '/reset-password']
+
 export function CookieConsent() {
   const [visible, setVisible] = useState(false)
+  const pathname = usePathname()
 
   useEffect(() => {
+    // Don't show on auth pages at all
+    if (HIDDEN_PATHS.some(p => pathname.startsWith(p))) return
     try {
       const stored = localStorage.getItem(CONSENT_KEY)
       if (!stored) setVisible(true)
     } catch {
       // ignore SSR / private browsing
     }
-  }, [])
+  }, [pathname])
 
   const accept = (all: boolean) => {
     try {
