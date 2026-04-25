@@ -4220,3 +4220,55 @@ test.describe('Generate Data UI Page', () => {
     expect(page.url()).not.toContain('404')
   })
 })
+
+// ─── Rollback + AI Email Enhancement ─────────────────────────────────────
+test.describe('Rollback Email — /api/experiments/[id]/rollback-email', () => {
+  const FAKE_ID = '00000000-0000-0000-0000-000000000001'
+
+  test('TC-RE-001: rollback-email endpoint exists (not 404)', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/experiments/${FAKE_ID}/rollback-email`, {
+      data: { tone: 'casual' }
+    })
+    expect(r.status()).not.toBe(404)
+  })
+
+  test('TC-RE-002: rollback-email returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/experiments/${FAKE_ID}/rollback-email`, {
+      data: { tone: 'casual' }
+    })
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-RE-003: audit-log endpoint returns 401 without auth', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/experiments/${FAKE_ID}/audit-log`)
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-RE-004: audit-log endpoint is routed (not 404)', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/experiments/${FAKE_ID}/audit-log`)
+    expect(r.status()).not.toBe(404)
+  })
+
+  test('TC-RE-005: rollback endpoint still returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/experiments/${FAKE_ID}/rollback`, {
+      data: { reason: 'test' }
+    })
+    expect(r.status()).toBe(401)
+  })
+})
+
+// ─── Experiment Detail UI (auth guard + structure) ────────────────────────
+test.describe('Experiment Detail Page', () => {
+  test('TC-EXPD-001: /experiments/:id redirects to login when not authenticated', async ({ page }) => {
+    await page.goto(`${BASE_URL}/experiments/00000000-0000-0000-0000-000000000001`)
+    // Should either redirect to login OR show "not found" — not expose data
+    const url = page.url()
+    const body = await page.textContent('body')
+    expect(url.includes('login') || body?.includes('not found') || body?.includes('Not found')).toBe(true)
+  })
+
+  test('TC-EXPD-002: /experiments page requires auth', async ({ page }) => {
+    await page.goto(`${BASE_URL}/experiments`)
+    expect(page.url()).toMatch(/login/i)
+  })
+})
