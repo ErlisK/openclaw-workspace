@@ -24,6 +24,7 @@ export default function SuggestionsPage() {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loading, setLoading] = useState(true)
   const [running, setRunning] = useState(false)
+  const [runError, setRunError] = useState('')
   const [dismissing, setDismissing] = useState<string | null>(null)
   const router = useRouter()
 
@@ -37,12 +38,20 @@ export default function SuggestionsPage() {
 
   const runEngine = async () => {
     setRunning(true)
-    const resp = await fetch('/api/engine/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
-    setRunning(false)
-    if (resp.ok) {
+    setRunError('')
+    try {
+      const resp = await fetch('/api/engine/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
       const data = await resp.json().catch(() => ({}))
-      track('suggestion_created', { count: Array.isArray(data) ? data.length : 1 })
-      fetchSuggestions()
+      if (!resp.ok) {
+        setRunError(data.error || `Analysis failed (${resp.status}). Please import data first.`)
+      } else {
+        track('suggestion_created', { count: Array.isArray(data) ? data.length : 1 })
+        fetchSuggestions()
+      }
+    } catch {
+      setRunError('Network error. Please try again.')
+    } finally {
+      setRunning(false)
     }
   }
 
@@ -98,6 +107,12 @@ export default function SuggestionsPage() {
           </button>
         </div>
 
+        {runError && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '0.75rem 1rem', marginBottom: '1.5rem', color: '#dc2626', fontSize: '0.9rem' }} data-testid="run-error">
+            ⚠️ {runError}
+          </div>
+        )}
+
         {loading && <div style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></div>}
 
         {!loading && suggestions.length === 0 && (
@@ -107,8 +122,8 @@ export default function SuggestionsPage() {
             <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>Import some sales data, then run the engine to get your first price recommendations.</p>
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
               <Link href="/import" className="btn btn-secondary">Import data</Link>
-              <button className="btn btn-primary" onClick={runEngine} disabled={running}>
-                {running ? 'Analyzing…' : 'Run engine now'}
+              <button className="btn btn-primary" onClick={runEngine} disabled={running} data-testid="run-engine-empty-btn">
+                {running ? 'Analyzing…' : 'Run analysis'}
               </button>
             </div>
           </div>

@@ -13,6 +13,11 @@ export async function POST(request: Request) {
     const mappingOverride = formData.get('mapping')
     if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
+    // File size guard — reject files over 10 MB
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 413 })
+    }
+
     const csvText = await file.text()
     const overrideMapping = mappingOverride ? JSON.parse(mappingOverride as string) : undefined
     const { mapping, mappingResult, rows, rowErrors, skipped } = parseCSVWithMapping(csvText, overrideMapping)

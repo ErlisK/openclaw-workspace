@@ -12,15 +12,14 @@ export function SiteFooter() {
         marginTop: '4rem',
       }}
     >
-      <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-        <Link href="/privacy" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>
-          Privacy Policy
-        </Link>
-        <Link href="/terms" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>
-          Terms of Service
-        </Link>
-        <span>© {new Date().getFullYear()} PricePilot</span>
+      <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+        <Link href="/privacy" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>Privacy Policy</Link>
+        <Link href="/terms" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>Terms of Service</Link>
+        <Link href="/cookies" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>Cookies</Link>
+        <Link href="/refund-policy" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>Refund Policy</Link>
+        <Link href="/billing" style={{ color: 'var(--muted, #6b7280)', textDecoration: 'none' }}>Billing</Link>
       </div>
+      <p style={{ margin: 0 }}>© {new Date().getFullYear()} PricePilot / Lima Labs LLC · 2298 Johanna Court, Pinole, CA 94564</p>
     </footer>
   )
 }

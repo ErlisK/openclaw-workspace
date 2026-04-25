@@ -37,6 +37,9 @@ export async function POST(request: NextRequest) {
   const platform = (formData.get('platform') as string || '').toLowerCase()
 
   if (!file) return NextResponse.json({ error: 'No file (field name: file)' }, { status: 400 })
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'File too large. Maximum size is 10 MB.' }, { status: 413 })
+  }
   if (!platform || !PLATFORM_SCHEMAS[platform]) {
     return NextResponse.json({
       error: `Invalid platform. Use: ${Object.keys(PLATFORM_SCHEMAS).join(' | ')}`,
@@ -45,7 +48,8 @@ export async function POST(request: NextRequest) {
 
   const schema = PLATFORM_SCHEMAS[platform]
   const text = await file.text()
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean)
+  const allLines = text.split('\n').map(l => l.trim()).filter(Boolean)
+  const lines = allLines.slice(0, 10001) // cap at 10k data rows + header
 
   if (lines.length === 0) return NextResponse.json({ error: 'File is empty' }, { status: 400 })
   if (lines.length < 2) return NextResponse.json({ error: 'CSV has no data rows (only header)' }, { status: 400 })

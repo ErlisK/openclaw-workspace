@@ -11,6 +11,7 @@ export default function SignupPage() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -22,7 +23,14 @@ export default function SignupPage() {
     setLoading(true)
     const { error: err } = await supabase.auth.signUp({ email, password })
     setLoading(false)
-    if (err) { setError(err.message); return }
+    if (err) {
+      const msg = err.message
+      setError(msg)
+      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('user already exists')) {
+        setIsAlreadyRegistered(true)
+      }
+      return
+    }
     router.push('/import')
   }
 
@@ -66,7 +74,18 @@ export default function SignupPage() {
               <input className="input" type="password" name="password" value={password} onChange={e => setPassword(e.target.value)}
                 required placeholder="Min. 8 characters" data-testid="password-input" />
             </div>
-            {error && <p className="error-message" data-testid="auth-error">{error}</p>}
+            {error && (
+              <div data-testid="auth-error">
+                <p className="error-message">{error}</p>
+                {isAlreadyRegistered && (
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.875rem' }}>
+                    <Link href={`/login?email=${encodeURIComponent(email)}`} className="btn btn-secondary btn-sm" style={{ display: 'inline-block' }}>
+                      Sign in with this email →
+                    </Link>
+                  </p>
+                )}
+              </div>
+            )}
             <div style={{ marginBottom: '1rem', marginTop: '0.25rem' }}>
               <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--muted)' }}>
                 <input

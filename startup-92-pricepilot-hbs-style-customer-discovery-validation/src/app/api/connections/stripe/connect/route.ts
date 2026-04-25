@@ -35,8 +35,9 @@ export async function POST(request: Request) {
     const testStripe = new Stripe(stripe_key, { apiVersion: '2026-04-22.dahlia' as '2026-04-22.dahlia' })
     account = await testStripe.accounts.retrieve('self') as unknown as typeof account
   } catch (err) {
+    console.error('[connections/stripe/connect] key validation failed:', err)
     return NextResponse.json(
-      { error: 'Invalid or expired Stripe key. Please check your key and try again.', detail: String(err) },
+      { error: 'Invalid or expired Stripe key. Please check your key and try again.' },
       { status: 400 }
     )
   }
@@ -72,7 +73,8 @@ export async function POST(request: Request) {
     }, { onConflict: 'user_id' })
 
   if (upsertErr) {
-    return NextResponse.json({ error: upsertErr.message }, { status: 500 })
+    console.error('[connections/stripe/connect] upsert error:', upsertErr)
+    return NextResponse.json({ error: 'Failed to save connection. Please try again.' }, { status: 500 })
   }
 
   return NextResponse.json({

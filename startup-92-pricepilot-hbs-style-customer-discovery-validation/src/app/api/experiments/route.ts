@@ -11,7 +11,8 @@ function slugify(str: string): string {
 }
 
 function randomSuffix(): string {
-  return Math.random().toString(36).slice(2, 7)
+  const bytes = crypto.getRandomValues(new Uint8Array(5))
+  return Array.from(bytes).map(b => b.toString(36).padStart(2, '0')).join('').slice(0, 8)
 }
 
 // GET /api/experiments — list all experiments for user

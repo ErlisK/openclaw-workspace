@@ -20,7 +20,6 @@ export function CookieConsent() {
     try {
       localStorage.setItem(CONSENT_KEY, all ? 'all' : 'essential')
       if (all && typeof window !== 'undefined') {
-        // Signal consent to analytics
         (window as unknown as Record<string, unknown>).__analyticsConsent = true
       }
     } catch { /* ignore */ }
@@ -35,31 +34,34 @@ export function CookieConsent() {
       aria-label="Cookie consent"
       style={{
         position: 'fixed',
-        bottom: '1rem',
-        left: '1rem',
-        right: '1rem',
-        maxWidth: 480,
-        margin: '0 auto',
+        bottom: 0,
+        left: 0,
+        right: 0,
         background: '#fff',
-        border: '1px solid var(--border, #e5e7eb)',
-        borderRadius: '0.75rem',
-        padding: '1.25rem',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+        borderTop: '1px solid #e5e7eb',
+        padding: '1rem 1.5rem',
+        boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
         zIndex: 9999,
         fontSize: '0.875rem',
         color: '#374151',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.75rem',
+        pointerEvents: 'auto',
       }}
     >
-      <p style={{ marginBottom: '1rem', lineHeight: 1.5 }}>
+      <p style={{ margin: 0, lineHeight: 1.5, flex: 1 }}>
         We use essential cookies for authentication and optional analytics cookies to improve the product.{' '}
-        <Link href="/privacy" style={{ color: '#6c47ff', textDecoration: 'underline' }}>
-          Privacy Policy
+        <Link href="/cookies" style={{ color: '#6c47ff', textDecoration: 'underline' }}>
+          Cookie Policy
         </Link>
       </p>
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
         <button
           onClick={() => accept(true)}
-          data-testid="cookie-accept-all"
+          data-testid="cookie-accept-btn"
           style={{
             background: '#6c47ff',
             color: '#fff',

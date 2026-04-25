@@ -27,9 +27,10 @@ function hashToVariant(visitorId: string, experimentId: string, splitPctB: numbe
 }
 
 function generateVisitorId(): string {
-  // 16-char hex string — no crypto dependency needed
-  const bytes = Array.from({ length: 8 }, () => Math.floor(Math.random() * 256))
-  return bytes.map(b => b.toString(16).padStart(2, '0')).join('')
+  // Use crypto for secure random visitor IDs
+  const bytes = new Uint8Array(8)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 interface Experiment {
@@ -59,9 +60,10 @@ export default async function ExperimentPage({
   const sp = await searchParams
   const previewVariant = sp.preview?.toUpperCase() as 'A' | 'B' | undefined
 
+  // Use anon key for public experiment reads; RLS must allow SELECT on public experiments
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
   const { data: exp } = await supabase
@@ -124,7 +126,7 @@ export default async function ExperimentPage({
       {isNewVisitor && (
         <script
           dangerouslySetInnerHTML={{
-            __html: `document.cookie = "pp_vid=${visitorId}; path=/; max-age=31536000; SameSite=Lax"`,
+            __html: `document.cookie = "pp_vid=${visitorId}; path=/; max-age=31536000; SameSite=Lax; Secure"`,
           }}
         />
       )}

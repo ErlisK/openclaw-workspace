@@ -10,6 +10,10 @@ import { createClient as createUserClient } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 
 export async function POST(request: Request) {
+  // Block entirely in production
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_TEST_GRANTS !== 'true') {
+    return NextResponse.json({ error: 'Not available' }, { status: 403 })
+  }
   if (process.env.ALLOW_TEST_GRANTS !== 'true') {
     return NextResponse.json({ error: 'Not available — ALLOW_TEST_GRANTS not set' }, { status: 403 })
   }

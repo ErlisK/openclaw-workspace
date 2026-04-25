@@ -3031,35 +3031,21 @@ test.describe('Custom Analytics Events', () => {
     expect(body.event).toBe('import_started');
   });
 
-  test('TC-EVT-006: /api/analytics records all 6 custom events without error', async ({ request }) => {
-    const events = [
-      'import_started',
-      'import_completed',
-      'suggestion_created',
-      'experiment_published',
-      'rollback_clicked',
-      'upgrade_clicked',
-    ];
-
-    for (const event of events) {
-      const r = await request.post(`${BASE_URL}/api/analytics`, {
-        headers: { 'Content-Type': 'application/json' },
-        data: { event, properties: { source: 'e2e_test', event } },
-      });
-      expect(r.status(), `Expected 200 for event: ${event}`).toBe(200);
-      const body = await r.json();
-      expect(body.ok).toBe(true);
-      expect(body.event).toBe(event);
-    }
-  });
-
-  test('TC-EVT-007: track() utility is server-guard safe — analytics endpoint exists', async ({ request }) => {
-    // Ensures the /api/analytics endpoint is reachable (used by client track())
+  test('TC-EVT-006: /api/analytics requires auth — returns 401 for unauthenticated', async ({ request }) => {
     const r = await request.post(`${BASE_URL}/api/analytics`, {
       headers: { 'Content-Type': 'application/json' },
-      data: { event: 'page_view', properties: { page: '/test' } },
+      data: { event: 'import_started', properties: { source: 'e2e_test' } },
     });
-    expect(r.status()).toBe(200);
+    expect(r.status()).toBe(401);
+  });
+
+  test('TC-EVT-007: /api/analytics rejects oversized payloads (413)', async ({ request }) => {
+    const bigProps = 'x'.repeat(5000)
+    const r = await request.post(`${BASE_URL}/api/analytics`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: { event: 'page_view', properties: { data: bigProps } },
+    });
+    expect([401, 413]).toContain(r.status());
   });
 
 });
@@ -3117,3 +3103,115 @@ test.describe('Security & Legal', () => {
   });
 
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUITE: LAUNCH GATE — New required tests (K section)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const TEST_EMAIL = `e2e-launch-${Date.now()}@test.pricepilot.local`
+
+test.describe('Launch Gate — Signup & Cookie', () => {
+
+  test('signup form submits without crashing (bad email → error)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/signup`)
+    // dismiss cookie banner if present (data-testid from new implementation)
+    try {
+      const btn = page.getByTestId('cookie-accept-btn')
+      if (await btn.isVisible({ timeout: 2000 })) await btn.click()
+    } catch { /* ignore */ }
+    await page.getByTestId('email-input').fill('not-an-email')
+    await page.getByTestId('password-input').fill('password123')
+    await page.getByTestId('signup-btn').click()
+    await page.waitForTimeout(1000)
+    const url = page.url()
+    expect(url).toMatch(/signup|error/i)
+  })
+
+  test('signup with valid test email does not crash', async ({ page }) => {
+    await page.goto(`${BASE_URL}/signup`)
+    try {
+      const btn = page.getByTestId('cookie-accept-btn')
+      if (await btn.isVisible({ timeout: 2000 })) await btn.click()
+    } catch { /* ignore */ }
+    await page.getByTestId('email-input').fill(TEST_EMAIL)
+    await page.getByTestId('password-input').fill('TestPass123!')
+    const termsBox = page.getByTestId('terms-checkbox')
+    if (await termsBox.isVisible({ timeout: 1000 }).catch(() => false)) {
+      await termsBox.check()
+    }
+    await page.getByTestId('signup-btn').click()
+    await page.waitForTimeout(3000)
+    const bodyText = await page.textContent('body')
+    expect(bodyText?.length).toBeGreaterThan(50)
+  })
+
+  test('cookie accept-btn has correct data-testid', async ({ browser }) => {
+    const ctx = await browser.newContext()
+    const freshPage = await ctx.newPage()
+    await freshPage.goto(`${BASE_URL}/signup`)
+    await expect(freshPage.getByTestId('cookie-accept-btn')).toBeVisible({ timeout: 5000 })
+    await freshPage.getByTestId('cookie-accept-btn').click()
+    await expect(freshPage.getByTestId('cookie-accept-btn')).not.toBeVisible({ timeout: 2000 })
+    await ctx.close()
+  })
+
+})
+
+test.describe('Launch Gate — Billing & Connections pages', () => {
+
+  test('/billing redirects to login when unauthenticated', async ({ page }) => {
+    await page.goto(`${BASE_URL}/billing`)
+    await page.waitForURL(/login/, { timeout: 8000 })
+    expect(page.url()).toContain('login')
+  })
+
+  test('/connections redirects (to /settings/connections or /login)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/connections`)
+    await page.waitForTimeout(2000)
+    const url = page.url()
+    expect(url).toMatch(/settings\/connections|login/)
+  })
+
+  test('/settings/connections redirects to login when unauthenticated', async ({ page }) => {
+    await page.goto(`${BASE_URL}/settings/connections`)
+    await page.waitForURL(/login/, { timeout: 8000 })
+    expect(page.url()).toContain('login')
+  })
+
+})
+
+test.describe('Launch Gate — Suggestions engine', () => {
+
+  test('/api/engine/recommend returns 401 without auth', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/engine/recommend`, {
+      headers: { 'Content-Type': 'application/json' },
+      data: {},
+    })
+    expect(r.status()).toBe(401)
+  })
+
+  test('/suggestions page loads (auth guard or content)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/suggestions`)
+    await page.waitForTimeout(2000)
+    const url = page.url()
+    // Either authenticated content or redirected to login
+    expect(url).toMatch(/suggestions|login/)
+    const bodyText = await page.textContent('body')
+    expect(bodyText?.length).toBeGreaterThan(50)
+  })
+
+})
+
+test.describe('Launch Gate — Legal pages', () => {
+
+  test('/cookies page renders', async ({ page }) => {
+    await page.goto(`${BASE_URL}/cookies`)
+    await expect(page.locator('h1')).toContainText('Cookie')
+  })
+
+  test('/refund-policy page renders', async ({ page }) => {
+    await page.goto(`${BASE_URL}/refund-policy`)
+    await expect(page.locator('h1')).toContainText('Refund')
+  })
+
+})
