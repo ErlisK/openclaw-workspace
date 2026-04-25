@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Metadata } from 'next'
 import CalculatorClient from './CalculatorClient'
 
@@ -42,7 +43,9 @@ export default function CalculatorPage() {
         </div>
 
         <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '2rem', background: '#fff', marginBottom: '2rem' }}>
-          <CalculatorClient />
+          <Suspense fallback={<div style={{ padding: '3rem', textAlign: 'center', color: '#9ca3af' }}>Loading calculator…</div>}>
+            <CalculatorClient />
+          </Suspense>
         </div>
 
         {/* Explanation */}

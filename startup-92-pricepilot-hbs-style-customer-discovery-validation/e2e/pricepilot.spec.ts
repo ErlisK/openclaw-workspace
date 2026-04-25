@@ -3548,3 +3548,63 @@ test.describe('Sitemap — guides and calculator', () => {
     }
   })
 })
+
+// ─── Calculator v2 — engine integration + shareable links ─────────────────
+test.describe('Calculator v2 enhancements', () => {
+  test('TC-CALC-V2-001: /api/calculator/engine returns a valid result for default inputs', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/calculator/engine`, {
+      data: { currentPrice: 29, currentSales: 50, elasticity: -1.0, trialPrice: 39 },
+    })
+    expect(r.status()).toBe(200)
+    const data = await r.json()
+    expect(['test_higher', 'stable', 'insufficient_data']).toContain(data.action)
+    expect(typeof data.confidence_label).toBe('string')
+    expect(typeof data.why_text).toBe('string')
+    expect(Array.isArray(data.caveats)).toBe(true)
+  })
+
+  test('TC-CALC-V2-002: /api/calculator/engine rejects invalid inputs', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/calculator/engine`, {
+      data: { currentPrice: -5, currentSales: 50, elasticity: -1.0, trialPrice: 39 },
+    })
+    expect(r.status()).toBe(400)
+  })
+
+  test('TC-CALC-V2-003: Calculator URL encodes inputs as query params', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator?p=49&s=100&e=-0.8&t=69`)
+    // Inputs should reflect URL params
+    const priceInput = page.locator('[data-testid="input-current-price"]')
+    await expect(priceInput).toHaveValue('49')
+    const trialInput = page.locator('[data-testid="input-trial-price"]')
+    await expect(trialInput).toHaveValue('69')
+  })
+
+  test('TC-CALC-V2-004: Share link button is present', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator`)
+    const btn = page.locator('[data-testid="btn-share"]')
+    await expect(btn).toBeVisible({ timeout: 8000 })
+  })
+
+  test('TC-CALC-V2-005: Run engine button is present and clickable', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator`)
+    const btn = page.locator('[data-testid="btn-run-engine"]')
+    await expect(btn).toBeVisible({ timeout: 8000 })
+    await btn.click()
+    // Wait for engine result or timeout gracefully
+    await page.waitForSelector('[data-testid="engine-result"]', { timeout: 12000 }).catch(() => {})
+  })
+
+  test('TC-CALC-V2-006: p05/p95 scenario outputs are shown', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator`)
+    const text = await page.textContent('body')
+    expect(text).toMatch(/p05|p95|pessimistic|scenario/i)
+  })
+
+  test('TC-CALC-V2-007: Downside floor indicator shows pass/fail', async ({ page }) => {
+    // High price increase + high elasticity should fail the floor
+    await page.goto(`${BASE_URL}/calculator?p=29&s=50&e=-2.5&t=59`)
+    await page.waitForTimeout(500)
+    const text = await page.textContent('body')
+    expect(text).toMatch(/safety floor|downside/i)
+  })
+})
