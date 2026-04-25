@@ -33,6 +33,13 @@ export default function SignupPage() {
       return
     }
     if (data.session) {
+      // Conversion tracking
+      if (typeof window !== 'undefined') {
+        if ((window as any).rdt) (window as any).rdt('track', 'SignUp');
+        if (typeof (window as any).gtag === 'function') {
+          (window as any).gtag('event', 'conversion', { send_to: 'AW-PLACEHOLDER/PLACEHOLDER_LABEL', value: 1.0, currency: 'USD' });
+        }
+      }
       router.push('/import')
     } else {
       setEmailSent(true)

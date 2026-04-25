@@ -177,7 +177,7 @@ export default function HomePage() {
               Start free →
             </Link>
           </div>
-          <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.75rem' }}>Upload your CSV · results in 30 seconds · no account needed</p>
+          <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.75rem' }}>No credit card required · Rollback any experiment in one click · Your data never leaves our encrypted database</p>
 
           <div className="card" style={{ marginTop: '4rem', textAlign: 'left' }}>
             <p style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Illustrative example — not a real user testimonial</p>

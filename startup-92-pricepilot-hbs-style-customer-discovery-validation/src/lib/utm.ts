@@ -98,3 +98,35 @@ export const CAMPAIGN_LINKS = {
 } as const
 
 export type CampaignLinkKey = keyof typeof CAMPAIGN_LINKS
+
+/**
+ * Capture UTM params from URL and store in localStorage.
+ * Call in root layout useEffect.
+ */
+export function captureUTM(): void {
+  if (typeof window === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  const utmData = {
+    source: params.get('utm_source'),
+    medium: params.get('utm_medium'),
+    campaign: params.get('utm_campaign'),
+    content: params.get('utm_content'),
+    term: params.get('utm_term'),
+  };
+  if (utmData.source) {
+    localStorage.setItem('utm_data', JSON.stringify(utmData));
+  }
+}
+
+/**
+ * Retrieve stored UTM params from localStorage.
+ * Pass to signup API routes to attribute conversions.
+ */
+export function getStoredUTM(): Record<string, string | null> {
+  if (typeof window === 'undefined') return {};
+  try {
+    return JSON.parse(localStorage.getItem('utm_data') || '{}');
+  } catch {
+    return {};
+  }
+}

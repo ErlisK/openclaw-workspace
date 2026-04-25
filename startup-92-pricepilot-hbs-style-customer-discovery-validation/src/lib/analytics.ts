@@ -58,3 +58,21 @@ export function trackClick(
   if (!element) return
   element.addEventListener('click', () => track(event, properties), { once: false })
 }
+
+/**
+ * Track ad landing — call on pages receiving paid traffic.
+ * Reads UTM from URL and fires ad_click_landing event.
+ */
+export function trackAdLanding(): void {
+  if (typeof window === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  const source = params.get('utm_source');
+  const medium = params.get('utm_medium');
+  if (!source) return;
+  track('ad_click_landing', {
+    utm_source: source,
+    utm_medium: medium,
+    utm_campaign: params.get('utm_campaign'),
+    utm_content: params.get('utm_content'),
+  });
+}
