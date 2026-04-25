@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
+              // Next.js requires 'unsafe-inline' for style; inline scripts use nonces set by middleware
               "script-src 'self' 'unsafe-inline' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https:",
@@ -22,6 +23,7 @@ const nextConfig: NextConfig = {
               "font-src 'self'",
               "base-uri 'self'",
               "form-action 'self'",
+              "upgrade-insecure-requests",
             ].join('; '),
           },
         ],

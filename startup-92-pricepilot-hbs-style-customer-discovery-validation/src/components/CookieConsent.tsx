@@ -41,7 +41,7 @@ export function CookieConsent() {
         borderTop: '1px solid #e5e7eb',
         padding: '1rem 1.5rem',
         boxShadow: '0 -4px 16px rgba(0,0,0,0.08)',
-        zIndex: 9999,
+        zIndex: 1000,
         fontSize: '0.875rem',
         color: '#374151',
         display: 'flex',

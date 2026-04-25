@@ -37,19 +37,35 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Set pp_vid cookie for public experiment pages (server-side, no inline script needed)
+  // Set pp_vid cookie for public experiment pages — httpOnly + HMAC-signed
   if (request.nextUrl.pathname.startsWith('/x/')) {
-    if (!request.cookies.get('pp_vid')) {
-      // Use Web Crypto API (Edge Runtime compatible)
+    const existingVid = request.cookies.get('pp_vid')?.value
+    const secret = process.env.PP_VID_SECRET || 'pp-vid-default-secret-change-in-prod'
+    // Validate existing cookie signature (format: <hex_id>.<hex_hmac>)
+    let isValid = false
+    if (existingVid && existingVid.includes('.')) {
+      const [rawId, sig] = existingVid.split('.')
+      const keyData = new TextEncoder().encode(secret)
+      const msgData = new TextEncoder().encode(rawId)
+      const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['verify'])
+      const sigBytes = new Uint8Array(sig.match(/.{2}/g)!.map(b => parseInt(b, 16)))
+      isValid = await crypto.subtle.verify('HMAC', cryptoKey, sigBytes, msgData)
+    }
+    if (!isValid) {
       const arr = new Uint8Array(16)
       crypto.getRandomValues(arr)
-      const vid = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
-      supabaseResponse.cookies.set('pp_vid', vid, {
+      const rawId = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
+      const keyData = new TextEncoder().encode(secret)
+      const msgData = new TextEncoder().encode(rawId)
+      const cryptoKey = await crypto.subtle.importKey('raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign'])
+      const sigBuffer = await crypto.subtle.sign('HMAC', cryptoKey, msgData)
+      const sigHex = Array.from(new Uint8Array(sigBuffer)).map(b => b.toString(16).padStart(2, '0')).join('')
+      supabaseResponse.cookies.set('pp_vid', `${rawId}.${sigHex}`, {
         path: '/',
         maxAge: 31536000,
         sameSite: 'lax',
         secure: true,
-        httpOnly: false,
+        httpOnly: true,
       })
     }
   }

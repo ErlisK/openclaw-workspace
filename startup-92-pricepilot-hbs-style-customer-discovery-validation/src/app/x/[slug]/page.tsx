@@ -80,8 +80,9 @@ export default async function ExperimentPage({
 
   // ── Visitor bucketing ──────────────────────────────────────────────────────
   const cookieStore = await cookies()
-  // Cookie may be set by middleware; fallback to server-generated ID for this request
-  const visitorId = cookieStore.get('pp_vid')?.value || randomBytes(16).toString('hex')
+  // pp_vid is httpOnly + HMAC-signed (format: <hex_id>.<hex_hmac>); extract raw ID part
+  const rawVid = cookieStore.get('pp_vid')?.value || ''
+  const visitorId = rawVid.includes('.') ? rawVid.split('.')[0] : (rawVid || randomBytes(16).toString('hex'))
 
   const variant: 'A' | 'B' = previewVariant === 'A' || previewVariant === 'B'
     ? previewVariant

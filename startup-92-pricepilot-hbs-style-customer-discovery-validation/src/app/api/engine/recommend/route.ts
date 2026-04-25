@@ -93,8 +93,8 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ suggestions: results })
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Unknown error'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    console.error('[engine/recommend] error:', err instanceof Error ? err.message : err)
+    return NextResponse.json({ error: 'Analysis failed. Please try again.' }, { status: 500 })
   }
 }
 
