@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'A/B Testing Your Gig Prices: A Practical Guide for Freelancers',
     description: 'Run statistically sound pricing experiments on gig platforms.',
-    url: 'https://giganalytics.app/blog/ab-pricing-gig-work',
+    url: 'https://hourlyroi.com/blog/ab-pricing-gig-work',
     type: 'article',
   },
 }

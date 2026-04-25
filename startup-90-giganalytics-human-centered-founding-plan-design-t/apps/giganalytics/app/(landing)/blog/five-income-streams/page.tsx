@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Running 5 Income Streams Without Burning Out: A Systems Approach',
     description: 'A data-driven approach to managing multiple gig income streams.',
-    url: 'https://giganalytics.app/blog/five-income-streams',
+    url: 'https://hourlyroi.com/blog/five-income-streams',
     type: 'article',
   },
 }

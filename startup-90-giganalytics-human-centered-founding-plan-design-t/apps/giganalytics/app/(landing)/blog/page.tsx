@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GigAnalytics Blog',
     description: 'Insights for multi-income freelancers.',
-    url: 'https://giganalytics.app/blog',
+    url: 'https://hourlyroi.com/blog',
   },
 }
 

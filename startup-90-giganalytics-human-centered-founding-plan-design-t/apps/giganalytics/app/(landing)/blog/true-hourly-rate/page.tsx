@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Why Your Real Hourly Rate Is Probably 40% Lower Than You Think',
     description: 'The math behind your true gig hourly rate — and how to fix it.',
-    url: 'https://giganalytics.app/blog/true-hourly-rate',
+    url: 'https://hourlyroi.com/blog/true-hourly-rate',
     type: 'article',
   },
 }

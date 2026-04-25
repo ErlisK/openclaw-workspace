@@ -43,6 +43,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Changelog + Media Kit
     { url: url('/changelog'), lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
     { url: url('/media-kit'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    // Calculator + Free Audit + For Creators + Integrations
+    { url: url('/calculator'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: url('/free-audit'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/for-creators'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: url('/integrations'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: url('/terms'), lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
+    { url: url('/contact'), lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
     // Advanced docs (whitepaper + privacy + integrations)
     { url: url('/docs/roi-whitepaper'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: url('/docs/privacy-benchmarking'), lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },

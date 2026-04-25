@@ -330,7 +330,7 @@ export default async function DashboardPage() {
         </div>
         <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center">
           <a
-            href="https://twitter.com/intent/tweet?text=I%20use%20GigAnalytics%20to%20track%20my%20true%20hourly%20rate%20across%20all%20my%20side%20incomes.%20Super%20useful%20if%20you%20freelance%20on%20multiple%20platforms%20%F0%9F%93%8A%20https%3A%2F%2Fgiganalytics.app%22"
+            href="https://twitter.com/intent/tweet?text=I%20use%20GigAnalytics%20to%20track%20my%20true%20hourly%20rate%20across%20all%20my%20side%20incomes.%20Super%20useful%20if%20you%20freelance%20on%20multiple%20platforms%20%F0%9F%93%8A%20https%3A%2F%2Fhourlyroi.com%22"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
@@ -338,7 +338,7 @@ export default async function DashboardPage() {
             Share on 𝕏
           </a>
           <a
-            href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fgiganalytics.app"
+            href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fhourlyroi.com"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block bg-blue-700 hover:bg-blue-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
