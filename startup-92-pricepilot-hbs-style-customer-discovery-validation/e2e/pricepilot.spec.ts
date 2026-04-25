@@ -2680,14 +2680,17 @@ test.describe('Onboarding Checklist', () => {
 
 test.describe('Blog & Docs Pages', () => {
 
-  test('TC-BLOG-001: /blog listing page returns 200 with 2 posts', async ({ page }) => {
+  test('TC-BLOG-001: /blog listing page returns 200 with 4 posts', async ({ page }) => {
     await page.goto(`${BASE_URL}/blog`);
     expect(page.url()).toContain('/blog');
     const text = await page.textContent('body');
-    expect(text).toMatch(/Price Test|Bayesian/i);
-    // Both posts present
+    expect(text).toMatch(/Price Test|Bayesian|TypeScript/i);
+    // Original posts present
     await expect(page.locator('[data-testid="blog-post-how-to-run-a-price-test-without-losing-customers"]')).toBeVisible();
     await expect(page.locator('[data-testid="blog-post-the-bayesian-advantage-why-we-dont-use-traditional-ab-tests"]')).toBeVisible();
+    // New technical posts present
+    await expect(page.locator('[data-testid="blog-post-building-the-bayesian-pricing-engine"]')).toBeVisible();
+    await expect(page.locator('[data-testid="blog-post-building-pricepilot-product-intro"]')).toBeVisible();
   });
 
   test('TC-BLOG-002: First blog post page renders correctly', async ({ page }) => {
@@ -2705,6 +2708,22 @@ test.describe('Blog & Docs Pages', () => {
     await expect(page.locator('[data-testid="blog-post-content"]')).toBeVisible({ timeout: 8_000 });
     const text = await page.textContent('body');
     expect(text).toMatch(/Bayesian|frequentist|A\/B/i);
+  });
+
+  test('TC-BLOG-005: Technical deep dive post renders with code snippets', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog/building-the-bayesian-pricing-engine`);
+    await expect(page.locator('[data-testid="blog-post-content"]')).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/nigUpdate|Normal-InvGamma|TypeScript/i);
+    const code = page.locator('code, pre');
+    await expect(code.first()).toBeVisible();
+  });
+
+  test('TC-BLOG-006: Product intro post renders correctly', async ({ page }) => {
+    await page.goto(`${BASE_URL}/blog/building-pricepilot-product-intro`);
+    await expect(page.locator('[data-testid="blog-post-content"]')).toBeVisible({ timeout: 8_000 });
+    const text = await page.textContent('body');
+    expect(text).toMatch(/solo founders|Bayesian|Supabase/i);
   });
 
   test('TC-BLOG-004: Unknown blog slug returns 404', async ({ request }) => {
