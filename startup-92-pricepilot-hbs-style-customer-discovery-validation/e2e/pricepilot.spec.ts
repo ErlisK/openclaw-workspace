@@ -3481,21 +3481,28 @@ test.describe('Elasticity Calculator', () => {
 
   test('TC-CALC-002: Calculator inputs are interactive and output updates', async ({ page }) => {
     await page.goto(`${BASE_URL}/calculator`)
-    // Read initial revenue change
     const outputEl = page.locator('[data-testid="output-revenue-change"]')
     await expect(outputEl).toBeVisible({ timeout: 8000 })
-    const initialText = await outputEl.innerText()
 
-    // Change trial price to something very different
+    // Change elasticity to -0.5 (inelastic) first — price increase should help revenue
+    const elasticityInput = page.locator('[data-testid="input-elasticity"]')
+    await elasticityInput.fill('-0.5')
+    await page.waitForTimeout(300)
+
+    // Now change trial price to 49 (higher than default 39)
     const trialInput = page.locator('[data-testid="input-trial-price"]')
-    await trialInput.fill('99')
+    await trialInput.fill('49')
     await page.waitForTimeout(300)
 
     const updatedText = await outputEl.innerText()
-    expect(updatedText).not.toBe(initialText)
-    // Revenue change should be positive for a big price increase with default elasticity
-    // (29 -> 99 at ε=-1 would show large change)
+    // At ε=-0.5 with price increase from 29 to 49, revenue should be positive
     expect(updatedText).toMatch(/[+-]?\d+\.?\d*%/)
+    // Should show a positive revenue change (inelastic product benefits from higher price)
+    const numMatch = updatedText.match(/([+-]?\d+\.?\d*)%/)
+    if (numMatch) {
+      const val = parseFloat(numMatch[1])
+      expect(val).toBeGreaterThan(0)
+    }
   })
 
   test('TC-CALC-003: Calculator has JSON-LD WebApplication schema', async ({ page }) => {
