@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import './globals.css'
 import { CookieConsent } from '@/components/CookieConsent'
+import { PlausibleTrackerWrapper } from '@/components/PlausibleTrackerWrapper'
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pricepilot.app'
 
@@ -29,8 +31,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
+        <PlausibleTrackerWrapper />
         {children}
         <CookieConsent />
+        {/* Plausible Analytics — respects DNT, no cookies, GDPR-friendly */}
+        <Script
+          defer
+          data-domain="startup-92-pricepilot-hbs-style-cus.vercel.app"
+          src="https://plausible.io/js/script.tagged-events.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   )

@@ -3300,3 +3300,112 @@ test('Authenticated /api/suggestions/run returns suggestion objects', async ({ p
     expect(data.length).toBeGreaterThan(0)
   }
 })
+
+// ─── UTM Parameters & Plausible Analytics ──────────────────────────────────
+test.describe('UTM & Plausible', () => {
+  test('TC-UTM-001: /api/utm-validate returns all campaign links', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/utm-validate`)
+    expect(r.status()).toBe(200)
+    const data = await r.json()
+    expect(data.total).toBeGreaterThanOrEqual(20)
+    expect(data.links).toBeTruthy()
+    expect(Object.keys(data.links).length).toBeGreaterThanOrEqual(20)
+  })
+
+  test('TC-UTM-002: All campaign links have utm_source, utm_medium, utm_campaign', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/utm-validate`)
+    const { links } = await r.json()
+    const missing: string[] = []
+    for (const [key, url] of Object.entries(links as Record<string, string>)) {
+      const validate = await request.get(`${BASE_URL}/api/utm-validate?url=${encodeURIComponent(url)}`)
+      const result = await validate.json()
+      if (!result.valid) missing.push(`${key}: missing ${result.missing.join(', ')}`)
+    }
+    expect(missing, `Campaign links missing UTM params:\n${missing.join('\n')}`).toHaveLength(0)
+  })
+
+  test('TC-UTM-003: /api/utm-validate?url= validates a correct UTM URL', async ({ request }) => {
+    const url = `${BASE_URL}/?utm_source=producthunt&utm_medium=referral&utm_campaign=launch`
+    const r = await request.get(`${BASE_URL}/api/utm-validate?url=${encodeURIComponent(url)}`)
+    expect(r.status()).toBe(200)
+    const data = await r.json()
+    expect(data.valid).toBe(true)
+    expect(data.present.utm_source).toBe('producthunt')
+    expect(data.present.utm_medium).toBe('referral')
+    expect(data.present.utm_campaign).toBe('launch')
+    expect(data.missing).toHaveLength(0)
+  })
+
+  test('TC-UTM-004: /api/utm-validate?url= returns invalid for missing params', async ({ request }) => {
+    const url = `${BASE_URL}/?utm_source=twitter`
+    const r = await request.get(`${BASE_URL}/api/utm-validate?url=${encodeURIComponent(url)}`)
+    const data = await r.json()
+    expect(data.valid).toBe(false)
+    expect(data.missing).toContain('utm_medium')
+    expect(data.missing).toContain('utm_campaign')
+  })
+
+  test('TC-UTM-005: /api/utm-validate?url= returns 400 for invalid URL', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/utm-validate?url=not-a-url`)
+    expect(r.status()).toBe(400)
+    const data = await r.json()
+    expect(data.valid).toBe(false)
+  })
+
+  test('TC-UTM-006: Homepage loads Plausible script tag', async ({ page }) => {
+    await page.goto(`${BASE_URL}/`)
+    // Check Plausible script is present in DOM
+    const plausibleScript = page.locator('script[data-domain]')
+    await expect(plausibleScript).toHaveCount(1)
+    const src = await plausibleScript.getAttribute('src')
+    expect(src).toContain('plausible.io')
+  })
+
+  test('TC-UTM-007: Homepage with UTM params stores them (sessionStorage set)', async ({ page }) => {
+    await page.goto(`${BASE_URL}/?utm_source=hackernews&utm_medium=referral&utm_campaign=show_hn`)
+    // Give the tracker time to run
+    await page.waitForTimeout(1000)
+    const stored = await page.evaluate(() => {
+      try { return sessionStorage.getItem('pricepilot_utm') } catch { return null }
+    })
+    expect(stored).toBeTruthy()
+    const parsed = JSON.parse(stored!)
+    expect(parsed.utm_source).toBe('hackernews')
+    expect(parsed.utm_medium).toBe('referral')
+    expect(parsed.utm_campaign).toBe('show_hn')
+  })
+
+  test('TC-UTM-008: /launch page renders UTM link grid', async ({ page }) => {
+    await page.goto(`${BASE_URL}/launch`)
+    const text = await page.textContent('body')
+    expect(text).toMatch(/utm_source|utm_medium|utm_campaign/i)
+    // UTM links section should exist
+    expect(text).toMatch(/producthunt|hackernews|twitter/i)
+  })
+
+  test('TC-UTM-009: producthunt campaign link utm_source=producthunt', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/utm-validate`)
+    const { links } = await r.json()
+    const url: string = links.producthunt
+    expect(url).toContain('utm_source=producthunt')
+    expect(url).toContain('utm_medium=referral')
+    expect(url).toContain('utm_campaign=launch')
+  })
+
+  test('TC-UTM-010: twitter_launch campaign link utm_source=twitter', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/utm-validate`)
+    const { links } = await r.json()
+    const url: string = links.twitter_launch
+    expect(url).toContain('utm_source=twitter')
+    expect(url).toContain('utm_medium=social')
+  })
+
+  test('TC-UTM-011: SOCIAL.md and LAUNCH.md UTM links reference correct base URL', async ({ request }) => {
+    // Spot-check the API: all links resolve to the correct base domain
+    const r = await request.get(`${BASE_URL}/api/utm-validate`)
+    const { links } = await r.json()
+    for (const [, url] of Object.entries(links as Record<string, string>)) {
+      expect(url).toContain('startup-92-pricepilot-hbs-style-cus.vercel.app')
+    }
+  })
+})

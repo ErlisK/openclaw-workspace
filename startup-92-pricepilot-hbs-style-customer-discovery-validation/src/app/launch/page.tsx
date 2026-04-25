@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { CAMPAIGN_LINKS } from '@/lib/utm'
 
 export const metadata: Metadata = {
   title: 'Launch — PricePilot',
@@ -24,7 +25,7 @@ const tweets = [
   `The problem with traditional A/B testing for indie founders:\n\nMost tests need 1000+ conversions per variant for significance.\n\nIf you have 50 sales/month → 2-year wait.\n\nSo we don't test. We just guess.`,
   `PricePilot uses Bayesian inference instead.\n\nInstead of "is this significant?" it asks: "what's the probability Price B beats Price A given my data?"\n\nYou get a confidence score after 30–90 conversions. Not 2 years.`,
   `The flow:\n1. Connect Stripe/Gumroad (60s)\n2. Bayesian engine suggests safe prices\n3. Live A/B page with real tracking\n4. Confidence score updates in real time\n5. Apply winner or roll back\n\nNo stats degree needed.`,
-  `Free tier, no credit card.\n\nTry it → ${APP_URL}\nPress kit + demo GIF → ${APP_URL}/press\n\nWhat price would you test first? 👇`,
+  `Free tier, no credit card.\n\nTry it → ${CAMPAIGN_LINKS.twitter_launch}\nPress kit + demo GIF → ${APP_URL}/press?utm_source=twitter&utm_medium=social&utm_campaign=launch_week1&utm_content=press_kit\n\nWhat price would you test first? 👇`,
 ]
 
 export default function LaunchPage() {
@@ -140,12 +141,41 @@ export default function LaunchPage() {
 
       <div style={{ padding: '1.25rem', background: '#f5f3ff', borderRadius: 12, textAlign: 'center', borderLeft: '4px solid #4f46e5' }}>
         <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>All submissions link to the self-serve product</p>
-        <a href={APP_URL} style={{ color: '#4f46e5', fontWeight: 700 }}>{APP_URL}</a>
+        <a href={CAMPAIGN_LINKS.producthunt} style={{ color: '#4f46e5', fontWeight: 700 }} data-utm-source="producthunt">Product Hunt link</a>
         <span style={{ color: '#9ca3af', margin: '0 0.75rem' }}>·</span>
-        <a href={`${APP_URL}/press`} style={{ color: '#4f46e5' }}>press kit</a>
+        <a href={CAMPAIGN_LINKS.hackernews} style={{ color: '#4f46e5' }} data-utm-source="hackernews">HN link</a>
         <span style={{ color: '#9ca3af', margin: '0 0.75rem' }}>·</span>
-        <a href={`${APP_URL}/pricing`} style={{ color: '#4f46e5' }}>pricing</a>
+        <a href={CAMPAIGN_LINKS.twitter_launch} style={{ color: '#4f46e5' }} data-utm-source="twitter">Twitter link</a>
+        <span style={{ color: '#9ca3af', margin: '0 0.75rem' }}>·</span>
+        <a href={CAMPAIGN_LINKS.linkedin_launch} style={{ color: '#4f46e5' }} data-utm-source="linkedin">LinkedIn link</a>
+        <span style={{ color: '#9ca3af', margin: '0 0.75rem' }}>·</span>
+        <a href={CAMPAIGN_LINKS.reddit_saas} style={{ color: '#4f46e5' }} data-utm-source="reddit">Reddit link</a>
       </div>
+
+      <section style={{ marginTop: '2rem' }}>
+        <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.75rem' }}>UTM Campaign Links (all {Object.keys(CAMPAIGN_LINKS).length} links)</h2>
+        <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>
+          All campaign links include <code>utm_source</code>, <code>utm_medium</code>, and <code>utm_campaign</code>.
+          Plausible captures these automatically via the tagged-events script.{' '}
+          <a href="/api/utm-validate" style={{ color: '#4f46e5' }}>View all links via API →</a>
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '0.5rem' }}>
+          {Object.entries(CAMPAIGN_LINKS).map(([key, url]) => {
+            const params = new URL(url).searchParams
+            return (
+              <div key={key} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.75rem', background: '#fff', fontSize: '0.8rem' }}>
+                <p style={{ fontWeight: 600, color: '#374151', marginBottom: '0.25rem' }}>{key}</p>
+                <p style={{ color: '#9ca3af', marginBottom: '0.25rem' }}>
+                  <span style={{ color: '#059669' }}>{params.get('utm_source')}</span>{' / '}
+                  <span style={{ color: '#2563eb' }}>{params.get('utm_medium')}</span>{' / '}
+                  <span style={{ color: '#7c3aed' }}>{params.get('utm_campaign')}</span>
+                </p>
+                <a href={url} style={{ color: '#4f46e5', wordBreak: 'break-all' }}>{url.replace('https://startup-92-pricepilot-hbs-style-cus.vercel.app', '')}</a>
+              </div>
+            )
+          })}
+        </div>
+      </section>
     </main>
   )
 }
