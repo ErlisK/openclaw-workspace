@@ -8,6 +8,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { getEntitlement } from '@/lib/entitlements'
 import Stripe from 'stripe'
+import crypto from 'crypto'
 
 export const maxDuration = 60
 
@@ -35,10 +36,17 @@ export async function POST(request: Request) {
     )
   }
 
-  // Decode the key
+  // Decode the key (AES-256-GCM)
   let stripeKey: string
   try {
-    stripeKey = Buffer.from(conn.stripe_key_enc, 'base64').toString('utf-8')
+    const encKey = Buffer.from(process.env.ENCRYPTION_KEY!, 'base64')
+    const buf = Buffer.from(conn.stripe_key_enc, 'base64')
+    const iv = buf.subarray(0, 12)
+    const tag = buf.subarray(12, 28)
+    const ciphertext = buf.subarray(28)
+    const decipher = crypto.createDecipheriv('aes-256-gcm', encKey, iv)
+    decipher.setAuthTag(tag)
+    stripeKey = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8')
   } catch {
     return NextResponse.json({ error: 'Stored Stripe key is corrupted. Please reconnect.' }, { status: 500 })
   }

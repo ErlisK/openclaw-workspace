@@ -15,6 +15,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'event required' }, { status: 400 })
   }
 
+  const ALLOWED_EVENTS = new Set([
+    'page_view', 'signup', 'login', 'import_started', 'import_completed',
+    'suggestion_created', 'experiment_published', 'upgrade_clicked',
+    'dismiss_suggestion', 'experiment_rollback', 'checkout_started',
+  ])
+  if (!ALLOWED_EVENTS.has(event)) {
+    return NextResponse.json({ error: 'Unknown event' }, { status: 400 })
+  }
+
   // Get user if authenticated
   let userId: string | null = null
   try {

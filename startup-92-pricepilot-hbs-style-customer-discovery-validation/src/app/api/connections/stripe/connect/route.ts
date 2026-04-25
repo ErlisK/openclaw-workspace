@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { getEntitlement } from '@/lib/entitlements'
 import Stripe from 'stripe'
+import crypto from 'crypto'
 
 export const maxDuration = 30
 
@@ -45,8 +46,16 @@ export async function POST(request: Request) {
   const accountName = account?.business_profile?.name || account?.display_name || account?.id || 'Stripe Account'
   const accountId = account?.id || ''
 
-  // Simple obfuscation — prepend a marker so we know it's stored
-  const keyEnc = Buffer.from(stripe_key).toString('base64')
+  // AES-256-GCM encryption at rest
+  if (!process.env.ENCRYPTION_KEY) {
+    return NextResponse.json({ error: 'Server misconfiguration: missing ENCRYPTION_KEY' }, { status: 500 })
+  }
+  const encKey = Buffer.from(process.env.ENCRYPTION_KEY, 'base64')
+  const iv = crypto.randomBytes(12)
+  const cipher = crypto.createCipheriv('aes-256-gcm', encKey, iv)
+  const encrypted = Buffer.concat([cipher.update(stripe_key, 'utf8'), cipher.final()])
+  const tag = cipher.getAuthTag()
+  const keyEnc = Buffer.concat([iv, tag, encrypted]).toString('base64')
 
   const supabase = await createClient()
   const { error: upsertErr } = await supabase

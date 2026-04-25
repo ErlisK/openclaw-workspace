@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { track } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
+import { SiteFooter } from '@/components/SiteFooter'
 
 const FREE_FEATURES = [
   '3 active experiments',
@@ -27,6 +28,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const isTestMode = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith('pk_test_') ?? true
 
   const handleUpgrade = async () => {
     setLoading(true); setError('')
@@ -132,19 +134,21 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Test mode banner */}
+        {/* Test mode banner - only shown when using Stripe test keys */}
+        {isTestMode && (
         <div style={{ textAlign: 'center', marginTop: '2rem' }}>
           <p style={{ color: '#9ca3af', fontSize: '0.8rem' }}>
             🔒 Stripe test mode · Use card <code style={{ background: '#f3f4f6', padding: '0.1rem 0.3rem', borderRadius: 4 }}>4242 4242 4242 4242</code> · Any future date · Any CVC
           </p>
         </div>
+        )}
 
         {/* FAQ */}
         <div style={{ maxWidth: 600, margin: '3rem auto 0', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {[
             ['Can I cancel anytime?', 'Yes — cancel from your billing portal and you keep Pro access until the end of the billing period.'],
             ['What counts as an experiment?', 'One A/B pricing page (/x/slug). Free tier: 3 active at a time. Pro: unlimited.'],
-            ['Is this really test mode?', 'Yes — no real charges. Use Stripe test card 4242 4242 4242 4242.'],
+            ...(isTestMode ? [['Is this really test mode?', 'Yes — no real charges. Use Stripe test card 4242 4242 4242 4242.']] : []),
           ].map(([q, a]) => (
             <div key={q} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.75rem', padding: '1rem 1.25rem' }}>
               <p style={{ fontWeight: 700, marginBottom: '0.35rem' }}>{q}</p>
@@ -153,6 +157,7 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+    <SiteFooter />
     </div>
   )
 }

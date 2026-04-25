@@ -100,7 +100,15 @@ const PersonaSchema = z.object({
   }),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Restrict to authenticated users
+  const { createClient } = await import('@/lib/supabase')
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const { NextResponse } = await import('next/server')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const clusterSummary = CLUSTERS.map(c => `${c.id} (${c.severity}): ${c.name} — ${c.freq}%`).join('\n');
     const quotesList = KEY_QUOTES.map((q, i) => `${i+1}. "${q}"`).join('\n');

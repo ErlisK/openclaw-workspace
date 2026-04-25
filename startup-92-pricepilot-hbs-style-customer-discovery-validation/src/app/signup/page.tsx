@@ -3,10 +3,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { SiteFooter } from '@/components/SiteFooter'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [termsAccepted, setTermsAccepted] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -16,6 +18,7 @@ export default function SignupPage() {
     e.preventDefault()
     setError('')
     if (password.length < 8) { setError('Password must be at least 8 characters'); return }
+    if (!termsAccepted) { setError('You must accept the Terms of Service to continue'); return }
     setLoading(true)
     const { error: err } = await supabase.auth.signUp({ email, password })
     setLoading(false)
@@ -64,6 +67,18 @@ export default function SignupPage() {
                 required placeholder="Min. 8 characters" data-testid="password-input" />
             </div>
             {error && <p className="error-message" data-testid="auth-error">{error}</p>}
+            <div style={{ marginBottom: '1rem', marginTop: '0.25rem' }}>
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer', fontSize: '0.875rem', color: 'var(--muted)' }}>
+                <input
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={e => setTermsAccepted(e.target.checked)}
+                  data-testid="terms-checkbox"
+                  style={{ marginTop: '0.15rem', flexShrink: 0 }}
+                />
+                <span>I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>Terms of Service</a> and <a href="/privacy" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)' }}>Privacy Policy</a></span>
+              </label>
+            </div>
             <button className="btn btn-primary" type="submit" disabled={loading} data-testid="signup-btn"
               style={{ width: '100%', justifyContent: 'center', marginTop: '1rem' }}>
               {loading ? <span className="spinner" /> : null}
@@ -76,6 +91,7 @@ export default function SignupPage() {
           Already have an account? <Link href="/login">Sign in</Link>
         </p>
       </div>
+      <SiteFooter />
     </div>
   )
 }

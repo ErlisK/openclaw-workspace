@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { track } from '@/lib/analytics'
 import { useRouter } from 'next/navigation'
+import { DisclaimerBanner } from '@/components/DisclaimerBanner'
 
 interface Suggestion {
   id: string
@@ -85,6 +86,7 @@ export default function SuggestionsPage() {
       </nav>
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
+        <DisclaimerBanner />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
           <div>
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Price suggestions</h1>

@@ -107,7 +107,15 @@ const ClusterSchema = z.object({
   }),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Restrict to authenticated users
+  const { createClient } = await import('@/lib/supabase')
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    const { NextResponse } = await import('next/server')
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
   try {
     const prompt = `You are an expert product researcher analyzing public signal data about solo founder and indie creator pricing pain points.
 
