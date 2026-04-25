@@ -37,9 +37,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Set pp_vid cookie for public experiment pages (server-side, no inline script needed)
+  if (request.nextUrl.pathname.startsWith('/x/')) {
+    if (!request.cookies.get('pp_vid')) {
+      // Use Web Crypto API (Edge Runtime compatible)
+      const arr = new Uint8Array(16)
+      crypto.getRandomValues(arr)
+      const vid = Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('')
+      supabaseResponse.cookies.set('pp_vid', vid, {
+        path: '/',
+        maxAge: 31536000,
+        sameSite: 'lax',
+        secure: true,
+        httpOnly: false,
+      })
+    }
+  }
+
   return supabaseResponse
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|x/|api/health|api/auth).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/health|api/auth).*)'],
 }

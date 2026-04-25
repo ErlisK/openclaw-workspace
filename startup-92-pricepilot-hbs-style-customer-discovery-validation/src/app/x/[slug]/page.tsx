@@ -2,14 +2,14 @@
  * /x/[slug] — Public A/B experiment page
  *
  * Visitor bucketing: deterministic via murmur-style hash of (visitor_id + experiment_id)
- * Visitor ID: read from cookie `pp_vid`; if missing, assigned here (set via response headers)
+ * Visitor ID: read from cookie `pp_vid` (set by middleware for /x/* routes)
  * Preview mode: ?preview=A or ?preview=B — shows the variant without recording observations
  * No auth required (public page).
  */
 
 import { cookies } from 'next/headers'
-import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { randomBytes } from 'crypto'
 
 // Simple 32-bit murmur-inspired hash — deterministic across server restarts
 function hashToVariant(visitorId: string, experimentId: string, splitPctB: number): 'A' | 'B' {
@@ -21,16 +21,8 @@ function hashToVariant(visitorId: string, experimentId: string, splitPctB: numbe
   }
   h = Math.imul(h, 0xc2b2ae35)
   h ^= h >>> 16
-  // Map to [0, 1) and compare to splitPctB
   const pct = (h >>> 0) / 0xffffffff
   return pct < splitPctB ? 'B' : 'A'
-}
-
-function generateVisitorId(): string {
-  // Use crypto for secure random visitor IDs
-  const bytes = new Uint8Array(8)
-  crypto.getRandomValues(bytes)
-  return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
 interface Experiment {
@@ -60,10 +52,10 @@ export default async function ExperimentPage({
   const sp = await searchParams
   const previewVariant = sp.preview?.toUpperCase() as 'A' | 'B' | undefined
 
-  // Use service role key server-side so we don't rely on anon RLS policies
+  // Use anon key — RLS policy "experiments_anon_read_active_by_slug" gates access
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 
   const { data: exp } = await supabase
@@ -80,17 +72,15 @@ export default async function ExperimentPage({
     .single()
 
   if (!exp) {
+    // Static demo fallback for /x/demo
+    if (slug === 'demo') return <DemoExperiment />
     return <NotFound />
   }
 
   // ── Visitor bucketing ──────────────────────────────────────────────────────
   const cookieStore = await cookies()
-  let visitorId = cookieStore.get('pp_vid')?.value || ''
-  let isNewVisitor = false
-  if (!visitorId) {
-    visitorId = generateVisitorId()
-    isNewVisitor = true
-  }
+  // Cookie may be set by middleware; fallback to server-generated ID for this request
+  const visitorId = cookieStore.get('pp_vid')?.value || randomBytes(16).toString('hex')
 
   const variant: 'A' | 'B' = previewVariant === 'A' || previewVariant === 'B'
     ? previewVariant
@@ -109,130 +99,154 @@ export default async function ExperimentPage({
   const isPreview = !!previewVariant
   const isInactive = exp.status !== 'active'
 
-  // ── Record observation (server-side, no redirect) ─────────────────────────
+  // ── Record observation via server API route (server-side, fire-and-forget) ─
   if (!isPreview && exp.status === 'active') {
-    // Fire-and-forget — don't block render
-    supabase.from('experiment_observations').insert({
+    // Use service-role supabase on server only for write path
+    const adminSupabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    adminSupabase.from('experiment_observations').insert({
       experiment_id: exp.id,
       variant,
       visitor_id: visitorId,
+      visitor_key: visitorId,
+      event: 'view',
       price_cents: priceVariant,
     }).then(() => {})
   }
 
   return (
-    <>
-      {/* Set visitor cookie via meta-refresh trick — Next.js RSC workaround */}
-      {isNewVisitor && (
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `document.cookie = "pp_vid=${visitorId}; path=/; max-age=31536000; SameSite=Lax; Secure"`,
-          }}
-        />
+    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
+      {/* Preview banner */}
+      {isPreview && (
+        <div data-testid="preview-banner" style={{
+          background: '#1e40af', color: '#fff', textAlign: 'center',
+          padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: 600,
+        }}>
+          🔍 Preview mode — Variant {variant} ({priceFormatted}) · Observations not recorded ·{' '}
+          <a href={`/x/${slug}`} style={{ color: '#bfdbfe', textDecoration: 'underline' }}>
+            Exit preview
+          </a>
+          {' | '}
+          <a href={`/x/${slug}?preview=${variant === 'A' ? 'B' : 'A'}`} style={{ color: '#bfdbfe', textDecoration: 'underline' }}>
+            Switch to variant {variant === 'A' ? 'B' : 'A'}
+          </a>
+        </div>
       )}
 
-      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
-        {/* Preview banner */}
-        {isPreview && (
-          <div data-testid="preview-banner" style={{
-            background: '#1e40af', color: '#fff', textAlign: 'center',
-            padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: 600,
-          }}>
-            🔍 Preview mode — Variant {variant} ({priceFormatted}) · Observations not recorded ·{' '}
-            <a href={`/x/${slug}`} style={{ color: '#bfdbfe', textDecoration: 'underline' }}>
-              Exit preview
-            </a>
-            {' | '}
-            <a href={`/x/${slug}?preview=${variant === 'A' ? 'B' : 'A'}`} style={{ color: '#bfdbfe', textDecoration: 'underline' }}>
-              Switch to variant {variant === 'A' ? 'B' : 'A'}
-            </a>
-          </div>
-        )}
-
-        {/* Inactive banner (shown in preview of draft) */}
-        {isInactive && isPreview && (
-          <div style={{
-            background: '#f59e0b', color: '#1f2937', textAlign: 'center',
-            padding: '0.5rem', fontSize: '0.8rem',
-          }}>
-            ⚠️ This experiment is in <strong>{exp.status}</strong> state — not yet live
-          </div>
-        )}
-
-        {/* Main offer card */}
+      {/* Inactive banner (shown in preview of draft) */}
+      {isInactive && isPreview && (
         <div style={{
-          maxWidth: 520, margin: '0 auto', padding: '3rem 1.5rem',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+          background: '#f59e0b', color: '#1f2937', textAlign: 'center',
+          padding: '0.5rem', fontSize: '0.8rem',
         }}>
-          {/* Variant badge (only in preview) */}
-          {isPreview && (
-            <span data-testid="variant-badge" style={{
-              background: variant === 'A' ? '#dbeafe' : '#dcfce7',
-              color: variant === 'A' ? '#1e40af' : '#15803d',
-              borderRadius: 999, padding: '0.25rem 0.75rem',
-              fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem',
-              letterSpacing: '0.05em', textTransform: 'uppercase',
-            }}>
-              Variant {variant}
-            </span>
-          )}
+          ⚠️ This experiment is in <strong>{exp.status}</strong> state — not yet live
+        </div>
+      )}
 
-          {/* Headline */}
-          <h1 data-testid="exp-headline" style={{
-            fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', fontWeight: 800,
-            lineHeight: 1.2, marginBottom: '0.75rem', color: '#111827',
+      {/* Main offer card */}
+      <div style={{
+        maxWidth: 520, margin: '0 auto', padding: '3rem 1.5rem',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+      }}>
+        {/* Variant badge (only in preview) */}
+        {isPreview && (
+          <span data-testid="variant-badge" style={{
+            background: variant === 'A' ? '#dbeafe' : '#dcfce7',
+            color: variant === 'A' ? '#1e40af' : '#15803d',
+            borderRadius: 999, padding: '0.25rem 0.75rem',
+            fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem',
+            letterSpacing: '0.05em', textTransform: 'uppercase',
           }}>
-            {headline}
-          </h1>
+            Variant {variant}
+          </span>
+        )}
 
-          {/* Description */}
-          {exp.description && (
-            <p data-testid="exp-description" style={{
-              color: '#6b7280', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '1.5rem', maxWidth: 400,
-            }}>
-              {exp.description}
-            </p>
-          )}
+        {/* Headline */}
+        <h1 data-testid="exp-headline" style={{
+          fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', fontWeight: 800,
+          lineHeight: 1.2, marginBottom: '0.75rem', color: '#111827',
+        }}>
+          {headline}
+        </h1>
 
-          {/* Price display */}
-          <div data-testid="exp-price" style={{
-            background: '#fff', border: '2px solid #e5e7eb', borderRadius: '1rem',
-            padding: '1.5rem 2rem', marginBottom: '1.5rem', width: '100%',
+        {/* Description */}
+        {exp.description && (
+          <p data-testid="exp-description" style={{
+            color: '#6b7280', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '1.5rem', maxWidth: 400,
           }}>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 500 }}>
-              {label}
-            </p>
-            <p style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
-              {priceFormatted}
-            </p>
-            <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.5rem' }}>
-              {productName}
-            </p>
-          </div>
+            {exp.description}
+          </p>
+        )}
 
-          {/* CTA */}
-          <a
-            href={ctaUrl !== '#' ? ctaUrl : undefined}
-            data-testid="exp-cta"
-            style={{
-              display: 'block', width: '100%', padding: '1rem',
-              background: '#6c47ff', color: '#fff', borderRadius: '0.75rem',
-              fontSize: '1.125rem', fontWeight: 700, textDecoration: 'none',
-              textAlign: 'center', cursor: ctaUrl === '#' ? 'default' : 'pointer',
-              opacity: ctaUrl === '#' ? 0.85 : 1,
-            }}
-          >
-            {ctaText}
-          </a>
-
-          {/* Powered by */}
-          <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#d1d5db' }}>
-            Pricing experiment by{' '}
-            <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
+        {/* Price display */}
+        <div data-testid="exp-price" style={{
+          background: '#fff', border: '2px solid #e5e7eb', borderRadius: '1rem',
+          padding: '1.5rem 2rem', marginBottom: '1.5rem', width: '100%',
+        }}>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 500 }}>
+            {label}
+          </p>
+          <p style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>
+            {priceFormatted}
+          </p>
+          <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.5rem' }}>
+            {productName}
           </p>
         </div>
+
+        {/* CTA */}
+        <a
+          href={ctaUrl !== '#' ? ctaUrl : undefined}
+          data-testid="exp-cta"
+          style={{
+            display: 'block', width: '100%', padding: '1rem',
+            background: '#6c47ff', color: '#fff', borderRadius: '0.75rem',
+            fontSize: '1.125rem', fontWeight: 700, textDecoration: 'none',
+            textAlign: 'center', cursor: ctaUrl === '#' ? 'default' : 'pointer',
+            opacity: ctaUrl === '#' ? 0.85 : 1,
+          }}
+        >
+          {ctaText}
+        </a>
+
+        {/* Powered by */}
+        <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#d1d5db' }}>
+          Pricing experiment by{' '}
+          <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
+        </p>
       </div>
-    </>
+    </div>
+  )
+}
+
+function DemoExperiment() {
+  return (
+    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
+      <div style={{ background: '#6c47ff', color: '#fff', textAlign: 'center', padding: '0.5rem', fontSize: '0.8rem' }}>
+        🎯 Demo Experiment — Sample A/B pricing test (not a real experiment)
+      </div>
+      <div style={{ maxWidth: 520, margin: '0 auto', padding: '3rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+        <h1 data-testid="exp-headline" style={{ fontSize: 'clamp(1.5rem, 5vw, 2.25rem)', fontWeight: 800, lineHeight: 1.2, marginBottom: '0.75rem', color: '#111827' }}>
+          Pro Template Pack
+        </h1>
+        <p style={{ color: '#6b7280', fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '1.5rem', maxWidth: 400 }}>
+          50+ premium Notion &amp; Figma templates for solo founders. Lifetime access.
+        </p>
+        <div data-testid="exp-price" style={{ background: '#fff', border: '2px solid #e5e7eb', borderRadius: '1rem', padding: '1.5rem 2rem', marginBottom: '1.5rem', width: '100%' }}>
+          <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.25rem', fontWeight: 500 }}>Variant B — New price</p>
+          <p style={{ fontSize: '3rem', fontWeight: 900, color: '#111827', lineHeight: 1 }}>$79</p>
+          <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.5rem' }}>Pro Template Pack</p>
+        </div>
+        <a data-testid="exp-cta" href="/" style={{ display: 'block', width: '100%', padding: '1rem', background: '#6c47ff', color: '#fff', borderRadius: '0.75rem', fontSize: '1.125rem', fontWeight: 700, textDecoration: 'none', textAlign: 'center' }}>
+          Get Pro Template Pack
+        </a>
+        <p style={{ marginTop: '2rem', fontSize: '0.75rem', color: '#d1d5db' }}>
+          Pricing experiment by <a href="/" style={{ color: '#a78bfa', textDecoration: 'none' }}>PricePilot</a>
+        </p>
+      </div>
+    </div>
   )
 }
 
