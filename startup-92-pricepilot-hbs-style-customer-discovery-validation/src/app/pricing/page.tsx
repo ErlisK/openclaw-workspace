@@ -4,6 +4,41 @@ import { SiteFooter } from '@/components/SiteFooter'
 
 export const dynamic = 'force-dynamic'
 
+const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+
+const pricingJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'PricePilot',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: `${BASE_URL}/pricing`,
+  description: 'Bayesian pricing experiments for solo founders. Free tier includes 3 experiments, CSV import, and A/B pages.',
+  offers: [
+    {
+      '@type': 'Offer',
+      name: 'Free',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Up to 3 active experiments, CSV import, Bayesian engine recommendations.',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Pro',
+      price: '29',
+      priceCurrency: 'USD',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: '29',
+        priceCurrency: 'USD',
+        billingDuration: 'P1M',
+      },
+      description: 'Unlimited experiments, AI templates, CSV export, priority support.',
+    },
+  ],
+  publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+}
+
 const FREE_FEATURES = [
   'Up to 3 active experiments',
   'CSV import (up to 500 rows)',
@@ -29,7 +64,9 @@ export default async function PricingPage() {
   const isAuthed = !!user
 
   return (
-    <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(pricingJsonLd) }} />
+      <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', padding: '0 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricePilot</Link>
@@ -151,5 +188,6 @@ export default async function PricingPage() {
       </div>
       <SiteFooter />
     </div>
+    </>
   )
 }

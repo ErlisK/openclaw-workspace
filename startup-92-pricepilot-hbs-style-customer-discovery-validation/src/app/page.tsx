@@ -1,8 +1,61 @@
 import Link from 'next/link'
 import { SiteFooter } from '@/components/SiteFooter'
 
+const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+
+const homepageJsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'PricePilot',
+    url: BASE_URL,
+    logo: `${BASE_URL}/assets/logo.svg`,
+    description: 'Safe Bayesian pricing experiments for solo founders and micro-SaaS sellers doing $500–$10k MRR.',
+    sameAs: [],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'PricePilot',
+    url: BASE_URL,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: { '@type': 'EntryPoint', urlTemplate: `${BASE_URL}/blog?q={search_term_string}` },
+      'query-input': 'required name=search_term_string',
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'PricePilot',
+    applicationCategory: 'BusinessApplication',
+    operatingSystem: 'Web',
+    url: BASE_URL,
+    description: 'Bayesian A/B pricing experiments for solo founders. Connect Stripe, Gumroad, or Shopify and safely test higher prices with one-click rollback.',
+    featureList: [
+      'Bayesian elasticity engine',
+      'A/B experiment pages',
+      'One-click rollback',
+      'Stripe/Gumroad/Shopify import',
+      'AI communication templates',
+      'Cohort-aware simulations',
+    ],
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      description: 'Free tier with 3 experiments. Pro at $29/month.',
+    },
+    publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+  },
+]
+
 export default function HomePage() {
   return (
+    <>
+      {homepageJsonLd.map((schema, i) => (
+        <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      ))}
     <div className="page" style={{ background: 'linear-gradient(135deg, #f9f8ff 0%, #ede9fe 100%)' }}>
       <nav className="nav">
         <div className="container nav-inner">
@@ -68,5 +121,6 @@ export default function HomePage() {
       </main>
       <SiteFooter />
     </div>
+    </>
   )
 }

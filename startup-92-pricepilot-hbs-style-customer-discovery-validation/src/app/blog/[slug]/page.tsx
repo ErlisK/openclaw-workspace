@@ -235,6 +235,30 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         }}>Get started free →</Link>
       </div>
 
+      {/* Internal links: related tools & guides */}
+      <section data-testid="blog-internal-links" style={{ marginTop: '2rem', padding: '1.25rem', background: '#f9fafb', borderRadius: 10, border: '1px solid #e5e7eb' }}>
+        <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: '#374151' }}>Related tools &amp; guides</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {[
+            { href: '/calculator', label: 'Price Elasticity Calculator — estimate revenue impact before running an experiment' },
+            { href: '/guides/micro-seller-pricing-experiments', label: "Guide: The Solo Seller's Complete Guide to Pricing Experiments" },
+            { href: '/guides/stripe-price-testing-without-code', label: "Guide: Stripe Price Testing Without Code" },
+            { href: '/guides/gumroad-pricing-updates-and-churn-risk', label: 'Guide: Gumroad Price Updates & Churn Risk' },
+            { href: '/pricing', label: 'PricePilot Pricing — free tier + Pro at $29/month' },
+          ].map(link => (
+            <Link
+              key={link.href}
+              href={link.href}
+              data-testid={`blog-internal-link-${link.href.replace(/\//g, '-')}`}
+              style={{ color: '#4f46e5', fontSize: '0.875rem', textDecoration: 'none', display: 'flex', gap: '0.4rem' }}
+            >
+              <span style={{ color: '#9ca3af' }}>→</span>
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </section>
+
       <div style={{ marginTop: '2rem' }}>
         <Link href="/blog" style={{ color: 'var(--brand, #4f46e5)', fontSize: '0.9rem', textDecoration: 'none' }}>
           ← All posts
