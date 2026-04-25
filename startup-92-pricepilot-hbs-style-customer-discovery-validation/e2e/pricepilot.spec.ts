@@ -27,7 +27,7 @@ const USERS = {
 /** Dismiss the cookie consent banner if it appears */
 async function dismissCookieBanner(page: Page) {
   try {
-    const banner = page.locator('[data-testid="cookie-accept-all"]')
+    const banner = page.locator('[data-testid="cookie-accept-btn"]')
     if (await banner.isVisible({ timeout: 2000 })) {
       await banner.click()
     }
@@ -3098,7 +3098,7 @@ test.describe('Security & Legal', () => {
     const freshCtx = await browser.newContext();
     const freshPage = await freshCtx.newPage();
     await freshPage.goto(`${BASE_URL}/signup`);
-    await expect(freshPage.locator('[data-testid="cookie-accept-all"]')).toBeVisible({ timeout: 5000 });
+    await expect(freshPage.locator('[data-testid="cookie-accept-btn"]')).toBeVisible({ timeout: 5000 });
     await freshCtx.close();
   });
 
