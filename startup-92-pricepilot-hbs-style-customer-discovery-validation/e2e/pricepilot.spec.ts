@@ -3615,7 +3615,7 @@ test.describe('Structured Data — JSON-LD schemas', () => {
     await page.goto(`${BASE_URL}/`)
     const schemas = await page.evaluate(() => {
       return Array.from(document.querySelectorAll('script[type="application/ld+json"]'))
-        .map(el => { try { return JSON.parse(el.textContent ?? '').['@type'] } catch { return null } })
+        .map(el => { try { return JSON.parse(el.textContent ?? '')['@type'] } catch { return null } })
         .filter(Boolean)
     })
     expect(schemas).toContain('Organization')
