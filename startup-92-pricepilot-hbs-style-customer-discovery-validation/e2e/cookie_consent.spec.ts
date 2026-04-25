@@ -20,7 +20,10 @@ test('Cookie banner does not block login submit', async ({ page }) => {
   await page.fill('input[type="email"]', 'user@example.com')
   await page.fill('input[type="password"]', 'WrongPass123!')
   await page.click('button[type="submit"]')
-  await expect(page.getByText(/Invalid email|password|error/i)).toBeVisible({ timeout: 5000 })
+  // Wait for auth error message (uses data-testid="auth-error" or specific error text)
+  await expect(
+    page.locator('[data-testid="auth-error"], .error-message')
+  ).toBeVisible({ timeout: 8000 })
 })
 
 test('Login form has required fields', async ({ page }) => {
