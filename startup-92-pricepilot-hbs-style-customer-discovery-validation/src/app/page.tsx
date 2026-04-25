@@ -6,7 +6,10 @@ export default function HomePage() {
     <div className="page" style={{ background: 'linear-gradient(135deg, #f9f8ff 0%, #ede9fe 100%)' }}>
       <nav className="nav">
         <div className="container nav-inner">
-          <span className="nav-logo">🚀 PricePilot</span>
+          <span className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="/assets/logo-icon.svg" alt="PricePilot" width={32} height={32} style={{ borderRadius: 8 }} />
+            PricePilot
+          </span>
           <div className="nav-links">
             <Link href="/pricing">Pricing</Link>
             <Link href="/login">Sign in</Link>
