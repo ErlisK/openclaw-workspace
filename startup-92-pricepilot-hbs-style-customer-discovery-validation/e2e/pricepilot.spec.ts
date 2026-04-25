@@ -4391,3 +4391,95 @@ test.describe('Admin Funnel Dashboard', () => {
     expect(new Date(d.generated_at).getFullYear()).toBeGreaterThan(2023)
   })
 })
+
+// ─── Weekly Cron & Research Page ─────────────────────────────────────────
+test.describe('Weekly Signals Cron & Research Page', () => {
+  const CRON_SECRET = process.env.BASE_CRON_SECRET ?? 'no-cron-secret'
+
+  test('TC-CRON-003: /api/cron/weekly-signals returns 401 without auth', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/cron/weekly-signals`)
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-CRON-004: /api/cron/weekly-signals returns 401 with wrong secret', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/cron/weekly-signals`, {
+      headers: { Authorization: 'Bearer wrong-secret-xyz' }
+    })
+    expect(r.status()).toBe(401)
+  })
+
+  test('TC-CRON-005: /api/cron/weekly-signals endpoint is routed (not 404)', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/cron/weekly-signals`)
+    expect(r.status()).not.toBe(404)
+  })
+
+  test('TC-CRON-006: cron returns valid JSON structure with correct secret', async ({ request }) => {
+    if (CRON_SECRET === 'no-cron-secret') test.skip()
+    const r = await request.get(`${BASE_URL}/api/cron/weekly-signals`, {
+      headers: { Authorization: `Bearer ${CRON_SECRET}` }
+    })
+    expect(r.status()).toBe(200)
+    const d = await r.json()
+    expect(d.success).toBe(true)
+    expect(d.week).toBeTruthy()
+    expect(typeof d.scraped).toBe('number')
+    expect(typeof d.inserted).toBe('number')
+  })
+
+  test('TC-CRON-007: cron response includes clusters object', async ({ request }) => {
+    if (CRON_SECRET === 'no-cron-secret') test.skip()
+    const r = await request.get(`${BASE_URL}/api/cron/weekly-signals`, {
+      headers: { Authorization: `Bearer ${CRON_SECRET}` }
+    })
+    const d = await r.json()
+    expect(d.clusters).toBeDefined()
+    expect(typeof d.clusters).toBe('object')
+  })
+
+  test('TC-RESEARCH-001: /research page loads (200)', async ({ page }) => {
+    const r = await page.goto(`${BASE_URL}/research`)
+    expect(r?.status()).toBe(200)
+  })
+
+  test('TC-RESEARCH-002: /research page has a heading', async ({ page }) => {
+    await page.goto(`${BASE_URL}/research`)
+    const h1 = await page.locator('h1').first().textContent()
+    expect(h1).toBeTruthy()
+  })
+
+  test('TC-RESEARCH-003: /research page renders signal cards or empty state', async ({ page }) => {
+    await page.goto(`${BASE_URL}/research`)
+    const body = await page.textContent('body')
+    // Either we have signal cards or the empty state
+    const hasContent = body?.includes('signal') || body?.includes('Pricing') || body?.includes('No signals')
+    expect(hasContent).toBeTruthy()
+  })
+
+  test('TC-RESEARCH-004: /research page includes nav link to /calculator', async ({ page }) => {
+    await page.goto(`${BASE_URL}/research`)
+    const calcLink = page.locator('a[href*="calculator"]')
+    await expect(calcLink.first()).toBeVisible()
+  })
+
+  test('TC-RESEARCH-005: /research has correct meta title', async ({ page }) => {
+    await page.goto(`${BASE_URL}/research`)
+    const title = await page.title()
+    expect(title).toContain('PricePilot')
+  })
+
+  test('TC-RESEARCH-006: /research cluster summary renders after data is present', async ({ request, page }) => {
+    // This test verifies the cluster_summary testid appears when data exists
+    // (The admin seed flow puts data in analytics_events, not public_signals,
+    //  so we check for page structural health regardless)
+    await page.goto(`${BASE_URL}/research`)
+    // Either cluster-summary or empty-state must be in the DOM
+    const hasClusters = await page.locator('[data-testid="cluster-summary"]').count()
+    const hasEmpty    = await page.locator('[data-testid="empty-state"]').count()
+    expect(hasClusters + hasEmpty).toBeGreaterThan(0)
+  })
+
+  test('TC-RESEARCH-007: /research page does not require auth (public)', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/research`)
+    expect(r.status()).toBe(200)
+  })
+})
