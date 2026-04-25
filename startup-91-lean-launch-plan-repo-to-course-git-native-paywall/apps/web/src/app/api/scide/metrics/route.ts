@@ -9,11 +9,13 @@
  *   metrics: {
  *     total_users          — all non-test auth users
  *     new_signups_24h      — users created in last 24h
+ *     new_signups_7d       — users created in last 7 days
+ *     new_signups_30d      — users created in last 30 days
  *     monthly_revenue      — succeeded Stripe charges this calendar month (USD)
  *     yearly_revenue       — monthly_revenue * 12
  *     active_subscriptions — active Stripe subscriptions count
  *     total_courses        — published courses
- *     total_enrollments    — total enrollments (non-test)
+ *     total_enrollments    — total enrollments (non-test users only)
  *   }
  *
  * Test accounts excluded: emails matching test-*, e2e-*, playwright-*,
@@ -48,6 +50,8 @@ export async function GET(req: NextRequest) {
   const metrics: Record<string, number | null> = {
     total_users: null,
     new_signups_24h: null,
+    new_signups_7d: null,
+    new_signups_30d: null,
     monthly_revenue: null,
     yearly_revenue: null,
     active_subscriptions: null,
@@ -60,7 +64,7 @@ export async function GET(req: NextRequest) {
     const supa = createServiceClient();
 
     // Fetch all users via auth admin API — paginate to handle > 1000 users
-    const allUsers: { email?: string; created_at?: string }[] = [];
+    const allUsers: { id?: string; email?: string; created_at?: string }[] = [];
     let page = 1;
     while (true) {
       const { data: usersData } = await supa.auth.admin.listUsers({ perPage: 1000, page });
@@ -73,9 +77,11 @@ export async function GET(req: NextRequest) {
     metrics.total_users = realUsers.length;
 
     const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-    metrics.new_signups_24h = realUsers.filter(
-      (u) => u.created_at && u.created_at >= cutoff24h,
-    ).length;
+    const cutoff7d  = new Date(Date.now() - 7  * 24 * 60 * 60 * 1000).toISOString();
+    const cutoff30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    metrics.new_signups_24h = realUsers.filter((u) => u.created_at && u.created_at >= cutoff24h).length;
+    metrics.new_signups_7d  = realUsers.filter((u) => u.created_at && u.created_at >= cutoff7d).length;
+    metrics.new_signups_30d = realUsers.filter((u) => u.created_at && u.created_at >= cutoff30d).length;
 
     // Total published courses
     const { count: courseCount } = await supa
@@ -84,11 +90,16 @@ export async function GET(req: NextRequest) {
       .eq('published', true);
     metrics.total_courses = courseCount ?? null;
 
-    // Total enrollments (join to exclude test users would be complex — count all)
-    const { count: enrollCount } = await supa
+    // Total enrollments — exclude test users by joining through profiles
+    // (profiles.id matches auth.users.id; test users simply won't have enrollments
+    // but we also double-filter by cross-referencing the real user id set)
+    const realUserIds = new Set(realUsers.map((u) => u.id).filter(Boolean));
+    const { data: enrollData } = await supa
       .from('enrollments')
-      .select('id', { count: 'exact', head: true });
-    metrics.total_enrollments = enrollCount ?? null;
+      .select('user_id');
+    metrics.total_enrollments = enrollData
+      ? enrollData.filter((e) => realUserIds.has(e.user_id)).length
+      : null;
   } catch (_e) {
     // Supabase metrics remain null on error
   }

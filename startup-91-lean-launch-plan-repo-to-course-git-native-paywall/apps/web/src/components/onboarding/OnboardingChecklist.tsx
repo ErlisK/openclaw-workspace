@@ -15,7 +15,7 @@ const CHECKLIST: ChecklistItem[] = [
     id: 'create_course',
     label: 'Create your first course',
     description: 'Import a GitHub repo or paste Markdown to create a course.',
-    href: '/dashboard/import',
+    href: '/dashboard/new',
     linkText: 'Import a repo',
   },
   {
@@ -49,7 +49,7 @@ const CHECKLIST: ChecklistItem[] = [
   {
     id: 'share',
     label: 'Share with your audience',
-    description: 'Copy your referral link and share it on Twitter, LinkedIn, or your newsletter to earn 20% on every referral.',
+    description: 'Copy your referral link and share it on Twitter, LinkedIn, or your newsletter. Earn $10 for every creator who upgrades to a paid plan — no cap, no expiry.',
     href: '/dashboard/settings',
     linkText: 'Get referral link',
   },
@@ -175,7 +175,7 @@ export function OnboardingChecklist() {
 
       {allDone && (
         <div className="mt-5 rounded-xl bg-violet-50 border border-violet-200 px-4 py-3 text-sm text-violet-800">
-          🎉 <strong>You're fully set up!</strong> Share your referral link to earn <strong>20% commission</strong> on every new creator you bring in.
+          🎉 <strong>You're fully set up!</strong> Share your referral link to earn <strong>$10</strong> for every creator you refer who upgrades to a paid plan — no cap, no expiry.
         </div>
       )}
 
