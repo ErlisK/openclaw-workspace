@@ -161,22 +161,23 @@ export default function HomePage() {
 
       <main className="container" style={{ paddingTop: '5rem', paddingBottom: '5rem', textAlign: 'center' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <span className="badge badge-purple" style={{ marginBottom: '1.5rem' }}>Built for solo founders · No stats degree required</span>
+          <span className="badge badge-purple" style={{ marginBottom: '1.5rem' }}>For Stripe micro-SaaS · $1k–$8k MRR · Solo founders</span>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1.1, marginBottom: '1.25rem' }}>
-            Test a higher price.<br />
-            <span style={{ color: 'var(--brand)' }}>Safely. In weeks.</span>
+            You&rsquo;re probably underpriced.<br />
+            <span style={{ color: 'var(--brand)' }}>Here&rsquo;s how to prove it.</span>
           </h1>
-          <p style={{ fontSize: '1.2rem', color: 'var(--muted)', marginBottom: '2.5rem', maxWidth: 520, margin: '0 auto 2.5rem' }}>
-            PricePilot connects to Gumroad, Stripe, or a CSV and uses a Bayesian engine to recommend a safe price test — with rollback in one click.
+          <p style={{ fontSize: '1.2rem', color: 'var(--muted)', marginBottom: '2.5rem', maxWidth: 540, margin: '0 auto 2.5rem' }}>
+            PricePilot analyzes your Stripe transaction history and runs a Bayesian simulation to find the safest price increase your data supports — with a rollback in one click if it doesn&rsquo;t work.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/signup" className="btn btn-primary" data-testid="cta-signup-btn" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-              Start free — no credit card
+            <Link href="/free-audit" className="btn btn-primary" data-testid="cta-audit-btn" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+              🎯 Free pricing audit — no signup
             </Link>
-            <Link href="/x/demo" className="btn btn-secondary" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
-              See demo experiment →
+            <Link href="/signup" className="btn btn-secondary" data-testid="cta-signup-btn" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
+              Start free →
             </Link>
           </div>
+          <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.75rem' }}>Upload your CSV · results in 30 seconds · no account needed</p>
 
           <div className="card" style={{ marginTop: '4rem', textAlign: 'left' }}>
             <p style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Illustrative example — not a real user testimonial</p>
