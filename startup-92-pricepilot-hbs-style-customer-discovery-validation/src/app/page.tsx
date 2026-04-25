@@ -11,6 +11,8 @@ export default function HomePage() {
             PricePilot
           </span>
           <div className="nav-links">
+            <Link href="/calculator">Calculator</Link>
+            <Link href="/guides">Guides</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/login">Sign in</Link>
             <Link href="/signup" className="btn btn-primary btn-sm" data-testid="hero-signup-btn">Start free</Link>

@@ -3409,3 +3409,135 @@ test.describe('UTM & Plausible', () => {
     }
   })
 })
+
+// ─── Authority Guides ──────────────────────────────────────────────────────
+const GUIDE_SLUGS = [
+  'micro-seller-pricing-experiments',
+  'gumroad-pricing-updates-and-churn-risk',
+  'stripe-price-testing-without-code',
+  'cohort-aware-simulations-explained',
+] as const
+
+test.describe('Authority Guides', () => {
+  test('TC-GUIDE-001: /guides listing returns 200 and shows all 4 guides', async ({ page }) => {
+    await page.goto(`${BASE_URL}/guides`)
+    expect(page.url()).toContain('/guides')
+    for (const slug of GUIDE_SLUGS) {
+      await expect(page.locator(`[data-testid="guide-${slug}"]`)).toBeVisible({ timeout: 8000 })
+    }
+  })
+
+  for (const slug of GUIDE_SLUGS) {
+    test(`TC-GUIDE-002: /guides/${slug} returns 200`, async ({ request }) => {
+      const r = await request.get(`${BASE_URL}/guides/${slug}`)
+      expect(r.status()).toBe(200)
+    })
+  }
+
+  for (const slug of GUIDE_SLUGS) {
+    test(`TC-GUIDE-003: /guides/${slug} has 1500+ chars body`, async ({ page }) => {
+      await page.goto(`${BASE_URL}/guides/${slug}`)
+      const content = page.locator('[data-testid="guide-content"]')
+      await expect(content).toBeVisible({ timeout: 8000 })
+      const text = await content.innerText()
+      expect(text.length, `Guide ${slug} has only ${text.length} chars`).toBeGreaterThanOrEqual(1500)
+    })
+  }
+
+  for (const slug of GUIDE_SLUGS) {
+    test(`TC-GUIDE-004: /guides/${slug} has JSON-LD structured data`, async ({ page }) => {
+      await page.goto(`${BASE_URL}/guides/${slug}`)
+      const jsonLdText = await page.evaluate(() => {
+        const el = document.querySelector('script[type="application/ld+json"]')
+        return el ? el.textContent : null
+      })
+      expect(jsonLdText).toBeTruthy()
+      const data = JSON.parse(jsonLdText!)
+      expect(data['@type']).toBe('Article')
+      expect(data.headline).toBeTruthy()
+      expect(data.datePublished).toBeTruthy()
+    })
+  }
+
+  for (const slug of GUIDE_SLUGS) {
+    test(`TC-GUIDE-005: /guides/${slug} has internal links to other guides`, async ({ page }) => {
+      await page.goto(`${BASE_URL}/guides/${slug}`)
+      const relatedSection = page.locator('[data-testid="related-guides"]')
+      await expect(relatedSection).toBeVisible({ timeout: 8000 })
+      // Should have 3 links to other guides
+      const links = relatedSection.locator('a[href^="/guides/"]')
+      const count = await links.count()
+      expect(count).toBeGreaterThanOrEqual(3)
+    })
+  }
+})
+
+// ─── Elasticity Calculator ─────────────────────────────────────────────────
+test.describe('Elasticity Calculator', () => {
+  test('TC-CALC-001: /calculator returns 200', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/calculator`)
+    expect(r.status()).toBe(200)
+  })
+
+  test('TC-CALC-002: Calculator inputs are interactive and output updates', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator`)
+    // Read initial revenue change
+    const outputEl = page.locator('[data-testid="output-revenue-change"]')
+    await expect(outputEl).toBeVisible({ timeout: 8000 })
+    const initialText = await outputEl.innerText()
+
+    // Change trial price to something very different
+    const trialInput = page.locator('[data-testid="input-trial-price"]')
+    await trialInput.fill('99')
+    await page.waitForTimeout(300)
+
+    const updatedText = await outputEl.innerText()
+    expect(updatedText).not.toBe(initialText)
+    // Revenue change should be positive for a big price increase with default elasticity
+    // (29 -> 99 at ε=-1 would show large change)
+    expect(updatedText).toMatch(/[+-]?\d+\.?\d*%/)
+  })
+
+  test('TC-CALC-003: Calculator has JSON-LD WebApplication schema', async ({ page }) => {
+    await page.goto(`${BASE_URL}/calculator`)
+    const jsonLdText = await page.evaluate(() => {
+      const el = document.querySelector('script[type="application/ld+json"]')
+      return el ? el.textContent : null
+    })
+    expect(jsonLdText).toBeTruthy()
+    const data = JSON.parse(jsonLdText!)
+    expect(data['@type']).toBe('WebApplication')
+    expect(data.name).toContain('Calculator')
+  })
+
+  test('TC-CALC-004: Homepage nav has Calculator and Guides links', async ({ page }) => {
+    await page.goto(`${BASE_URL}/`)
+    const nav = page.locator('nav')
+    await expect(nav.getByRole('link', { name: 'Calculator' })).toBeVisible({ timeout: 8000 })
+    await expect(nav.getByRole('link', { name: 'Guides' })).toBeVisible()
+  })
+})
+
+// ─── Sitemap additions ─────────────────────────────────────────────────────
+test.describe('Sitemap — guides and calculator', () => {
+  test('TC-SITEMAP-001: /guides appears in sitemap.xml', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/sitemap.xml`)
+    expect(r.status()).toBe(200)
+    const body = await r.text()
+    expect(body).toContain('/guides')
+  })
+
+  test('TC-SITEMAP-002: /calculator appears in sitemap.xml', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/sitemap.xml`)
+    const body = await r.text()
+    expect(body).toContain('/calculator')
+  })
+
+  test('TC-SITEMAP-003: All 4 guide slugs appear in sitemap.xml', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/sitemap.xml`)
+    const body = await r.text()
+    for (const slug of GUIDE_SLUGS) {
+      expect(body).toContain(slug)
+    }
+  })
+})

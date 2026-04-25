@@ -189,8 +189,21 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const post = posts[slug]
   if (!post) notFound()
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.description,
+    datePublished: post.date,
+    author: { '@type': 'Organization', name: 'PricePilot', url: 'https://startup-92-pricepilot-hbs-style-cus.vercel.app' },
+    publisher: { '@type': 'Organization', name: 'PricePilot', url: 'https://startup-92-pricepilot-hbs-style-cus.vercel.app' },
+    url: `https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/${slug}`,
+  }
+
   return (
-    <main style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1rem' }}>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <main style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
         <Link href="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>PricePilot</Link>
         <span style={{ color: '#d1d5db' }}>›</span>
@@ -228,5 +241,6 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </Link>
       </div>
     </main>
+    </>
   )
 }
