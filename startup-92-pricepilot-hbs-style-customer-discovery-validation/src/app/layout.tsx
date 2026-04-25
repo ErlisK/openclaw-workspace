@@ -31,6 +31,9 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const redditPixelId = process.env.NEXT_PUBLIC_REDDIT_PIXEL_ID
+  const googleAdsId = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID
+
   return (
     <html lang="en">
       <body>
@@ -45,24 +48,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           src="https://plausible.io/js/script.tagged-events.js"
           strategy="afterInteractive"
         />
-        {/* Reddit Pixel — replace t2_PLACEHOLDER with real account ID before going live */}
-        <Script id="reddit-pixel" strategy="afterInteractive">
-          {`
-            !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/v2.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);
-            rdt('init','t2_PLACEHOLDER', {"optOut":false,"useDecimalCurrencyValues":true});
-            rdt('track', 'PageVisit');
-          `}
-        </Script>
-        {/* Google Ads — replace AW-PLACEHOLDER with real conversion ID before going live */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=AW-PLACEHOLDER" strategy="afterInteractive" />
-        <Script id="google-gtag" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-PLACEHOLDER');
-          `}
-        </Script>
+        {/* Reddit Pixel — only loads when NEXT_PUBLIC_REDDIT_PIXEL_ID is set */}
+        {redditPixelId && (
+          <Script id="reddit-pixel" strategy="afterInteractive">
+            {`
+              !function(w,d){if(!w.rdt){var p=w.rdt=function(){p.sendEvent?p.sendEvent.apply(p,arguments):p.callQueue.push(arguments)};p.callQueue=[];var t=d.createElement("script");t.src="https://www.redditstatic.com/ads/v2.js",t.async=!0;var s=d.getElementsByTagName("script")[0];s.parentNode.insertBefore(t,s)}}(window,document);
+              rdt('init','${redditPixelId}', {"optOut":false,"useDecimalCurrencyValues":true});
+              rdt('track', 'PageVisit');
+            `}
+          </Script>
+        )}
+        {/* Google Ads — only loads when NEXT_PUBLIC_GOOGLE_ADS_ID is set */}
+        {googleAdsId && (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${googleAdsId}`} strategy="afterInteractive" />
+            <Script id="google-gtag" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${googleAdsId}');
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   )
