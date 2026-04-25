@@ -99,7 +99,9 @@ export async function POST(request: Request) {
   // Cohort-based funnel for each simulated signed-up user
   for (let u = 0; u < nUsers; u++) {
     const signupDaysAgo = Math.floor(rand() * nDays)
-    const userId = `sim-user-${u.toString().padStart(4, '0')}`
+    // Generate a deterministic UUID-shaped ID for this simulated user
+    const hex = (u * 16807 + 1013904223) >>> 0
+    const userId = `00000000-0000-4000-8000-${hex.toString(16).padStart(12, '0')}`
     const referrer = REFERRERS[Math.floor(rand() * REFERRERS.length)]
     const abVariant = AB_VARIANTS[Math.floor(rand() * AB_VARIANTS.length)]
 
