@@ -6,8 +6,21 @@
  */
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
+
+const loginLimiter = createRatelimit(10, 60)
 
 export async function POST(request: Request) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+    request.headers.get('x-real-ip') || 'unknown'
+  const { limited, headers: rlHeaders } = await checkRateLimit(loginLimiter, `login:${ip}`)
+  if (limited) {
+    return NextResponse.json(
+      { error: 'Too many login attempts. Please try again later.' },
+      { status: 429, headers: rlHeaders }
+    )
+  }
+
   let body: Record<string, unknown>
   try {
     body = await request.json()
@@ -35,9 +48,8 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     success: true,
-    access_token: data.session?.access_token,
     token_type: 'bearer',
     expires_in: data.session?.expires_in,
     user: { id: data.user?.id, email: data.user?.email },
-  })
+  }, { headers: rlHeaders })
 }

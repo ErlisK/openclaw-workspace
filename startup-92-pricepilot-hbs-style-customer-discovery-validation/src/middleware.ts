@@ -2,7 +2,32 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  // Generate a per-request CSP nonce
+  const nonceBytes = new Uint8Array(16)
+  crypto.getRandomValues(nonceBytes)
+  const nonce = Buffer.from(nonceBytes).toString('base64')
+
+  const csp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+    "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline; no dynamic CSS injection risk
+    "img-src 'self' data: blob: https:",
+    "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.vercel.app https://accounts.google.com https://oauth2.googleapis.com",
+    "frame-src 'self' https://accounts.google.com https://js.stripe.com https://hooks.stripe.com",
+    "font-src 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests",
+  ].join('; ')
+
+  let supabaseResponse = NextResponse.next({
+    request,
+    headers: {
+      'x-nonce': nonce,
+      'Content-Security-Policy': csp,
+    },
+  })
+  supabaseResponse.headers.set('Content-Security-Policy', csp)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,7 +37,14 @@ export async function middleware(request: NextRequest) {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({ request })
+          supabaseResponse = NextResponse.next({
+            request,
+            headers: {
+              'x-nonce': nonce,
+              'Content-Security-Policy': csp,
+            },
+          })
+          supabaseResponse.headers.set('Content-Security-Policy', csp)
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )
@@ -45,11 +77,11 @@ export async function middleware(request: NextRequest) {
     const existingVid = request.cookies.get('pp_vid')?.value
     const secret = process.env.PP_VID_SECRET
     if (!secret) {
-      if (process.env.NODE_ENV === 'production') {
-        console.error('[middleware] CRITICAL: PP_VID_SECRET is not set in production. Visitor tracking HMAC is insecure.')
-      }
+      // Hard fail — never use a known-public fallback secret
+      console.error('[middleware] FATAL: PP_VID_SECRET is not set. Visitor tracking is disabled.')
+      return supabaseResponse // serve the page but skip cookie assignment
     }
-    const effectiveSecret = secret || 'pp-vid-default-secret-change-in-prod'
+    const effectiveSecret = secret
     // Validate existing cookie signature (format: <hex_id>.<hex_hmac>)
     let isValid = false
     if (existingVid && existingVid.includes('.')) {

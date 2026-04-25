@@ -103,12 +103,12 @@ export default async function ExperimentPage({
 
   // ── Record observation via server API route (server-side, fire-and-forget) ─
   if (!isPreview && exp.status === 'active') {
-    // Use service-role supabase on server only for write path
-    const adminSupabase = createClient(
+    // Use anon key — RLS policy "observations_insert_public" gates by experiment status
+    const anonSupabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    adminSupabase.from('experiment_observations').insert({
+    anonSupabase.from('experiment_observations').insert({
       experiment_id: exp.id,
       variant,
       visitor_id: visitorId,
