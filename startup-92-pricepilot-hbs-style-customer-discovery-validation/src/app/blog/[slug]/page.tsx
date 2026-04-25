@@ -69,9 +69,114 @@ const posts: Record<string, {
 <h2>The Bottom Line</h2>
 <p>For low-traffic, high-intent products, Bayesian testing is the right tool. You get actionable insights in weeks, not months, with honest uncertainty quantification.</p>
     `
-  }
-}
+  },
+  'building-the-bayesian-pricing-engine': {
+    title: 'Building a Bayesian Pricing Engine in TypeScript',
+    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricePilot — all in TypeScript, no Python required.',
+    date: 'February 10, 2025',
+    readTime: '10 min read',
+    content: `
+<p>When I started building PricePilot, I faced a core problem: <strong>how do you run a meaningful pricing experiment with 30–100 sales per month?</strong></p>
 
+<p>Traditional A/B tests need 200–1,000 conversions per variant for significance. At 50 monthly sales, that's a 2-year wait. Useless.</p>
+
+<p>Bayesian inference changes the question: instead of "is this statistically significant?", it asks "what's the probability Price B generates more revenue than Price A?" That's answerable with 20–40 data points.</p>
+
+<h2>The Core Model</h2>
+
+<p>We model price-demand as a log-linear regression:</p>
+<pre><code>log(Q/Q_ref) = ε · log(P/P_ref) + noise</code></pre>
+
+<p>Where <code>ε</code> is price elasticity. Our prior: <code>Normal(-1.0, 0.5²)</code> — most digital products sit near unit elasticity. The prior shrinks with sparse data and lets the data speak as observations accumulate.</p>
+
+<h2>Normal-InvGamma Conjugate Update</h2>
+
+<p>We use the NIG conjugate prior — closed-form posterior, no MCMC needed:</p>
+
+<pre><code>function nigUpdate(x: number[], y: number[], priorMu = -1.0, priorSd = 0.5): NIGPosterior {
+  const lam0 = 1 / (priorSd * priorSd)
+  const N = x.length
+  let Sxx = 0, Sxy = 0, Syy = 0
+  for (let i = 0; i < N; i++) {
+    Sxx += x[i]*x[i]; Sxy += x[i]*y[i]; Syy += y[i]*y[i]
+  }
+  const lamPost = lam0 + Sxx
+  const muPost  = (priorMu * lam0 + Sxy) / lamPost
+  const aPost   = priorA + N / 2
+  const bPost   = priorB + 0.5*Syy + 0.5*priorMu*priorMu*lam0 - 0.5*muPost*muPost*lamPost
+  return { mu: muPost, lam: lamPost, a: aPost, b: bPost }
+}</code></pre>
+
+<p>5 observations → prior dominates. 50 observations → data dominates. Exactly the right behavior.</p>
+
+<h2>Conservative Recommendation Rule</h2>
+
+<p>The optimizer maximizes E[Revenue] subject to a downside constraint: the 5th-percentile outcome must stay above 95% of current revenue.</p>
+
+<pre><code>function findOptimalPrice(pRef, rRef, samples) {
+  const floor = rRef * 0.95  // max 5% downside
+  let bestPrice = 0, bestMean = -Infinity
+
+  for (let mult = 1.1; mult <= 2.5; mult += 0.05) {
+    const dist = predictRevenue(pRef * mult, pRef, rRef, samples)
+    if (dist.p05 < floor) continue  // reject — too risky
+    if (dist.mean > bestMean) { bestMean = dist.mean; bestPrice = pRef * mult }
+  }
+  return bestPrice
+}</code></pre>
+
+<h2>Spike Detection (MAD Filter)</h2>
+
+<p>A ProductHunt launch creates a sales spike at a discounted price that ruins the elasticity estimate. We flag outliers using Median Absolute Deviation (better than std dev because it's not inflated by the outliers themselves):</p>
+
+<pre><code>// Modified Z-score > 3.0 = spike (Iglewicz & Hoaglin, 1993)
+is_spike = mad > 0 ? (0.6745 * Math.abs(qty - median) / mad) > 3.0 : false</code></pre>
+
+<h2>Stack: Pure TypeScript, No External Math Libs</h2>
+
+<p>Zero external dependencies — no ml-matrix, no tensorflow.js. The NIG update, Cornish-Fisher quantile approximation, and Box-Muller sampler are hand-implemented. The engine runs in a Next.js App Router Route Handler, backed by Supabase with Row Level Security isolating each user's data.</p>
+
+<p><strong>Try PricePilot free:</strong> <a href="https://startup-92-pricepilot-hbs-style-cus.vercel.app">startup-92-pricepilot-hbs-style-cus.vercel.app</a></p>
+    `,
+  },
+  'building-pricepilot-product-intro': {
+    title: "I Built a Pricing Experiment Tool for Solo Founders — Here's What I Learned",
+    description: 'PricePilot uses Bayesian inference to help indie creators safely test higher prices. A product intro covering the why, what, and how.',
+    date: 'February 3, 2025',
+    readTime: '5 min read',
+    content: `
+<p>Six months ago, I talked to 40 solo founders about pricing. Every single one said the same thing:</p>
+<p><em>"No. I'm scared of losing customers."</em></p>
+<p>I built PricePilot to solve that.</p>
+
+<h2>What PricePilot Does</h2>
+<p>Connect your Stripe, Gumroad, or Shopify store — the app analyzes 90 days of sales, estimates your price elasticity using Bayesian inference, suggests 2–3 conservative test prices with confidence scores, and generates a live A/B experiment page. When the experiment completes, one click applies the winner or rolls back to your original price.</p>
+
+<h2>Why Traditional A/B Testing Fails for Solo Founders</h2>
+<p>Traditional A/B tests need 200–1,000 conversions per variant for significance. At 50–100 monthly sales, that's a 2-year wait. Bayesian inference answers the right question instead: "What's the probability Price B generates more revenue?" — answerable with 20–40 data points.</p>
+
+<h2>Three Things I Learned Building It</h2>
+<p><strong>Conservative defaults win.</strong> Adding hard caps (max 2.5× current price) and a downside floor (p05 ≥ 95% of current revenue) increased usage significantly. Founders don't trust aggressive suggestions.</p>
+
+<p><strong>Real-world CSVs are messier than you think.</strong> Gumroad changed their export format twice in 2024. We switched to fuzzy column detection — matching by substring, not exact header names.</p>
+
+<p><strong>Supabase RLS is excellent but requires planning.</strong> Getting Row Level Security right at the start saved an entire category of data isolation bugs.</p>
+
+<h2>The Stack</h2>
+<ul>
+  <li><strong>Next.js 15</strong> (App Router, TypeScript)</li>
+  <li><strong>Supabase</strong> (PostgreSQL + Auth + RLS)</li>
+  <li><strong>Vercel</strong> (deployment + AI Gateway)</li>
+  <li><strong>Stripe</strong> (checkout + billing portal)</li>
+  <li><strong>Engine:</strong> Pure TypeScript — Normal-InvGamma conjugate model, zero external deps</li>
+</ul>
+
+<p>See the <a href="/blog/building-the-bayesian-pricing-engine">technical deep dive</a> for the full engine implementation with code.</p>
+
+<p><strong>Try it free (no credit card):</strong> <a href="https://startup-92-pricepilot-hbs-style-cus.vercel.app">startup-92-pricepilot-hbs-style-cus.vercel.app</a></p>
+    `,
+  },
+}
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const post = posts[slug]

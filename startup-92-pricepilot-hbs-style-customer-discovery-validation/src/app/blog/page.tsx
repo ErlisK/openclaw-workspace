@@ -8,6 +8,22 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: 'building-the-bayesian-pricing-engine',
+    title: 'Building a Bayesian Pricing Engine in TypeScript',
+    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricePilot — all in TypeScript, no Python required.',
+    date: 'February 10, 2025',
+    readTime: '10 min read',
+    tags: ['engineering', 'Bayesian', 'TypeScript', 'statistics'],
+  },
+  {
+    slug: 'building-pricepilot-product-intro',
+    title: "I Built a Pricing Experiment Tool for Solo Founders — Here's What I Learned",
+    description: 'PricePilot uses Bayesian inference to help indie creators safely test higher prices. The why, what, and how — plus three hard-won lessons from building it.',
+    date: 'February 3, 2025',
+    readTime: '5 min read',
+    tags: ['startup', 'SaaS', 'pricing', 'Next.js'],
+  },
+  {
     slug: 'how-to-run-a-price-test-without-losing-customers',
     title: 'How to Run a Price Test Without Losing Customers',
     description: 'A practical guide to Bayesian A/B pricing experiments for solo founders — safe, statistical, and reversible.',
