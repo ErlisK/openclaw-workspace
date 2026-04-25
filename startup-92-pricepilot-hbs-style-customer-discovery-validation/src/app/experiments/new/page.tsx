@@ -244,6 +244,16 @@ function NewExperimentForm() {
 
       {error && <p className="error-message">{error}</p>}
 
+      {/* Rollback safety callout */}
+      <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.5rem', padding: '0.875rem 1rem', marginBottom: '1rem', fontSize: '0.875rem', color: '#166534' }}>
+        <strong>🔒 Safe to launch — here&apos;s why:</strong>
+        <ul style={{ margin: '0.5rem 0 0 1.25rem', paddingLeft: 0 }}>
+          <li>Your current price stays active for <strong>all existing visitors</strong>.</li>
+          <li>This experiment only affects <strong>new visitors</strong> — 50/50 split by default.</li>
+          <li>You can <strong>revert to your original price in one click</strong> at any time from the Experiments dashboard.</li>
+        </ul>
+      </div>
+
       <button className="btn btn-primary" onClick={handleCreate} disabled={loading || !productId || !priceB}
         data-testid="create-experiment-btn"
         style={{ width: '100%', justifyContent: 'center' }}>

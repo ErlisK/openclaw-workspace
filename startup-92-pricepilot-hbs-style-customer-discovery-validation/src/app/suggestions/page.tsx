@@ -151,7 +151,9 @@ export default function SuggestionsPage() {
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                   <h3 style={{ fontWeight: 700 }}>{s.title}</h3>
-                  <span className="badge badge-purple">{s.confidence_label}</span>
+                  <span className="badge badge-purple" style={{ position: 'relative', cursor: 'default' }} title={`Confidence measures how certain we are that this price outperforms your current price. ${Math.round((s.confidence_score || 0) * 100)}% means: if you ran this experiment ${Math.round(1 / (1 - (s.confidence_score || 0.5)))} times, it would show a lift ${Math.round(1 / (1 - (s.confidence_score || 0.5))) - 1} times. Experiments typically reach 80%+ confidence in 2–4 weeks.`}>
+                    {s.confidence_label} <span style={{ opacity: 0.7, fontSize: '0.75em' }}>ⓘ</span>
+                  </span>
                 </div>
                 <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: '0.75rem' }} data-testid="suggestion-why">{s.rationale}</p>
 

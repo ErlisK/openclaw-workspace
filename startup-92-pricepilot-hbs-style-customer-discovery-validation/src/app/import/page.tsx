@@ -132,7 +132,11 @@ export default function ImportPage() {
         {step === 'upload' && (
           <div className="card">
             <h1 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem' }}>Import sales data</h1>
-            <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>Upload any sales CSV. We auto-detect columns for date, product, price, quantity, revenue, and coupon code.</p>
+            <p style={{ color: 'var(--muted)', marginBottom: '1rem' }}>Upload any sales CSV. We auto-detect columns for date, product, price, quantity, revenue, and coupon code.</p>
+
+            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', padding: '0.625rem 0.875rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: '#1e40af', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span>⚡</span> <strong>Fastest path — no API keys needed.</strong> Just export from Gumroad/Stripe/Shopify and drop the CSV here.
+            </div>
 
             <div
               data-testid="csv-upload"
