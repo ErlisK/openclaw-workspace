@@ -12,12 +12,20 @@ import { createClient } from '@/lib/supabase'
 import { getEntitlement } from '@/lib/entitlements'
 import Stripe from 'stripe'
 import crypto from 'crypto'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
+
+const connectLimiter = createRatelimit(5, 60)
 
 export const maxDuration = 30
 
 export async function POST(request: Request) {
   const entResult = await getEntitlement()
   if (entResult instanceof NextResponse) return entResult
+
+  // Rate limit by IP
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
+  const { limited, headers: rlHeaders } = await checkRateLimit(connectLimiter, ip)
+  if (limited) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429, headers: rlHeaders })
 
   const body = await request.json().catch(() => ({}))
   const { stripe_key, label } = body as { stripe_key?: string; label?: string }

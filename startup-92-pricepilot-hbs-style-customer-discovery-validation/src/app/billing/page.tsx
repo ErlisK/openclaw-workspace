@@ -12,6 +12,7 @@ export default function BillingPage() {
   const [status, setStatus] = useState<BillingStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [upgradeLoading, setUpgradeLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
 
@@ -21,6 +22,19 @@ export default function BillingPage() {
       .then(d => { setStatus(d); setLoading(false) })
       .catch(() => { setLoading(false) })
   }, [])
+
+  const handleUpgrade = async () => {
+    setUpgradeLoading(true)
+    setError('')
+    try {
+      const r = await fetch('/api/billing/checkout', { method: 'POST' })
+      const data = await r.json()
+      if (!r.ok) { setError(data.error || 'Failed to start checkout'); setUpgradeLoading(false); return }
+      window.location.href = data.url
+    } catch {
+      setError('Network error'); setUpgradeLoading(false)
+    }
+  }
 
   const openPortal = async () => {
     setPortalLoading(true)
@@ -74,8 +88,9 @@ export default function BillingPage() {
 
             {status.plan !== 'pro' && (
               <div style={{ marginTop: '1.25rem' }}>
-                <button className="btn btn-primary" onClick={() => router.push('/pricing')} data-testid="upgrade-btn">
-                  Upgrade to Pro →
+                <button className="btn btn-primary" onClick={handleUpgrade} disabled={upgradeLoading} data-testid="upgrade-btn">
+                  {upgradeLoading ? <span className="spinner" /> : null}
+                  {upgradeLoading ? 'Loading…' : 'Upgrade to Pro — $29/mo →'}
                 </button>
               </div>
             )}
@@ -95,7 +110,7 @@ export default function BillingPage() {
         <div className="card" style={{ fontSize: '0.875rem', color: 'var(--muted)' }}>
           <p>Questions about billing? Email us at <a href="mailto:support@pricepilot.app" style={{ color: 'var(--brand)' }}>support@pricepilot.app</a></p>
           <p style={{ marginTop: '0.5rem' }}>
-            See our <Link href="/refund-policy" style={{ color: 'var(--brand)' }}>Refund Policy</Link> for cancellation and refund information.
+            See our <Link href="/refund" style={{ color: 'var(--brand)' }}>Refund Policy</Link> for cancellation and refund information.
           </p>
         </div>
       </main>

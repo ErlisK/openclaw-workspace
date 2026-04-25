@@ -1,11 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { parseCSVWithMapping } from '@/lib/csv-parser'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
+
+const importLimiter = createRatelimit(10, 60)
 
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { limited: rlLimited, headers: rlHeaders } = await checkRateLimit(importLimiter, user.id)
+  if (rlLimited) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429, headers: rlHeaders })
 
   try {
     const formData = await request.formData()

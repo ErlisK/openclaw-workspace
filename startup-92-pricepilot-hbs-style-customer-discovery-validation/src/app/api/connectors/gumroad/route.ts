@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { hashCustomerKey } from '@/lib/hash'
 
 export const maxDuration = 30
 
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
       amount_cents: Math.round(price * 100),
       currency,
       is_refunded: refunded,
-      customer_key: email,
+      customer_key: hashCustomerKey(email, user.id),
       purchased_at: parseDateSafe(saleDate),
       metadata: { product_name: productName, row: i },
     })

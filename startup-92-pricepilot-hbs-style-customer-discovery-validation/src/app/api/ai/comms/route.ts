@@ -7,13 +7,18 @@
 import { NextResponse } from 'next/server'
 import { requirePro } from '@/lib/entitlements'
 import { createClient } from '@/lib/supabase'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 export const maxDuration = 30
+
+const aiLimiter = createRatelimit(20, 60)
 
 export async function POST(request: Request) {
   const entResult = await requirePro()
   if (entResult instanceof NextResponse) return entResult
   const user = entResult.user
+  const { limited, headers } = await checkRateLimit(aiLimiter, user.id)
+  if (limited) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429, headers })
   const supabase = await createClient()
 
   const body = await request.json()

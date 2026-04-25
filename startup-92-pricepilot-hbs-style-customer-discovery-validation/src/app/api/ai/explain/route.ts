@@ -6,13 +6,18 @@
  */
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 export const maxDuration = 30
+
+const aiLimiter = createRatelimit(20, 60)
 
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const { limited, headers } = await checkRateLimit(aiLimiter, user.id)
+  if (limited) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429, headers })
 
   const body = await request.json()
   const { suggestion_id } = body

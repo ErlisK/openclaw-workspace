@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 const docPages = [
   { slug: 'quickstart', title: 'Quickstart Guide', description: 'Get from zero to your first pricing experiment in under 10 minutes.', icon: '🚀' },
+  { slug: 'csv-import', title: 'CSV Import Guide', description: 'Import Stripe, Gumroad, or Shopify transactions via CSV. Required headers and downloadable templates.', icon: '📥' },
 ]
 
 export default function DocsPage() {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { stripe } from '@/lib/stripe'
 import { requirePro, getEntitlement } from '@/lib/entitlements'
+import { hashCustomerKey } from '@/lib/hash'
 
 export const maxDuration = 60
 
@@ -45,7 +46,7 @@ async function handleAPIImport(request: NextRequest, supabase: any, userId: stri
           amount_cents: ch.amount ?? 0,
           currency: (ch.currency ?? 'usd').toUpperCase(),
           is_refunded: ch.refunded ?? false,
-          customer_key: ch.billing_details?.email ?? ch.receipt_email ?? null,
+          customer_key: hashCustomerKey(ch.billing_details?.email ?? ch.receipt_email ?? null, user.id),
           purchased_at: new Date((ch.created ?? 0) * 1000).toISOString(),
           metadata: { description: ch.description, product_name: ch.metadata?.product_name ?? ch.description },
         })
@@ -105,7 +106,7 @@ async function handleCSVImport(request: NextRequest, supabase: any, userId: stri
       amount_cents: Math.round(amount * 100),
       currency,
       is_refunded: isRefunded,
-      customer_key: email,
+      customer_key: hashCustomerKey(email, user.id),
       purchased_at: parseDateSafe(created),
       metadata: { product_name: productName, csv_row: i },
     })

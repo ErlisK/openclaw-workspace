@@ -26,6 +26,7 @@ export default function SuggestionsPage() {
   const [running, setRunning] = useState(false)
   const [runError, setRunError] = useState('')
   const [dismissing, setDismissing] = useState<string | null>(null)
+  const [txCount, setTxCount] = useState<number | null>(null)
   const router = useRouter()
 
   const fetchSuggestions = async () => {
@@ -34,7 +35,16 @@ export default function SuggestionsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { fetchSuggestions() }, [])
+  useEffect(() => {
+    fetchSuggestions()
+    fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'page_view', page: 'suggestions' }) })
+      .catch(() => {})
+    // Fetch transaction count to determine empty state
+    fetch('/api/import/sample').then(r => r.ok ? r.json() : null).then(d => {
+      if (d && typeof d.total === 'number') setTxCount(d.total)
+      else setTxCount(1) // assume data exists if API doesn't return count
+    }).catch(() => setTxCount(1))
+  }, [])
 
   const runEngine = async () => {
     setRunning(true)
@@ -101,7 +111,7 @@ export default function SuggestionsPage() {
             <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Price suggestions</h1>
             <p style={{ color: 'var(--muted)' }}>Conservative, data-backed price recommendations</p>
           </div>
-          <button className="btn btn-primary" onClick={runEngine} disabled={running} data-testid="run-engine-btn">
+          <button className="btn btn-primary" onClick={runEngine} disabled={running || txCount === 0} title={txCount === 0 ? 'Import transaction data first' : undefined} data-testid="run-engine-btn">
             {running ? <span className="spinner" /> : '✨'}
             {running ? 'Analyzing…' : 'Run analysis'}
           </button>
@@ -115,7 +125,16 @@ export default function SuggestionsPage() {
 
         {loading && <div style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></div>}
 
-        {!loading && suggestions.length === 0 && (
+        {!loading && txCount === 0 && (
+          <div className="card" style={{ textAlign: 'center', padding: '3rem' }} data-testid="no-data-empty-state">
+            <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📊</p>
+            <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>No transaction data yet</h2>
+            <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>Import your sales data first, then run the analysis engine to get price recommendations.</p>
+            <Link href="/import" className="btn btn-primary">Import data →</Link>
+          </div>
+        )}
+
+        {!loading && txCount !== 0 && suggestions.length === 0 && (
           <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎯</p>
             <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>No suggestions yet</h2>
