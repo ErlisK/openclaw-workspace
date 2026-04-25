@@ -118,6 +118,9 @@ export async function POST(request: Request) {
       const file = formData.get('file') as File | null
       if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
       csvText = await file.text()
+    } else if (contentType.includes('text/csv') || contentType.includes('text/plain')) {
+      // Raw CSV body
+      csvText = await request.text()
     } else {
       // JSON body with csv field
       const body = await request.json().catch(() => ({}))

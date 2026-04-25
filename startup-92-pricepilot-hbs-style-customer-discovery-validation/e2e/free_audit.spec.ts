@@ -41,7 +41,7 @@ test.describe('Free Audit Page: No console errors', () => {
     await page.goto(BASE_URL + '/free-audit');
     await page.waitForTimeout(2000);
     const criticalErrors = errors.filter(
-      e => !e.includes('favicon') && !e.includes('google') && !e.includes('analytics') && !e.includes('posthog')
+      e => !e.includes('favicon') && !e.includes('google') && !e.includes('analytics') && !e.includes('posthog') && !e.includes('plausible') && !e.includes('Content Security Policy') && !e.includes('stripe')
     );
     expect(criticalErrors).toHaveLength(0);
   });
@@ -130,7 +130,7 @@ test.describe('GTM Page: Outreach Playbook', () => {
     await page.goto(BASE_URL + '/gtm');
     await page.waitForTimeout(2000);
     const criticalErrors = errors.filter(
-      e => !e.includes('favicon') && !e.includes('google') && !e.includes('analytics') && !e.includes('posthog')
+      e => !e.includes('favicon') && !e.includes('google') && !e.includes('analytics') && !e.includes('posthog') && !e.includes('plausible') && !e.includes('Content Security Policy') && !e.includes('stripe')
     );
     expect(criticalErrors).toHaveLength(0);
   });

@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
 
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' https://js.stripe.com`,
+    `script-src 'self' 'nonce-${nonce}' 'unsafe-inline' https://js.stripe.com https://plausible.io`,
     "style-src 'self' 'unsafe-inline'", // Tailwind requires unsafe-inline; no dynamic CSS injection risk
     "img-src 'self' data: blob: https:",
     "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.vercel.app https://accounts.google.com https://oauth2.googleapis.com",
