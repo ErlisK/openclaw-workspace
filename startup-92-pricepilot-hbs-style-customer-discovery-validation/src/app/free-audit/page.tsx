@@ -246,6 +246,14 @@ export default function FreeAuditPage() {
                 <p style={{ fontWeight: 700, color: '#111827', marginBottom: '0.25rem', fontSize: '1.1rem' }}>Drop your CSV here</p>
                 <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>or click to browse</p>
                 <p style={{ color: '#9ca3af', fontSize: '0.75rem', marginTop: '0.5rem' }}>Up to 2,000 rows · .csv files only</p>
+                <a
+                  href="/sample-transactions.csv"
+                  download
+                  onClick={e => e.stopPropagation()}
+                  style={{ color: '#6c47ff', fontSize: '0.75rem', fontWeight: 600, marginTop: '0.75rem', display: 'inline-block', textDecoration: 'underline' }}
+                >
+                  📥 Download sample CSV to try it out
+                </a>
               </>
             )}
           </div>
