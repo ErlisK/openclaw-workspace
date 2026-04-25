@@ -49,6 +49,7 @@ export interface TestJob {
   completed_at: string | null
   stripe_payment_intent_id: string | null
   payment_status: PaymentStatus
+  webhook_url: string | null
   created_at: string
   updated_at: string
 }

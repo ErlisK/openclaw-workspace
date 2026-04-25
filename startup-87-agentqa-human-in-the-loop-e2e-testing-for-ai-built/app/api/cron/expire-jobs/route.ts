@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/server'
 import { releaseCredits } from '@/lib/credits'
 import { emailNotifications } from '@/lib/email/resend'
+import { fireWebhook } from '@/lib/webhook'
 
 export const runtime = 'nodejs'
 
@@ -23,7 +24,7 @@ export async function GET(req: NextRequest) {
   // Find expired jobs (published/assigned, expires_at in the past)
   const { data: expiredJobs, error } = await admin
     .from('test_jobs')
-    .select('id, title, client_id, tier, status')
+    .select('id, title, client_id, tier, status, webhook_url')
     .in('status', ['published', 'assigned'])
     .lt('expires_at', new Date().toISOString())
     .limit(100)
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, expired: 0 })
   }
 
-  type ExpiredJob = { id: string; title: string; client_id: string; tier: string; status: string }
+  type ExpiredJob = { id: string; title: string; client_id: string; tier: string; status: string; webhook_url: string | null }
   const jobIds = (expiredJobs as ExpiredJob[]).map(j => j.id)
 
   // Bulk update to expired
@@ -68,6 +69,15 @@ export async function GET(req: NextRequest) {
 
       if (requester?.email) {
         await emailNotifications.jobExpired(requester.email, job.title, job.id)
+      }
+
+      if (job.webhook_url) {
+        await fireWebhook(job.webhook_url, {
+          event: 'job.expired',
+          job_id: job.id,
+          status: 'expired',
+          timestamp: new Date().toISOString(),
+        })
       }
 
       results.push({ id: job.id, ok: true })

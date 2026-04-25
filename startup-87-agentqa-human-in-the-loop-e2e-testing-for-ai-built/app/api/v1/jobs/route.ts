@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
     instructions = '',
     project_id,
     auto_submit = false,
+    webhook_url,
   } = body as {
     title?: string
     url?: string
@@ -61,6 +62,7 @@ export async function POST(req: NextRequest) {
     instructions?: string
     project_id?: string
     auto_submit?: boolean
+    webhook_url?: string
   }
 
   if (!title || !url) {
@@ -74,6 +76,19 @@ export async function POST(req: NextRequest) {
   }
   if (!['quick', 'standard', 'deep'].includes(tier as string)) {
     return NextResponse.json({ error: 'tier must be quick | standard | deep' }, { status: 400 })
+  }
+
+  // Validate webhook_url if provided — must be HTTPS
+  if (webhook_url !== undefined) {
+    let parsedWebhook: URL
+    try {
+      parsedWebhook = new URL(webhook_url as string)
+    } catch {
+      return NextResponse.json({ error: 'Invalid webhook_url' }, { status: 400 })
+    }
+    if (parsedWebhook.protocol !== 'https:') {
+      return NextResponse.json({ error: 'webhook_url must use HTTPS' }, { status: 400 })
+    }
   }
 
   let parsedUrl: URL
@@ -101,6 +116,7 @@ export async function POST(req: NextRequest) {
       instructions,
       project_id: project_id ?? null,
       status,
+      webhook_url: webhook_url ?? null,
     })
     .select()
     .single()

@@ -3,6 +3,7 @@ import { getSupabaseClient } from '@/lib/supabase/get-client'
 import { createAdminClient } from '@/lib/supabase/server'
 import { captureServerEvent } from '@/lib/analytics/events'
 import { emailNotifications } from '@/lib/email/resend'
+import { fireWebhook } from '@/lib/webhook'
 
 /**
  *
@@ -196,13 +197,24 @@ export async function POST(req: NextRequest) {
     bug_count: insertedBugs.length,
   }).catch(() => {})
 
-  // Notify requester that test is complete
+  // Notify requester that test is complete (email + webhook)
   const notifyRequester = async () => {
-    const { data: jobRow } = await admin.from('test_jobs').select('title, client_id').eq('id', feedback.job_id).single()
+    const { data: jobRow } = await admin.from('test_jobs').select('title, client_id, webhook_url').eq('id', feedback.job_id).single()
     if (!jobRow) return
     const { data: requester } = await admin.from('users').select('email').eq('id', jobRow.client_id).single()
     if (requester?.email) {
       await emailNotifications.testComplete(requester.email, jobRow.title, feedback.job_id, feedback.session_id)
+    }
+    if (jobRow.webhook_url) {
+      await fireWebhook(jobRow.webhook_url, {
+        event: 'job.complete',
+        job_id: feedback.job_id,
+        status: 'complete',
+        feedback_id: feedback.id,
+        session_id: feedback.session_id ?? null,
+        bugs_found: insertedBugs.length,
+        timestamp: new Date().toISOString(),
+      })
     }
   }
   notifyRequester().catch(() => {})
