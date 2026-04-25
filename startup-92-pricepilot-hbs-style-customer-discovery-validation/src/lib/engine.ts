@@ -249,8 +249,8 @@ export function runEngine(transactions: Transaction[]): EngineResult {
       revenue_ref_monthly: rRef, revenue_dist: result.dist,
       elasticity_mean: eMean, elasticity_sd: eSd,
       n_observations: N, spike_fraction: spikeFraction,
-      confidence_label: `${Math.round(result.dist.prob_above_current * 100)}% likely to increase revenue`,
-      why_text: `Expected lift is only ${Math.round((result.dist.mean/rRef - 1)*100)}% — below the 8% threshold to justify an experiment.`,
+      confidence_label: `Low expected lift — below experiment threshold`,
+      why_text: `Expected lift is only ${Math.round((result.dist.mean/rRef - 1)*100)}% (${Math.round(result.dist.prob_above_current * 100)}% probability of any gain) — below the 8% threshold needed to justify an experiment. Current pricing appears close to optimal; collect more data before testing a change.`,
       caveats: [],
       conservative_rules_applied: result.rules,
     }

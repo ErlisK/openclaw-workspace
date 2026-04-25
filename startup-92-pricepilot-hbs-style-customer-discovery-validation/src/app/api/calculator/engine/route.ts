@@ -20,13 +20,13 @@ export async function POST(request: Request) {
   const elasticity   = Number(body.elasticity)
   const trialPrice   = Number(body.trialPrice)
 
-  if (
-    !isFinite(currentPrice) || currentPrice <= 0 ||
-    !isFinite(currentSales) || currentSales <= 0 ||
-    !isFinite(elasticity) || elasticity >= 0 ||
-    !isFinite(trialPrice) || trialPrice <= 0
-  ) {
-    return NextResponse.json({ error: 'Invalid inputs' }, { status: 400 })
+  const errors: string[] = []
+  if (!isFinite(currentPrice) || currentPrice <= 0) errors.push('currentPrice must be a number greater than 0')
+  if (!isFinite(currentSales) || currentSales <= 0) errors.push('currentSales must be a number greater than 0')
+  if (!isFinite(elasticity) || elasticity >= 0) errors.push('elasticity must be a negative number (e.g. -1.5)')
+  if (!isFinite(trialPrice) || trialPrice <= 0) errors.push('trialPrice must be a number greater than 0')
+  if (errors.length > 0) {
+    return NextResponse.json({ error: 'Invalid inputs', details: errors }, { status: 400 })
   }
 
   // Synthesize a plausible 90-day transaction history that reflects the

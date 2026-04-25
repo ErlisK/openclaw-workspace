@@ -33,7 +33,10 @@ export async function middleware(request: NextRequest) {
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone()
+    const next = request.nextUrl.pathname + (request.nextUrl.search || '')
     url.pathname = '/login'
+    url.searchParams.set('message', 'Please sign in to continue.')
+    url.searchParams.set('next', next)
     return NextResponse.redirect(url)
   }
 

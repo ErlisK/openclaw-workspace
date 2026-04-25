@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0f172a"/>
+  <rect x="0" y="0" width="6" height="630" fill="#3b82f6"/>
+  <text x="80" y="200" font-family="system-ui,Arial,sans-serif" font-size="72" font-weight="700" fill="white">PricePilot</text>
+  <text x="80" y="290" font-family="system-ui,Arial,sans-serif" font-size="36" fill="#94a3b8">Safe pricing experiments for solo founders</text>
+  <text x="80" y="380" font-family="system-ui,Arial,sans-serif" font-size="28" fill="#64748b">Bayesian A/B pricing · Stripe · Gumroad · Shopify</text>
+  <text x="80" y="460" font-family="system-ui,Arial,sans-serif" font-size="28" fill="#64748b">$500–$10k MRR · Prove lift in weeks</text>
+  <rect x="80" y="510" width="220" height="56" rx="8" fill="#3b82f6"/>
+  <text x="190" y="546" font-family="system-ui,Arial,sans-serif" font-size="22" font-weight="600" fill="white" text-anchor="middle">Try for Free</text>
+</svg>
