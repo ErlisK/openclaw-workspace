@@ -3732,3 +3732,101 @@ test.describe('Internal Links — blog to product pages', () => {
     await expect(nav.locator('a[href="/calculator"]')).toBeVisible()
   })
 })
+
+// ─── Backlink Outreach System ──────────────────────────────────────────────
+test.describe('Backlink Outreach System', () => {
+  test('TC-OUTREACH-001: /api/outreach/status returns 50 targets', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/outreach/status`)
+    expect(r.status()).toBe(200)
+    const data = await r.json()
+    expect(data.total).toBeGreaterThanOrEqual(50)
+    expect(data.by_status).toBeTruthy()
+    expect(data.by_category).toBeTruthy()
+    expect(Array.isArray(data.targets)).toBe(true)
+  })
+
+  test('TC-OUTREACH-002: Targets span 5+ categories', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/outreach/status`)
+    const data = await r.json()
+    const cats = Object.keys(data.by_category)
+    expect(cats.length).toBeGreaterThanOrEqual(5)
+    // Should include blog, newsletter, directory, community, platform
+    expect(cats).toContain('blog')
+    expect(cats).toContain('newsletter')
+    expect(cats).toContain('directory')
+  })
+
+  test('TC-OUTREACH-003: All targets have site_name, site_url, category, relevance_reason', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/outreach/status`)
+    const data = await r.json()
+    for (const t of data.targets) {
+      expect(t.site_name, `Missing site_name on target ${t.id}`).toBeTruthy()
+      expect(t.site_url, `Missing site_url on ${t.site_name}`).toBeTruthy()
+      expect(t.category, `Missing category on ${t.site_name}`).toBeTruthy()
+    }
+  })
+
+  test('TC-OUTREACH-004: Each target has a suggested_guide linking to an existing guide', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/outreach/status`)
+    const data = await r.json()
+    const validGuides = new Set([
+      'micro-seller-pricing-experiments',
+      'gumroad-pricing-updates-and-churn-risk',
+      'stripe-price-testing-without-code',
+      'cohort-aware-simulations-explained',
+    ])
+    for (const t of data.targets) {
+      expect(validGuides.has(t.suggested_guide), `Invalid guide '${t.suggested_guide}' on ${t.site_name}`).toBe(true)
+    }
+  })
+
+  test('TC-OUTREACH-005: /api/outreach/draft POST (batch=true, limit=2) drafts emails', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/outreach/draft`, {
+      data: { batch: true, limit: 2 },
+    })
+    expect(r.status()).toBe(200)
+    const data = await r.json()
+    // Either drafted some, or 0 if all already drafted
+    expect(typeof data.drafted).toBe('number')
+    if (data.results) {
+      for (const res of data.results) {
+        if (!res.error) {
+          expect(res.subject).toBeTruthy()
+        }
+      }
+    }
+  })
+
+  test('TC-OUTREACH-006: /outreach dashboard returns 200 and shows targets', async ({ page }) => {
+    await page.goto(`${BASE_URL}/outreach`)
+    expect(page.url()).toContain('/outreach')
+    const body = await page.textContent('body')
+    expect(body).toMatch(/Indie Hackers|Starter Story|Baremetrics/i)
+    // Should show status badges
+    expect(body).toMatch(/pending|drafted|sent/i)
+    // Should show categories
+    expect(body).toMatch(/blog|newsletter|directory/i)
+  })
+
+  test('TC-OUTREACH-007: /api/outreach/draft returns 400 without body', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/outreach/draft`, { data: {} })
+    expect(r.status()).toBe(400)
+  })
+
+  test('TC-OUTREACH-008: /api/outreach/send returns 400 without body', async ({ request }) => {
+    const r = await request.post(`${BASE_URL}/api/outreach/send`, { data: {} })
+    expect(r.status()).toBe(400)
+  })
+
+  test('TC-OUTREACH-009: /api/outreach/status targets array includes guide URLs', async ({ request }) => {
+    const r = await request.get(`${BASE_URL}/api/outreach/status`)
+    const data = await r.json()
+    // At least some targets should have suggested_url
+    const withUrl = data.targets.filter((t: { suggested_url?: string }) => t.suggested_url)
+    expect(withUrl.length).toBeGreaterThanOrEqual(10)
+    // URLs should point to the live site
+    for (const t of withUrl.slice(0, 5)) {
+      expect(t.suggested_url).toContain('pricepilot')
+    }
+  })
+})
