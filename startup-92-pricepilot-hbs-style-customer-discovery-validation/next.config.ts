@@ -14,10 +14,10 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com",
+              "script-src 'self' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
-              "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.vercel.app",
+              "connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.vercel.app https://api.openai.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "font-src 'self'",
             ].join('; '),

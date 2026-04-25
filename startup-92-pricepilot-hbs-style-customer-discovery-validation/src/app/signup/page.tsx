@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [isAlreadyRegistered, setIsAlreadyRegistered] = useState(false)
+  const [emailSent, setEmailSent] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -21,7 +22,7 @@ export default function SignupPage() {
     if (password.length < 8) { setError('Password must be at least 8 characters'); return }
     if (!termsAccepted) { setError('You must accept the Terms of Service to continue'); return }
     setLoading(true)
-    const { error: err } = await supabase.auth.signUp({ email, password })
+    const { data, error: err } = await supabase.auth.signUp({ email, password })
     setLoading(false)
     if (err) {
       const msg = err.message
@@ -31,7 +32,11 @@ export default function SignupPage() {
       }
       return
     }
-    router.push('/import')
+    if (data.session) {
+      router.push('/import')
+    } else {
+      setEmailSent(true)
+    }
   }
 
   const handleGoogle = async () => {
@@ -50,6 +55,16 @@ export default function SignupPage() {
           <p style={{ color: 'var(--muted)', marginTop: '0.5rem' }}>Free forever · No credit card</p>
         </div>
 
+        {emailSent ? (
+          <div className="card" style={{ textAlign: 'center', padding: '2rem' }} data-testid="email-confirmation-banner">
+            <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📧</p>
+            <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>Check your email</h2>
+            <p style={{ color: 'var(--muted)', marginBottom: '1.5rem' }}>
+              We sent a confirmation link to <strong>{email}</strong>. Click the link to activate your account.
+            </p>
+            <Link href="/login" className="btn btn-secondary">Back to login</Link>
+          </div>
+        ) : (
         <div className="card">
           <button className="btn btn-secondary" onClick={handleGoogle} data-testid="google-oauth-btn"
             style={{ width: '100%', justifyContent: 'center', marginBottom: '1.25rem' }}>
@@ -105,6 +120,7 @@ export default function SignupPage() {
             </button>
           </form>
         </div>
+        )}
 
         <p style={{ textAlign: 'center', marginTop: '1.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
           Already have an account? <Link href="/login">Sign in</Link>

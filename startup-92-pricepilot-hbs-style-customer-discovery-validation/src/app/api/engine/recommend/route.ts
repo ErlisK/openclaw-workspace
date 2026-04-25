@@ -1,11 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { runEngine, Transaction } from '@/lib/engine'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
+
+const engineLimiter = createRatelimit(5, 60)
 
 export async function POST(request: Request) {
   const supabase = await createClient()
   const { data: { user }, error: authErr } = await supabase.auth.getUser()
   if (authErr || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { limited, headers: rlHeaders } = await checkRateLimit(engineLimiter, user.id)
+  if (limited) return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429, headers: rlHeaders })
 
   try {
     const body = await request.json().catch(() => ({}))
@@ -61,7 +67,10 @@ export async function POST(request: Request) {
 
       // Store suggestion in DB
       if (result.action === 'test_higher' && result.price_proposed) {
-        await supabase.from('suggestions').upsert({
+        // Delete any existing pending suggestion for this product first
+        await supabase.from('suggestions').delete()
+          .eq('user_id', user.id).eq('product_id', product.id).eq('status', 'pending')
+        const { error: sgErr } = await supabase.from('suggestions').insert({
           user_id: user.id,
           product_id: product.id,
           suggestion_type: 'price_increase',
@@ -77,7 +86,8 @@ export async function POST(request: Request) {
           rule_flags: result.conservative_rules_applied,
           caveats: result.caveats,
           status: 'pending',
-        }, { onConflict: 'user_id,product_id', ignoreDuplicates: false })
+        })
+        if (sgErr) console.error('Failed to insert suggestion:', sgErr.message)
       }
     }
 

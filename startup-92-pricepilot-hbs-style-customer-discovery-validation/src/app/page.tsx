@@ -53,6 +53,10 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+
+          <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '2rem', maxWidth: 520, margin: '2rem auto 0', textAlign: 'center' }}>
+            Results vary. Estimates are model-based, not guarantees. PricePilot&apos;s recommendations are for informational purposes only and do not constitute financial or business advice.
+          </p>
         </div>
       </main>
     </div>

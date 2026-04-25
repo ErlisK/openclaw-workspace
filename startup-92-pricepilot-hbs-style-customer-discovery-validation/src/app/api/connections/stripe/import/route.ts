@@ -7,14 +7,21 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase'
 import { getEntitlement } from '@/lib/entitlements'
+import { hashCustomerKey } from '@/lib/hash'
+import { createRatelimit, checkRateLimit } from '@/lib/ratelimit'
 import Stripe from 'stripe'
 import crypto from 'crypto'
+
+const importLimiter = createRatelimit(3, 60)
 
 export const maxDuration = 60
 
 export async function POST(request: Request) {
   const entResult = await getEntitlement()
   if (entResult instanceof NextResponse) return entResult
+
+  const { limited, headers: rlHeaders } = await checkRateLimit(importLimiter, entResult.user.id)
+  if (limited) return NextResponse.json({ error: 'Rate limit exceeded. Try again in a minute.' }, { status: 429, headers: rlHeaders })
 
   const body = await request.json().catch(() => ({}))
   const limit = Math.min(Number(body.limit) || 100, 500)
@@ -76,10 +83,9 @@ export async function POST(request: Request) {
           amount_cents: ch.amount as number ?? 0,
           currency: ((ch.currency as string) ?? 'usd').toUpperCase(),
           is_refunded: ch.refunded as boolean ?? false,
-          customer_key: billingDetails?.email as string ?? ch.receipt_email as string ?? null,
+          customer_key: (() => { const rawEmail = (billingDetails?.email as string) ?? (ch.receipt_email as string) ?? null; return rawEmail ? hashCustomerKey(rawEmail, entResult.user.id) : null })(),
           purchased_at: new Date(((ch.created as number) ?? 0) * 1000).toISOString(),
           metadata: {
-            description: ch.description,
             product_name: (ch.metadata as Record<string, unknown>)?.product_name ?? ch.description ?? null,
             charge_id: ch.id,
             amount_usd: amount,
@@ -98,7 +104,7 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     return NextResponse.json(
-      { error: `Stripe API error: ${err}. Your key may be invalid or expired.` },
+      { error: 'Stripe API error. Your key may be invalid or expired.' },
       { status: 400 }
     )
   }

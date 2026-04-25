@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
+import { DisclaimerBanner } from '@/components/DisclaimerBanner'
 
 async function logout() {
   'use server'
@@ -61,6 +62,7 @@ export default async function DashboardPage() {
       </nav>
 
       <main className="container" style={{ paddingTop: '2rem', paddingBottom: '4rem' }}>
+        <DisclaimerBanner />
         <div style={{ marginBottom: '2rem' }}>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Dashboard</h1>
           <p style={{ color: 'var(--muted)' }}>Welcome back, {user.email}</p>

@@ -40,10 +40,7 @@ export default function SuggestionsPage() {
     fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'page_view', page: 'suggestions' }) })
       .catch(() => {})
     // Fetch transaction count to determine empty state
-    fetch('/api/import/sample').then(r => r.ok ? r.json() : null).then(d => {
-      if (d && typeof d.total === 'number') setTxCount(d.total)
-      else setTxCount(1) // assume data exists if API doesn't return count
-    }).catch(() => setTxCount(1))
+    setTxCount(1) // default non-zero so Run Analysis is always accessible
   }, [])
 
   const runEngine = async () => {
@@ -56,7 +53,7 @@ export default function SuggestionsPage() {
         setRunError(data.error || `Analysis failed (${resp.status}). Please import data first.`)
       } else {
         track('suggestion_created', { count: Array.isArray(data) ? data.length : 1 })
-        fetchSuggestions()
+        await fetchSuggestions()
       }
     } catch {
       setRunError('Network error. Please try again.')
