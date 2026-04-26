@@ -37,14 +37,14 @@ export async function POST(req: Request) {
 
       // Persist benchmark opt-in preference if user explicitly opted in at signup
       if (benchmarkOptIn) {
-        supabase
-          .from('user_settings')
-          .upsert(
-            { user_id: data.user.id, benchmark_opted_in: true },
-            { onConflict: 'user_id' }
-          )
-          .then(() => {})
-          .catch(() => {})
+        void Promise.resolve(
+          supabase
+            .from('user_settings')
+            .upsert(
+              { user_id: data.user.id, benchmark_opted_in: true },
+              { onConflict: 'user_id' }
+            )
+        ).catch(() => {})
       }
     }
     // If autoconfirm is enabled (mailer_autoconfirm=true), also sign in immediately

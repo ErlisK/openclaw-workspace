@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    // ESLint is run in a separate CI step; skip it during Vercel builds
+    ignoreDuringBuilds: true,
+  },
   poweredByHeader: false,
   experimental: {
     serverBodySizeLimit: '2mb',
