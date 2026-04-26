@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
+import { rateLimitRequest, getClientIp, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const LoginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -8,6 +9,11 @@ const LoginSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 10 login attempts per IP per 15 minutes
+  const ip = getClientIp(req);
+  const rl = await rateLimitRequest(ip, { limit: 10, windowMs: 15 * 60_000, bucket: 'login' });
+  if (!rl.success) return tooManyRequestsResponse(rl);
+
   let body: unknown;
   try {
     body = await req.json();

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { trackQuizSubmitted } from '@/lib/analytics/server';
+import { rateLimitRequest, getClientIp, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const SubmitSchema = z.object({
   quiz_id: z.string().uuid(),
@@ -21,6 +22,11 @@ const SubmitSchema = z.object({
  *   { score, passed, correct, total, feedback }
  */
 export async function POST(req: NextRequest) {
+  // Rate limit: 30 submissions per IP per 10 minutes to prevent answer brute-forcing
+  const ip = getClientIp(req);
+  const rl = await rateLimitRequest(ip, { limit: 30, windowMs: 10 * 60_000, bucket: 'quiz-submit' });
+  if (!rl.success) return tooManyRequestsResponse(rl);
+
   const user = await resolveUser(req);
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

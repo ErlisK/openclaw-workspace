@@ -115,22 +115,26 @@ export async function GET(req: NextRequest) {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const monthStartTs = Math.floor(monthStart.getTime() / 1000);
 
-      // Fetch succeeded charges this month (up to 100)
-      const charges = await stripe.charges.list({
+      // Fetch ALL succeeded charges this month via auto-pagination
+      let monthlyRevenueCents = 0;
+      for await (const charge of stripe.charges.list({
         created: { gte: monthStartTs },
         limit: 100,
-      });
-
-      const monthlyRevenueCents = (charges.data ?? [])
-        .filter((c) => c.status === 'succeeded' && !c.refunded)
-        .reduce((sum, c) => sum + c.amount, 0);
+      })) {
+        if (charge.status === 'succeeded' && !charge.refunded) {
+          monthlyRevenueCents += charge.amount;
+        }
+      }
 
       metrics.monthly_revenue = parseFloat((monthlyRevenueCents / 100).toFixed(2));
       metrics.yearly_revenue = parseFloat((metrics.monthly_revenue * 12).toFixed(2));
 
-      // Active subscriptions
-      const subs = await stripe.subscriptions.list({ status: 'active', limit: 100 });
-      metrics.active_subscriptions = subs.data.length;
+      // Active subscriptions — paginate to avoid 100-item cap
+      let activeSubs = 0;
+      for await (const _sub of stripe.subscriptions.list({ status: 'active', limit: 100 })) {
+        activeSubs++;
+      }
+      metrics.active_subscriptions = activeSubs;
     } catch (_e) {
       // Stripe metrics remain null on error
     }
