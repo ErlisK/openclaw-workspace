@@ -4,7 +4,7 @@ import { captureServerEvent } from '@/lib/posthog/server'
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json()
+    const { email, password, benchmarkOptIn } = await req.json()
     if (!email || !password) {
       return NextResponse.json({ error: 'missing_params', message: 'Email and password are required.' }, { status: 400 })
     }
@@ -32,7 +32,20 @@ export async function POST(req: Request) {
         funnel: 'activation',
         funnel_step: 3,
         email_confirmed: !!data.user.email_confirmed_at,
+        benchmark_opt_in: !!benchmarkOptIn,
       }).catch(() => {})
+
+      // Persist benchmark opt-in preference if user explicitly opted in at signup
+      if (benchmarkOptIn) {
+        supabase
+          .from('user_settings')
+          .upsert(
+            { user_id: data.user.id, benchmark_opted_in: true },
+            { onConflict: 'user_id' }
+          )
+          .then(() => {})
+          .catch(() => {})
+      }
     }
     // If autoconfirm is enabled (mailer_autoconfirm=true), also sign in immediately
     // so the user gets a session cookie and can be redirected to onboarding.

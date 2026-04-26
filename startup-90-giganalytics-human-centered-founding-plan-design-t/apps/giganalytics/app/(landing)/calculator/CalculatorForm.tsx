@@ -259,7 +259,7 @@ export default function CalculatorForm() {
                 Sign up free to track all streams
               </Link>
             </div>
-            <p className="text-xs text-gray-400 mt-3">Based on data from 150+ multi-stream freelancers · No spam · Cancel anytime</p>
+            <p className="text-xs text-gray-400 mt-3">Privacy-first · No spam · Cancel anytime</p>
           </div>
         </div>
       )}
