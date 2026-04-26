@@ -74,11 +74,16 @@ function SignupForm() {
           body: JSON.stringify({ code: referralCode }),
         }).catch(() => {})
       }
-      // Notify founder via Slack
+      // Notify founder via Slack (include referral + UTM context for attribution)
       fetch('/api/notify-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+          referral_code: referralCode || undefined,
+          utm_source: utm.lastTouch?.utm_source || undefined,
+          utm_campaign: utm.lastTouch?.utm_campaign || undefined,
+        }),
       }).catch(() => {})
       router.push('/dashboard?welcome=1')
     } else {

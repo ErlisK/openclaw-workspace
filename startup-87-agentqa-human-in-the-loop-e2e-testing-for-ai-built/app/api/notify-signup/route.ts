@@ -2,7 +2,7 @@
  * POST /api/notify-signup
  * Sends a Slack notification when a new user signs up.
  * Called client-side after successful signup.
- * Body: { email: string }
+ * Body: { email: string, referral_code?: string, utm_source?: string, utm_campaign?: string }
  *
  * Rate-limited: max 5 notifications per IP per 15 minutes to prevent Slack spam.
  */
@@ -38,7 +38,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: 'Rate limit exceeded' }, { status: 429 })
     }
 
-    const { email } = await req.json()
+    const body = await req.json()
+    const { email, referral_code, utm_source, utm_campaign } = body
 
     // Basic email sanity check — must look like an email
     if (!email || typeof email !== 'string' || !email.includes('@') || email.length > 254) {
@@ -48,8 +49,19 @@ export async function POST(req: NextRequest) {
     const webhookUrl = process.env.SLACK_WEBHOOK_URL
     if (!webhookUrl) return NextResponse.json({ ok: false, error: 'No webhook configured' })
 
+    // Build context lines for extra signal
+    const contextLines: string[] = []
+    if (referral_code && typeof referral_code === 'string' && referral_code.length <= 16) {
+      contextLines.push(`• Referral code: \`${referral_code}\``)
+    }
+    if (utm_source && typeof utm_source === 'string') {
+      const campaign = (utm_campaign && typeof utm_campaign === 'string') ? ` / ${utm_campaign}` : ''
+      contextLines.push(`• Source: \`${utm_source}${campaign}\``)
+    }
+    const extraLines = contextLines.length > 0 ? '\n' + contextLines.join('\n') : ''
+
     const payload = {
-      text: `🎉 *New BetaWindow signup!*\n• Email: \`${email}\`\n• Time: ${new Date().toISOString()}\n• First test: FREE (LAUNCH promo auto-applied)\n\n<https://betawindow.com/admin|View admin dashboard>`,
+      text: `🎉 *New BetaWindow signup!*\n• Email: \`${email}\`\n• Time: ${new Date().toISOString()}\n• First test: FREE (LAUNCH promo auto-applied)${extraLines}\n\n<https://betawindow.com/admin|View admin dashboard>`,
     }
 
     const res = await fetch(webhookUrl, {
