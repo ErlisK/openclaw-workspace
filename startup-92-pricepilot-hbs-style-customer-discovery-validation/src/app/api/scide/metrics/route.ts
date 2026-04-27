@@ -34,7 +34,7 @@ export async function GET(request: Request) {
   // Auth check
   const authHeader = request.headers.get('authorization') ?? ''
   const token = authHeader.replace('Bearer ', '').trim()
-  const expected = process.env.SCIDE_METRICS_TOKEN
+  const expected = (process.env.SCIDE_METRICS_TOKEN ?? '').trim()
   if (!expected || token !== expected) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
