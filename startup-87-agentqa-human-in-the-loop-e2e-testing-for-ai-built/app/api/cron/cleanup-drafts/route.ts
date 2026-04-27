@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: true, cancelled: 0 })
   }
 
-  const ids = stale.map((j) => j.id)
+  const ids = stale.map((j: { id: string }) => j.id)
 
   const { error: updateError } = await admin
     .from('test_jobs')
