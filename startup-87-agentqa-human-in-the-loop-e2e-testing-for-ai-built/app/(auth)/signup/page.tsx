@@ -52,10 +52,14 @@ function SignupForm() {
       setLoading(false)
     } else if (data.session) {
       // autoconfirm is on — session returned immediately
-      // Track Reddit SignUp conversion
+      // Track Reddit SignUp conversion + capture UTM for attribution
+      let utmSource: string | undefined
+      let utmCampaign: string | undefined
       try {
         trackRedditEvent('SignUp')
         const utm = getStoredUTM()
+        utmSource = utm.lastTouch?.utm_source || undefined
+        utmCampaign = utm.lastTouch?.utm_campaign || undefined
         if (utm.lastTouch?.utm_source === 'reddit') {
           trackRedditEvent('Lead', { value: 5, currency: 'USD' })
         }
@@ -81,8 +85,8 @@ function SignupForm() {
         body: JSON.stringify({
           email,
           referral_code: referralCode || undefined,
-          utm_source: utm.lastTouch?.utm_source || undefined,
-          utm_campaign: utm.lastTouch?.utm_campaign || undefined,
+          utm_source: utmSource,
+          utm_campaign: utmCampaign,
         }),
       }).catch(() => {})
       router.push('/dashboard?welcome=1')
