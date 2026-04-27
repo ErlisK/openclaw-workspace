@@ -5,6 +5,7 @@ import { validateTransition, isJobExpired } from '@/lib/job-lifecycle'
 import { holdCredits, spendCredits, releaseCredits } from '@/lib/credits'
 import { captureServerEvent } from '@/lib/analytics/events'
 import { emailNotifications } from '@/lib/email/resend'
+import { fireWebhook } from '@/lib/webhook'
 import type { JobStatus } from '@/lib/types'
 
 /**
@@ -168,6 +169,25 @@ export async function POST(
     if (to === 'expired') await emailNotifications.jobExpired(email, title, jobId)
   }
   notifyEmail().catch(() => {})
+
+  // ── Webhook notifications ─────────────────────────────────────────────────
+  // Fire webhook for status transitions relevant to API consumers (assigned, complete, expired, cancelled)
+  if (['assigned', 'complete', 'expired', 'cancelled'].includes(to)) {
+    const { data: jobWithWebhook } = await admin
+      .from('test_jobs')
+      .select('webhook_url, title')
+      .eq('id', jobId)
+      .single()
+    if (jobWithWebhook?.webhook_url) {
+      fireWebhook(jobWithWebhook.webhook_url, {
+        event: `job.${to}`,
+        job_id: jobId,
+        status: to,
+        title: jobWithWebhook.title ?? '',
+        timestamp: new Date().toISOString(),
+      }).catch(() => {})
+    }
+  }
 
   return NextResponse.json({
     job: updated,

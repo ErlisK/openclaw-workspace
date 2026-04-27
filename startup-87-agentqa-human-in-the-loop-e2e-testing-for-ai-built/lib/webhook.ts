@@ -4,7 +4,7 @@
  */
 
 export interface WebhookPayload {
-  event: 'job.complete' | 'job.expired'
+  event: 'job.assigned' | 'job.complete' | 'job.expired' | 'job.cancelled'
   job_id: string
   status: string
   timestamp: string
