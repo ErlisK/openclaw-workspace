@@ -180,7 +180,7 @@ export async function POST(
       .single()
     if (jobWithWebhook?.webhook_url) {
       fireWebhook(jobWithWebhook.webhook_url, {
-        event: `job.${to}`,
+        event: `job.${to}` as 'job.assigned' | 'job.complete' | 'job.expired' | 'job.cancelled',
         job_id: jobId,
         status: to,
         title: jobWithWebhook.title ?? '',
