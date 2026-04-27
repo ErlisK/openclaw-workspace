@@ -23,18 +23,26 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url)
   const status = searchParams.get('status')
+  const limit = Math.min(Math.max(Number(searchParams.get('limit') ?? 50), 1), 200)
+  const offset = Math.max(Number(searchParams.get('offset') ?? 0), 0)
 
   let q = supabase
     .from('experiments')
-    .select('*, products(name, current_price_cents)')
+    .select('*, products(name, current_price_cents)', { count: 'exact' })
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (status) q = q.eq('status', status)
 
-  const { data, error } = await q
+  const { data, error, count } = await q
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ experiments: data || [] })
+  return NextResponse.json({
+    experiments: data || [],
+    total: count ?? (data?.length ?? 0),
+    limit,
+    offset,
+  })
 }
 
 // POST /api/experiments — create a new experiment
