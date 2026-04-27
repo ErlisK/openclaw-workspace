@@ -81,6 +81,7 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
         <div className="flex items-center gap-3">
           <Link href="/calculator" className="text-sm text-gray-600 hover:text-gray-900">Calculator</Link>
           <Link href="/demo" className="text-sm text-gray-600 hover:text-gray-900">Demo</Link>
+          <Link href="/docs" className="text-sm text-gray-600 hover:text-gray-900">Docs</Link>
           <Link href="/pricing" className="text-sm text-gray-600 hover:text-gray-900" data-testid="nav-pricing-link">Pricing</Link>
           <Link href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</Link>
           <Link
