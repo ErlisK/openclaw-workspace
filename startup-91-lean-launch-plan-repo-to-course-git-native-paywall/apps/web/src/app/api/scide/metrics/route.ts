@@ -14,6 +14,8 @@
  *     monthly_revenue      — succeeded Stripe charges this calendar month (USD)
  *     yearly_revenue       — monthly_revenue * 12
  *     active_subscriptions — active Stripe subscriptions count
+ *     churned_users        — Stripe subscriptions cancelled this calendar month
+ *     attrition_rate       — churned / (active + churned) * 100, as a percentage
  *     total_courses        — published courses
  *     total_enrollments    — total enrollments (non-test users only)
  *   }
@@ -57,6 +59,8 @@ export async function GET(req: NextRequest) {
     active_subscriptions: null,
     total_courses: null,
     total_enrollments: null,
+    churned_users: null,
+    attrition_rate: null,
   };
 
   // ── Supabase: user counts ──────────────────────────────────────────────────
@@ -135,6 +139,27 @@ export async function GET(req: NextRequest) {
         activeSubs++;
       }
       metrics.active_subscriptions = activeSubs;
+
+      // Churned users — subscriptions cancelled in the current calendar month
+      let churnedThisMonth = 0;
+      for await (const sub of stripe.subscriptions.list({
+        status: 'canceled',
+        limit: 100,
+        // canceled_at is on the subscription; filter post-fetch
+      })) {
+        // sub.canceled_at is Unix timestamp
+        const canceledAt = (sub as { canceled_at?: number | null }).canceled_at;
+        if (canceledAt && canceledAt >= monthStartTs) {
+          churnedThisMonth++;
+        }
+      }
+      metrics.churned_users = churnedThisMonth;
+
+      // Attrition rate = churned / (active + churned), expressed as a percentage
+      const totalTracked = activeSubs + churnedThisMonth;
+      metrics.attrition_rate = totalTracked > 0
+        ? parseFloat(((churnedThisMonth / totalTracked) * 100).toFixed(2))
+        : 0;
     } catch (_e) {
       // Stripe metrics remain null on error
     }
