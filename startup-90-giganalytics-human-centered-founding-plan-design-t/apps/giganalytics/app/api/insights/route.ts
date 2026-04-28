@@ -52,6 +52,14 @@ export async function GET() {
     earnings: Math.round(earnings * 100) / 100,
   }))
 
+  // Income concentration risk: flag if one stream > 80% of total earnings
+  const totalStreamEarnings = Object.values(streamEarnings).reduce((s, v) => s + v, 0)
+  const dominantStream = streamBreakdown.sort((a, b) => b.earnings - a.earnings)[0]
+  const concentrationRisk =
+    dominantStream && totalStreamEarnings > 0
+      ? dominantStream.earnings / totalStreamEarnings
+      : 0
+
   // Top recommendation
   const recommendations: string[] = []
   if (trueHourlyRate !== null && trueHourlyRate < 25) {
@@ -59,6 +67,12 @@ export async function GET() {
   }
   if (feeRate > 0.1) {
     recommendations.push(`Platform fees are taking ${Math.round(feeRate * 100)}% of gross revenue. Explore direct client channels to reduce fees.`)
+  }
+  if (concentrationRisk > 0.8 && dominantStream) {
+    recommendations.push(
+      `Income concentration risk: ${dominantStream.name} makes up ${Math.round(concentrationRisk * 100)}% of your earnings. ` +
+      'Diversifying to a second stream reduces financial exposure if that platform changes its terms or demand drops.'
+    )
   }
   if ((transactions ?? []).length === 0) {
     recommendations.push('Import your first payment data to unlock personalized insights and ROI analysis.')
@@ -78,5 +92,6 @@ export async function GET() {
     },
     streamBreakdown,
     recommendations,
+    concentrationRisk: Math.round(concentrationRisk * 1000) / 10,
   })
 }
