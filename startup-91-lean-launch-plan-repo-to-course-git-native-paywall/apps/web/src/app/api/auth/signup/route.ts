@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createServerClient } from '@/lib/supabase/server';
 import { trackSignupCompleted } from '@/lib/analytics/server';
+import { rateLimitRequest, getClientIp, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 const SignupSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -9,6 +10,11 @@ const SignupSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 5 signups per IP per 15 minutes to prevent bot/spam registrations
+  const ip = getClientIp(req);
+  const rl = await rateLimitRequest(ip, { limit: 5, windowMs: 15 * 60_000, bucket: 'signup' });
+  if (!rl.success) return tooManyRequestsResponse(rl);
+
   let body: unknown;
   try {
     body = await req.json();

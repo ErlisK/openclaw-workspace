@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { createServiceClient } from '@/lib/supabase/service';
 import { resolveUser } from '@/lib/auth/resolve-user';
 import { trackRepoImportStarted, trackRepoImportCompleted } from '@/lib/analytics/server';
+import { rateLimitRequest, getClientIp, tooManyRequestsResponse } from '@/lib/rate-limit';
 
 // ────────────────────────────────────────────────────────────────────────────
 // GitHub helpers
@@ -393,6 +394,11 @@ async function handleDirectImport(
 }
 
 export async function POST(req: NextRequest) {
+  // Rate limit: 10 imports per user IP per hour to protect GitHub API quota
+  const ip = getClientIp(req);
+  const rl = await rateLimitRequest(ip, { limit: 10, windowMs: 60 * 60_000, bucket: 'repo-import' });
+  if (!rl.success) return tooManyRequestsResponse(rl);
+
   // 1. Auth — supports SSR cookie session and Bearer token
   const user = await resolveUser(req);
   if (!user) {
