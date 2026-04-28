@@ -133,7 +133,16 @@ export default function NewJobPage() {
               <textarea value={instructions} onChange={e => setInstructions(e.target.value)}
                 placeholder="Describe what flows to test, what the app is supposed to do, and any specific areas of concern…"
                 rows={5} data-testid="job-instructions-input"
+                maxLength={2000}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" />
+              <div className="flex items-start justify-between mt-1 gap-4">
+                <div className="text-xs text-gray-400">
+                  <strong>Tip:</strong> The more detail you give, the better the report. E.g. &quot;Sign up with a new email, complete onboarding, then create a new project — check that the project appears in the dashboard and the API returns a 200.&quot;
+                </div>
+                <span className={`text-xs whitespace-nowrap ${
+                  instructions.length > 1800 ? 'text-red-500 font-medium' : 'text-gray-400'
+                }`}>{instructions.length}/2000</span>
+              </div>
             </div>
 
             {/* Summary + Submit */}

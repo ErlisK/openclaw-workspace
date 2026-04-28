@@ -341,6 +341,27 @@ function DashboardContent() {
                           </button>
                         </>
                       )}
+                      {(job.status === 'published' || job.status === 'assigned') && (
+                        <a href={`/jobs/${job.id}`}
+                          className="text-xs px-3 py-1 bg-gray-50 text-gray-700 hover:bg-gray-100 rounded-md font-medium"
+                          data-testid={`view-job-${job.id}`}>
+                          View →
+                        </a>
+                      )}
+                      {job.status === 'complete' && (
+                        <a href={`/jobs/${job.id}/results`}
+                          className="text-xs px-3 py-1 bg-green-50 text-green-700 hover:bg-green-100 rounded-md font-medium"
+                          data-testid={`view-results-${job.id}`}>
+                          View Results →
+                        </a>
+                      )}
+                      {job.status === 'expired' && (
+                        <a href={`/jobs/${job.id}`}
+                          className="text-xs px-3 py-1 bg-gray-50 text-gray-500 hover:bg-gray-100 rounded-md"
+                          data-testid={`view-expired-${job.id}`}>
+                          Details
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
