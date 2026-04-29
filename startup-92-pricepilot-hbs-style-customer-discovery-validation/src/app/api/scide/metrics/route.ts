@@ -19,8 +19,15 @@ const TEST_EMAIL_PATTERNS = [
   'test-%',
   'e2e-%',
   'playwright-%',
+  'profile-check-%',
+  'qa-test-%',
   '%@example.com',
   '%@test.com',
+  '%@mailtest.com',
+  '%@agentmail.to',
+  '%.test',
+  '%pricepilot.test',
+  '%pricepilot.local',
 ]
 
 function getServiceClient() {
@@ -107,12 +114,44 @@ export async function GET(request: Request) {
     if (!error) active_experiments = count ?? 0
   } catch {}
 
+  // ── 5. Trialing subscriptions (Stripe) ──────────────────────────────
+  let trialing_users: number | null = null
+  try {
+    const stripeKey = process.env.STRIPE_SECRET_KEY
+    if (stripeKey) {
+      const res = await fetch(
+        'https://api.stripe.com/v1/subscriptions?status=trialing&limit=100',
+        {
+          headers: {
+            Authorization: `Basic ${Buffer.from(stripeKey + ':').toString('base64')}`,
+          },
+        }
+      )
+      if (res.ok) {
+        const data = await res.json()
+        trialing_users = (data.data ?? []).length
+      }
+    }
+  } catch {}
+
+  // ── 6. Pro/paid users (Supabase profiles with plan = 'pro') ──────────
+  let pro_users: number | null = null
+  try {
+    const { count, error } = await supabase
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('plan', 'pro')
+    if (!error) pro_users = count ?? 0
+  } catch {}
+
   return NextResponse.json({
     total_users,
     new_signups_24h,
     monthly_revenue,
     yearly_revenue,
     active_experiments,
+    trialing_users,
+    pro_users,
     collected_at: new Date().toISOString(),
   })
 }
