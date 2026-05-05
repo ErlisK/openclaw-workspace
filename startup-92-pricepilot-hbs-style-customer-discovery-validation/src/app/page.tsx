@@ -152,7 +152,6 @@ export default function HomePage() {
             <Link href="/free-audit">Free Audit</Link>
             <Link href="/calculator">Calculator</Link>
             <Link href="/pricing">Pricing</Link>
-            <Link href="/gtm">GTM Playbook</Link>
             <Link href="/login">Sign in</Link>
             <Link href="/signup" className="btn btn-primary btn-sm" data-testid="hero-signup-btn">Start free</Link>
           </div>

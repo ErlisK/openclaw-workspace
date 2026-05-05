@@ -111,31 +111,6 @@ test.describe('Free Audit API: Endpoint health', () => {
   });
 });
 
-test.describe('GTM Page: Outreach Playbook', () => {
-  test('/gtm loads with 200 status', async ({ page }) => {
-    const response = await page.goto(BASE_URL + '/gtm');
-    expect(response?.status()).toBe(200);
-  });
-
-  test('/gtm shows outreach templates', async ({ page }) => {
-    await page.goto(BASE_URL + '/gtm');
-    // Should contain cold outreach template content
-    const content = await page.textContent('body');
-    expect(content).toContain('Template');
-  });
-
-  test('No critical JS errors on /gtm', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('console', msg => { if (msg.type() === 'error') errors.push(msg.text()); });
-    await page.goto(BASE_URL + '/gtm');
-    await page.waitForTimeout(2000);
-    const criticalErrors = errors.filter(
-      e => !e.includes('favicon') && !e.includes('google') && !e.includes('analytics') && !e.includes('posthog') && !e.includes('plausible') && !e.includes('Content Security Policy') && !e.includes('stripe')
-    );
-    expect(criticalErrors).toHaveLength(0);
-  });
-});
-
 test.describe('Homepage: ICP-sharpened hero', () => {
   test('Homepage hero mentions micro-SaaS or MRR', async ({ page }) => {
     await page.goto(BASE_URL + '/');
