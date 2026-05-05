@@ -8,6 +8,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: 'monetize-github-repo',
+    title: 'How to Monetize Your GitHub Repository in 2025',
+    date: '2025-05-01',
+    readMin: 10,
+    tags: ['tutorial', 'monetization'],
+    excerpt:
+      'Turn your GitHub repos, READMEs, and workshop notes into paid courses with Stripe checkout — without leaving your git workflow.',
+  },
+  {
     slug: 'gated-sandboxes',
     title: 'Gated Sandboxes: Teaching with Real Code',
     date: '2025-04-23',
@@ -63,6 +72,7 @@ const tagColors: Record<string, string> = {
   quickstart: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
   quizzes: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
   sandboxes: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+  monetization: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
 };
 
 export default function BlogIndex() {

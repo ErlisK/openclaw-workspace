@@ -52,6 +52,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/docs/course-yaml`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: `${BASE_URL}/docs/pricing`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/docs/self-hosting`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
+    { url: `${BASE_URL}/blog/monetize-github-repo`, lastModified: new Date('2025-05-01'), changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/blog/gated-sandboxes`, lastModified: new Date('2025-04-23'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog/yaml-frontmatter-quizzes`, lastModified: new Date('2025-04-22'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog/from-markdown-to-paywalled-course`, lastModified: new Date('2025-04-21'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog/why-git-native-courses`, lastModified: new Date('2025-04-20'), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/blog/introducing-teachrepo`, lastModified: new Date('2025-04-19'), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/auth/login`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/auth/signup`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.4 },
   ];

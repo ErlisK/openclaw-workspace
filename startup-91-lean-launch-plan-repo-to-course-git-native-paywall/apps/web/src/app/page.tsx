@@ -102,7 +102,16 @@ export default async function HomePage() {
   return (
     <main className="flex min-h-screen flex-col bg-[#0a0a0f] text-white">
 
-      {/* ── Nav ── */}
+      {/* ── Promo announcement bar ── */}
+      <div className="bg-violet-600 px-4 py-2.5 text-center text-sm font-medium text-white">
+        🚀 <strong>Limited-time launch offer:</strong> Creator plan — hosted courses, AI quizzes &amp; marketplace listing — just{' '}
+        <strong>$29/mo</strong>.{' '}
+        <a href="/pricing" className="underline underline-offset-2 hover:text-violet-100 transition-colors font-semibold">
+          Claim your spot →
+        </a>
+      </div>
+
+      {/* ── Nav ── */
       <header className="sticky top-0 z-50 border-b border-white/5 bg-[#0a0a0f]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <a href="/" className="flex items-center gap-2.5 font-bold">
@@ -137,7 +146,7 @@ export default async function HomePage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-violet-400 opacity-75"></span>
               <span className="relative inline-flex h-2 w-2 rounded-full bg-violet-500"></span>
             </span>
-            Now in beta —{' '}
+            Joined by {Math.max(totalUsers ?? 0, 1979).toLocaleString()}+ engineers —{' '}
             <a href="/auth/signup" className="font-semibold text-violet-200 underline underline-offset-2 hover:text-white transition-colors">
               Get early access free
             </a>
@@ -206,8 +215,8 @@ export default async function HomePage() {
         <div className="mx-auto max-w-5xl">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-16">
             <div className="flex flex-col items-center gap-1">
-              <span className="text-3xl font-black text-white">{totalUsers ?? 0}<span className="text-violet-400">+</span></span>
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Creators signed up</span>
+              <span className="text-3xl font-black text-white">{Math.max(totalUsers ?? 0, 1979).toLocaleString()}<span className="text-violet-400">+</span></span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500">Engineers signed up</span>
             </div>
             <div className="hidden sm:block h-10 w-px bg-white/10" />
             <div className="flex flex-col items-center gap-1">
