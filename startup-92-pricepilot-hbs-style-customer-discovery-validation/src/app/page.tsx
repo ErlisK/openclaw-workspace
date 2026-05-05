@@ -61,7 +61,8 @@ function ImportMockup() {
         <p style={{ fontSize: '0.7rem' }}>or click to browse</p>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-        {['Stripe', 'Gumroad', 'Shopify'].map(p => (
+        <span style={{ background: '#dcfce7', color: '#166534', borderRadius: 999, padding: '0.2rem 0.6rem', fontSize: '0.7rem', fontWeight: 700 }}>CSV ✓ Best</span>
+        {['Stripe', 'Gumroad'].map(p => (
           <span key={p} style={{ background: '#ede9fe', color: '#6c47ff', borderRadius: 999, padding: '0.2rem 0.6rem', fontSize: '0.7rem', fontWeight: 600 }}>{p}</span>
         ))}
       </div>
@@ -160,13 +161,13 @@ export default function HomePage() {
 
       <main className="container" style={{ paddingTop: '5rem', paddingBottom: '5rem', textAlign: 'center' }}>
         <div style={{ maxWidth: 680, margin: '0 auto' }}>
-          <span className="badge badge-purple" style={{ marginBottom: '1.5rem' }}>For Stripe micro-SaaS · $1k–$8k MRR · Solo founders</span>
+          <span className="badge badge-purple" style={{ marginBottom: '1.5rem' }}>For Gumroad creators · template sellers · micro-SaaS founders · $500–$10k MRR</span>
           <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 900, lineHeight: 1.1, marginBottom: '1.25rem' }}>
             You&rsquo;re probably underpriced.<br />
             <span style={{ color: 'var(--brand)' }}>Here&rsquo;s how to prove it.</span>
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--muted)', marginBottom: '2.5rem', maxWidth: 540, margin: '0 auto 2.5rem' }}>
-            PricingSim analyzes your Stripe transaction history and runs a Bayesian simulation to find the safest price increase your data supports — with a rollback in one click if it doesn&rsquo;t work.
+            Upload your Gumroad CSV or connect Stripe — PricingSim runs a Bayesian simulation on your actual transaction data to find the safest price increase your data supports, with a rollback in one click if it doesn&rsquo;t work.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/free-audit" className="btn btn-primary" data-testid="cta-audit-btn" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
@@ -178,17 +179,29 @@ export default function HomePage() {
           </div>
           <p style={{ color: 'var(--muted)', fontSize: '0.8rem', marginTop: '0.75rem' }}>No credit card required · Rollback any experiment in one click · Your data never leaves our encrypted database</p>
 
-          <div className="card" style={{ marginTop: '4rem', textAlign: 'left' }}>
-            <p style={{ fontSize: '0.7rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Illustrative example — not a real user testimonial</p>
-            <p style={{ fontSize: '1.1rem', fontStyle: 'italic', color: 'var(--text)', marginBottom: '0.75rem' }}>
-              &ldquo;I tested two price points on my digital template. The data made the decision obvious — no guesswork needed.&rdquo;
+          {/* ── Early access social proof ── */}
+          <div style={{ marginTop: '4rem', background: '#faf5ff', border: '1px solid #e9d5ff', borderRadius: '0.75rem', padding: '2rem', textAlign: 'center' }}>
+            <p style={{ fontSize: '0.75rem', color: '#6c47ff', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700, marginBottom: '0.75rem' }}>🚀 Now in early access</p>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#111827', marginBottom: '0.5rem' }}>Be one of the first 50 founders</p>
+            <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '1.25rem', maxWidth: 420, margin: '0 auto 1.25rem' }}>
+              We&rsquo;re onboarding solo founders personally. Free access in exchange for honest feedback. No pitch, just data.
             </p>
-            <p style={{ fontSize: '0.875rem', color: 'var(--muted)', fontWeight: 600 }}>— Hypothetical scenario for illustration purposes only. Individual results will vary.</p>
+            <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1.25rem' }}>
+              {[['🗂', 'CSV import', 'Works today — Gumroad, Stripe, any CSV'], ['🔬', 'Bayesian engine', 'Confidence scores on your actual data'], ['🔁', 'One-click rollback', 'Revert any experiment instantly']].map(([icon, title, desc]) => (
+                <div key={title} style={{ textAlign: 'center', maxWidth: 140 }}>
+                  <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{icon}</div>
+                  <p style={{ fontWeight: 700, fontSize: '0.85rem', color: '#111827', marginBottom: '0.2rem' }}>{title}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>{desc}</p>
+                </div>
+              ))}
+            </div>
+            <Link href="/signup" className="btn btn-primary" style={{ padding: '0.75rem 1.75rem' }}>Get early access — free</Link>
+            <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.75rem' }}>No credit card · Cancel anytime · Your data stays encrypted</p>
           </div>
 
           <div className="grid-3" style={{ marginTop: '3rem', textAlign: 'left' }}>
             {[
-              { icon: '📊', title: 'Import in 60s', desc: 'Upload a Gumroad CSV or connect Stripe. No code, no webhooks.' },
+              { icon: '🗂', title: 'CSV import in 60s', desc: 'Drop in a Gumroad, Lemon Squeezy, or Stripe CSV. No code, no API keys required.' },
               { icon: '🎯', title: 'Safe suggestions', desc: 'Bayesian engine recommends 1–3 prices. Never >2.5× current price.' },
               { icon: '🔁', title: 'One-click rollback', desc: 'Rollback to your original price instantly if anything feels off.' },
             ].map(f => (
@@ -227,6 +240,29 @@ export default function HomePage() {
             </div>
           </div>
           {/* ── /See it in action ── */}
+
+          {/* ── Who it's for ── */}
+          <div style={{ marginTop: '4rem', textAlign: 'left' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, textAlign: 'center', marginBottom: '0.5rem', color: '#111827' }}>Built for three types of sellers</h2>
+            <p style={{ color: 'var(--muted)', textAlign: 'center', marginBottom: '2rem', fontSize: '0.9rem' }}>If you sell digital products and haven’t touched your price since launch, this is for you.</p>
+            <div className="grid-3" style={{ gap: '1rem' }}>
+              {[
+                { emoji: '📝', label: 'Template Sellers', platforms: 'Gumroad · Lemon Squeezy · Payhip', mrr: '$500–$5k MRR', pain: 'Set a launch price and never changed it. Suspects they’re underpriced but fears a backlash.', cta: '/for-gumroad-sellers', ctaLabel: 'See how it works →' },
+                { emoji: '🚀', label: 'Micro-SaaS Founders', platforms: 'Stripe · Paddle', mrr: '$2k–$10k MRR', pain: 'Afraid to raise subscription prices. No time to build an A/B framework, no data on elasticity.', cta: '/for-micro-saas', ctaLabel: 'See how it works →' },
+                { emoji: '🎬', label: 'Course Creators', platforms: 'Teachable · Podia · Gumroad', mrr: '$1k–$8k MRR', pain: 'One fixed price point. No idea if tiered or bundle pricing would convert better.', cta: '/for-stripe-users', ctaLabel: 'See how it works →' },
+              ].map(p => (
+                <div key={p.label} className="card" style={{ textAlign: 'left' }}>
+                  <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>{p.emoji}</div>
+                  <p style={{ fontWeight: 800, color: '#111827', marginBottom: '0.2rem' }}>{p.label}</p>
+                  <p style={{ fontSize: '0.75rem', color: '#6c47ff', fontWeight: 600, marginBottom: '0.5rem' }}>{p.platforms}</p>
+                  <p style={{ fontSize: '0.75rem', background: '#f3f4f6', borderRadius: 6, padding: '0.2rem 0.5rem', display: 'inline-block', color: '#374151', marginBottom: '0.75rem' }}>{p.mrr}</p>
+                  <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: '1rem' }}>{p.pain}</p>
+                  <Link href={p.cta} style={{ color: '#6c47ff', fontWeight: 600, fontSize: '0.875rem', textDecoration: 'none' }}>{p.ctaLabel}</Link>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* ── /Who it's for ── */}
 
           <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '3rem', maxWidth: 520, margin: '3rem auto 0', textAlign: 'center' }}>
             Results vary. Estimates are model-based, not guarantees. PricingSim&apos;s recommendations are for informational purposes only and do not constitute financial or business advice.
