@@ -1,10 +1,109 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { type LandingVariant } from '@/lib/landing/variants'
+import UrgencyBanner from '@/components/UrgencyBanner'
 import { trackLandingVariant, trackCtaClick } from '@/lib/posthog/provider'
 import { getSessionId } from '@/lib/utm'
+
+function MiniCalculator({ accentCta, variantId }: { accentCta: string; variantId: string }) {
+  const [revenue, setRevenue] = useState('')
+  const [hours, setHours] = useState('')
+  const [fees, setFees] = useState('20')
+  const [result, setResult] = useState<{ gross: number; net: number; lost: number } | null>(null)
+
+  function calculate() {
+    const rev = parseFloat(revenue)
+    const hrs = parseFloat(hours)
+    const feesPct = parseFloat(fees) / 100
+    if (!rev || !hrs || hrs <= 0) return
+    const gross = rev / hrs
+    const net = (rev * (1 - feesPct)) / hrs
+    const lost = gross - net
+    setResult({ gross, net, lost })
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const ph = (window as any).posthog
+      if (ph?.capture) ph.capture('mini_calculator_used', { variant: variantId })
+    } catch { /* best-effort */ }
+  }
+
+  return (
+    <div className="max-w-2xl mx-auto mb-16 text-left">
+      <div className="bg-gradient-to-br from-indigo-50 to-blue-50 border border-blue-200 rounded-2xl p-6">
+        <div className="text-center mb-5">
+          <span className="text-2xl">⚡</span>
+          <h2 className="text-lg font-bold text-gray-900 mt-1">Quick ROI check — 30 seconds</h2>
+          <p className="text-sm text-gray-500 mt-1">See your true hourly rate right now, no account needed.</p>
+        </div>
+        <div className="grid sm:grid-cols-3 gap-3 mb-4">
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">Monthly revenue ($)</label>
+            <input
+              type="number"
+              placeholder="e.g. 3200"
+              value={revenue}
+              onChange={e => setRevenue(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">Hours worked</label>
+            <input
+              type="number"
+              placeholder="e.g. 60"
+              value={hours}
+              onChange={e => setHours(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-gray-600 mb-1 block">Platform fee %</label>
+            <input
+              type="number"
+              placeholder="e.g. 20"
+              value={fees}
+              onChange={e => setFees(e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            />
+          </div>
+        </div>
+        <button
+          onClick={calculate}
+          className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors ${accentCta}`}
+        >
+          Calculate my true rate
+        </button>
+        {result && (
+          <div className="mt-4 grid sm:grid-cols-3 gap-3 text-center">
+            <div className="bg-white rounded-xl border border-gray-200 p-3">
+              <div className="text-xs text-gray-500 mb-0.5">Gross rate</div>
+              <div className="text-xl font-bold text-gray-900">${result.gross.toFixed(2)}<span className="text-xs font-normal">/hr</span></div>
+            </div>
+            <div className="bg-white rounded-xl border border-blue-200 p-3">
+              <div className="text-xs text-blue-600 mb-0.5 font-medium">True net rate</div>
+              <div className="text-xl font-bold text-blue-700">${result.net.toFixed(2)}<span className="text-xs font-normal">/hr</span></div>
+            </div>
+            <div className="bg-white rounded-xl border border-red-200 p-3">
+              <div className="text-xs text-red-500 mb-0.5">Lost to fees/hr</div>
+              <div className="text-xl font-bold text-red-600">${result.lost.toFixed(2)}<span className="text-xs font-normal">/hr</span></div>
+            </div>
+            <div className="sm:col-span-3 text-center pt-2">
+              <p className="text-sm text-gray-600 mb-3">Track <strong>all</strong> your streams, ad spend, and time in one place →</p>
+              <Link
+                href={`/signup?utm_source=mini_calc&utm_medium=landing&utm_campaign=calculator&v=${variantId}`}
+                className={`inline-block px-6 py-2.5 rounded-xl text-sm font-semibold transition-colors ${accentCta}`}
+              >
+                Get my full dashboard free
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
 
 const ACCENT_MAP: Record<string, { badge: string; cta: string; stat: string; border: string }> = {
   blue: {
@@ -75,6 +174,8 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
 
   return (
     <div className="min-h-screen bg-white overflow-x-hidden">
+      {/* Urgency Banner */}
+      <UrgencyBanner />
       {/* Nav */}
       <nav className="border-b border-gray-100 px-6 py-4 flex items-center justify-between max-w-6xl mx-auto">
         <div className="font-bold text-gray-900 text-lg" data-testid="nav-logo">GigAnalytics</div>
@@ -237,6 +338,9 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           </div>
           <p className="text-center text-xs text-gray-500 mt-3">Your real data — not a spreadsheet. Connect Stripe, PayPal, or import CSV in minutes.</p>
         </div>
+
+        {/* Inline Mini-Calculator */}
+        <MiniCalculator accentCta={accent.cta} variantId={variant.id} />
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-5 text-left max-w-4xl mx-auto mb-16">

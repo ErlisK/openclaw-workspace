@@ -231,17 +231,30 @@ export default function DemoPage() {
         </div>
 
         {/* CTA */}
-        <div className="bg-blue-50 border border-blue-200 rounded-2xl p-8 text-center">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Ready to see your real numbers?</h2>
-          <p className="text-gray-500 text-sm mb-6">Connect your Stripe, PayPal, or import CSV. Takes under 2 minutes.</p>
+        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-center text-white">
+          <div className="text-3xl mb-3">🚀</div>
+          <h2 className="text-2xl font-bold mb-2">Now imagine this with <em>your</em> real data.</h2>
+          <p className="text-blue-100 text-sm mb-2 max-w-lg mx-auto">You just saw how GigAnalytics breaks down ROI across streams. Connect your Stripe, PayPal, or drop a CSV — your real dashboard takes under 2 minutes to build.</p>
+          <div className="flex flex-wrap gap-3 justify-center text-xs text-blue-200 mb-6">
+            <span>✅ Free plan — no credit card</span>
+            <span>⚡ First results in ~11 min</span>
+            <span>🔒 Your data stays private</span>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/signup" className="px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold text-sm hover:bg-blue-700">
-              Get started free →
+            <Link
+              href="/signup?utm_source=demo&utm_medium=cta&utm_campaign=post_demo"
+              className="px-8 py-3.5 bg-white text-blue-700 rounded-xl font-semibold text-sm hover:bg-blue-50 shadow-md"
+            >
+              Get my free dashboard →
             </Link>
-            <Link href="/login" className="px-8 py-3 border border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:bg-gray-50">
-              Sign in
+            <Link
+              href="/calculator"
+              className="px-8 py-3.5 border border-white/40 text-white rounded-xl font-semibold text-sm hover:bg-white/10"
+            >
+              Try the calculator first
             </Link>
           </div>
+          <p className="text-xs text-blue-300 mt-4">🎉 Early access: first 100 users get 3 months Pro free.</p>
         </div>
       </div>
     </div>
