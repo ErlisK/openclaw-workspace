@@ -1,5 +1,5 @@
 # Research Mining Log
-*PricePilot — HBS Discovery Phase*
+*PricingSim — HBS Discovery Phase*
 *Executed: 2025-04-24*
 
 ## Methods Used
@@ -121,10 +121,10 @@ I need advice on my first B2B SaaS startup
 
 2. **Price-as-signal is underappreciated** — The monitoring tool post ($24/mo vs $89+/mo competitors) illustrates that low prices can actively hurt conversion by signaling low quality/side-project status.
 
-3. **Manual experiments happen anyway** — Founders are running their own crude experiments (changing Gumroad price for 2 weeks, then reverting) without statistical rigor or tooling. PricePilot formalizes what they're already doing.
+3. **Manual experiments happen anyway** — Founders are running their own crude experiments (changing Gumroad price for 2 weeks, then reverting) without statistical rigor or tooling. PricingSim formalizes what they're already doing.
 
 4. **Pricing tool demand is expressed openly** — The r/microsaas post "Your honest opinion: Would a tool helping early-stage SaaS owners build their pricing strategy be useful?" signals explicit demand validation from the community.
 
 5. **Comment thread on PriceWell.io** — In the "How to easily experiment with SaaS pricing" thread, a comment about PriceWell.io (embed-based pricing page switcher) got 2 upvotes. Shows demand for no-code pricing flexibility, but PriceWell doesn't have the Bayesian recommendation engine or rollback.
 
-6. **Cost-based pricing mistake is universal** — Multiple founders (AI agents, monitoring tools, dev kits) admitted pricing based on time/cost to build rather than customer value. PricePilot's ROI framing addresses exactly this mental model shift.
+6. **Cost-based pricing mistake is universal** — Multiple founders (AI agents, monitoring tools, dev kits) admitted pricing based on time/cost to build rather than customer value. PricingSim's ROI framing addresses exactly this mental model shift.

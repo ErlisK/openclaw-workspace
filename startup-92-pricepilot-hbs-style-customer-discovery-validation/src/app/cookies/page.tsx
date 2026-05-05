@@ -8,7 +8,7 @@ export default function CookiesPage() {
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/" className="nav-logo">🚀 PricingSim</Link>
         </div>
       </nav>
       <main className="container" style={{ maxWidth: 720, paddingTop: '2rem', paddingBottom: '4rem' }}>
@@ -17,7 +17,7 @@ export default function CookiesPage() {
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>Essential Cookies</h2>
-          <p>These cookies are required for the application to function. They enable authentication (Supabase session tokens) and security features. You cannot opt out of essential cookies while using PricePilot.</p>
+          <p>These cookies are required for the application to function. They enable authentication (Supabase session tokens) and security features. You cannot opt out of essential cookies while using PricingSim.</p>
           <ul style={{ marginTop: '0.75rem', paddingLeft: '1.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
             <li><strong>sb-* (Supabase)</strong> — Authentication session tokens</li>
             <li><strong>pp_vid</strong> — Anonymous visitor ID for A/B experiment bucketing (HttpOnly, Secure, SameSite=Lax)</li>
@@ -26,7 +26,7 @@ export default function CookiesPage() {
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>Functional / Analytics Cookies</h2>
-          <p>With your consent, we use analytics to understand how founders use PricePilot so we can improve the product. These are stored in localStorage and only activated when you click &quot;Accept all.&quot;</p>
+          <p>With your consent, we use analytics to understand how founders use PricingSim so we can improve the product. These are stored in localStorage and only activated when you click &quot;Accept all.&quot;</p>
           <ul style={{ marginTop: '0.75rem', paddingLeft: '1.5rem', color: 'var(--muted)', fontSize: '0.9rem' }}>
             <li><strong>pp_cookie_consent</strong> — Stores your cookie preference (localStorage)</li>
           </ul>
@@ -38,7 +38,7 @@ export default function CookiesPage() {
         </div>
 
         <p style={{ color: 'var(--muted)', fontSize: '0.875rem' }}>
-          Questions? Email <a href="mailto:privacy@pricepilot.app" style={{ color: 'var(--brand)' }}>privacy@pricepilot.app</a>
+          Questions? Email <a href="mailto:privacy@pricingsim.com" style={{ color: 'var(--brand)' }}>privacy@pricingsim.com</a>
         </p>
       </main>
     </div>

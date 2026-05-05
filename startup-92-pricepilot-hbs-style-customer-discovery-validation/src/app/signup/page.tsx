@@ -57,7 +57,7 @@ export default function SignupPage() {
     <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
       <div style={{ width: '100%', maxWidth: 420, padding: '0 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link href="/" className="nav-logo" style={{ fontSize: '1.4rem' }}>🚀 PricePilot</Link>
+          <Link href="/" className="nav-logo" style={{ fontSize: '1.4rem' }}>🚀 PricingSim</Link>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '1rem' }}>Create your account</h1>
           <p style={{ color: 'var(--muted)', marginTop: '0.5rem' }}>Free forever · No credit card</p>
         </div>

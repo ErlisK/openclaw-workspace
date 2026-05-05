@@ -24,10 +24,10 @@ const posts: Record<string, {
   <li><strong>Clear success metric</strong> — usually conversion rate or revenue per visitor</li>
   <li><strong>Easy rollback</strong> — if the test fails, you're back to baseline in one click</li>
 </ol>
-<p>PricePilot automates all three.</p>
+<p>PricingSim automates all three.</p>
 
 <h2>Step 1: Connect Your Sales Data</h2>
-<p>Start by connecting your Stripe, Gumroad, or Shopify account. PricePilot analyzes your existing transaction history to understand your current conversion rate, seasonal patterns, and price-sensitive customer cohorts.</p>
+<p>Start by connecting your Stripe, Gumroad, or Shopify account. PricingSim analyzes your existing transaction history to understand your current conversion rate, seasonal patterns, and price-sensitive customer cohorts.</p>
 
 <h2>Step 2: Let the Engine Suggest Prices</h2>
 <p>The Bayesian engine looks at your last 90–180 days of data and proposes 2–3 candidate prices derived from a price elasticity model fitted to your actual sales.</p>
@@ -38,7 +38,7 @@ const posts: Record<string, {
 <h2>Step 4: Roll Out or Roll Back</h2>
 <p>When your experiment reaches confidence, you get a clear recommendation. One click applies the winner — or reverts to your original price if the experiment failed.</p>
 
-<p>Running a price test isn't risky. Running one <strong>without data</strong> is. PricePilot gives you the data, the stats, and the safety net.</p>
+<p>Running a price test isn't risky. Running one <strong>without data</strong> is. PricingSim gives you the data, the stats, and the safety net.</p>
     `
   },
   'the-bayesian-advantage-why-we-dont-use-traditional-ab-tests': {
@@ -62,7 +62,7 @@ const posts: Record<string, {
   <li><strong>Works with small samples</strong> — even 20–30 conversions per variant give meaningful signal</li>
 </ul>
 
-<h2>How PricePilot's Engine Works</h2>
+<h2>How PricingSim's Engine Works</h2>
 <p>We model each price point's conversion rate as a Beta distribution. When a new sale comes in, we update the distribution using Bayes' theorem. Over time, the distributions either converge (similar performance) or diverge (one is clearly better).</p>
 <p>We also account for time effects, cohort effects, and seasonality that could confound results.</p>
 
@@ -72,11 +72,11 @@ const posts: Record<string, {
   },
   'building-the-bayesian-pricing-engine': {
     title: 'Building a Bayesian Pricing Engine in TypeScript',
-    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricePilot — all in TypeScript, no Python required.',
+    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricingSim — all in TypeScript, no Python required.',
     date: 'February 10, 2025',
     readTime: '10 min read',
     content: `
-<p>When I started building PricePilot, I faced a core problem: <strong>how do you run a meaningful pricing experiment with 30–100 sales per month?</strong></p>
+<p>When I started building PricingSim, I faced a core problem: <strong>how do you run a meaningful pricing experiment with 30–100 sales per month?</strong></p>
 
 <p>Traditional A/B tests need 200–1,000 conversions per variant for significance. At 50 monthly sales, that's a 2-year wait. Useless.</p>
 
@@ -136,20 +136,20 @@ is_spike = mad > 0 ? (0.6745 * Math.abs(qty - median) / mad) > 3.0 : false</code
 
 <p>Zero external dependencies — no ml-matrix, no tensorflow.js. The NIG update, Cornish-Fisher quantile approximation, and Box-Muller sampler are hand-implemented. The engine runs in a Next.js App Router Route Handler, backed by Supabase with Row Level Security isolating each user's data.</p>
 
-<p><strong>Try PricePilot free:</strong> <a href="https://startup-92-pricepilot-hbs-style-cus.vercel.app">startup-92-pricepilot-hbs-style-cus.vercel.app</a></p>
+<p><strong>Try PricingSim free:</strong> <a href="https://pricingsim.com">pricingsim.com</a></p>
     `,
   },
   'building-pricepilot-product-intro': {
     title: "I Built a Pricing Experiment Tool for Solo Founders — Here's What I Learned",
-    description: 'PricePilot uses Bayesian inference to help indie creators safely test higher prices. A product intro covering the why, what, and how.',
+    description: 'PricingSim uses Bayesian inference to help indie creators safely test higher prices. A product intro covering the why, what, and how.',
     date: 'February 3, 2025',
     readTime: '5 min read',
     content: `
 <p>Six months ago, I talked to 40 solo founders about pricing. Every single one said the same thing:</p>
 <p><em>"No. I'm scared of losing customers."</em></p>
-<p>I built PricePilot to solve that.</p>
+<p>I built PricingSim to solve that.</p>
 
-<h2>What PricePilot Does</h2>
+<h2>What PricingSim Does</h2>
 <p>Connect your Stripe, Gumroad, or Shopify store — the app analyzes 90 days of sales, estimates your price elasticity using Bayesian inference, suggests 2–3 conservative test prices with confidence scores, and generates a live A/B experiment page. When the experiment completes, one click applies the winner or rolls back to your original price.</p>
 
 <h2>Why Traditional A/B Testing Fails for Solo Founders</h2>
@@ -173,7 +173,7 @@ is_spike = mad > 0 ? (0.6745 * Math.abs(qty - median) / mad) > 3.0 : false</code
 
 <p>See the <a href="/blog/building-the-bayesian-pricing-engine">technical deep dive</a> for the full engine implementation with code.</p>
 
-<p><strong>Try it free (no credit card):</strong> <a href="https://startup-92-pricepilot-hbs-style-cus.vercel.app">startup-92-pricepilot-hbs-style-cus.vercel.app</a></p>
+<p><strong>Try it free (no credit card):</strong> <a href="https://pricingsim.com">pricingsim.com</a></p>
     `,
   },
 }
@@ -181,7 +181,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const post = posts[slug]
   if (!post) return { title: 'Not Found' }
-  return { title: `${post.title} — PricePilot Blog`, description: post.description }
+  return { title: `${post.title} — PricingSim Blog`, description: post.description }
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -195,9 +195,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     headline: post.title,
     description: post.description,
     datePublished: post.date,
-    author: { '@type': 'Organization', name: 'PricePilot', url: 'https://startup-92-pricepilot-hbs-style-cus.vercel.app' },
-    publisher: { '@type': 'Organization', name: 'PricePilot', url: 'https://startup-92-pricepilot-hbs-style-cus.vercel.app' },
-    url: `https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/${slug}`,
+    author: { '@type': 'Organization', name: 'PricingSim', url: 'https://pricingsim.com' },
+    publisher: { '@type': 'Organization', name: 'PricingSim', url: 'https://pricingsim.com' },
+    url: `https://pricingsim.com/blog/${slug}`,
   }
 
   return (
@@ -205,7 +205,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <main style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>PricingSim</Link>
         <span style={{ color: '#d1d5db' }}>›</span>
         <Link href="/blog" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Blog</Link>
       </div>
@@ -215,7 +215,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           {post.title}
         </h1>
         <div style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '2rem' }}>
-          {post.date} · {post.readTime} · PricePilot Team
+          {post.date} · {post.readTime} · PricingSim Team
         </div>
         <div
           style={{ lineHeight: 1.75, color: '#374151' }}
@@ -224,7 +224,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       </article>
 
       <div style={{ marginTop: '3rem', padding: '1.5rem', background: '#f5f3ff', borderRadius: 12, borderLeft: '4px solid var(--brand, #4f46e5)' }}>
-        <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Try PricePilot free</p>
+        <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Try PricingSim free</p>
         <p style={{ color: '#6b7280', marginBottom: '1rem', fontSize: '0.9rem' }}>
           Connect your store and run your first pricing experiment in under 10 minutes.
         </p>
@@ -244,7 +244,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             { href: '/guides/micro-seller-pricing-experiments', label: "Guide: The Solo Seller's Complete Guide to Pricing Experiments" },
             { href: '/guides/stripe-price-testing-without-code', label: "Guide: Stripe Price Testing Without Code" },
             { href: '/guides/gumroad-pricing-updates-and-churn-risk', label: 'Guide: Gumroad Price Updates & Churn Risk' },
-            { href: '/pricing', label: 'PricePilot Pricing — free tier + Pro at $29/month' },
+            { href: '/pricing', label: 'PricingSim Pricing — free tier + Pro at $29/month' },
           ].map(link => (
             <Link
               key={link.href}

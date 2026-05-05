@@ -1,4 +1,4 @@
-// PricePilot — Free Audit Page E2E Tests
+// PricingSim — Free Audit Page E2E Tests
 // Run: BASE_URL=https://<deployed> npx playwright test e2e/free_audit.spec.ts
 
 import { test, expect } from '@playwright/test';

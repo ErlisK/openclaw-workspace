@@ -5,24 +5,24 @@ import { CookieConsent } from '@/components/CookieConsent'
 import { PlausibleTrackerWrapper } from '@/components/PlausibleTrackerWrapper'
 import { UTMCapture } from '@/components/UTMCapture'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pricingsim.com'
 
 export const metadata: Metadata = {
-  title: { default: 'PricePilot — Safe pricing experiments for solo founders', template: '%s — PricePilot' },
+  title: { default: 'PricingSim — Safe pricing experiments for solo founders', template: '%s — PricingSim' },
   description: 'Test higher prices safely. Bayesian A/B pricing experiments for creators and micro-SaaS founders doing $500–$10k MRR.',
   metadataBase: new URL(BASE_URL),
   icons: { icon: '/favicon.ico' },
   openGraph: {
     type: 'website',
-    siteName: 'PricePilot',
-    title: 'PricePilot — Safe pricing experiments for solo founders',
+    siteName: 'PricingSim',
+    title: 'PricingSim — Safe pricing experiments for solo founders',
     description: 'Test higher prices safely. Bayesian A/B pricing experiments for Stripe, Gumroad, and Shopify sellers.',
     url: BASE_URL,
-    images: [{ url: `${BASE_URL}/og-image.png`, width: 1200, height: 630, alt: 'PricePilot — Safe pricing experiments for solo founders' }],
+    images: [{ url: `${BASE_URL}/og-image.png`, width: 1200, height: 630, alt: 'PricingSim — Safe pricing experiments for solo founders' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PricePilot — Safe pricing experiments for solo founders',
+    title: 'PricingSim — Safe pricing experiments for solo founders',
     description: 'Bayesian A/B pricing experiments for creators and micro-SaaS founders.',
     images: [`${BASE_URL}/og-image.png`],
   },
@@ -44,7 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Plausible Analytics — respects DNT, no cookies, GDPR-friendly */}
         <Script
           defer
-          data-domain="startup-92-pricepilot-hbs-style-cus.vercel.app"
+          data-domain="pricingsim.com"
           src="https://plausible.io/js/script.tagged-events.js"
           strategy="afterInteractive"
         />

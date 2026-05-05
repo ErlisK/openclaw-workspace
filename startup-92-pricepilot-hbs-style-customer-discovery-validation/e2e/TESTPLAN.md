@@ -1,4 +1,4 @@
-# PricePilot — Playwright E2E Test Plan
+# PricingSim — Playwright E2E Test Plan
 *Last updated: 2025-04-24*
 
 ---

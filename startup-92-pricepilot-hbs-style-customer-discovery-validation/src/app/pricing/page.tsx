@@ -4,12 +4,12 @@ import { SiteFooter } from '@/components/SiteFooter'
 
 export const dynamic = 'force-dynamic'
 
-const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = 'https://pricingsim.com'
 
 const pricingJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'PricePilot',
+  name: 'PricingSim',
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   url: `${BASE_URL}/pricing`,
@@ -36,7 +36,7 @@ const pricingJsonLd = {
       description: 'Unlimited experiments, AI templates, CSV export, priority support.',
     },
   ],
-  publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+  publisher: { '@type': 'Organization', name: 'PricingSim', url: BASE_URL },
 }
 
 const FREE_FEATURES = [
@@ -69,7 +69,7 @@ export default async function PricingPage() {
       <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', padding: '0 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricePilot</Link>
+          <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricingSim</Link>
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <Link href="/dashboard" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>Dashboard</Link>
             <Link href="/signup" style={{ background: '#6c47ff', color: '#fff', padding: '0.4rem 1rem', borderRadius: '0.5rem', textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>Get started free</Link>

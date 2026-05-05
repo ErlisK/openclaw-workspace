@@ -1,12 +1,12 @@
 ---
-title: "Building a Bayesian Pricing Engine in TypeScript: How PricePilot Finds Optimal Prices with Noisy Data"
-description: "A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricePilot's pricing engine — all in TypeScript, no Python required."
+title: "Building a Bayesian Pricing Engine in TypeScript: How PricingSim Finds Optimal Prices with Noisy Data"
+description: "A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricingSim's pricing engine — all in TypeScript, no Python required."
 tags: ["typescript", "bayesian", "statistics", "nextjs"]
-canonical_url: "https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/building-the-bayesian-pricing-engine"
-cover_image: "https://startup-92-pricepilot-hbs-style-cus.vercel.app/assets/screenshot-homepage.png"
+canonical_url: "https://pricingsim.com/blog/building-the-bayesian-pricing-engine"
+cover_image: "https://pricingsim.com/assets/screenshot-homepage.png"
 ---
 
-When I started building PricePilot, I faced a problem that every statistics-minded solo developer eventually hits: **how do you run a meaningful pricing experiment when you have 30–100 sales per month instead of 30,000?**
+When I started building PricingSim, I faced a problem that every statistics-minded solo developer eventually hits: **how do you run a meaningful pricing experiment when you have 30–100 sales per month instead of 30,000?**
 
 Traditional A/B testing frameworks (Optimizely, VWO) are built for high-traffic consumer apps. They assume frequentist statistics: set a sample size up front, collect data until you hit it, then check for statistical significance at p < 0.05. With 50 monthly sales per variant, a frequentist test would take 14–20 months to reach significance. That's useless for a solo founder.
 
@@ -278,6 +278,6 @@ We're also planning to add temporal correlation: sales velocity changes with day
 
 ---
 
-**PricePilot is live and free to try:** https://startup-92-pricepilot-hbs-style-cus.vercel.app
+**PricingSim is live and free to try:** https://pricingsim.com
 
 The full engine source is visible at `src/lib/engine.ts` in the Next.js app. Questions about the Bayesian approach? Drop them in the comments.

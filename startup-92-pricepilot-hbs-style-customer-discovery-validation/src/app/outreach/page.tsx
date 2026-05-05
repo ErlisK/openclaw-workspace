@@ -3,7 +3,7 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
 export const metadata: Metadata = {
-  title: 'Outreach Dashboard — PricePilot',
+  title: 'Outreach Dashboard — PricingSim',
   description: 'Backlink outreach campaign tracker. 50 targets across blogs, newsletters, and directories.',
 }
 export const dynamic = 'force-dynamic'
@@ -68,7 +68,7 @@ export default async function OutreachPage() {
     <main style={{ maxWidth: 1100, margin: '0 auto', padding: '2rem 1rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}>← PricePilot</Link>
+          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}>← PricingSim</Link>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '0.25rem 0 0' }}>Backlink Outreach Dashboard</h1>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>

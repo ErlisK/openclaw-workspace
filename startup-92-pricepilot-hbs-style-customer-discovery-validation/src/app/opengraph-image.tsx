@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'PricePilot — Safe pricing experiments for solo founders'
+export const alt = 'PricingSim — Safe pricing experiments for solo founders'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -26,7 +26,7 @@ export default async function Image() {
         
         <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
           <span style={{ fontSize: '52px', marginRight: '16px' }}>✈️</span>
-          <span style={{ fontSize: '64px', fontWeight: 800, color: 'white' }}>PricePilot</span>
+          <span style={{ fontSize: '64px', fontWeight: 800, color: 'white' }}>PricingSim</span>
         </div>
         
         <div style={{ fontSize: '36px', color: '#94a3b8', marginBottom: '24px', fontWeight: 500 }}>

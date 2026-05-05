@@ -18,7 +18,7 @@ export default async function BillingPage({
     return (
       <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ maxWidth: 420, textAlign: 'center' }}>
-          <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricePilot</Link>
+          <Link href="/" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricingSim</Link>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#111827', margin: '1rem 0 0.75rem' }}>Billing</h1>
           <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Sign in to manage your billing and subscription.</p>
           <Link href="/login?next=/billing" style={{
@@ -43,7 +43,7 @@ export default async function BillingPage({
     <div style={{ fontFamily: 'system-ui, -apple-system, sans-serif', background: '#fafafa', minHeight: '100vh' }}>
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', padding: '0 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricePilot</Link>
+          <Link href="/dashboard" style={{ fontWeight: 800, fontSize: '1.1rem', color: '#111827', textDecoration: 'none' }}>🚀 PricingSim</Link>
           <div style={{ display: 'flex', gap: '1rem' }}>
             <Link href="/dashboard" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>Dashboard</Link>
           </div>
@@ -109,7 +109,7 @@ export default async function BillingPage({
         </div>
 
         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '1rem', padding: '1.25rem', fontSize: '0.875rem', color: '#6b7280' }}>
-          <p>Questions about billing? Email us at <a href="mailto:support@pricepilot.app" style={{ color: '#6c47ff' }}>support@pricepilot.app</a></p>
+          <p>Questions about billing? Email us at <a href="mailto:hello@pricingsim.com" style={{ color: '#6c47ff' }}>hello@pricingsim.com</a></p>
           <p style={{ marginTop: '0.5rem' }}>
             See our <Link href="/refund" style={{ color: '#6c47ff' }}>Refund Policy</Link> for cancellation and refund information.
           </p>

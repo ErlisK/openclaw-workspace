@@ -1,7 +1,7 @@
 /**
  * POST /api/calculator/engine
  * Accept manual inputs from the calculator UI, synthesize transaction data,
- * and run the real Bayesian elasticity engine used by PricePilot internally.
+ * and run the real Bayesian elasticity engine used by PricingSim internally.
  * No authentication required — this is a public tool endpoint.
  */
 import { NextResponse } from 'next/server'

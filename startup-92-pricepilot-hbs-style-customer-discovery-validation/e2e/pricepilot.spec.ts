@@ -1,4 +1,4 @@
-// PricePilot — Playwright E2E Test Plan
+// PricingSim — Playwright E2E Test Plan
 // /e2e/TESTPLAN.md is the prose spec; this file contains executable test scaffolds.
 // Run: BASE_URL=https://<deployed> npx playwright test
 // All tests are written against the deployed Vercel + Supabase stack.
@@ -1459,7 +1459,7 @@ test.describe('Connectors', () => {
       const prod = products[i % 5];
       const price = prices[i % 5];
       const dt = `2024-${String(Math.floor(i/30)+1).padStart(2,'0')}-${String((i%28)+1).padStart(2,'0')} 12:00`;
-      csvRows.push(`ch_test_${String(i+1).padStart(5,'0')},${price},0.00,usd,PricePilot test: ${prod},buyer${i+1}@example.com,${dt},Paid,Visa,4242,${prod}`);
+      csvRows.push(`ch_test_${String(i+1).padStart(5,'0')},${price},0.00,usd,PricingSim test: ${prod},buyer${i+1}@example.com,${dt},Paid,Visa,4242,${prod}`);
     }
     const csvContent = csvRows.join('\n');
 
@@ -2777,7 +2777,7 @@ test.describe('SEO & Sitemap', () => {
   test('TC-SEO-003: Homepage has title and meta description', async ({ page }) => {
     await page.goto(`${BASE_URL}/`);
     const title = await page.title();
-    expect(title).toMatch(/PricePilot/i);
+    expect(title).toMatch(/PricingSim/i);
     const desc = await page.getAttribute('meta[name="description"]', 'content');
     expect(desc).toBeTruthy();
     expect(desc!.length).toBeGreaterThan(20);
@@ -2786,7 +2786,7 @@ test.describe('SEO & Sitemap', () => {
   test('TC-SEO-004: Blog post has unique title', async ({ page }) => {
     await page.goto(`${BASE_URL}/blog/how-to-run-a-price-test-without-losing-customers`);
     const title = await page.title();
-    expect(title).toContain('PricePilot');
+    expect(title).toContain('PricingSim');
     expect(title).toMatch(/Price Test|Customers/i);
   });
 
@@ -3405,7 +3405,7 @@ test.describe('UTM & Plausible', () => {
     const r = await request.get(`${BASE_URL}/api/utm-validate`)
     const { links } = await r.json()
     for (const [, url] of Object.entries(links as Record<string, string>)) {
-      expect(url).toContain('startup-92-pricepilot-hbs-style-cus.vercel.app')
+      expect(url).toContain('pricingsim.com')
     }
   })
 })
@@ -4464,7 +4464,7 @@ test.describe('Weekly Signals Cron & Research Page', () => {
   test('TC-RESEARCH-005: /research has correct meta title', async ({ page }) => {
     await page.goto(`${BASE_URL}/research`)
     const title = await page.title()
-    expect(title).toContain('PricePilot')
+    expect(title).toContain('PricingSim')
   })
 
   test('TC-RESEARCH-006: /research cluster summary renders after data is present', async ({ request, page }) => {

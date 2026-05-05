@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Outreach Templates — PricePilot',
+  title: 'Outreach Templates — PricingSim',
   description: 'Cold DM and forum reply templates for solo founders doing pricing outreach on Indie Hackers, Reddit, and X.',
   robots: 'noindex',
 }
@@ -14,7 +14,7 @@ const templates = [
     subject: 'Free pricing simulation for [their product name]',
     body: `Hey [Name] — I've been following your build-in-public updates and noticed you recently [mentioned pricing / crossed $X MRR / asked about raising prices].
 
-I'm building PricePilot — it takes your Stripe transaction history and runs a Bayesian simulation to show the safest price increase your data supports, with a projected revenue lift and a one-click rollback if it doesn't work.
+I'm building PricingSim — it takes your Stripe transaction history and runs a Bayesian simulation to show the safest price increase your data supports, with a projected revenue lift and a one-click rollback if it doesn't work.
 
 I'd love to run a free simulation on [product name] and share the output with you — no strings, just want to see if the tool produces something useful for a real product. Would that be interesting?
 
@@ -26,11 +26,11 @@ I'd love to run a free simulation on [product name] and share the output with yo
     id: 'reddit-reply',
     label: 'Reddit / Indie Hackers Forum Reply (in a pricing thread)',
     subject: 'Use when: someone posts "I think I\'m underpriced but scared to raise — what do I do?"',
-    body: `This exact situation is why I'm building PricePilot. The fear is rational — a blind price raise can hurt, but so is leaving money on the table for years.
+    body: `This exact situation is why I'm building PricingSim. The fear is rational — a blind price raise can hurt, but so is leaving money on the table for years.
 
 What I've found works: run a Bayesian elasticity model on your existing transactions. Even with 50–100 data points you can get a directional read on what price your buyers would accept without significant churn. The confidence interval is wide, but it's better than guessing.
 
-Happy to run a free simulation on your data if you want to share a Stripe CSV export (anonymized if you prefer). DM me or check out pricepilot.app — it does this automatically.`,
+Happy to run a free simulation on your data if you want to share a Stripe CSV export (anonymized if you prefer). DM me or check out pricingsim.com — it does this automatically.`,
     why: 'Adds genuine value to the thread first; the CTA is soft and contextual.',
     icon: '💬',
   },
@@ -38,14 +38,14 @@ Happy to run a free simulation on your data if you want to share a Stripe CSV ex
     id: 'newsletter-pitch',
     label: 'Newsletter / Podcast Pitch (to Arvid Kahl or similar)',
     subject: 'Collab idea — live pricing audit for your audience',
-    body: `Hi Arvid — longtime reader of The Bootstrapped Founder. I'm building PricePilot, a tool that runs Bayesian pricing simulations on Stripe/Gumroad data for solo founders who are nervous about raising prices.
+    body: `Hi Arvid — longtime reader of The Bootstrapped Founder. I'm building PricingSim, a tool that runs Bayesian pricing simulations on Stripe/Gumroad data for solo founders who are nervous about raising prices.
 
 I'd love to propose a collab: I run a live, unedited pricing audit on a volunteer from your community — we publish the output (what the data says, what the simulation recommends, what they actually decide to do). It'd make for a concrete, data-driven piece that's different from the usual "just raise your prices" advice.
 
 No payment needed — just honest coverage if it produces something worth sharing. Interested?
 
 — [Your name]`,
-    why: 'Provides content value to the creator, creates a case study for PricePilot, and reaches exactly the right audience.',
+    why: 'Provides content value to the creator, creates a case study for PricingSim, and reaches exactly the right audience.',
     icon: '📧',
   },
   {
@@ -54,11 +54,11 @@ No payment needed — just honest coverage if it produces something worth sharin
     subject: 'Show IH: I built a Bayesian pricing engine for solo founders — free audit inside',
     body: `Hey IH 👋
 
-I'm building PricePilot — a tool that takes your Stripe/Gumroad CSV, runs a Bayesian elasticity analysis, and tells you the safest price increase your data supports (with a confidence score and projected revenue lift).
+I'm building PricingSim — a tool that takes your Stripe/Gumroad CSV, runs a Bayesian elasticity analysis, and tells you the safest price increase your data supports (with a confidence score and projected revenue lift).
 
 The problem I kept seeing: solo founders set prices arbitrarily at launch, suspect they're underpriced, but won't touch them because they're scared of churn. There's no good way to test safely with small transaction volumes.
 
-PricePilot uses a Normal-InvGamma conjugate prior (elasticity ε ~ N(-1.0, 0.5²)) that performs decently even with 30–100 data points. It's conservative by design — the rule is maximize E[R] subject to p05(R) >= 95% of current revenue.
+PricingSim uses a Normal-InvGamma conjugate prior (elasticity ε ~ N(-1.0, 0.5²)) that performs decently even with 30–100 data points. It's conservative by design — the rule is maximize E[R] subject to p05(R) >= 95% of current revenue.
 
 **Free audit offer:** Drop your CSV at [link] — no account, no email, results in 30 seconds. Happy to run a manual analysis for anyone who wants to discuss their specific situation.
 
@@ -90,7 +90,7 @@ export default function OutreachTemplatesPage() {
     <div style={{ minHeight: '100vh', background: '#f9fafb' }}>
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', padding: '0 1rem' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
-          <Link href="/" style={{ textDecoration: 'none', color: '#111827', fontWeight: 700 }}>← PricePilot</Link>
+          <Link href="/" style={{ textDecoration: 'none', color: '#111827', fontWeight: 700 }}>← PricingSim</Link>
           <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>Sales Outreach Playbook</span>
         </div>
       </nav>

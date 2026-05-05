@@ -434,7 +434,7 @@ export default function CalculatorClient() {
           <div>
             <h3 style={{ fontWeight: 700, fontSize: '0.95rem', margin: 0 }}>Run the Bayesian Engine</h3>
             <p style={{ color: '#6b7280', fontSize: '0.8rem', marginTop: '0.25rem' }}>
-              Generates synthetic data from your inputs (with cohort + guardrail settings) and runs the real PricePilot engine.
+              Generates synthetic data from your inputs (with cohort + guardrail settings) and runs the real PricingSim engine.
             </p>
           </div>
           <button
@@ -468,7 +468,7 @@ export default function CalculatorClient() {
 
       <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '1rem', lineHeight: 1.5 }}>
         Results vary. This calculator uses a point estimate with ±0.5 elasticity uncertainty for p05/p95 bounds.
-        PricePilot&apos;s full engine computes a proper Bayesian posterior from your transaction history.
+        PricingSim&apos;s full engine computes a proper Bayesian posterior from your transaction history.
       </p>
     </div>
   )

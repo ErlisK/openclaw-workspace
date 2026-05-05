@@ -92,7 +92,7 @@ export default function ImportPage() {
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/dashboard" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/dashboard" className="nav-logo">🚀 PricingSim</Link>
           <div className="nav-links">
             <Link href="/dashboard">Dashboard</Link>
             <Link href="/suggestions">Suggestions</Link>

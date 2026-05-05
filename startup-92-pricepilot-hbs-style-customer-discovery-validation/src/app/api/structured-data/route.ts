@@ -4,13 +4,13 @@
  */
 import { NextResponse } from 'next/server'
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://pricingsim.com'
 
 export async function GET() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'PricePilot',
+    name: 'PricingSim',
     applicationCategory: 'BusinessApplication',
     description: 'Safe pricing experiments for solo founders and micro-SaaS creators. Bayesian A/B pricing experiments for Stripe, Gumroad, and Shopify sellers.',
     url: BASE_URL,
@@ -31,7 +31,7 @@ export async function GET() {
     operatingSystem: 'Web',
     author: {
       '@type': 'Organization',
-      name: 'PricePilot',
+      name: 'PricingSim',
       url: BASE_URL,
     },
   }

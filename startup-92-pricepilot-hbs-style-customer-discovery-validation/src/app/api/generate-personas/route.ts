@@ -113,7 +113,7 @@ export async function GET(request: Request) {
     const clusterSummary = CLUSTERS.map(c => `${c.id} (${c.severity}): ${c.name} — ${c.freq}%`).join('\n');
     const quotesList = KEY_QUOTES.map((q, i) => `${i+1}. "${q}"`).join('\n');
 
-    const prompt = `You are a product strategist building PricePilot — a lightweight pricing experiment tool for solo creators and micro-SaaS founders at $500–$10k MRR.
+    const prompt = `You are a product strategist building PricingSim — a lightweight pricing experiment tool for solo creators and micro-SaaS founders at $500–$10k MRR.
 
 You have completed pain-point cluster analysis of 95 public signals and identified 10 clusters. Now generate 5 deeply researched personas covering the specific platform archetypes the founder needs to target.
 
@@ -136,7 +136,7 @@ For each persona:
 - Write the specific "trigger moment" that makes them search for a pricing tool RIGHT NOW
 - Map which pain clusters are most/least relevant to them
 - Describe their channel footprint: where they read, post, who they follow on Twitter
-- Write their PricePilot adoption journey (how they discover → evaluate → activate → succeed)
+- Write their PricingSim adoption journey (how they discover → evaluate → activate → succeed)
 - Be specific about WTP: actual dollar amounts, preferred billing model (monthly/annual/one-time)
 
 IMPORTANT: The persona name should be a realistic first name + brief descriptor. The quote_that_defines_them should be a real-sounding verbatim quote in their voice.

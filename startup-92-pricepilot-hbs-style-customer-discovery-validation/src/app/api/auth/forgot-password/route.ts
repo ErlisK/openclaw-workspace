@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 const APP_URL =
   process.env.NEXT_PUBLIC_BASE_URL ||
   process.env.NEXT_PUBLIC_APP_URL ||
-  'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+  'https://pricingsim.com'
 
 export async function POST(request: NextRequest) {
   try {

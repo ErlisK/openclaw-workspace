@@ -191,7 +191,7 @@ export default function ExperimentDetailPage({ params }: { params: Promise<{ id:
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/dashboard" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/dashboard" className="nav-logo">🚀 PricingSim</Link>
           <div className="nav-links">
             <Link href="/experiments">← Experiments</Link>
           </div>

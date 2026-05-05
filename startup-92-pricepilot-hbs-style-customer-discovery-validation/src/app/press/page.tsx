@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Press Kit — PricePilot',
-  description: 'Logos, screenshots, and media assets for PricePilot.',
+  title: 'Press Kit — PricingSim',
+  description: 'Logos, screenshots, and media assets for PricingSim.',
 }
 
-const BASE = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE = 'https://pricingsim.com'
 
 const assets = [
   { name: 'Logo (SVG, horizontal)', file: '/assets/logo.svg', desc: 'Full wordmark — use on white or light backgrounds' },
@@ -25,12 +25,12 @@ export default function PressPage() {
   return (
     <main style={{ maxWidth: 900, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
 
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Press Kit</h1>
       <p style={{ color: '#6b7280', marginBottom: '2rem' }}>
-        Download logos, screenshots, and media for PricePilot. All assets are free to use in reviews, articles, and directory listings.
+        Download logos, screenshots, and media for PricingSim. All assets are free to use in reviews, articles, and directory listings.
       </p>
 
       {/* Quick facts */}
@@ -38,7 +38,7 @@ export default function PressPage() {
         <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem' }}>Quick Facts</h2>
         <dl style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.5rem 1rem', fontSize: '0.9rem' }}>
           {[
-            ['Name', 'PricePilot'],
+            ['Name', 'PricingSim'],
             ['Tagline', 'Safe pricing experiments for solo founders'],
             ['Category', 'SaaS / Developer Tools / E-commerce'],
             ['Target user', 'Solo creators & micro-SaaS founders ($500–$10k MRR)'],
@@ -61,7 +61,7 @@ export default function PressPage() {
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Core Flow (Animated)</h2>
         <img
           src="/assets/core-flow-small.gif"
-          alt="PricePilot core flow — homepage, pricing, blog, docs, import guide"
+          alt="PricingSim core flow — homepage, pricing, blog, docs, import guide"
           style={{ width: '100%', borderRadius: 12, border: '1px solid #e5e7eb', maxWidth: 800 }}
         />
         <div style={{ marginTop: '0.75rem', display: 'flex', gap: '1rem' }}>
@@ -75,12 +75,12 @@ export default function PressPage() {
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>Logo</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.5rem', background: '#fff', textAlign: 'center' }}>
-            <img src="/assets/logo.svg" alt="PricePilot logo" style={{ maxWidth: 320, height: 'auto', marginBottom: '0.75rem' }} />
+            <img src="/assets/logo.svg" alt="PricingSim logo" style={{ maxWidth: 320, height: 'auto', marginBottom: '0.75rem' }} />
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>Horizontal wordmark</p>
             <a href="/assets/logo.svg" download style={{ color: '#4f46e5', fontSize: '0.875rem' }}>↓ Download SVG</a>
           </div>
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 12, padding: '1.5rem', background: '#fff', textAlign: 'center' }}>
-            <img src="/assets/logo-icon.svg" alt="PricePilot icon" style={{ width: 80, height: 80, marginBottom: '0.75rem' }} />
+            <img src="/assets/logo-icon.svg" alt="PricingSim icon" style={{ width: 80, height: 80, marginBottom: '0.75rem' }} />
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>Square icon</p>
             <a href="/assets/logo-icon.svg" download style={{ color: '#4f46e5', fontSize: '0.875rem' }}>↓ Download SVG</a>
           </div>
@@ -116,7 +116,7 @@ export default function PressPage() {
       <section style={{ padding: '1.5rem', background: '#f5f3ff', borderRadius: 12, borderLeft: '4px solid #4f46e5' }}>
         <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>Media enquiries</p>
         <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
-          Email <a href="mailto:press@pricepilot.ai" style={{ color: '#4f46e5' }}>press@pricepilot.ai</a> for interviews, demos, or additional assets.
+          Email <a href="mailto:press@pricingsim.com" style={{ color: '#4f46e5' }}>press@pricingsim.com</a> for interviews, demos, or additional assets.
         </p>
       </section>
     </main>

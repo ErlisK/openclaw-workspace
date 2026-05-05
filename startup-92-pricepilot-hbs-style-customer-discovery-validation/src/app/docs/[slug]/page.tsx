@@ -8,11 +8,11 @@ const docs: Record<string, { title: string; description: string; content: string
     description: 'Get from zero to your first pricing experiment in under 10 minutes.',
     content: `
 <h2>Connect Your Data Source</h2>
-<p>PricePilot supports three connection methods:</p>
+<p>PricingSim supports three connection methods:</p>
 <h3>Stripe (API)</h3>
-<p>Go to <strong>Settings → Connections</strong> and paste your Stripe API key (test or live). PricePilot validates the key and imports your last 200 charges automatically.</p>
+<p>Go to <strong>Settings → Connections</strong> and paste your Stripe API key (test or live). PricingSim validates the key and imports your last 200 charges automatically.</p>
 <h3>Gumroad / Shopify CSV</h3>
-<p>Export a CSV from your platform's dashboard, then drag it onto the <strong>Import</strong> page. PricePilot auto-detects the column format and maps fields.</p>
+<p>Export a CSV from your platform's dashboard, then drag it onto the <strong>Import</strong> page. PricingSim auto-detects the column format and maps fields.</p>
 <h3>Generic CSV</h3>
 <p>Any CSV with <code>Date</code>, <code>Product Name</code>, and <code>Amount</code> columns works. See the <a href="/import/guide">CSV guide</a> for the full field mapping.</p>
 
@@ -26,7 +26,7 @@ const docs: Record<string, { title: string; description: string; content: string
 
 <h2>Create an Experiment</h2>
 <p>Pick a suggestion and click <strong>Create Experiment</strong>. This generates a public A/B page at <code>/x/&lt;your-experiment-slug&gt;</code>.</p>
-<p>Share the link on your sales channels. PricePilot tracks conversions on both variants.</p>
+<p>Share the link on your sales channels. PricingSim tracks conversions on both variants.</p>
 
 <hr />
 
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const doc = docs[slug]
   if (!doc) return { title: 'Not Found' }
-  return { title: `${doc.title} — PricePilot Docs`, description: doc.description }
+  return { title: `${doc.title} — PricingSim Docs`, description: doc.description }
 }
 
 export default async function DocsPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -57,7 +57,7 @@ export default async function DocsPostPage({ params }: { params: Promise<{ slug:
   return (
     <main style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>PricingSim</Link>
         <span style={{ color: '#d1d5db' }}>›</span>
         <Link href="/docs" style={{ color: '#6b7280', fontSize: '0.875rem', textDecoration: 'none' }}>Docs</Link>
       </div>

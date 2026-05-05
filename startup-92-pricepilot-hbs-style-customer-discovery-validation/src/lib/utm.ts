@@ -1,12 +1,12 @@
 /**
- * UTM link builder for PricePilot launch campaigns.
+ * UTM link builder for PricingSim launch campaigns.
  *
  * Usage:
  *   utm({ source: 'producthunt', medium: 'referral', campaign: 'launch' })
  *   // → "?utm_source=producthunt&utm_medium=referral&utm_campaign=launch"
  *
- *   utmUrl('https://pricepilot.app/pricing', { source: 'twitter', medium: 'social', campaign: 'launch_week1' })
- *   // → "https://pricepilot.app/pricing?utm_source=twitter&utm_medium=social&utm_campaign=launch_week1"
+ *   utmUrl('https://pricingsim.com/pricing', { source: 'twitter', medium: 'social', campaign: 'launch_week1' })
+ *   // → "https://pricingsim.com/pricing?utm_source=twitter&utm_medium=social&utm_campaign=launch_week1"
  */
 
 export interface UTMParams {
@@ -47,7 +47,7 @@ export function utmUrl(base: string, params: UTMParams): string {
  * Pre-built campaign links for all launch channels.
  * All point to the live Vercel deployment.
  */
-const BASE = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE = 'https://pricingsim.com'
 
 export const CAMPAIGN_LINKS = {
   // ── Homepage CTAs ───────────────────────────────────────────────────────

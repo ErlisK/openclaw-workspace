@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Documentation — PricePilot',
-  description: 'Guides and reference for PricePilot — pricing experiments, connectors, and the Bayesian engine.',
+  title: 'Documentation — PricingSim',
+  description: 'Guides and reference for PricingSim — pricing experiments, connectors, and the Bayesian engine.',
 }
 
 const docPages = [
@@ -15,11 +15,11 @@ export default function DocsPage() {
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '0.5rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Documentation</h1>
       <p style={{ color: '#6b7280', marginBottom: '2.5rem' }}>
-        Everything you need to get started and make the most of PricePilot.
+        Everything you need to get started and make the most of PricingSim.
       </p>
 
       <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
@@ -45,9 +45,9 @@ export default function DocsPage() {
 
       <div style={{ marginTop: '2.5rem', padding: '1.25rem', background: '#f9fafb', borderRadius: 10, fontSize: '0.9rem' }}>
         <strong>Need help?</strong> Reach us at{' '}
-        <a href="mailto:support@pricepilot.ai" style={{ color: 'var(--brand, #4f46e5)' }}>support@pricepilot.ai</a>
+        <a href="mailto:hello@pricingsim.com" style={{ color: 'var(--brand, #4f46e5)' }}>hello@pricingsim.com</a>
         {' '}or join the community on{' '}
-        <a href="https://discord.gg/pricepilot" style={{ color: 'var(--brand, #4f46e5)' }}>Discord</a>.
+        <a href="https://discord.gg/pricingsim" style={{ color: 'var(--brand, #4f46e5)' }}>Discord</a>.
       </div>
     </main>
   )

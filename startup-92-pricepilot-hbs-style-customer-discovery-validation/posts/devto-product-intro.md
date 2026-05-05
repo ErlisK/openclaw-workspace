@@ -1,20 +1,20 @@
 ---
 title: "I Built a Pricing Experiment Tool for Solo Founders — Here's What I Learned"
-description: "PricePilot uses Bayesian inference to help indie creators safely test higher prices. A product intro covering the why, what, and how."
+description: "PricingSim uses Bayesian inference to help indie creators safely test higher prices. A product intro covering the why, what, and how."
 tags: ["saas", "webdev", "startup", "beginners"]
-canonical_url: "https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/building-pricepilot-product-intro"
-cover_image: "https://startup-92-pricepilot-hbs-style-cus.vercel.app/assets/screenshot-pricing.png"
+canonical_url: "https://pricingsim.com/blog/building-pricepilot-product-intro"
+cover_image: "https://pricingsim.com/assets/screenshot-pricing.png"
 ---
 
 Six months ago, I talked to 40 solo founders about pricing. Every single one had the same answer when I asked if they'd ever tested their prices:
 
 *"No. I'm scared of losing customers."*
 
-I built PricePilot to solve that.
+I built PricingSim to solve that.
 
-## What PricePilot Does
+## What PricingSim Does
 
-PricePilot is a web app that helps solo creators — Notion template sellers, micro-SaaS founders, course creators — run safe pricing experiments. Connect your Stripe, Gumroad, or Shopify store, and the app:
+PricingSim is a web app that helps solo creators — Notion template sellers, micro-SaaS founders, course creators — run safe pricing experiments. Connect your Stripe, Gumroad, or Shopify store, and the app:
 
 1. Analyzes your last 90 days of sales data
 2. Estimates your price elasticity of demand using Bayesian inference
@@ -39,7 +39,7 @@ Bayesian inference doesn't ask "is this significant at p < 0.05?" It asks: "Give
 
 That's a much more useful question, and it's answerable with 20–40 data points instead of 1,000.
 
-PricePilot models your conversion rate at each price as a probability distribution (Beta distribution, specifically). Each sale updates that distribution. You get an evolving confidence score — "87% confident the higher price generates more revenue" — that narrows as more data comes in.
+PricingSim models your conversion rate at each price as a probability distribution (Beta distribution, specifically). Each sale updates that distribution. You get an evolving confidence score — "87% confident the higher price generates more revenue" — that narrows as more data comes in.
 
 The engine also has a hard downside constraint: it will never recommend a test where the 5th-percentile outcome (the bad scenario) results in more than 5% revenue loss from your current baseline.
 
@@ -68,6 +68,6 @@ The engine runs entirely server-side in Next.js Route Handlers. No external ML s
 
 Free tier, no credit card required.
 
-→ **https://startup-92-pricepilot-hbs-style-cus.vercel.app**
+→ **https://pricingsim.com**
 
 I'd love to hear from indie founders who've run pricing experiments — what worked, what didn't, what you wish you'd known. Drop a comment below.

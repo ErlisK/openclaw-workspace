@@ -1,4 +1,4 @@
-# PricePilot — Pain Point Clusters
+# PricingSim — Pain Point Clusters
 *AI-Classified using Vercel AI Gateway (Claude Haiku 4.5)*
 *Analyzed: 60 verbatim signals from Reddit, HN, IndieHackers, Twitter*
 *Generated: 2025-04-24*
@@ -47,7 +47,7 @@ Solo founders intellectually know they should raise prices but are emotionally p
 - *"Raised prices once, lost 3 customers immediately, panicked and reverted within a week. Now I'm too scared to try again."*
 - *"Pricing is emotional. I literally get anxious setting prices. There has to be a better way."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Safe-Testing Framework:** Gradual rollout with micro-audience segments (10% → 25% → 50%), real-time churn tracking, one-click rollback, and confidence interval display showing predicted vs. actual customer loss at each stage.
 
 ---
@@ -64,7 +64,7 @@ Founders with <100 customers cannot use standard A/B testing tools (requiring 5,
 - *"Every AB testing tool I look at requires like 5000 visitors a month. I get 400. I give up."*
 - *"Tested $29 vs $49 manually by changing Gumroad price and tracking for 2 weeks each. Completely invalid experiment but what else am I supposed to do?"*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Bayesian Small-Sample Pricing Engine:** Applies Bayesian statistics to achieve 80%+ confidence with <50 transactions per variant. Key differentiator: designed explicitly for low-volume sellers where frequentist A/B testing is meaningless.
 
 ---
@@ -81,7 +81,7 @@ Founders lack any framework for pricing decisions and default to random numbers,
 - *"How do people actually make pricing decisions? Gut? Twitter consensus? I feel like there should be a more rigorous way."*
 - *"The pricing mistake I made for 6 months: priced based on build cost. Later raised to $299. Nothing about the product changed."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Guided Pricing Advisor:** Analyzes Stripe/Gumroad payment data to surface willingness-to-pay patterns, customer cohort LTV, and suggested price ranges with confidence scores. Replaces guesswork with data-backed recommendations.
 
 ---
@@ -98,7 +98,7 @@ Founders significantly undervalue their product relative to actual value deliver
 - *"I realized my $12 Figma kit had been downloaded 2,000 times. If I'd charged $29, same conversion rate gets me $16k more."*
 - *"$24/mo said 'this is a side project.' $89+ says 'this is real infrastructure.'"*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Value Calculator & Benchmarking:** Auto-suggest price increases based on time-savings, revenue generation, or competitive benchmarks. Includes "value gap" visualization showing the spread between current price and estimated WTP.
 
 ---
@@ -115,7 +115,7 @@ Founders use heavy discounting, sales, fake urgency, and Black Friday tactics to
 - *"I've been using fake urgency ('Only 10 spots left!') for 2 years. I hate it. I'd rather just charge the right price."*
 - *"My revenue looks like a seismograph — huge spikes on launch days, dead flat in between."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Discount Recovery Playbook:** Models the path from discount-dependent sales back to sustainable full-price evergreen revenue. Provides simulation: "if you raise base price 20% and stop discounting, projected 6-month revenue vs. current discount strategy."
 
 ---
@@ -132,7 +132,7 @@ Founders know they should raise prices on existing customers but face emotional 
 - *"Early adopters at $7/mo make me feel guilty. Logically I should raise them."*
 - *"Raised prices, communicated it badly, lost 3 great customers who said they 'felt blindsided.'"*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Customer Migration Toolkit:** Email templates by tier/cohort, segmented rollout plans, grace-period options, and communication preview. Includes "how to grandfather gracefully" playbook.
 
 ---
@@ -148,7 +148,7 @@ Pricing intelligence platforms (ProfitWell, Price Intelligently, Baremetrics) co
 - *"Baremetrics costs more than my first paying customer brought in."*
 - *"Price Intelligently cheapest plan was more than my MRR. Good for them, useless for me."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Freemium or sub-$20/mo starter plan:** Make pricing intelligence accessible to <$10K MRR founders with a free tier that provides immediate value (first insight free, first experiment free) and a paid tier that's justified by first revenue lift.
 
 ---
@@ -165,7 +165,7 @@ Founders lack clarity on whether to tier, bundle, or unbundle products; what fea
 - *"I added a $99/mo 'Pro' tier with 'advanced features' nobody asked for. Zero customers on it."*
 - *"We lost $47K in MRR because I priced for 'fairness' instead of value — flattened usage-based pricing and lost our best customers."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Tier & Bundle Optimizer:** Analyzes product-usage patterns or download/engagement data to recommend bundle composition and tier structure. Simulates revenue under different bundle scenarios.
 
 ---
@@ -181,8 +181,8 @@ Founders want to run simple price tests but lack the technical skills to route d
 - *"I want to test two prices with Stripe but the technical setup to route different users to different price IDs is above my frontend skills."*
 - *"What I want: show the new price to 10% of visitors, see if conversion holds, then roll out. Is that technically possible without an engineering team?"*
 
-**PricePilot feature implication:**  
-**One-Click Pricing A/B Setup:** Integrate with Stripe/Gumroad/Lemon Squeezy to auto-create variant pricing pages, no code required. Customer is routed via link or embed; PricePilot handles the split.
+**PricingSim feature implication:**  
+**One-Click Pricing A/B Setup:** Integrate with Stripe/Gumroad/Lemon Squeezy to auto-create variant pricing pages, no code required. Customer is routed via link or embed; PricingSim handles the split.
 
 ---
 
@@ -198,7 +198,7 @@ Gumroad, Lemon Squeezy, Stripe, and other payment platforms offer no pricing int
 - *"Lemon Squeezy has great billing but their analytics are almost nonexistent."*
 - *"I downloaded my Gumroad CSV and tried to analyze it in Google Sheets. Spent 3 hours, concluded nothing useful, gave up."*
 
-**PricePilot feature implication:**  
+**PricingSim feature implication:**  
 **Native Payment Platform Integration & Dashboard:** Pull Stripe/Gumroad/Lemon Squeezy data and surface actionable pricing insights not available in the native platforms. CSV upload as fallback for platforms with no API.
 
 ---
@@ -232,7 +232,7 @@ Gumroad, Lemon Squeezy, Stripe, and other payment platforms offer no pricing int
 
 ---
 
-## PricePilot MVP Feature Mapping
+## PricingSim MVP Feature Mapping
 
 Based on cluster severity and interdependencies, the **minimum viable product** must address the CRITICAL triad:
 

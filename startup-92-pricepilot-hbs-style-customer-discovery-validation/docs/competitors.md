@@ -1,4 +1,4 @@
-# PricePilot — Competitor Matrix
+# PricingSim — Competitor Matrix
 *HBS Discovery Phase — Competitive Landscape*
 *Last updated: 2025-04-24 — enriched with live pricing data from competitor pages*
 
@@ -6,7 +6,7 @@
 
 ## Summary: The White Space
 
-No existing tool combines all five of: (1) works with one-time sales + subscriptions, (2) Bayesian/low-signal elasticity engine, (3) one-click A/B experiment pages, (4) rollback & safety rails, (5) pricing accessible to <$10k MRR founders. **That gap is PricePilot's beachhead.**
+No existing tool combines all five of: (1) works with one-time sales + subscriptions, (2) Bayesian/low-signal elasticity engine, (3) one-click A/B experiment pages, (4) rollback & safety rails, (5) pricing accessible to <$10k MRR founders. **That gap is PricingSim's beachhead.**
 
 ---
 
@@ -41,7 +41,7 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
 - **Positioning:** "Free SaaS metrics, sell Retain (dunning) and Pricing (research) as upsells"
 - **Live pricing (scraped):** ProfitWell Metrics is free; Paddle charges 5% + $0.50/transaction for billing. Paddle pricing page confirms: "Pay-as-you-go: 5% + 50¢ per Checkout transaction" with "Custom pricing for rapidly scaling businesses."
 - **What they do well:** Subscription metric benchmarking, willingness-to-pay surveys via their panel
-- **What's missing for PricePilot's segment:** 
+- **What's missing for PricingSim's segment:** 
   - Requires subscription data (won't work with Gumroad one-time sales)
   - The "Pricing" product is a research consultancy, not a self-serve experiment engine
   - No A/B experiment scaffolding; no rollback
@@ -58,20 +58,20 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
   - No A/B testing or experiment management
   - $75/mo starting price is steep when MRR is $1–2k (that's 3–7% of revenue)
   - Requires Stripe subscription data; Gumroad integration is limited
-- **Relevance to PricePilot:** Clear complement, not competitor; PricePilot can integrate Baremetrics data as a signal source
+- **Relevance to PricingSim:** Clear complement, not competitor; PricingSim can integrate Baremetrics data as a signal source
 
 ### ChartMogul
 - **Positioning:** "Your SaaS metrics, finally trustworthy. One source of truth for MRR, ARR, and churn."
 - **Live pricing (scraped):** **Free up to $10K MRR** (1 billing source, 3 team members). Starter plan at **$59/mo** (annual) for up to $120K ARR. Pro at **$99/mo** (annual). Enterprise from $19,900/yr.
-- **Key differentiator vs PricePilot:** ChartMogul has the most generous free tier in the space and genuinely serves early-stage founders. However:
+- **Key differentiator vs PricingSim:** ChartMogul has the most generous free tier in the space and genuinely serves early-stage founders. However:
   - Still analytics-only; no pricing recommendation engine
   - No A/B experiment scaffolding or rollback
   - Subscription-biased; poor fit for one-time digital product sellers
   - No Gumroad integration (Stripe, Chargebee, Paddle only)
-- **Competitive implication:** ChartMogul free tier is direct competition for PricePilot's onboarding hook; PricePilot must differentiate on *action*, not just metrics
+- **Competitive implication:** ChartMogul free tier is direct competition for PricingSim's onboarding hook; PricingSim must differentiate on *action*, not just metrics
 
 ### Gumroad (Native Features)
-- **Target users:** Exactly PricePilot's segment
+- **Target users:** Exactly PricingSim's segment
 - **Live pricing (scraped):** 10% flat fee per transaction. No monthly subscription. Features include: customizable store, memberships, subscriptions, "pay what you want", discount codes, bundles/upsells. Customer testimonials emphasize simplicity: *"I upload a file, set a price, and I can start selling."*
 - **What's critically missing:**
   - Zero pricing intelligence or analytics beyond "here are your sales"
@@ -79,26 +79,26 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
   - No cohort analysis or LTV calculation
   - No way to roll out a price change to a subset of visitors
   - No rollback capability
-- **Strategic implication:** Gumroad's 4M+ creators are the PricePilot TAM. PricePilot integrates *on top* of Gumroad via CSV export + API
+- **Strategic implication:** Gumroad's 4M+ creators are the PricingSim TAM. PricingSim integrates *on top* of Gumroad via CSV export + API
 
 ### Lemon Squeezy
-- **Target users:** Indie SaaS + digital product creators (very close to PricePilot target)
+- **Target users:** Indie SaaS + digital product creators (very close to PricingSim target)
 - **Live pricing (scraped):** Transaction fee model: Starter at 5% + $0.50/txn. Features include: per-seat pricing, usage-based billing, license key management, digital downloads, no-code checkout, bundles/upsells, coupon codes, real-time revenue insights (MRR, refunds, AOV), AI fraud protection. Testimonials highlight fast setup and all-in-one convenience.
 - **What's critically missing:** Despite listing "real-time revenue insights", the analytics are basic — MRR, refunds, AOV. No pricing recommendation engine, no price elasticity analysis, no A/B experiment framework.
-- **Note:** Acquired by Stripe in 2024; future product roadmap may expand analytics, making PricePilot's window of differentiation time-sensitive.
+- **Note:** Acquired by Stripe in 2024; future product roadmap may expand analytics, making PricingSim's window of differentiation time-sensitive.
 
 ### Shopify (+ third-party A/B apps)
 - **Target users:** E-commerce merchants
-- **Close, but no cigar:** Has pricing flexibility and some A/B apps (Neat A/B Testing, Shoplift, Intelligems). Intelligems is closest to PricePilot's value prop for Shopify — it tests price points with traffic splits. However:
+- **Close, but no cigar:** Has pricing flexibility and some A/B apps (Neat A/B Testing, Shoplift, Intelligems). Intelligems is closest to PricingSim's value prop for Shopify — it tests price points with traffic splits. However:
   - Shopify-only; no Gumroad/Stripe/Lemon Squeezy
   - Requires Shopify plan ($29–$299/mo just for the platform)
   - Physical product / e-commerce framing; not built for digital-only creators
   - No Bayesian engine; relies on frequentist significance
-- **PricePilot opportunity:** Shopify store owners selling digital products or consulting add-ons are a secondary segment
+- **PricingSim opportunity:** Shopify store owners selling digital products or consulting add-ons are a secondary segment
 
 ### Convert.com
 - **Live pricing (scraped):** $199/mo for 200K tested users/month. Counts "tested users" as unique visitors bucketed into active experiments. Will not cancel for traffic spikes.
-- **Why it fails for PricePilot's segment:**
+- **Why it fails for PricingSim's segment:**
   - $199/mo is 10–40% of monthly revenue for the target segment — non-starter
   - Traffic-based pricing model is irrelevant for low-volume digital product sellers
   - Frequentist stats; needs high conversion volume to produce significance
@@ -116,11 +116,11 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
 ### LaunchDarkly
 - **What it does:** Feature flag management and progressive delivery for engineering teams
 - **Why it's used as a pricing proxy:** Teams use feature flags to roll out new price IDs to a % of users, enabling gradual price changes without full deployment
-- **Why it fails for PricePilot's target:** Requires engineering team to implement; no pricing intelligence layer; no recommendations; pricing starts ~$12/seat/mo but effectively requires a developer to operate; not a solo-founder tool
+- **Why it fails for PricingSim's target:** Requires engineering team to implement; no pricing intelligence layer; no recommendations; pricing starts ~$12/seat/mo but effectively requires a developer to operate; not a solo-founder tool
 
 ### Lago / Stigg / Maxio / Chargebee
 - **Category:** Billing infrastructure and subscription management
-- **Why they're irrelevant for PricePilot's core segment:**
+- **Why they're irrelevant for PricingSim's core segment:**
   - Engineering-heavy setup (Lago, Stigg)
   - Priced for teams, not solo founders
   - Feature entitlement management ≠ pricing optimization
@@ -141,13 +141,13 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
                          |  Baremetrics  ChartMogul
                          |  Maxio  Chargebee
                          |
-   Lago  Stigg           |    [PricePilot HERE]
+   Lago  Stigg           |    [PricingSim HERE]
    (dev tools)           |
                          |  Gumroad  LemonSqueezy
                     LOW PRICE
 ```
 
-**PricePilot occupies:** Low-to-mid price ($29–$99/mo), deeply indie/solo-focused, with unique action layer (experiments, rollback, Bayesian recommendations) that nobody in this quadrant has.
+**PricingSim occupies:** Low-to-mid price ($29–$99/mo), deeply indie/solo-focused, with unique action layer (experiments, rollback, Bayesian recommendations) that nobody in this quadrant has.
 
 ---
 
@@ -155,7 +155,7 @@ No existing tool combines all five of: (1) works with one-time sales + subscript
 
 1. **The action gap is real:** Every existing tool is either analytics (show data) or billing infrastructure (process payments). Nobody connects data → recommendation → experiment → rollback in one flow for this segment.
 
-2. **Price ceiling is real:** The market has trained solo founders to expect $0–$29/mo for analytics tools. PricePilot must demonstrate ROI (e.g., "pays for itself in 2 days of revenue lift") to justify $49–$99/mo.
+2. **Price ceiling is real:** The market has trained solo founders to expect $0–$29/mo for analytics tools. PricingSim must demonstrate ROI (e.g., "pays for itself in 2 days of revenue lift") to justify $49–$99/mo.
 
 3. **Integration moat:** Deep integrations with Gumroad, Lemon Squeezy, and Stripe CSV import create switching costs that dashboards-only tools can't replicate.
 

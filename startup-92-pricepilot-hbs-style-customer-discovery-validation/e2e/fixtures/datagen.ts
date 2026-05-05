@@ -56,7 +56,7 @@ export interface DemoDataFull extends DemoDataSummary {
   }>
 }
 
-const BASE_URL = process.env.BASE_URL ?? 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = process.env.BASE_URL ?? 'https://pricingsim.com'
 
 export async function getDemoSummary(
   request: APIRequestContext,

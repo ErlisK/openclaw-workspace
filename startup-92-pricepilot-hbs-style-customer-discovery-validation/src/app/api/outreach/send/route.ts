@@ -10,8 +10,8 @@ import { createClient } from '@supabase/supabase-js'
 
 const AGENTMAIL_API_KEY = process.env.AGENTMAIL_API_KEY!
 const FROM_EMAIL = 'scide-founder@agentmail.to'
-const FROM_NAME  = 'Erlis @ PricePilot'
-const BASE_URL   = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const FROM_NAME  = 'Erlis @ PricingSim'
+const BASE_URL   = 'https://pricingsim.com'
 
 function getSupabaseAdmin() {
   return createClient(
@@ -29,7 +29,7 @@ async function sendEmail(to: string, subject: string, body: string): Promise<{ s
     subject,
     text: body,
     // Add a plain-text footer with unsubscribe instruction
-    text_footer: `\n\n---\nYou received this because PricePilot's founder reached out personally. Reply to this email or visit ${BASE_URL} to learn more. To opt out, reply "unsubscribe".`,
+    text_footer: `\n\n---\nYou received this because PricingSim's founder reached out personally. Reply to this email or visit ${BASE_URL} to learn more. To opt out, reply "unsubscribe".`,
   }
 
   const resp = await fetch(`https://api.agentmail.to/v0/inboxes/${inboxId}/messages`, {

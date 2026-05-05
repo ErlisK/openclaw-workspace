@@ -1,4 +1,4 @@
-# PricePilot — Customer Journey Map & UX Wireframes
+# PricingSim — Customer Journey Map & UX Wireframes
 *HBS Steps 3–4 | Primary Personas: Maya (Gumroad) + Marcus (Stripe)*
 *Last updated: 2025-04-24*
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-PricePilot's core user journey has **7 stages** mapping directly to the product's value chain. Each stage is documented with: user mental model, key actions, friction points, and UX wireframe description.
+PricingSim's core user journey has **7 stages** mapping directly to the product's value chain. Each stage is documented with: user mental model, key actions, friction points, and UX wireframe description.
 
 ```
 DISCOVER → CONNECT → ANALYZE → SIMULATE → EXPERIMENT → MONITOR → ROLLBACK/COMMIT
@@ -17,7 +17,7 @@ DISCOVER → CONNECT → ANALYZE → SIMULATE → EXPERIMENT → MONITOR → ROL
 ## Journey Stage 1: DISCOVER
 
 ### User Mental Model
-Maya just had a viral Gumroad post and watched $1,800 in sales happen when she suspects $29 could have made $5,100. She Googles "how to test pricing on Gumroad" and finds nothing useful. Sees a tweet from another creator: "Used PricePilot to test my Gumroad price — it just worked."
+Maya just had a viral Gumroad post and watched $1,800 in sales happen when she suspects $29 could have made $5,100. She Googles "how to test pricing on Gumroad" and finds nothing useful. Sees a tweet from another creator: "Used PricingSim to test my Gumroad price — it just worked."
 
 Marcus has been reading the same r/SaaS thread for the 6th time this month. A customer emailed him saying they'd "pay twice as much." He's about to try to build something himself in Stripe.
 
@@ -30,7 +30,7 @@ Marcus has been reading the same r/SaaS thread for the 6th time this month. A cu
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  PricePilot                                    [Sign in]  [Start free] │
+│  PricingSim                                    [Sign in]  [Start free] │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │  Test a higher price.           ←── Hero headline
@@ -38,7 +38,7 @@ Marcus has been reading the same r/SaaS thread for the 6th time this month. A cu
 │                                                                         │
 │  ┌──────────────────────────────────────────────────────┐             │
 │  │ 📈 "Tested $12 vs $29 on my Notion template.         │             │
-│  │     PricePilot said $29 wins. Revenue up 41%."       │             │
+│  │     PricingSim said $29 wins. Revenue up 41%."       │             │
 │  │                               — @traf_notiontemplate │             │
 │  └──────────────────────────────────────────────────────┘             │
 │                                                                         │
@@ -146,7 +146,7 @@ Step 2: Plan selection
 │  │ Sales velocity:        ~65/mo  ↑ trending              │            │
 │  │                                                        │            │
 │  │ ⚠️  Low volume detected: 65 sales/mo                  │            │
-│  │    PricePilot will use Bayesian estimation             │            │
+│  │    PricingSim will use Bayesian estimation             │            │
 │  │    to give you results with as few as 30 sales.        │            │
 │  └──────────────────────────────────────────────────────┘            │
 │                                                                        │
@@ -189,7 +189,7 @@ Marcus: "Show me my cohort data. What do my best customers look like vs. my chur
 │                                                                        │
 │  💡 PRICE RECOMMENDATION                                              │
 │  ┌──────────────────────────────────────────────────────┐            │
-│  │  PricePilot recommends testing:  $12  vs  $29        │            │
+│  │  PricingSim recommends testing:  $12  vs  $29        │            │
 │  │                                                        │            │
 │  │  Projected outcome at 90-day mark:                    │            │
 │  │  ┌────────────────┬──────────────┐                   │            │
@@ -327,7 +327,7 @@ Both personas: "Tell me when you have a result. Don't make me check every day."
 
 **Email notification when confidence ≥ 90%:**
 ```
-Subject: 🎯 PricePilot result: $29 wins with 91% confidence
+Subject: 🎯 PricingSim result: $29 wins with 91% confidence
 
 Your experiment is done.
 

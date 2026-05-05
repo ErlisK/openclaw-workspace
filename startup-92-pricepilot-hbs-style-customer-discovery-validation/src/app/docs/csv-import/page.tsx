@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'CSV Import Guide — PricePilot',
-  description: 'How to import transaction data via CSV into PricePilot.',
+  title: 'CSV Import Guide — PricingSim',
+  description: 'How to import transaction data via CSV into PricingSim.',
 }
 
 const platforms = [

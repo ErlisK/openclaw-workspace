@@ -1,5 +1,5 @@
 /**
- * PricePilot Bayesian Elasticity Engine v0
+ * PricingSim Bayesian Elasticity Engine v0
  * Model: log(Q/Q_ref) = ε·log(P/P_ref) + noise
  * Prior: ε ~ Normal(-1.0, 0.5²), σ² ~ InvGamma(3, 0.5)
  * Conservative rule: maximize E[R] s.t. p05(R) >= R_ref * 0.95

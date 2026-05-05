@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { SiteFooter } from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'PricePilot for Stripe Users — Safe Pricing Experiments',
-  description: 'Your Stripe data is worth more than you think. PricePilot reads your transaction history and finds the safest price to test next.',
+  title: 'PricingSim for Stripe Users — Safe Pricing Experiments',
+  description: 'Your Stripe data is worth more than you think. PricingSim reads your transaction history and finds the safest price to test next.',
 }
 
 export default function ForStripeUsersPage() {
@@ -12,7 +12,7 @@ export default function ForStripeUsersPage() {
     <>
       <main style={{ minHeight: '100vh', background: '#fafafa', fontFamily: 'system-ui, sans-serif' }}>
         <nav style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', background: '#fff' }}>
-          <Link href="/" style={{ fontWeight: 800, fontSize: '1.125rem', color: '#6c47ff', textDecoration: 'none' }}>PricePilot</Link>
+          <Link href="/" style={{ fontWeight: 800, fontSize: '1.125rem', color: '#6c47ff', textDecoration: 'none' }}>PricingSim</Link>
           <Link href="/signup" style={{ background: '#6c47ff', color: '#fff', padding: '0.5rem 1.25rem', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem' }}>Connect Stripe Free →</Link>
         </nav>
 
@@ -24,7 +24,7 @@ export default function ForStripeUsersPage() {
             Your Stripe data is worth<br />more than you think
           </h1>
           <p style={{ fontSize: '1.2rem', color: '#4b5563', lineHeight: 1.6, marginBottom: '2.5rem', maxWidth: 560, margin: '0 auto 2.5rem' }}>
-            PricePilot reads your Stripe transaction history and finds the safest, highest-revenue price to test next — with one-click rollback if conversion drops.
+            PricingSim reads your Stripe transaction history and finds the safest, highest-revenue price to test next — with one-click rollback if conversion drops.
           </p>
           <Link href="/signup?utm_source=ad&utm_medium=cpc&utm_campaign=stripe-lp&utm_content=hero_cta" style={{ background: '#6c47ff', color: '#fff', padding: '0.9rem 2.5rem', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '1.1rem', display: 'inline-block' }}>
             Connect Stripe Free →

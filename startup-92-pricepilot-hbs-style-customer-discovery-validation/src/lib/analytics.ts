@@ -7,7 +7,7 @@
  *   import { track } from '@/lib/analytics'
  *   track('import_started', { source: 'stripe-csv' })
  *
- * Supported events (custom PricePilot events):
+ * Supported events (custom PricingSim events):
  *   import_started          – user clicks import / starts upload
  *   import_completed        – import API returned success
  *   suggestion_created      – engine generated a price suggestion

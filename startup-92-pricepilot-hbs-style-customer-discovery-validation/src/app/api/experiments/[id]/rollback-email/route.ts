@@ -132,7 +132,7 @@ Subject max 60 chars. Body is plain text with line breaks as \\n.`
         },
         body: JSON.stringify({
           to: [{ email: toEmail }],
-          from: { email: fromEmail, name: 'PricePilot (via your account)' },
+          from: { email: fromEmail, name: 'PricingSim (via your account)' },
           subject,
           text: emailBody,
         }),

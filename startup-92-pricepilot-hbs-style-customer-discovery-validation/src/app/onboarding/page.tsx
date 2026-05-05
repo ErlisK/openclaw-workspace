@@ -65,7 +65,7 @@ export default function OnboardingPage() {
   return (
     <main style={{ maxWidth: 700, margin: '0 auto', padding: '2rem 1rem' }}>
       <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-        🚀 Getting Started with PricePilot
+        🚀 Getting Started with PricingSim
       </h1>
       <p style={{ color: 'var(--text-secondary, #666)', marginBottom: '1.5rem' }}>
         Complete these steps to run your first pricing experiment and start growing revenue.

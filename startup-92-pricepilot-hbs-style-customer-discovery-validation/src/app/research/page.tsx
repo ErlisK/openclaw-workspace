@@ -10,7 +10,7 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
 export const metadata: Metadata = {
-  title: 'Pricing Research — Public Signals | PricePilot',
+  title: 'Pricing Research — Public Signals | PricingSim',
   description: 'Weekly-scraped pricing discussions from Hacker News, Product Hunt and the indie SaaS community, clustered by theme.',
 }
 export const dynamic = 'force-dynamic'
@@ -114,7 +114,7 @@ export default async function ResearchPage() {
       <div style={{ borderBottom: '1px solid #1e1e3f', padding: '1.25rem 2rem', background: '#0f0f23' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <a href="/" style={{ color: '#6366f1', fontWeight: 800, fontSize: '1rem', textDecoration: 'none' }}>PricePilot</a>
+            <a href="/" style={{ color: '#6366f1', fontWeight: 800, fontSize: '1rem', textDecoration: 'none' }}>PricingSim</a>
             <span style={{ color: '#374151', margin: '0 0.5rem' }}>›</span>
             <span style={{ color: '#9ca3af', fontSize: '0.9rem', fontWeight: 600 }}>Pricing Research</span>
           </div>

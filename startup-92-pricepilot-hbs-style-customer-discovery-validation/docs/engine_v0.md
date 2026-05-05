@@ -1,4 +1,4 @@
-# PricePilot — Bayesian Elasticity Engine v0 Math Spec
+# PricingSim — Bayesian Elasticity Engine v0 Math Spec
 *Precise specification for the pricing recommendation engine*
 *Last updated: 2025-04-24*
 

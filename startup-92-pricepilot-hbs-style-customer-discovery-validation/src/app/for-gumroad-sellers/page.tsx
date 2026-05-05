@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { SiteFooter } from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'PricePilot for Gumroad Sellers — Find Your Optimal Price',
+  title: 'PricingSim for Gumroad Sellers — Find Your Optimal Price',
   description: 'Gumroad creator? Find out if your pricing is leaving money on the table. Upload your CSV and model price elasticity in minutes.',
 }
 
@@ -12,7 +12,7 @@ export default function ForGumroadSellersPage() {
     <>
       <main style={{ minHeight: '100vh', background: '#fafafa', fontFamily: 'system-ui, sans-serif' }}>
         <nav style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e5e7eb', background: '#fff' }}>
-          <Link href="/" style={{ fontWeight: 800, fontSize: '1.125rem', color: '#6c47ff', textDecoration: 'none' }}>PricePilot</Link>
+          <Link href="/" style={{ fontWeight: 800, fontSize: '1.125rem', color: '#6c47ff', textDecoration: 'none' }}>PricingSim</Link>
           <Link href="/signup" style={{ background: '#6c47ff', color: '#fff', padding: '0.5rem 1.25rem', borderRadius: 8, textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem' }}>Upload Your Data →</Link>
         </nav>
 
@@ -24,7 +24,7 @@ export default function ForGumroadSellersPage() {
             Is your pricing leaving<br />money on the table?
           </h1>
           <p style={{ fontSize: '1.2rem', color: '#4b5563', lineHeight: 1.6, marginBottom: '2.5rem', maxWidth: 560, margin: '0 auto 2.5rem' }}>
-            Upload your Gumroad transaction CSV — PricePilot will model your price elasticity, simulate revenue at different price points, and recommend the safest change to test first.
+            Upload your Gumroad transaction CSV — PricingSim will model your price elasticity, simulate revenue at different price points, and recommend the safest change to test first.
           </p>
           <Link href="/signup?utm_source=ad&utm_medium=cpc&utm_campaign=gumroad-lp&utm_content=hero_cta" style={{ background: '#6c47ff', color: '#fff', padding: '0.9rem 2.5rem', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '1.1rem', display: 'inline-block' }}>
             Upload Your Data →

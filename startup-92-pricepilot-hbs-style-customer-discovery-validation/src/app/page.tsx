@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { SiteFooter } from '@/components/SiteFooter'
 
-const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = 'https://pricingsim.com'
 
 const homepageJsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'PricePilot',
+    name: 'PricingSim',
     url: BASE_URL,
     logo: `${BASE_URL}/assets/logo.svg`,
     description: 'Safe Bayesian pricing experiments for solo founders and micro-SaaS sellers doing $500–$10k MRR.',
@@ -16,7 +16,7 @@ const homepageJsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'PricePilot',
+    name: 'PricingSim',
     url: BASE_URL,
     potentialAction: {
       '@type': 'SearchAction',
@@ -27,7 +27,7 @@ const homepageJsonLd = [
   {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'PricePilot',
+    name: 'PricingSim',
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web',
     url: BASE_URL,
@@ -46,7 +46,7 @@ const homepageJsonLd = [
       priceCurrency: 'USD',
       description: 'Free tier with 3 experiments. Pro at $29/month.',
     },
-    publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+    publisher: { '@type': 'Organization', name: 'PricingSim', url: BASE_URL },
   },
 ]
 
@@ -145,8 +145,8 @@ export default function HomePage() {
       <nav className="nav">
         <div className="container nav-inner">
           <span className="nav-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <img src="/assets/logo-icon.svg" alt="PricePilot" width={32} height={32} style={{ borderRadius: 8 }} />
-            PricePilot
+            <img src="/assets/logo-icon.svg" alt="PricingSim" width={32} height={32} style={{ borderRadius: 8 }} />
+            PricingSim
           </span>
           <div className="nav-links">
             <Link href="/free-audit">Free Audit</Link>
@@ -167,7 +167,7 @@ export default function HomePage() {
             <span style={{ color: 'var(--brand)' }}>Here&rsquo;s how to prove it.</span>
           </h1>
           <p style={{ fontSize: '1.2rem', color: 'var(--muted)', marginBottom: '2.5rem', maxWidth: 540, margin: '0 auto 2.5rem' }}>
-            PricePilot analyzes your Stripe transaction history and runs a Bayesian simulation to find the safest price increase your data supports — with a rollback in one click if it doesn&rsquo;t work.
+            PricingSim analyzes your Stripe transaction history and runs a Bayesian simulation to find the safest price increase your data supports — with a rollback in one click if it doesn&rsquo;t work.
           </p>
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/free-audit" className="btn btn-primary" data-testid="cta-audit-btn" style={{ padding: '0.875rem 2rem', fontSize: '1rem' }}>
@@ -230,7 +230,7 @@ export default function HomePage() {
           {/* ── /See it in action ── */}
 
           <p style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '3rem', maxWidth: 520, margin: '3rem auto 0', textAlign: 'center' }}>
-            Results vary. Estimates are model-based, not guarantees. PricePilot&apos;s recommendations are for informational purposes only and do not constitute financial or business advice.
+            Results vary. Estimates are model-based, not guarantees. PricingSim&apos;s recommendations are for informational purposes only and do not constitute financial or business advice.
           </p>
         </div>
       </main>

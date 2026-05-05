@@ -45,7 +45,7 @@ export async function requirePro(): Promise<
         error: 'Pro plan required',
         code: 'PLAN_UPGRADE_REQUIRED',
         upgrade_url: '/pricing',
-        message: 'This feature requires a PricePilot Pro subscription ($29/month). Upgrade at /pricing.',
+        message: 'This feature requires a PricingSim Pro subscription ($29/month). Upgrade at /pricing.',
       },
       { status: 403 }
     )

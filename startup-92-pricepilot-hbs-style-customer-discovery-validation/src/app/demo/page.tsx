@@ -37,7 +37,7 @@ export default function DemoPage() {
   return (
     <div className="page">
       <nav className="nav">
-        <Link href="/" className="nav-logo">PricePilot</Link>
+        <Link href="/" className="nav-logo">PricingSim</Link>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <Link href="/signup" className="btn btn-primary" style={{ fontSize: '0.875rem', padding: '0.4rem 1rem' }}>
             Try with your data →

@@ -5,7 +5,7 @@
  */
 import { NextResponse } from 'next/server'
 
-const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = 'https://pricingsim.com'
 
 const EXPECTED_SCHEMAS: Record<string, string[]> = {
   '/':                                              ['Organization', 'WebSite', 'SoftwareApplication'],
@@ -50,7 +50,7 @@ export async function GET() {
 
     try {
       const res = await fetch(`${BASE_URL}${path}`, {
-        headers: { 'User-Agent': 'PricePilot-StructuredData-Validator/1.0' },
+        headers: { 'User-Agent': 'PricingSim-StructuredData-Validator/1.0' },
         next: { revalidate: 0 },
       })
       status = res.status

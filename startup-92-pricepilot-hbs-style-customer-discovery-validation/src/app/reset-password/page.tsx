@@ -28,7 +28,7 @@ export default function ResetPasswordPage() {
     <div className="page" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
       <div style={{ width: '100%', maxWidth: 420, padding: '0 1.5rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <Link href="/" className="nav-logo" style={{ fontSize: '1.4rem' }}>🚀 PricePilot</Link>
+          <Link href="/" className="nav-logo" style={{ fontSize: '1.4rem' }}>🚀 PricingSim</Link>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '1rem' }}>Reset password</h1>
         </div>
         <div className="card">

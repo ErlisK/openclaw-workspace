@@ -1,4 +1,4 @@
-// PricePilot — Health & Launch Gate E2E Tests
+// PricingSim — Health & Launch Gate E2E Tests
 // Run: BASE_URL=https://<deployed> npx playwright test e2e/health.spec.ts
 
 import { test, expect } from '@playwright/test';

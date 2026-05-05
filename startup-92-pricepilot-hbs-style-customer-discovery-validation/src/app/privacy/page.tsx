@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — PricePilot',
-  description: 'How PricePilot collects, uses, and protects your data.',
+  title: 'Privacy Policy — PricingSim',
+  description: 'How PricingSim collects, uses, and protects your data.',
 }
 
 export default function PrivacyPage() {
@@ -11,7 +11,7 @@ export default function PrivacyPage() {
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/" className="nav-logo">🚀 PricingSim</Link>
           <div className="nav-links">
             <Link href="/terms">Terms</Link>
             <Link href="/signup">Sign up</Link>
@@ -24,7 +24,7 @@ export default function PrivacyPage() {
         <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>Effective date: June 1, 2025 · Last updated: June 1, 2025</p>
 
         <Section title="1. Who We Are">
-          <p>PricePilot ("we", "us", "our") is a pricing-experiment tool for solo creators and micro-SaaS founders. Our service is operated by PricePilot, Inc. For privacy questions, contact us at <a href="mailto:privacy@pricepilot.io">privacy@pricepilot.io</a>.</p>
+          <p>PricingSim ("we", "us", "our") is a pricing-experiment tool for solo creators and micro-SaaS founders. Our service is operated by PricingSim, Inc. For privacy questions, contact us at <a href="mailto:privacy@pricingsim.com">privacy@pricingsim.com</a>.</p>
         </Section>
 
         <Section title="2. Data We Collect">
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
 
         <Section title="3. How We Use Your Data">
           <ul>
-            <li>To provide the PricePilot service — run the pricing engine, generate suggestions, and power A/B experiment pages.</li>
+            <li>To provide the PricingSim service — run the pricing engine, generate suggestions, and power A/B experiment pages.</li>
             <li>To operate your account — authentication, billing, subscription management.</li>
             <li>To improve our product — aggregate, anonymized usage patterns.</li>
             <li>To communicate with you — transactional emails (receipts, alerts) and, with consent, product updates.</li>
@@ -72,17 +72,17 @@ export default function PrivacyPage() {
         <Section title="7. Your Rights">
           <p>Depending on your location, you may have the following rights:</p>
           <ul>
-            <li><strong>Access:</strong> Request a copy of all data we hold about you via Settings → Export my data, or by emailing privacy@pricepilot.io.</li>
+            <li><strong>Access:</strong> Request a copy of all data we hold about you via Settings → Export my data, or by emailing privacy@pricingsim.com.</li>
             <li><strong>Deletion:</strong> Delete your account and all associated data via Settings → Delete account.</li>
             <li><strong>Correction:</strong> Update your account details in Settings.</li>
             <li><strong>Portability:</strong> Export your data in JSON format at any time.</li>
-            <li><strong>Objection / Restriction:</strong> Contact us at privacy@pricepilot.io.</li>
+            <li><strong>Objection / Restriction:</strong> Contact us at privacy@pricingsim.com.</li>
           </ul>
           <p>For EU/EEA users: You have rights under GDPR. Our lawful basis for processing is <em>contract performance</em> (to provide the service you signed up for) and <em>legitimate interests</em> (analytics, security). You may withdraw consent for non-essential analytics via the cookie banner.</p>
         </Section>
 
         <Section title="8. International Data Transfers">
-          <p>PricePilot operates primarily in the United States. If you are located in the EU/EEA or UK, your data may be transferred to and processed in the US. We rely on <strong>Standard Contractual Clauses (SCCs)</strong> as the legal mechanism for such transfers, as executed with our sub-processors. You may request a copy of applicable DPAs by emailing privacy@pricepilot.io.</p>
+          <p>PricingSim operates primarily in the United States. If you are located in the EU/EEA or UK, your data may be transferred to and processed in the US. We rely on <strong>Standard Contractual Clauses (SCCs)</strong> as the legal mechanism for such transfers, as executed with our sub-processors. You may request a copy of applicable DPAs by emailing privacy@pricingsim.com.</p>
         </Section>
 
         <Section title="9. Cookies & Tracking">
@@ -94,7 +94,7 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="11. Children">
-          <p>PricePilot is not directed at children under 16. We do not knowingly collect data from anyone under 16. If you believe we have inadvertently collected such data, please contact us.</p>
+          <p>PricingSim is not directed at children under 16. We do not knowingly collect data from anyone under 16. If you believe we have inadvertently collected such data, please contact us.</p>
         </Section>
 
         <Section title="12. Changes to This Policy">
@@ -102,8 +102,8 @@ export default function PrivacyPage() {
         </Section>
 
         <Section title="13. Contact Us">
-          <p>Email: <a href="mailto:privacy@pricepilot.io">privacy@pricepilot.io</a><br />
-          Address: PricePilot, Inc., 2298 Johanna Court, Pinole, CA 94564, USA</p>
+          <p>Email: <a href="mailto:privacy@pricingsim.com">privacy@pricingsim.com</a><br />
+          Address: PricingSim, Inc., 2298 Johanna Court, Pinole, CA 94564, USA</p>
         </Section>
 
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '2rem' }}>

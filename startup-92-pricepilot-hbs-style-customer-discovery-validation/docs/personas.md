@@ -1,4 +1,4 @@
-# PricePilot — Persona Briefs & Priority Stack
+# PricingSim — Persona Briefs & Priority Stack
 *Cluster-informed, AI-assisted via Vercel AI Gateway (Claude Sonnet 4.6)*
 *Source data: 95 public signals, 10 pain clusters*
 *Last updated: 2025-04-24*
@@ -16,7 +16,7 @@
 | **#5 V2** | Alexei — Productized Consultant | Stripe payment links | $3k–$10k | ⭐⭐⭐ Post-MVP |
 
 **MVP Positioning Statement (AI-generated):**
-> *"PricePilot is the pricing experiment tool for solo creators and micro-SaaS founders who want to safely test a higher price — without needing a data team, a statistics degree, or an enterprise analytics budget."*
+> *"PricingSim is the pricing experiment tool for solo creators and micro-SaaS founders who want to safely test a higher price — without needing a data team, a statistics degree, or an enterprise analytics budget."*
 
 **First 60 Days Focus:**
 Build one core flow: connect Gumroad or Stripe → pick a product → set two prices → get a split test URL → receive a plain-English verdict when confidence crosses 90%. Ship Gumroad integration first (weeks 1–2), Stripe recurring second (weeks 3–4). Do 10 manual onboarding calls with Gumroad creators from r/Notion and IndieHackers. Instrument two north-star events: "started a test" and "saw a verdict." Do not build dashboards, cohort analysis, or tier optimization until both P0 personas have hit success metric at least 20 times.
@@ -65,13 +65,13 @@ A Reddit post or tweet about their Notion template goes viral, driving 300 sales
 - **Follows on Twitter:** @traf, @thomas_frank, @hahnbee, @JohnRush_x, @marc_louvion
 - **Buys from:** other Gumroad creators, Gumroad community recommendations
 
-### PricePilot Adoption Journey
+### PricingSim Adoption Journey
 | Stage | What Happens |
 |---|---|
-| **Discovery** | Sees a tweet from another Gumroad creator: "Used PricePilot to test $12 vs $29 on my template — $29 won and I doubled revenue with same traffic." Clicks the link out of acute FOMO. |
+| **Discovery** | Sees a tweet from another Gumroad creator: "Used PricingSim to test $12 vs $29 on my template — $29 won and I doubled revenue with same traffic." Clicks the link out of acute FOMO. |
 | **Evaluation question** | "Does this actually work with Gumroad or do I need to set up custom code?" Checks the landing page within 90 seconds for "works with Gumroad" signal. Leaves if not obvious. |
 | **Activation moment** | Connects Gumroad account, selects best-selling template, sets Test A at $12 and Test B at $29, clicks "Start Experiment." Gets a shareable test link she can drop in her next tweet. |
-| **Success metric** | PricePilot tells her "Test B ($29) is performing 23% better in revenue per visitor with 94% confidence." She raises the price with one click. Revenue goes up. She posts about it on Twitter. |
+| **Success metric** | PricingSim tells her "Test B ($29) is performing 23% better in revenue per visitor with 94% confidence." She raises the price with one click. Revenue goes up. She posts about it on Twitter. |
 | **Churn risk** | Setup takes >10 minutes or requires any code. Gets no traffic for 30 days (no traffic = no signal = no value). Tool doesn't show results clearly enough for a non-analytical person. |
 
 ### Willingness to Pay
@@ -124,10 +124,10 @@ Hits $5k MRR, realizes the business is "real money" now. Opens a spreadsheet, ca
 - **Follows on Twitter:** @levelsio, @marc_louvion, @patio11, @shl, @dannypostmaa, @tibo_maker
 - **Buys from:** other indie tools, AppSumo LTDs, Gumroad starter kits
 
-### PricePilot Adoption Journey
+### PricingSim Adoption Journey
 | Stage | What Happens |
 |---|---|
-| **Discovery** | Sees PricePilot on IndieHackers "What are you working on this week?" thread. Or a Show HN post. Clicks through because the title mentions "Bayesian pricing for small SaaS." |
+| **Discovery** | Sees PricingSim on IndieHackers "What are you working on this week?" thread. Or a Show HN post. Clicks through because the title mentions "Bayesian pricing for small SaaS." |
 | **Evaluation question** | "Does this work with Stripe subscriptions, not just one-time sales? Can I test $29 vs $49 on new signups only, while keeping existing customers at $29?" |
 | **Activation moment** | Connects Stripe, selects the $29/mo plan, sets up a price experiment showing $49/mo to 25% of new visitors, gets a tracking URL to swap on his pricing page. |
 | **Success metric** | After 3 weeks: "New customers on $49 plan are converting at 78% the rate of the $29 cohort, but revenue per new customer is up 42%. Projected 60-day revenue lift: +$1,100/mo at 80% confidence." Raises price on new signups. |
@@ -172,7 +172,7 @@ Plans a "price increase before cohort closes" announcement for the next launch. 
 ### Channel Footprint
 - **Daily reads:** Twitter/X (course creator community), ConvertKit Creator Community, Every.to
 - **Follows on Twitter:** @NathanBarry, @JustinWelsh, @AliAbdaal, @dangellareed
-- **Discovery trigger:** Twitter thread from another course creator: "I used PricePilot to test two launch prices. Here's what the data showed."
+- **Discovery trigger:** Twitter thread from another course creator: "I used PricingSim to test two launch prices. Here's what the data showed."
 
 ### Willingness to Pay
 - **Comfortable:** $29–$59/mo OR $79–$149 one-time audit

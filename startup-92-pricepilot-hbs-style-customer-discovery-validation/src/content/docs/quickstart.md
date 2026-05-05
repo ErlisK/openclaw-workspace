@@ -7,13 +7,13 @@ order: 1
 
 ## Connect Your Data Source
 
-PricePilot supports three connection methods:
+PricingSim supports three connection methods:
 
 ### Stripe (API)
-Go to **Settings → Connections** and paste your Stripe API key (test or live). PricePilot validates the key and imports your last 200 charges automatically.
+Go to **Settings → Connections** and paste your Stripe API key (test or live). PricingSim validates the key and imports your last 200 charges automatically.
 
 ### Gumroad / Shopify CSV
-Export a CSV from your platform's dashboard, then drag it onto the **Import** page. PricePilot auto-detects the column format and maps fields.
+Export a CSV from your platform's dashboard, then drag it onto the **Import** page. PricingSim auto-detects the column format and maps fields.
 
 ### Generic CSV
 Any CSV with `Date`, `Product Name`, and `Amount` columns works. See the [CSV guide](/import/guide) for the full field mapping.
@@ -39,7 +39,7 @@ The experiment page shows:
 - Variant A (your current price)
 - Variant B (the suggested price)
 
-Share the link on your sales channels. PricePilot tracks conversions on both variants.
+Share the link on your sales channels. PricingSim tracks conversions on both variants.
 
 ---
 

@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — PricePilot',
-  description: 'PricePilot Terms of Service — pricing experiments for solo founders.',
+  title: 'Terms of Service — PricingSim',
+  description: 'PricingSim Terms of Service — pricing experiments for solo founders.',
 }
 
 export default function TermsPage() {
@@ -11,7 +11,7 @@ export default function TermsPage() {
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/" className="nav-logo">🚀 PricingSim</Link>
           <div className="nav-links">
             <Link href="/privacy">Privacy</Link>
             <Link href="/signup">Sign up</Link>
@@ -24,17 +24,17 @@ export default function TermsPage() {
         <p style={{ color: 'var(--muted)', marginBottom: '2rem' }}>Effective date: June 1, 2025 · Last updated: June 1, 2025</p>
 
         <Section title="1. Agreement to Terms">
-          <p>By creating an account or using PricePilot ("Service"), you agree to these Terms of Service ("Terms") between you and PricePilot, Inc. ("we", "us", "our"). If you do not agree, do not use the Service.</p>
+          <p>By creating an account or using PricingSim ("Service"), you agree to these Terms of Service ("Terms") between you and PricingSim, Inc. ("we", "us", "our"). If you do not agree, do not use the Service.</p>
         </Section>
 
         <Section title="2. Description of Service">
-          <p>PricePilot is a pricing-experiment tool that connects to your payment platforms (Stripe, Gumroad, Shopify), analyzes your sales data using Bayesian statistical methods, and proposes pricing experiments to help you test whether higher prices increase revenue.</p>
+          <p>PricingSim is a pricing-experiment tool that connects to your payment platforms (Stripe, Gumroad, Shopify), analyzes your sales data using Bayesian statistical methods, and proposes pricing experiments to help you test whether higher prices increase revenue.</p>
         </Section>
 
         <div style={{ background: '#fffbeb', border: '2px solid #fbbf24', borderRadius: '0.75rem', padding: '1.25rem 1.5rem', marginBottom: '2rem' }}>
           <h2 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#92400e', marginBottom: '0.75rem' }}>⚠️ NOT FINANCIAL OR BUSINESS ADVICE</h2>
           <p style={{ color: '#92400e', lineHeight: 1.7 }}>
-            PricePilot provides automated pricing suggestions based on statistical analysis of your transaction data. These suggestions are <strong>estimates only</strong> and do not constitute financial, business, legal, or professional advice of any kind. Results vary based on market conditions, product quality, competitive landscape, and many other factors beyond our analysis. <strong>You are solely responsible for all pricing decisions and their business consequences.</strong> Always apply your own judgment and consult qualified professionals for important business decisions.
+            PricingSim provides automated pricing suggestions based on statistical analysis of your transaction data. These suggestions are <strong>estimates only</strong> and do not constitute financial, business, legal, or professional advice of any kind. Results vary based on market conditions, product quality, competitive landscape, and many other factors beyond our analysis. <strong>You are solely responsible for all pricing decisions and their business consequences.</strong> Always apply your own judgment and consult qualified professionals for important business decisions.
           </p>
         </div>
 
@@ -60,13 +60,13 @@ export default function TermsPage() {
         </Section>
 
         <Section title="6. Subscription & Billing">
-          <p>PricePilot offers a free tier with limited features and a paid Pro plan billed monthly via Stripe. Prices are shown at the time of subscription. We reserve the right to change prices with 30 days' notice.</p>
+          <p>PricingSim offers a free tier with limited features and a paid Pro plan billed monthly via Stripe. Prices are shown at the time of subscription. We reserve the right to change prices with 30 days' notice.</p>
           <p>Subscriptions auto-renew until cancelled. You may cancel at any time via Settings → Billing; cancellation takes effect at the end of the current billing period. No refunds are provided for partial periods.</p>
           <p>During the beta period, we may offer discounts or extended trials at our discretion.</p>
         </Section>
 
         <Section title="7. Intellectual Property">
-          <p>PricePilot and its underlying technology are owned by PricePilot, Inc. We grant you a limited, non-exclusive, non-transferable license to use the Service as described herein. You retain all rights to your own data.</p>
+          <p>PricingSim and its underlying technology are owned by PricingSim, Inc. We grant you a limited, non-exclusive, non-transferable license to use the Service as described herein. You retain all rights to your own data.</p>
         </Section>
 
         <Section title="8. Disclaimer of Warranties">
@@ -78,7 +78,7 @@ export default function TermsPage() {
         </Section>
 
         <Section title="10. Indemnification">
-          <p>You agree to indemnify and hold harmless PricePilot, Inc. from any claims, damages, or expenses arising from your use of the Service, violation of these Terms, or infringement of any third-party rights.</p>
+          <p>You agree to indemnify and hold harmless PricingSim, Inc. from any claims, damages, or expenses arising from your use of the Service, violation of these Terms, or infringement of any third-party rights.</p>
         </Section>
 
         <Section title="11. Termination">
@@ -94,8 +94,8 @@ export default function TermsPage() {
         </Section>
 
         <Section title="14. Contact">
-          <p>Email: <a href="mailto:legal@pricepilot.io">legal@pricepilot.io</a><br />
-          Address: PricePilot, Inc., 2298 Johanna Court, Pinole, CA 94564, USA</p>
+          <p>Email: <a href="mailto:hello@pricingsim.com">hello@pricingsim.com</a><br />
+          Address: PricingSim, Inc., 2298 Johanna Court, Pinole, CA 94564, USA</p>
         </Section>
 
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '2rem', marginTop: '2rem' }}>

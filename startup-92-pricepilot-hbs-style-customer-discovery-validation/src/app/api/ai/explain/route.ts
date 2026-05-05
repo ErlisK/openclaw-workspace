@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     ? `$${(suggestion.proj_monthly_lift_p50 / 100).toFixed(0)}/month`
     : 'unknown'
 
-  const prompt = `You are PricePilot, a pricing coach for solo creators and micro-SaaS founders. 
+  const prompt = `You are PricingSim, a pricing coach for solo creators and micro-SaaS founders. 
 Explain this pricing recommendation in plain English for a non-technical founder.
 
 Product: ${productName}

@@ -159,7 +159,7 @@ async function updatePersonas(
           key_signals: z.array(z.string()).describe('2-3 behavioral signals'),
         })).describe('One persona per dominant cluster theme'),
       }),
-      prompt: `You are a B2B SaaS customer researcher for PricePilot, a pricing experiment tool.
+      prompt: `You are a B2B SaaS customer researcher for PricingSim, a pricing experiment tool.
 Based on this week's public pricing discussion signals, generate ${topClusters.length} personas representing different micro-SaaS founders.
 
 Cluster themes observed this week:

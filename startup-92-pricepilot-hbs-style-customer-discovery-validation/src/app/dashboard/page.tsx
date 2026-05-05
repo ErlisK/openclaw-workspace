@@ -44,7 +44,7 @@ export default async function DashboardPage() {
     <div className="page">
       <nav className="nav">
         <div className="container nav-inner">
-          <Link href="/dashboard" className="nav-logo">🚀 PricePilot</Link>
+          <Link href="/dashboard" className="nav-logo">🚀 PricingSim</Link>
           <div className="nav-links">
             <Link href="/import">Import</Link>
             <Link href="/suggestions">Suggestions</Link>

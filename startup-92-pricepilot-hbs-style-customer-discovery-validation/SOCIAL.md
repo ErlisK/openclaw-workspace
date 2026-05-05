@@ -1,8 +1,8 @@
-# PricePilot — Social Media Content Calendar
+# PricingSim — Social Media Content Calendar
 
-**App URL:** https://startup-92-pricepilot-hbs-style-cus.vercel.app  
-**Press kit:** https://startup-92-pricepilot-hbs-style-cus.vercel.app/press  
-**Handle:** @PricePilotApp (Twitter/X + LinkedIn)
+**App URL:** https://pricingsim.com  
+**Press kit:** https://pricingsim.com/press  
+**Handle:** @PricingSimApp (Twitter/X + LinkedIn)
 
 ---
 
@@ -11,7 +11,7 @@
 **Bio:**
 Safe A/B pricing experiments for solo founders 🚀 Connect Stripe/Gumroad/Shopify → Bayesian engine → test prices → roll back in one click. Free tier ↓
 
-**Website:** https://startup-92-pricepilot-hbs-style-cus.vercel.app  
+**Website:** https://pricingsim.com  
 **Banner image:** /assets/screenshot-homepage.png  
 **Profile photo:** /assets/logo-icon.svg  
 **Location:** Global (remote-first)
@@ -20,14 +20,14 @@ Safe A/B pricing experiments for solo founders 🚀 Connect Stripe/Gumroad/Shopi
 
 ## LinkedIn — Page Setup
 
-**Company name:** PricePilot  
+**Company name:** PricingSim  
 **Type:** Software / Technology  
 **Industry:** Internet · Software Development  
 **Tagline:** Safe pricing experiments for solo founders  
 **About:**
-PricePilot helps solo creators and micro-SaaS founders run safe, statistically-sound pricing experiments. Connect your Stripe, Gumroad, or Shopify store in 60 seconds, get price suggestions from a Bayesian inference engine, and test with real buyers — with one-click rollback if it doesn't work. Built for sellers doing $500–$10k MRR.
+PricingSim helps solo creators and micro-SaaS founders run safe, statistically-sound pricing experiments. Connect your Stripe, Gumroad, or Shopify store in 60 seconds, get price suggestions from a Bayesian inference engine, and test with real buyers — with one-click rollback if it doesn't work. Built for sellers doing $500–$10k MRR.
 
-**Website:** https://startup-92-pricepilot-hbs-style-cus.vercel.app  
+**Website:** https://pricingsim.com  
 **Logo:** /assets/logo.svg
 
 ---
@@ -37,7 +37,7 @@ PricePilot helps solo creators and micro-SaaS founders run safe, statistically-s
 ### Week 1, Day 1 — Launch Announcement
 
 **Twitter:**
-🚀 PricePilot is live.
+🚀 PricingSim is live.
 
 Connect your Stripe/Gumroad/Shopify → Bayesian engine → 2–3 safe price tests → live A/B page → one-click rollback.
 
@@ -45,16 +45,16 @@ Built for solo founders doing $500–$10k MRR who want more revenue without the 
 
 Free tier, no credit card.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app
+→ https://pricingsim.com
 
 **LinkedIn:**
-We just launched PricePilot — a tool I built specifically for solo founders and micro-SaaS creators who want to test their pricing, but are scared of hurting their revenue.
+We just launched PricingSim — a tool I built specifically for solo founders and micro-SaaS creators who want to test their pricing, but are scared of hurting their revenue.
 
 The core insight: traditional A/B testing requires 1000+ conversions per variant to reach statistical significance. Most indie founders have 50–200 sales/month. That's a 2-year wait.
 
-PricePilot uses Bayesian inference instead. It models each price point's conversion rate as a Beta distribution and updates it with each sale. You get a confidence score in 2–6 weeks — not 2 years.
+PricingSim uses Bayesian inference instead. It models each price point's conversion rate as a Beta distribution and updates it with each sale. You get a confidence score in 2–6 weeks — not 2 years.
 
-Try it free: https://startup-92-pricepilot-hbs-style-cus.vercel.app
+Try it free: https://pricingsim.com
 
 #SaaS #IndieHackers #Pricing #Bootstrapped
 
@@ -65,7 +65,7 @@ Try it free: https://startup-92-pricepilot-hbs-style-cus.vercel.app
 **Twitter:**
 The #1 fear about pricing tests: "What if I lose customers?"
 
-PricePilot's safety guardrails:
+PricingSim's safety guardrails:
 
 🔒 Never suggests >2.5× your current price
 📊 Shows confidence score before you commit
@@ -74,12 +74,12 @@ PricePilot's safety guardrails:
 
 Risk-managed by design.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app
+→ https://pricingsim.com
 
 **LinkedIn:**
 "What if raising prices hurts my sales?" — I heard this from every founder I talked to.
 
-So I built PricePilot with four hard safety guardrails:
+So I built PricingSim with four hard safety guardrails:
 
 1️⃣ The engine never suggests a price more than 2.5× your current price
 2️⃣ Every suggestion comes with a confidence score and projected revenue change
@@ -101,7 +101,7 @@ Traditional A/B tests: need 1000+ conversions per variant
 → At 50 sales/month: 2-year wait
 → Useless for small businesses
 
-PricePilot uses Bayesian inference:
+PricingSim uses Bayesian inference:
 → Works with 20–30 conversions
 → Updates with every sale
 → Shows probability, not just pass/fail
@@ -129,7 +129,7 @@ This:
 
 The tradeoff is that early estimates have wide uncertainty bands — but that uncertainty narrows quickly. By the time you have 40–60 conversions, you usually have a clear signal.
 
-That's why PricePilot uses Bayesian inference. And why it works for sellers doing $500–$10k MRR.
+That's why PricingSim uses Bayesian inference. And why it works for sellers doing $500–$10k MRR.
 
 #DataScience #Bayesian #ABTesting #SaaS
 
@@ -148,22 +148,22 @@ That's why PricePilot uses Bayesian inference. And why it works for sellers doin
 
 No code. No stats degree.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app/import/guide
+→ https://pricingsim.com/import/guide
 
 **LinkedIn:**
 **How fast can you go from zero to a live pricing experiment?**
 
-With PricePilot, the answer is about 5 minutes:
+With PricingSim, the answer is about 5 minutes:
 
 Step 1: Export a CSV from Gumroad, Stripe, or Shopify (2 min)
-Step 2: Upload it to PricePilot — auto-detects column format
+Step 2: Upload it to PricingSim — auto-detects column format
 Step 3: The Bayesian engine analyzes your last 90 days of transactions
 Step 4: You get 2–3 price suggestions with projected revenue lift
 Step 5: Click "Create Experiment" → a live A/B page is generated automatically
 
 No code. No webhook configuration. No stats knowledge required.
 
-The pricing guide for Stripe, Gumroad, and Shopify exports: https://startup-92-pricepilot-hbs-style-cus.vercel.app/import/guide
+The pricing guide for Stripe, Gumroad, and Shopify exports: https://pricingsim.com/import/guide
 
 #Gumroad #Stripe #Shopify #SoloFounder
 
@@ -178,14 +178,14 @@ Scenario: $29 template, 2 sales/week, 200 visitors/month
 
 Current: $29 → 1% conversion → $58/mo
 
-PricePilot suggests testing $39 (confidence: 73%)
+PricingSim suggests testing $39 (confidence: 73%)
 → Even if conversion drops to 0.8%, you still win: $31.20/visitor
 → Experiment runs 6 weeks → recommendation: apply
 
 That's $78/mo vs $58/mo → +34% revenue
 
 **LinkedIn:**
-Here's a concrete example of what a PricePilot pricing experiment looks like in practice:
+Here's a concrete example of what a PricingSim pricing experiment looks like in practice:
 
 A Notion template seller with:
 • $29 current price
@@ -193,16 +193,16 @@ A Notion template seller with:
 • 200 monthly visitors
 • Current revenue: $58/month
 
-PricePilot's engine analyzes the data and suggests testing $39.
+PricingSim's engine analyzes the data and suggests testing $39.
 
 Projected outcomes:
 • If conversion holds at 1%: +34% revenue ($78/mo)
 • If conversion drops to 0.8%: still +8% revenue ($62/mo)
 • If conversion drops below 0.74%: break even
 
-The experiment runs for 6 weeks. Conversion at $39 holds at 0.9%. PricePilot recommends applying. New revenue: $70/month — a 21% increase with no additional work.
+The experiment runs for 6 weeks. Conversion at $39 holds at 0.9%. PricingSim recommends applying. New revenue: $70/month — a 21% increase with no additional work.
 
-This is the PricePilot promise: find the revenue you're leaving on the table.
+This is the PricingSim promise: find the revenue you're leaving on the table.
 
 #RevenueOptimization #ContentCreator #DigitalProducts
 
@@ -215,21 +215,21 @@ The part I built last and use most: AI communication templates.
 
 When your price test wins, you need to tell your customers.
 
-PricePilot's Pro tier generates:
+PricingSim's Pro tier generates:
 → Email announcement (warm, not salesy)
 → Tweet thread (explains the why)
 → Blog post intro (for your newsletter)
 
 All tone-matched to your product.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app/ai-tools
+→ https://pricingsim.com/ai-tools
 
 **LinkedIn:**
 **The hardest part of raising prices: telling your customers**
 
 You've run the experiment. Price B wins. But now you need to announce it without losing goodwill.
 
-PricePilot's AI Communication Generator (Pro feature) writes:
+PricingSim's AI Communication Generator (Pro feature) writes:
 
 📧 Email — warm, personalized, explains the value behind the new price
 🐦 Twitter thread — 3–5 tweets with the "why" story
@@ -237,7 +237,7 @@ PricePilot's AI Communication Generator (Pro feature) writes:
 
 All generated from your product name, old price, new price, and a sentence about your audience. Uses Claude via Vercel AI Gateway.
 
-Try it: https://startup-92-pricepilot-hbs-style-cus.vercel.app/ai-tools
+Try it: https://pricingsim.com/ai-tools
 
 #AI #ContentMarketing #SaaS
 
@@ -248,7 +248,7 @@ Try it: https://startup-92-pricepilot-hbs-style-cus.vercel.app/ai-tools
 **Twitter:**
 New user onboarding checklist ✅
 
-Getting started with PricePilot:
+Getting started with PricingSim:
 1. ✅ Connect source (Stripe/Gumroad/CSV)
 2. ✅ Run the Bayesian engine
 3. ✅ Create first experiment
@@ -257,12 +257,12 @@ Getting started with PricePilot:
 
 Most users hit step 3 in under 10 minutes.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app/onboarding
+→ https://pricingsim.com/onboarding
 
 **LinkedIn:**
 **Building an onboarding experience that respects your time**
 
-PricePilot's onboarding checklist has 4 required steps (plus 1 optional upgrade):
+PricingSim's onboarding checklist has 4 required steps (plus 1 optional upgrade):
 
 1. Connect your store or import a CSV
 2. Run the pricing engine on your data
@@ -273,7 +273,7 @@ Each step links directly to the relevant page. You can mark steps done manually,
 
 Most founders complete it in 8–12 minutes.
 
-Try it: https://startup-92-pricepilot-hbs-style-cus.vercel.app/onboarding
+Try it: https://pricingsim.com/onboarding
 
 #UX #ProductDesign #SaaS
 
@@ -282,7 +282,7 @@ Try it: https://startup-92-pricepilot-hbs-style-cus.vercel.app/onboarding
 ### Week 3, Day 3 — Free vs Pro
 
 **Twitter:**
-PricePilot pricing (we eat our own cooking 🍽️):
+PricingSim pricing (we eat our own cooking 🍽️):
 
 Free:
 • 3 active experiments
@@ -298,12 +298,12 @@ Pro ($29/mo):
 
 Start free. No credit card.
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app/pricing
+→ https://pricingsim.com/pricing
 
 **LinkedIn:**
 **We tested our own pricing before we launched. Obviously.**
 
-PricePilot's pricing tiers:
+PricingSim's pricing tiers:
 
 FREE
 • 3 active experiments at once
@@ -336,10 +336,10 @@ The short version:
 • Bayesian: actionable at 20–30 conversions
 • The math behind why this works
 
-→ https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests
+→ https://pricingsim.com/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests
 
 **LinkedIn:**
-📖 New post on the PricePilot blog: **"The Bayesian Advantage: Why We Don't Use Traditional A/B Tests"**
+📖 New post on the PricingSim blog: **"The Bayesian Advantage: Why We Don't Use Traditional A/B Tests"**
 
 Key points:
 • Why frequentist testing fails at small sample sizes
@@ -347,7 +347,7 @@ Key points:
 • Why Bayesian credible intervals are more useful than p-values for founders
 • The tradeoffs you accept when using Bayesian methods
 
-Read it: https://startup-92-pricepilot-hbs-style-cus.vercel.app/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests
+Read it: https://pricingsim.com/blog/the-bayesian-advantage-why-we-dont-use-traditional-ab-tests
 
 ---
 
@@ -362,7 +362,7 @@ C) Too much engineering overhead
 D) Not enough data
 E) Just haven't gotten to it
 
-(PricePilot is built to solve A–D. Reply if you want to beta-test.)
+(PricingSim is built to solve A–D. Reply if you want to beta-test.)
 
 **LinkedIn:**
 **I spoke to 40 solo founders about pricing. Here's what I found:**
@@ -372,7 +372,7 @@ E) Just haven't gotten to it
 • 91% said they would test if it was safe and easy
 • 0% had tried a Bayesian pricing tool
 
-The insight that drove PricePilot: the demand for pricing experiments is high. The barrier — technical complexity, fear of downside, lack of data tools — is what's holding founders back.
+The insight that drove PricingSim: the demand for pricing experiments is high. The barrier — technical complexity, fear of downside, lack of data tools — is what's holding founders back.
 
 What's held you back from testing your prices? Would love to hear in the comments.
 

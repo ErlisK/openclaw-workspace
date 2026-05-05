@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { Metadata } from 'next'
 
-const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = 'https://pricingsim.com'
 
 interface Guide {
   title: string
@@ -51,7 +51,7 @@ const guides: Record<string, Guide> = {
 
 <p>Bayesian testing answers a different question: <em>given the data collected so far, what is the probability that Price B generates more revenue than Price A?</em> This probability updates continuously as each sale comes in. After 30–60 conversions per variant, you often have a clear signal — even without reaching the sample sizes frequentist methods require.</p>
 
-<p>The tradeoff: Bayesian estimates have wider uncertainty bands at small sample sizes, and early results can be misleading. A good Bayesian pricing tool (like PricePilot) accounts for this by being conservative: it only recommends applying a test result when confidence is high, and it shows you the full probability distribution — not just the point estimate.</p>
+<p>The tradeoff: Bayesian estimates have wider uncertainty bands at small sample sizes, and early results can be misleading. A good Bayesian pricing tool (like PricingSim) accounts for this by being conservative: it only recommends applying a test result when confidence is high, and it shows you the full probability distribution — not just the point estimate.</p>
 
 <h2>What Makes a Safe Pricing Experiment</h2>
 
@@ -84,7 +84,7 @@ const guides: Record<string, Guide> = {
 <p>Don't test more than one price at a time. Pick one candidate price, typically 20–40% above your current price. If your elasticity is near -1.0 (unit elastic), a 30% price increase with a 30% demand decrease leaves revenue flat — so your test price should be conservative enough that you expect positive revenue even if demand drops significantly.</p>
 
 <h3>Step 4: Create the A/B page</h3>
-<p>The test page shows your product at the new price. Half your visitors see the test, half see the control. PricePilot generates this page automatically — complete with tracking, variant assignment, and the rollback mechanism.</p>
+<p>The test page shows your product at the new price. Half your visitors see the test, half see the control. PricingSim generates this page automatically — complete with tracking, variant assignment, and the rollback mechanism.</p>
 
 <h3>Step 5: Let it run</h3>
 <p>4–8 weeks, minimum. Check the confidence dashboard weekly but don't touch the experiment. The goal is data, not early optimization.</p>
@@ -129,7 +129,7 @@ const guides: Record<string, Guide> = {
 
 <h2>Tools for Running Safe Pricing Experiments</h2>
 
-<p>PricePilot automates the entire workflow described above: data import, elasticity estimation, A/B page generation, confidence tracking, and one-click rollback. The free tier supports up to 3 simultaneous experiments and all major import formats.</p>
+<p>PricingSim automates the entire workflow described above: data import, elasticity estimation, A/B page generation, confidence tracking, and one-click rollback. The free tier supports up to 3 simultaneous experiments and all major import formats.</p>
 
 <p>The alternative is to do it manually: create two versions of your product page, split traffic with a Cloudflare Worker or Netlify redirect, and track conversions in a spreadsheet. This works but requires engineering and ongoing maintenance. For most solo founders, automation is worth it.</p>
     `,
@@ -180,7 +180,7 @@ const guides: Record<string, Guide> = {
   <li><strong>Calculate revenue per period:</strong> Your organic baseline revenue (excluding promo spikes) is the metric your pricing experiment should be measured against.</li>
 </ol>
 
-<p>PricePilot's import tool automatically detects spike cohorts using a Modified Absolute Deviation (MAD) filter and flags them. Your elasticity estimate is then calculated from organic sales only — the buyers whose behavior actually predicts how future organic buyers will respond to price changes.</p>
+<p>PricingSim's import tool automatically detects spike cohorts using a Modified Absolute Deviation (MAD) filter and flags them. Your elasticity estimate is then calculated from organic sales only — the buyers whose behavior actually predicts how future organic buyers will respond to price changes.</p>
 
 <h2>How Price Changes Affect Existing Subscribers</h2>
 
@@ -204,7 +204,7 @@ const guides: Record<string, Guide> = {
 <h3>Method 2: Time-series test</h3>
 <p>Raise your price to the test price for 4–6 weeks, then revert and compare. This is less rigorous (seasonal variation can confound results) but requires zero engineering. It works best for products with stable, predictable traffic patterns.</p>
 
-<h3>Method 3: PricePilot's A/B page</h3>
+<h3>Method 3: PricingSim's A/B page</h3>
 <p>Import your Gumroad CSV, let the Bayesian engine suggest test prices, and generate a hosted A/B experiment page that handles variant assignment, tracking, and rollback automatically. This is the fastest path from data to experiment to result.</p>
 
 <h2>Communication Templates for Price Changes</h2>
@@ -292,16 +292,16 @@ const guides: Record<string, Guide> = {
 
 <p><strong>Caveat:</strong> This isn't a true A/B test because different channels have different audiences with different price sensitivities. Your email list subscribers may convert at higher rates regardless of price. Use this method for directional signals only.</p>
 
-<h2>Method 3: Stripe + PricePilot (No Code, Statistically Sound)</h2>
+<h2>Method 3: Stripe + PricingSim (No Code, Statistically Sound)</h2>
 
-<p>PricePilot imports your Stripe transaction history, estimates your price elasticity, and generates an A/B experiment page that routes visitors to different Stripe checkout URLs based on randomized variant assignment.</p>
+<p>PricingSim imports your Stripe transaction history, estimates your price elasticity, and generates an A/B experiment page that routes visitors to different Stripe checkout URLs based on randomized variant assignment.</p>
 
 <p><strong>How it works:</strong>
 <ol>
   <li>Export your Stripe transaction CSV (Reports → Payments → Export).</li>
-  <li>Upload to PricePilot. The Bayesian engine analyzes 90+ days of transaction data and suggests 2–3 test prices with confidence scores and projected revenue uplift.</li>
-  <li>Click "Create Experiment." PricePilot generates a hosted A/B page with two Stripe checkout buttons — one at each price — and randomized variant assignment via cookie.</li>
-  <li>Share the experiment page URL. PricePilot tracks which visitors see which price and which ones convert.</li>
+  <li>Upload to PricingSim. The Bayesian engine analyzes 90+ days of transaction data and suggests 2–3 test prices with confidence scores and projected revenue uplift.</li>
+  <li>Click "Create Experiment." PricingSim generates a hosted A/B page with two Stripe checkout buttons — one at each price — and randomized variant assignment via cookie.</li>
+  <li>Share the experiment page URL. PricingSim tracks which visitors see which price and which ones convert.</li>
   <li>After 4–8 weeks, the confidence dashboard shows the probability that the test price generates more revenue per visitor.</li>
   <li>Apply the winner (update your main checkout to the winning Price ID) or roll back in one click.</li>
 </ol>
@@ -369,7 +369,7 @@ stripe.prices.create({
 
 <ol>
   <li>Export your Stripe CSV (5 minutes)</li>
-  <li>Import to PricePilot (2 minutes)</li>
+  <li>Import to PricingSim (2 minutes)</li>
   <li>Review the suggested prices and create an experiment (5 minutes)</li>
   <li>Update your marketing to drive traffic to the experiment page (30 minutes)</li>
   <li>Wait 4–8 weeks</li>
@@ -429,7 +429,7 @@ stripe.prices.create({
 
 <h2>MAD Spike Detection: The First Line of Defense</h2>
 
-<p>PricePilot uses a Median Absolute Deviation (MAD) filter to automatically identify and flag sales spikes before estimating elasticity. Here's how it works:</p>
+<p>PricingSim uses a Median Absolute Deviation (MAD) filter to automatically identify and flag sales spikes before estimating elasticity. Here's how it works:</p>
 
 <p>For each transaction period, we calculate the daily sales rate (units per day). We then compute the median daily sales rate across all periods. The MAD is the median of the absolute deviations from that median:</p>
 
@@ -444,7 +444,7 @@ z_i = 0.6745 × |qty_i - median(qty)| / MAD
 
 <p>Why MAD instead of standard deviation? Because standard deviation is itself inflated by outliers. If you have one period with 200× normal sales (an AppSumo spike), the standard deviation becomes huge, and the spike no longer looks extreme relative to the inflated baseline. MAD is "robust to outliers" — it uses the median, which can't be moved by extreme values.</p>
 
-<p>After spike removal, PricePilot also allows cohort tagging. If you know that a particular sales period was a promo deal, you can tag it directly and it's excluded from the elasticity estimation regardless of whether the spike detector flags it.</p>
+<p>After spike removal, PricingSim also allows cohort tagging. If you know that a particular sales period was a promo deal, you can tag it directly and it's excluded from the elasticity estimation regardless of whether the spike detector flags it.</p>
 
 <h2>The Cohort-Aware Simulation Model</h2>
 
@@ -463,7 +463,7 @@ z_i = 0.6745 × |qty_i - median(qty)| / MAD
 
 <h2>Interpreting Percentile Outcomes</h2>
 
-<p>The simulation produces not just a point estimate of expected revenue at the test price, but a full probability distribution. PricePilot reports this as five percentiles: p05, p25, p50, p75, p95.</p>
+<p>The simulation produces not just a point estimate of expected revenue at the test price, but a full probability distribution. PricingSim reports this as five percentiles: p05, p25, p50, p75, p95.</p>
 
 <p>How to read them:</p>
 <ul>
@@ -542,7 +542,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const guide = guides[slug]
   if (!guide) return { title: 'Not Found' }
   return {
-    title: `${guide.title} — PricePilot Guides`,
+    title: `${guide.title} — PricingSim Guides`,
     description: guide.description,
     keywords: guide.keywords,
     openGraph: {
@@ -568,8 +568,8 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
     headline: guide.title,
     description: guide.description,
     datePublished: guide.date,
-    author: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
-    publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+    author: { '@type': 'Organization', name: 'PricingSim', url: BASE_URL },
+    publisher: { '@type': 'Organization', name: 'PricingSim', url: BASE_URL },
     url: `${BASE_URL}/guides/${slug}`,
     keywords: guide.keywords.join(', '),
   }
@@ -582,7 +582,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
       />
       <main style={{ maxWidth: 760, margin: '0 auto', padding: '3rem 1rem' }}>
         <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>
-          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none' }}>← PricePilot</Link>
+          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none' }}>← PricingSim</Link>
           <span style={{ color: '#d1d5db' }}>/</span>
           <Link href="/guides" style={{ color: '#6b7280', textDecoration: 'none' }}>Guides</Link>
         </div>
@@ -605,7 +605,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
         <div style={{ margin: '3rem 0', padding: '1.5rem', background: '#f5f3ff', borderRadius: 12, textAlign: 'center', borderLeft: '4px solid #4f46e5' }}>
           <p style={{ fontWeight: 700, fontSize: '1.1rem', marginBottom: '0.5rem' }}>Ready to run your first safe pricing experiment?</p>
           <p style={{ color: '#6b7280', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-            PricePilot connects to Stripe, Gumroad, and Shopify and gives you Bayesian price recommendations from your real data. Free tier, no credit card.
+            PricingSim connects to Stripe, Gumroad, and Shopify and gives you Bayesian price recommendations from your real data. Free tier, no credit card.
           </p>
           <Link
             href={`/signup?utm_source=guides&utm_medium=organic&utm_campaign=authority_content&utm_content=${slug}`}

@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Pricing Guides for Solo Founders — PricePilot',
+  title: 'Pricing Guides for Solo Founders — PricingSim',
   description: 'In-depth guides on pricing experiments, Gumroad price updates, Stripe A/B testing, and cohort-aware simulations for micro-SaaS and digital product sellers.',
 }
 
@@ -45,7 +45,7 @@ export default function GuidesPage() {
   return (
     <main style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
 
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Pricing Guides</h1>

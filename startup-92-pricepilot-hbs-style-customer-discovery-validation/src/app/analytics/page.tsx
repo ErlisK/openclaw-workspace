@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Analytics — PricePilot' }
+export const metadata: Metadata = { title: 'Analytics — PricingSim' }
 export const dynamic = 'force-dynamic'
 
 // ── Event funnel definition ───────────────────────────────────────────────
@@ -97,7 +97,7 @@ export default async function AnalyticsPage() {
       {/* Nav */}
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: '#fff', padding: '0 1.5rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto', height: 56, display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link href="/dashboard" style={{ fontWeight: 700, color: '#4f46e5', textDecoration: 'none', fontSize: '1rem' }}>PricePilot</Link>
+          <Link href="/dashboard" style={{ fontWeight: 700, color: '#4f46e5', textDecoration: 'none', fontSize: '1rem' }}>PricingSim</Link>
           <Link href="/dashboard" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}>Dashboard</Link>
           <Link href="/experiments" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.875rem' }}>Experiments</Link>
           <span style={{ color: '#4f46e5', fontWeight: 600, fontSize: '0.875rem' }}>Analytics</span>

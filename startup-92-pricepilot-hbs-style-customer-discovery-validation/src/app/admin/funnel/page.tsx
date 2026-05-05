@@ -9,7 +9,7 @@ import { redirect } from 'next/navigation'
 import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 
-export const metadata: Metadata = { title: 'Funnel Metrics — Admin | PricePilot' }
+export const metadata: Metadata = { title: 'Funnel Metrics — Admin | PricingSim' }
 export const dynamic = 'force-dynamic'
 
 const FUNNEL_STEP_LABELS: Record<string, string> = {
@@ -116,7 +116,7 @@ export default async function AdminFunnelPage({
       <div style={{ fontFamily: 'system-ui, sans-serif', minHeight: '100vh', background: '#0f0f23', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ background: '#1e1e3f', padding: '2rem', borderRadius: 12, maxWidth: 380, width: '90%', border: '1px solid #3730a3' }}>
           <h1 style={{ color: '#a5b4fc', fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.5rem' }}>🔐 Admin Dashboard</h1>
-          <p style={{ color: '#6b7280', fontSize: '0.8rem', marginBottom: '1.5rem' }}>PricePilot Funnel Metrics</p>
+          <p style={{ color: '#6b7280', fontSize: '0.8rem', marginBottom: '1.5rem' }}>PricingSim Funnel Metrics</p>
           <form method="GET" action="/admin/funnel">
             <input
               name="key"
@@ -163,7 +163,7 @@ export default async function AdminFunnelPage({
       {/* Header */}
       <div style={{ borderBottom: '1px solid #1e1e3f', padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#0f0f23' }}>
         <div>
-          <h1 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#a5b4fc', margin: 0 }}>🚀 PricePilot — Admin Funnel</h1>
+          <h1 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#a5b4fc', margin: 0 }}>🚀 PricingSim — Admin Funnel</h1>
           <p style={{ color: '#4b5563', fontSize: '0.75rem', margin: '0.1rem 0 0' }}>
             Last {days} days · Generated {new Date(data.generated_at).toLocaleString()}
           </p>

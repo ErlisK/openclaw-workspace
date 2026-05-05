@@ -1,4 +1,4 @@
-# PricePilot — Problem Hypotheses
+# PricingSim — Problem Hypotheses
 *HBS Discovery Phase — Steps 1–2*
 *Last updated: 2025-04-24*
 
@@ -76,7 +76,7 @@
 - No data to support the decision; relies on Twitter anecdata ("I raised my price 3x and doubled revenue!")
 - No rollback plan; permanent changes expose full customer base at once
 - Survivorship bias: founders who killed churn by raising prices share loudly; those who lost 40% of customers go quiet
-- **Gap PricePilot fills:** Statistical grounding + staged rollout + rollback button
+- **Gap PricingSim fills:** Statistical grounding + staged rollout + rollback button
 
 ### 2. General Analytics Tools (Baremetrics, ChartMogul, ProfitWell)
 - Show what happened, not what to do
@@ -84,26 +84,26 @@
 - Minimum viable data: Baremetrics requires Stripe/Braintree subscription data; irrelevant for Gumroad sellers
 - No pricing recommendation engine; no A/B test scaffolding; no rollback
 - Pricing: Baremetrics starts at $108/mo — often more than the founder's own product revenue
-- **Gap PricePilot fills:** Action-oriented recommendations, not just dashboards; works with low-volume one-time sales
+- **Gap PricingSim fills:** Action-oriented recommendations, not just dashboards; works with low-volume one-time sales
 
 ### 3. Enterprise Pricing Optimization (Pricefx, Zilliant, PROS)
 - Built for manufacturing, retail, or SaaS companies with thousands of SKUs and millions of transactions
 - Minimum deal size typically $50k+/year
 - Require dedicated implementation teams and months of onboarding
-- **Gap PricePilot fills:** Zero-setup, opinionated, built for 1-person operations
+- **Gap PricingSim fills:** Zero-setup, opinionated, built for 1-person operations
 
 ### 4. DIY Spreadsheet Models
 - Founders copy-paste revenue CSVs into Google Sheets and try to model elasticity by hand
 - No statistical rigor; cognitive overhead is high; mistakes are easy
 - Can't simulate "what if" without building the model from scratch
 - Not connected to live payment data; requires manual refresh
-- **Gap PricePilot fills:** Auto-ingestion from Stripe/Gumroad + automated Bayesian simulations
+- **Gap PricingSim fills:** Auto-ingestion from Stripe/Gumroad + automated Bayesian simulations
 
 ### 5. Pricing Consultants
 - Cost $200–$500/hr; inaccessible at $2k MRR
 - One-time engagement; no ongoing experiment loop
 - Advice is generic; not calibrated to the founder's specific data
-- **Gap PricePilot fills:** Persistent, affordable, data-driven pricing intelligence at 1/100th the cost
+- **Gap PricingSim fills:** Persistent, affordable, data-driven pricing intelligence at 1/100th the cost
 
 ---
 
@@ -122,11 +122,11 @@
 *Falsifiable via: willingness-to-pay interviews; feature ranking exercises*
 
 **H4 — The Revenue Lift Hypothesis**  
-> Founders using PricePilot's Bayesian recommendation engine will achieve a statistically significant revenue lift of ≥10% within 60 days, compared to no-change control groups.  
+> Founders using PricingSim's Bayesian recommendation engine will achieve a statistically significant revenue lift of ≥10% within 60 days, compared to no-change control groups.  
 *Falsifiable via: product telemetry post-launch; cohort analysis of early adopters*
 
 **H5 — The Channel Hypothesis**  
-> The primary acquisition channels for PricePilot are IndieHackers, r/SaaS, and Twitter/X — specifically posts from founders sharing pricing experiments — not paid ads or SEO.  
+> The primary acquisition channels for PricingSim are IndieHackers, r/SaaS, and Twitter/X — specifically posts from founders sharing pricing experiments — not paid ads or SEO.  
 *Falsifiable via: UTM tracking on early signups; community post engagement rates*
 
 ---
@@ -140,13 +140,13 @@
 Cluster 1 (Fear-of-Churn Price-Increase Paralysis) is the single most frequent pain category at 13.3% of all signals. The AI independently identified this as the #1 priority cluster, confirming H1's primacy. The cluster reveals the emotion is not just "uncertainty" but specifically churn anxiety — meaning rollback and staged rollout are not just nice-to-haves but *pre-conditions for adoption*.
 
 **H2 (Data Scarcity) — STRENGTHENED:**  
-Cluster 2 (Statistically-Invalid Tiny-Sample Tests) confirms that sample size anxiety is a distinct, named pain (10% frequency). Founders are aware that classical A/B testing is invalid for them — they just have no Bayesian alternative. This validates PricePilot's Bayesian engine as the core technical differentiation.
+Cluster 2 (Statistically-Invalid Tiny-Sample Tests) confirms that sample size anxiety is a distinct, named pain (10% frequency). Founders are aware that classical A/B testing is invalid for them — they just have no Bayesian alternative. This validates PricingSim's Bayesian engine as the core technical differentiation.
 
 **H3 (Safety-First) — STRONGLY CONFIRMED:**  
 Clusters 1 and 9 together (20% of signals) directly map to the rollback + staged rollout requirement. The cluster analysis reveals the mechanism: it's not just that founders want safety — they've been *burned* by previous price changes done wrong, making safety infrastructure the psychological unlock for adoption.
 
 **H4 (Revenue Lift) — REFINED:**  
-Cluster 4 (Missing Value-to-Price Alignment) suggests the average underpricing gap is 3–10x — much larger than the 10% lift estimated in H4. Revised: PricePilot should be able to demonstrate ≥15–25% revenue lift within 60 days for first-time users, since most are severely underpriced.
+Cluster 4 (Missing Value-to-Price Alignment) suggests the average underpricing gap is 3–10x — much larger than the 10% lift estimated in H4. Revised: PricingSim should be able to demonstrate ≥15–25% revenue lift within 60 days for first-time users, since most are severely underpriced.
 
 **H5 (Channel) — CONFIRMED:**  
 Clusters were sourced from r/SaaS, r/microsaas, IndieHackers, and Twitter/BuildInPublic — the exact channels named in H5. The highest-engagement signals came from r/SaaS and r/microsaas.

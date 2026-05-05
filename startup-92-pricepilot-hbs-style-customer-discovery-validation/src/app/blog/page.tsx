@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Blog — PricePilot',
+  title: 'Blog — PricingSim',
   description: 'Pricing strategy, A/B testing guides, and growth insights for solo founders and micro-SaaS builders.',
 }
 
@@ -10,7 +10,7 @@ const posts = [
   {
     slug: 'building-the-bayesian-pricing-engine',
     title: 'Building a Bayesian Pricing Engine in TypeScript',
-    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricePilot — all in TypeScript, no Python required.',
+    description: 'A deep dive into the Normal-InvGamma conjugate model, spike detection, and conservative revenue optimization that powers PricingSim — all in TypeScript, no Python required.',
     date: 'February 10, 2025',
     readTime: '10 min read',
     tags: ['engineering', 'Bayesian', 'TypeScript', 'statistics'],
@@ -18,7 +18,7 @@ const posts = [
   {
     slug: 'building-pricepilot-product-intro',
     title: "I Built a Pricing Experiment Tool for Solo Founders — Here's What I Learned",
-    description: 'PricePilot uses Bayesian inference to help indie creators safely test higher prices. The why, what, and how — plus three hard-won lessons from building it.',
+    description: 'PricingSim uses Bayesian inference to help indie creators safely test higher prices. The why, what, and how — plus three hard-won lessons from building it.',
     date: 'February 3, 2025',
     readTime: '5 min read',
     tags: ['startup', 'SaaS', 'pricing', 'Next.js'],
@@ -45,7 +45,7 @@ export default function BlogPage() {
   return (
     <main style={{ maxWidth: 800, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '0.5rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Blog</h1>
       <p style={{ color: '#6b7280', marginBottom: '2.5rem' }}>

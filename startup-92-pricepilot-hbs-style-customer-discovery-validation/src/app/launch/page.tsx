@@ -3,11 +3,11 @@ import { Metadata } from 'next'
 import { CAMPAIGN_LINKS } from '@/lib/utm'
 
 export const metadata: Metadata = {
-  title: 'Launch — PricePilot',
-  description: 'PricePilot is live. Submit to communities, share the press kit, and try the product.',
+  title: 'Launch — PricingSim',
+  description: 'PricingSim is live. Submit to communities, share the press kit, and try the product.',
 }
 
-const APP_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const APP_URL = 'https://pricingsim.com'
 
 const submissions = [
   { platform: 'Product Hunt', url: 'https://www.producthunt.com/posts/new', status: 'ready', note: 'Requires PH account · Best launch day: Tuesday' },
@@ -21,9 +21,9 @@ const submissions = [
 ]
 
 const tweets = [
-  `I spent 3 months asking solo founders why they don't test their prices.\n\nThe answer: "What if I lose customers?"\n\nSo I built PricePilot — safe A/B pricing experiments with statistical proof and one-click rollback.\n\nThread 🧵`,
+  `I spent 3 months asking solo founders why they don't test their prices.\n\nThe answer: "What if I lose customers?"\n\nSo I built PricingSim — safe A/B pricing experiments with statistical proof and one-click rollback.\n\nThread 🧵`,
   `The problem with traditional A/B testing for indie founders:\n\nMost tests need 1000+ conversions per variant for significance.\n\nIf you have 50 sales/month → 2-year wait.\n\nSo we don't test. We just guess.`,
-  `PricePilot uses Bayesian inference instead.\n\nInstead of "is this significant?" it asks: "what's the probability Price B beats Price A given my data?"\n\nYou get a confidence score after 30–90 conversions. Not 2 years.`,
+  `PricingSim uses Bayesian inference instead.\n\nInstead of "is this significant?" it asks: "what's the probability Price B beats Price A given my data?"\n\nYou get a confidence score after 30–90 conversions. Not 2 years.`,
   `The flow:\n1. Connect Stripe/Gumroad (60s)\n2. Bayesian engine suggests safe prices\n3. Live A/B page with real tracking\n4. Confidence score updates in real time\n5. Apply winner or roll back\n\nNo stats degree needed.`,
   `Free tier, no credit card.\n\nTry it → ${CAMPAIGN_LINKS.twitter_launch}\nPress kit + demo GIF → ${APP_URL}/press?utm_source=twitter&utm_medium=social&utm_campaign=launch_week1&utm_content=press_kit\n\nWhat price would you test first? 👇`,
 ]
@@ -32,7 +32,7 @@ export default function LaunchPage() {
   return (
     <main style={{ maxWidth: 860, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
@@ -42,7 +42,7 @@ export default function LaunchPage() {
         <h1 style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>Launch HQ</h1>
       </div>
       <p style={{ color: '#6b7280', marginBottom: '2.5rem' }}>
-        PricePilot is live at <a href={APP_URL} style={{ color: '#4f46e5' }}>{APP_URL}</a>.
+        PricingSim is live at <a href={APP_URL} style={{ color: '#4f46e5' }}>{APP_URL}</a>.
         All submission copy is ready to paste.
       </p>
 
@@ -97,7 +97,7 @@ export default function LaunchPage() {
             { label: 'Tagline (short)', text: 'Safe A/B pricing experiments for solo founders' },
             { label: 'Tagline (HN)', text: 'Bayesian A/B pricing experiments for solo founders ($500–$10k MRR)' },
             { label: 'Product Hunt tagline', text: 'Safe Bayesian pricing experiments for solo founders' },
-            { label: '280-char pitch', text: `PricePilot: connect your Stripe/Gumroad/Shopify store and run safe A/B pricing experiments using Bayesian inference. Get results in weeks, not months — with one-click rollback. Free tier. ${APP_URL}` },
+            { label: '280-char pitch', text: `PricingSim: connect your Stripe/Gumroad/Shopify store and run safe A/B pricing experiments using Bayesian inference. Get results in weeks, not months — with one-click rollback. Free tier. ${APP_URL}` },
           ].map(item => (
             <div key={item.label} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.875rem 1.25rem', background: '#fff' }}>
               <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginBottom: '0.25rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{item.label}</p>
@@ -124,9 +124,9 @@ export default function LaunchPage() {
       <section style={{ marginBottom: '2.5rem' }}>
         <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '0.75rem' }}>Show HN — Post Text</h2>
         <div style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: '1.25rem', background: '#fff', fontFamily: 'monospace', fontSize: '0.875rem', lineHeight: 1.7, color: '#374151' }}>
-          <p style={{ margin: '0 0 0.75rem', fontWeight: 700 }}>Title: Show HN: PricePilot – Bayesian A/B pricing experiments for solo founders ($500–$10k MRR)</p>
+          <p style={{ margin: '0 0 0.75rem', fontWeight: 700 }}>Title: Show HN: PricingSim – Bayesian A/B pricing experiments for solo founders ($500–$10k MRR)</p>
           <p style={{ margin: 0 }}>
-            Hi HN, I built PricePilot — a tool for solo creators who want to safely test higher prices without risking their revenue.
+            Hi HN, I built PricingSim — a tool for solo creators who want to safely test higher prices without risking their revenue.
             <br /><br />
             The core problem: traditional A/B testing needs 1000+ conversions per variant. Most indie founders have 50–200 sales/month — that's a 2-year wait. So we never test.
             <br /><br />
@@ -170,7 +170,7 @@ export default function LaunchPage() {
                   <span style={{ color: '#2563eb' }}>{params.get('utm_medium')}</span>{' / '}
                   <span style={{ color: '#7c3aed' }}>{params.get('utm_campaign')}</span>
                 </p>
-                <a href={url} style={{ color: '#4f46e5', wordBreak: 'break-all' }}>{url.replace('https://startup-92-pricepilot-hbs-style-cus.vercel.app', '')}</a>
+                <a href={url} style={{ color: '#4f46e5', wordBreak: 'break-all' }}>{url.replace('https://pricingsim.com', '')}</a>
               </div>
             )
           })}

@@ -3,7 +3,7 @@ slug: how-to-run-a-price-test-without-losing-customers
 title: "How to Run a Price Test Without Losing Customers"
 description: "A practical guide to Bayesian A/B pricing experiments for solo founders — safe, statistical, and reversible."
 date: "2025-01-15"
-author: "PricePilot Team"
+author: "PricingSim Team"
 tags: ["pricing", "A/B testing", "founder tips"]
 ---
 
@@ -23,11 +23,11 @@ A safe pricing experiment has three properties:
 2. **Clear success metric** — usually conversion rate or revenue per visitor
 3. **Easy rollback** — if the test fails, you're back to baseline in one click
 
-PricePilot automates all three.
+PricingSim automates all three.
 
 ## Step 1: Connect Your Sales Data
 
-Start by connecting your Stripe, Gumroad, or Shopify account. PricePilot analyzes your existing transaction history to understand:
+Start by connecting your Stripe, Gumroad, or Shopify account. PricingSim analyzes your existing transaction history to understand:
 
 - Your current conversion rate at each price point
 - Seasonal patterns in your sales
@@ -55,6 +55,6 @@ No engineering. No CSV exports. Just a decision and a button.
 
 ---
 
-Running a price test isn't risky. Running one **without data** is. PricePilot gives you the data, the stats, and the safety net.
+Running a price test isn't risky. Running one **without data** is. PricingSim gives you the data, the stats, and the safety net.
 
 [Start your first experiment →](/signup)

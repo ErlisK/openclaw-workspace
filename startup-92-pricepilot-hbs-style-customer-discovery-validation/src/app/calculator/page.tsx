@@ -3,10 +3,10 @@ import { Suspense } from 'react'
 import { Metadata } from 'next'
 import CalculatorClient from './CalculatorClient'
 
-const BASE_URL = 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+const BASE_URL = 'https://pricingsim.com'
 
 export const metadata: Metadata = {
-  title: 'Price Elasticity Calculator — PricePilot',
+  title: 'Price Elasticity Calculator — PricingSim',
   description: 'Free interactive calculator: estimate how a price change will affect your revenue based on price elasticity of demand. Instant results, no signup required.',
   keywords: ['price elasticity calculator', 'pricing calculator', 'revenue calculator', 'price change impact'],
 }
@@ -20,7 +20,7 @@ const jsonLd = {
   applicationCategory: 'BusinessApplication',
   operatingSystem: 'Web',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-  publisher: { '@type': 'Organization', name: 'PricePilot', url: BASE_URL },
+  publisher: { '@type': 'Organization', name: 'PricingSim', url: BASE_URL },
 }
 
 export default function CalculatorPage() {
@@ -32,7 +32,7 @@ export default function CalculatorPage() {
       />
       <main style={{ maxWidth: 900, margin: '0 auto', padding: '3rem 1rem' }}>
         <div style={{ marginBottom: '1rem' }}>
-          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+          <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
         </div>
 
         <div style={{ marginBottom: '2rem' }}>
@@ -59,7 +59,7 @@ export default function CalculatorPage() {
               },
               {
                 title: 'Where does my elasticity estimate come from?',
-                body: "If you don't know your elasticity, start with -1.0 (the standard assumption). To get a data-driven estimate, connect your Stripe or Gumroad account to PricePilot — the Bayesian engine estimates elasticity from your actual transaction history.",
+                body: "If you don't know your elasticity, start with -1.0 (the standard assumption). To get a data-driven estimate, connect your Stripe or Gumroad account to PricingSim — the Bayesian engine estimates elasticity from your actual transaction history.",
               },
               {
                 title: 'What does break-even demand mean?',
@@ -67,7 +67,7 @@ export default function CalculatorPage() {
               },
               {
                 title: 'Why is this different from a real experiment?',
-                body: 'This calculator gives a point estimate — one number based on a single elasticity value. Real buyer behavior has uncertainty. PricePilot\'s Bayesian engine produces a full probability distribution: p05, p50, p95 outcomes, so you understand the range of possible results.',
+                body: 'This calculator gives a point estimate — one number based on a single elasticity value. Real buyer behavior has uncertainty. PricingSim\'s Bayesian engine produces a full probability distribution: p05, p50, p95 outcomes, so you understand the range of possible results.',
               },
             ].map(item => (
               <div key={item.title} style={{ padding: '1.25rem', border: '1px solid #e5e7eb', borderRadius: 8, background: '#f9fafb' }}>
@@ -107,7 +107,7 @@ export default function CalculatorPage() {
             </tbody>
           </table>
           <p style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '0.75rem' }}>
-            These are general ranges. Your actual elasticity depends on your specific audience, positioning, and competition. Use PricePilot to estimate it from your own data.
+            These are general ranges. Your actual elasticity depends on your specific audience, positioning, and competition. Use PricingSim to estimate it from your own data.
           </p>
         </section>
 
@@ -117,7 +117,7 @@ export default function CalculatorPage() {
             Want Bayesian estimates from your real data?
           </p>
           <p style={{ color: '#6b7280', marginBottom: '1.25rem', fontSize: '0.9rem' }}>
-            This calculator uses a single elasticity estimate. PricePilot computes a full probability distribution from your Stripe, Gumroad, or Shopify transaction history — with a 5th-percentile downside floor so you know the worst-case scenario.
+            This calculator uses a single elasticity estimate. PricingSim computes a full probability distribution from your Stripe, Gumroad, or Shopify transaction history — with a 5th-percentile downside floor so you know the worst-case scenario.
           </p>
           <Link
             href="/signup?utm_source=calculator&utm_medium=tool&utm_campaign=elasticity_calc"
@@ -127,7 +127,7 @@ export default function CalculatorPage() {
               textDecoration: 'none', display: 'inline-block',
             }}
           >
-            Try PricePilot Free →
+            Try PricingSim Free →
           </Link>
         </div>
       </main>

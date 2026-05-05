@@ -1,5 +1,5 @@
 /**
- * PricePilot Synthetic Data Generator v2
+ * PricingSim Synthetic Data Generator v2
  * Generates realistic transaction histories with variety:
  *   - Launch + decay pattern (spike on release, gradual drop)
  *   - Seasonal pattern (Q4 boost, summer dip)

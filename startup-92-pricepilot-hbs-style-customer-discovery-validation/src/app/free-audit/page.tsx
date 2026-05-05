@@ -177,7 +177,7 @@ export default function FreeAuditPage() {
       <nav style={{ borderBottom: '1px solid #e5e7eb', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(8px)', padding: '0 1rem', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none', color: '#111827', fontWeight: 700 }}>
-            ← PricePilot
+            ← PricingSim
           </Link>
           <Link href="/signup" style={{ background: '#6c47ff', color: '#fff', padding: '0.5rem 1.25rem', borderRadius: 8, textDecoration: 'none', fontSize: '0.875rem', fontWeight: 600 }}>
             Get full access →
@@ -329,7 +329,7 @@ export default function FreeAuditPage() {
                 Ready to run a live A/B test?
               </h2>
               <p style={{ color: '#6b7280', marginBottom: '1.5rem', maxWidth: 480, margin: '0 auto 1.5rem', lineHeight: 1.6 }}>
-                PricePilot turns this simulation into a real experiment page — with live conversion tracking, one-click rollback, and AI-generated email templates to announce your price change.
+                PricingSim turns this simulation into a real experiment page — with live conversion tracking, one-click rollback, and AI-generated email templates to announce your price change.
               </p>
               <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <Link href="/signup" style={{ background: '#6c47ff', color: '#fff', padding: '0.875rem 2rem', borderRadius: 10, textDecoration: 'none', fontWeight: 700, fontSize: '1rem' }}>
@@ -348,7 +348,7 @@ export default function FreeAuditPage() {
             <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
               <p style={{ color: '#9ca3af', fontSize: '0.8rem' }}>
                 Found this useful? Share it with a founder friend →{' '}
-                <a href={`https://twitter.com/intent/tweet?text=Just+ran+a+free+pricing+audit+on+my+sales+data+with+@PricePilotHQ+—+found+${result.results.filter(r => r.engine.action === 'test_higher').length}+pricing+opportunity(ies)+in+30+seconds&url=https://startup-92-pricepilot-hbs-style-cus.vercel.app/free-audit`}
+                <a href={`https://twitter.com/intent/tweet?text=Just+ran+a+free+pricing+audit+on+my+sales+data+with+@PricingSimHQ+—+found+${result.results.filter(r => r.engine.action === 'test_higher').length}+pricing+opportunity(ies)+in+30+seconds&url=https://pricingsim.com/free-audit`}
                   target="_blank" rel="noopener noreferrer"
                   style={{ color: '#6c47ff', fontWeight: 600 }}>
                   Tweet your results

@@ -3,7 +3,7 @@ slug: the-bayesian-advantage-why-we-dont-use-traditional-ab-tests
 title: "The Bayesian Advantage: Why We Don't Use Traditional A/B Tests"
 description: "Traditional A/B testing is broken for small-scale sellers. Here's why Bayesian inference works better when you have less data."
 date: "2025-01-28"
-author: "PricePilot Team"
+author: "PricingSim Team"
 tags: ["statistics", "Bayesian", "pricing science"]
 ---
 
@@ -35,9 +35,9 @@ This approach:
 - **Expresses uncertainty directly** as a probability ("There's a 87% chance Price B outperforms Price A")
 - **Works with small samples** — even 20–30 conversions per variant give meaningful signal
 
-The tradeoff is that early in an experiment, confidence is low. But as data accumulates, confidence rises quickly. PricePilot shows you this confidence score in real time.
+The tradeoff is that early in an experiment, confidence is low. But as data accumulates, confidence rises quickly. PricingSim shows you this confidence score in real time.
 
-## How PricePilot's Engine Works
+## How PricingSim's Engine Works
 
 We model each price point's conversion rate as a Beta distribution — a probability distribution that represents our uncertainty about the "true" conversion rate.
 
@@ -55,6 +55,6 @@ We also account for:
 
 For low-traffic, high-intent products like yours, Bayesian testing is the right tool. You get actionable insights in weeks, not months, with honest uncertainty quantification rather than a binary pass/fail.
 
-That's why PricePilot uses it, and why it works for founders doing $500–$10k MRR.
+That's why PricingSim uses it, and why it works for founders doing $500–$10k MRR.
 
 [Try the Bayesian pricing engine free →](/signup)

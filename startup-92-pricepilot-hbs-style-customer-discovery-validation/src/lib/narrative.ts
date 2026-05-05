@@ -32,7 +32,7 @@ export async function generateNarrative(input: NarrativeInput): Promise<string> 
     ? `Price elasticity: ε ≈ ${input.elasticityMean.toFixed(2)} (${input.elasticityMean > -1 ? 'inelastic' : 'elastic'} demand).`
     : ''
 
-  const prompt = `You are PricePilot, a pricing advisor for solo creators and micro-SaaS founders. 
+  const prompt = `You are PricingSim, a pricing advisor for solo creators and micro-SaaS founders. 
 Write a concise, confident 2-3 sentence pricing recommendation narrative.
 
 Product: ${input.productName}

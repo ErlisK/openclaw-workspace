@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Page Not Found — PricePilot',
+  title: 'Page Not Found — PricingSim',
   description: "The page you're looking for doesn't exist.",
 }
 

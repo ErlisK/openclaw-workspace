@@ -10,4 +10,4 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 })
 
 export const PRO_PRICE_ID = process.env.STRIPE_PRO_PRICE_ID || 'price_1TPsI4Gt92XrRvUutqwiM9uw'
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://startup-92-pricepilot-hbs-style-cus.vercel.app'
+export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pricingsim.com'

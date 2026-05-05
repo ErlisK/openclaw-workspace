@@ -125,10 +125,10 @@ Analyze and cluster these into 7-10 distinct pain point themes. For each cluster
 1. Give it a precise product-relevant name (e.g. "Fear-of-Churn Pricing Paralysis")
 2. Describe the underlying job/frustration
 3. Count how many of the signals belong to this cluster
-4. Rate severity for PricePilot's business case (critical/high/medium/low)  
+4. Rate severity for PricingSim's business case (critical/high/medium/low)  
 5. Note which personas it affects most (micro-SaaS founder, course creator, template seller, indie consultant)
 6. Pick 2-3 most representative quotes
-7. State the specific PricePilot feature that addresses this cluster
+7. State the specific PricingSim feature that addresses this cluster
 
 Also provide meta-analysis: which cluster is most frequent, a cross-cluster insight, and the feature build priority order.
 

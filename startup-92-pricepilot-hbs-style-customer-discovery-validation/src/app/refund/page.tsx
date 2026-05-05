@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Refund Policy — PricePilot',
+  title: 'Refund Policy — PricingSim',
 }
 
 export default function RefundPage() {
   return (
     <main style={{ maxWidth: 700, margin: '0 auto', padding: '3rem 1rem' }}>
       <div style={{ marginBottom: '1rem' }}>
-        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricePilot</Link>
+        <Link href="/" style={{ color: '#6b7280', textDecoration: 'none', fontSize: '0.9rem' }}>← PricingSim</Link>
       </div>
       <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Refund Policy</h1>
       <p style={{ color: '#6b7280', marginBottom: '2rem', fontSize: '0.9rem' }}>Last updated: January 2025</p>
@@ -28,7 +28,7 @@ export default function RefundPage() {
       <section style={{ marginBottom: '1.5rem' }}>
         <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '0.5rem' }}>How to Request a Refund</h2>
         <p style={{ color: '#374151', lineHeight: 1.6 }}>
-          Email <a href="mailto:support@pricepilot.app" style={{ color: '#6c47ff' }}>support@pricepilot.app</a> with your account email and order details. We aim to respond within 2 business days.
+          Email <a href="mailto:hello@pricingsim.com" style={{ color: '#6c47ff' }}>hello@pricingsim.com</a> with your account email and order details. We aim to respond within 2 business days.
         </p>
       </section>
       <section>
