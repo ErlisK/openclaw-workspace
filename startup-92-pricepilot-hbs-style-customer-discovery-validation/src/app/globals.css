@@ -33,7 +33,12 @@ a:hover { text-decoration: underline; }
 .nav-logo { font-weight: 800; font-size: 1.1rem; color: var(--brand); }
 .nav-links { display: flex; gap: 1.5rem; align-items: center; }
 .nav-links a { font-size: 0.9rem; color: var(--muted); font-weight: 500; }
+.nav-links a.btn-primary { color: #fff; }
+.nav-links a.btn-secondary { color: var(--text); }
+.nav-links a.btn-danger { color: #fff; }
 .nav-links a:hover { color: var(--text); text-decoration: none; }
+.nav-links a.btn-primary:hover { color: #fff; }
+.nav-links a.btn-danger:hover { color: #fff; }
 .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
 .badge-green { background: #d1fae5; color: #065f46; }
 .badge-yellow { background: #fef3c7; color: #92400e; }
