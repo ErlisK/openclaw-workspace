@@ -8,6 +8,15 @@ export const metadata: Metadata = {
 
 const posts = [
   {
+    slug: 'teachable-alternative-developers',
+    title: 'The Best Teachable Alternative for Developer Course Creators',
+    date: '2025-05-06',
+    readMin: 9,
+    tags: ['comparison', 'tutorial'],
+    excerpt:
+      'Teachable is built for influencers. If your course has code, YAML, or versioned lessons, here\'s why engineers are switching to git-native workflows — and saving $7K+ per year.',
+  },
+  {
     slug: 'monetize-github-repo',
     title: 'How to Monetize Your GitHub Repository in 2025',
     date: '2025-05-01',
@@ -64,6 +73,7 @@ const posts = [
 ];
 
 const tagColors: Record<string, string> = {
+  comparison: 'bg-violet-500/10 text-violet-600 border-violet-200',
   launch: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   product: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
   engineering: 'bg-orange-500/10 text-orange-400 border-orange-500/20',

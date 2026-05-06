@@ -130,6 +130,12 @@ export default function PricingClient() {
             Upgrade to Hosted Creator for managed infrastructure and marketplace discovery.
           </p>
 
+          {/* Annual savings callout */}
+          <div className="mb-6 inline-flex items-center gap-2.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3 text-sm text-emerald-300">
+            <span className="text-lg">💰</span>
+            <span><strong className="text-emerald-200">Save ${annualSavings}/year</strong> — pay annually and get 2 months free</span>
+          </div>
+
           {/* Billing toggle */}
           <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
             <button

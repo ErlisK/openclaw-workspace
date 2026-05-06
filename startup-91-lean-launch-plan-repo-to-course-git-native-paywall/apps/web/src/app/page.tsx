@@ -237,6 +237,35 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* ── Live activity ticker ── */}
+      <section className="border-t border-white/5 bg-white/[0.01] px-6 py-5 overflow-hidden">
+        <div className="mx-auto max-w-5xl flex items-center gap-3">
+          <span className="shrink-0 text-xs font-semibold uppercase tracking-widest text-gray-600">Recent activity</span>
+          <div className="relative flex-1 overflow-hidden">
+            <div className="flex gap-5 animate-[slide_18s_linear_infinite] whitespace-nowrap">
+              {[
+                { icon: '📚', text: 'Hired an engineer just published "Next.js 15 Patterns"' },
+                { icon: '🎉', text: 'New course: "Rust for TypeScript devs" went live' },
+                { icon: '💳', text: 'Creator earned $210 — 3 new course sales' },
+                { icon: '🚀', text: '"Advanced Git for Teams" published in 11 min' },
+                { icon: '⭐', text: '"Docker Deep Dive" reached 50 enrollments' },
+                { icon: '📚', text: 'Hired an engineer just published "Next.js 15 Patterns"' },
+                { icon: '🎉', text: 'New course: "Rust for TypeScript devs" went live' },
+                { icon: '💳', text: 'Creator earned $210 — 3 new course sales' },
+                { icon: '🚀', text: '"Advanced Git for Teams" published in 11 min' },
+                { icon: '⭐', text: '"Docker Deep Dive" reached 50 enrollments' },
+              ].map((item, i) => (
+                <span key={i} className="inline-flex items-center gap-1.5 text-xs text-gray-500 shrink-0">
+                  <span>{item.icon}</span>
+                  <span>{item.text}</span>
+                  <span className="mx-3 text-gray-700">•</span>
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── How it works ── */}
       <section className="px-6 py-24 border-t border-white/5">
         <div className="mx-auto max-w-5xl">
