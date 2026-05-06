@@ -53,7 +53,10 @@ export default function SignupPage() {
           <Link href="/" className="nav-logo" style={{ fontSize: '1.4rem' }}>🚀 PricingSim</Link>
           <h1 style={{ fontSize: '1.75rem', fontWeight: 800, marginTop: '1rem' }}>Create your account</h1>
           <p style={{ color: 'var(--muted)', marginTop: '0.5rem' }}>Free forever · No credit card</p>
-          <p style={{ color: '#1e40af', fontSize: '0.75rem', marginTop: '0.25rem', background: '#eff6ff', borderRadius: 6, padding: '0.25rem 0.75rem', display: 'inline-block' }}>Works with 30+ transactions · most sellers qualify on day 1</p>
+          <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', alignItems: 'center' }}>
+            <p style={{ color: '#1e40af', fontSize: '0.75rem', background: '#eff6ff', borderRadius: 6, padding: '0.25rem 0.75rem', display: 'inline-block', margin: 0 }}>Works with 30+ transactions · most sellers qualify on day 1</p>
+            <p style={{ color: '#166534', fontSize: '0.75rem', background: '#dcfce7', borderRadius: 6, padding: '0.25rem 0.75rem', display: 'inline-block', margin: 0, fontWeight: 600 }}>🚀 57 founders already running price experiments</p>
+          </div>
         </div>
 
         {emailSent ? (

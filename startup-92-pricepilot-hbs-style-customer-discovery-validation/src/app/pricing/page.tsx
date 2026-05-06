@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import { SiteFooter } from '@/components/SiteFooter'
+import { BillingToggle } from '@/components/BillingToggle'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,37 +135,7 @@ export default async function PricingPage() {
               Most popular
             </div>
             <p style={{ fontWeight: 700, color: '#6c47ff', marginBottom: '0.5rem', fontSize: '0.875rem', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pro</p>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem', marginBottom: '0.5rem' }}>
-              <span style={{ fontSize: '3rem', fontWeight: 900, color: '#111827' }}>$29</span>
-              <span style={{ color: '#9ca3af' }}>/month</span>
-            </div>
-            <p style={{ color: '#9ca3af', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Cancel anytime</p>
-
-            {isAuthed ? (
-              <form method="post" action="/api/billing/checkout" style={{ marginBottom: '1.5rem' }}>
-                <button type="submit"
-                  data-testid="upgrade-btn"
-                  style={{
-                    display: 'block', width: '100%', padding: '0.75rem',
-                    background: '#6c47ff', color: '#fff', border: 'none',
-                    borderRadius: '0.75rem', fontWeight: 700, fontSize: '1rem',
-                    cursor: 'pointer',
-                  }}>
-                  Upgrade to Pro →
-                </button>
-              </form>
-            ) : (
-              <a href="/signup?intent=upgrade" rel="nofollow"
-                data-testid="upgrade-btn"
-                style={{
-                  display: 'block', textAlign: 'center', padding: '0.75rem',
-                  background: '#6c47ff', color: '#fff', borderRadius: '0.75rem',
-                  fontWeight: 700, fontSize: '1rem', textDecoration: 'none',
-                  marginBottom: '1.5rem',
-                }}>
-                Upgrade to Pro →
-              </a>
-            )}
+            <BillingToggle isAuthed={isAuthed} />
 
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {PRO_FEATURES.map(f => (

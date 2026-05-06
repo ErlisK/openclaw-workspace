@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SiteFooter } from '@/components/SiteFooter'
+import { StickySignupBar } from '@/components/StickySignupBar'
 
 const BASE_URL = 'https://pricingsim.com'
 
@@ -287,6 +288,7 @@ export default function HomePage() {
       </main>
       <SiteFooter />
     </div>
+    <StickySignupBar />
     </>
   )
 }
