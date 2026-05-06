@@ -65,18 +65,19 @@ export async function POST(request: Request) {
         ...result,
       })
 
-      // Store suggestion in DB
+      // Store suggestion in DB — always upsert so the page always has something to show
+      // Delete any existing pending suggestion for this product first
+      await supabase.from('suggestions').delete()
+        .eq('user_id', user.id).eq('product_id', product.id).eq('status', 'pending')
+
       if (result.action === 'test_higher' && result.price_proposed) {
-        // Delete any existing pending suggestion for this product first
-        await supabase.from('suggestions').delete()
-          .eq('user_id', user.id).eq('product_id', product.id).eq('status', 'pending')
         const { error: sgErr } = await supabase.from('suggestions').insert({
           user_id: user.id,
           product_id: product.id,
           suggestion_type: 'price_increase',
           current_price_cents: product.current_price_cents,
           suggested_price_cents: Math.round(result.price_proposed * 100),
-          title: `Test $${result.price_proposed} vs $${(product.current_price_cents / 100).toFixed(0)}`,
+          title: `Test $${result.price_proposed.toFixed(0)} vs $${(product.current_price_cents / 100).toFixed(0)} for ${product.name}`,
           rationale: result.why_text,
           confidence_score: result.revenue_dist?.prob_above_current || null,
           confidence_label: result.confidence_label,
@@ -88,6 +89,32 @@ export async function POST(request: Request) {
           status: 'pending',
         })
         if (sgErr) console.error('Failed to insert suggestion:', sgErr.message)
+      } else {
+        // stable or insufficient_data — still create a card so the user sees something
+        const safePrice = result.action === 'insufficient_data'
+          ? Math.round(product.current_price_cents * 1.1) / 100
+          : (product.current_price_cents / 100)
+        const safePriceCents = Math.round(safePrice * 100)
+        const { error: sgErr } = await supabase.from('suggestions').insert({
+          user_id: user.id,
+          product_id: product.id,
+          suggestion_type: result.action === 'stable' ? 'hold' : 'price_increase',
+          current_price_cents: product.current_price_cents,
+          suggested_price_cents: safePriceCents,
+          title: result.action === 'stable'
+            ? `Current pricing looks solid for ${product.name}`
+            : `Conservative +10% test for ${product.name}`,
+          rationale: result.why_text,
+          confidence_score: result.revenue_dist?.prob_above_current ?? 0.4,
+          confidence_label: result.confidence_label,
+          proj_monthly_lift_p50: result.revenue_dist
+            ? Math.round((result.revenue_dist.p50 - result.revenue_ref_monthly) * 100)
+            : null,
+          rule_flags: result.conservative_rules_applied,
+          caveats: result.caveats,
+          status: 'pending',
+        })
+        if (sgErr) console.error('Failed to insert suggestion (stable/insufficient):', sgErr.message)
       }
     }
 
