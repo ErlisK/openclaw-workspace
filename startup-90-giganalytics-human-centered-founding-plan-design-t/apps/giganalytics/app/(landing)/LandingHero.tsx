@@ -4,6 +4,8 @@ import { useEffect, useCallback, useState } from 'react'
 import Link from 'next/link'
 import { type LandingVariant } from '@/lib/landing/variants'
 import UrgencyBanner from '@/components/UrgencyBanner'
+import Testimonials from '@/components/Testimonials'
+import StickyCtaBar from '@/components/StickyCtaBar'
 import { trackLandingVariant, trackCtaClick } from '@/lib/posthog/provider'
 import { getSessionId } from '@/lib/utm'
 
@@ -357,6 +359,9 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           ))}
         </div>
 
+        {/* Testimonials */}
+        <Testimonials />
+
         {/* Financial disclaimer */}
         <p className="text-xs text-gray-500 max-w-xl mx-auto mb-10 leading-relaxed">
           GigAnalytics provides data analytics tools only and does not provide financial, tax, or
@@ -400,6 +405,9 @@ export default function LandingHero({ variant }: { variant: LandingVariant }) {
           </Link>
         </div>
       </main>
+
+      {/* Sticky CTA bar */}
+      <StickyCtaBar />
 
       {/* Footer */}
       <footer className="border-t border-gray-100 py-6 px-6 text-center text-xs text-gray-500">

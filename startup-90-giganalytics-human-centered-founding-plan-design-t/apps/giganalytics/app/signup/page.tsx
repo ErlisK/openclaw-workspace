@@ -126,7 +126,37 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
+      <div className="w-full max-w-3xl flex gap-6 items-start">
+        {/* Benefits sidebar */}
+        <div className="hidden md:flex flex-col gap-5 flex-1 pt-2">
+          <div>
+            <span className="text-2xl font-bold text-blue-600">GigAnalytics</span>
+            <p className="text-sm text-gray-500 mt-1">The ROI dashboard built for multi-income freelancers</p>
+          </div>
+          <div className="space-y-4">
+            {[
+              { icon: '⚡', title: 'First dashboard in ~11 min', body: 'Import a CSV or connect Stripe — see your true hourly rate in minutes, not hours.' },
+              { icon: '💡', title: 'Know which stream wins', body: 'Side-by-side ROI across every platform. Stop guessing, start optimising.' },
+              { icon: '📊', title: 'Acquisition ROI built-in', body: 'Track ad spend and platform fees against real revenue. Cut what doesn\'t work.' },
+              { icon: '🔒', title: 'Privacy-first by design', body: 'Your financial data never leaves our encrypted vault. No third-party sharing.' },
+            ].map(b => (
+              <div key={b.title} className="flex gap-3">
+                <span className="text-xl mt-0.5">{b.icon}</span>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">{b.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{b.body}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+            <p className="text-xs text-blue-700 font-medium mb-1">🎉 Early access offer</p>
+            <p className="text-xs text-blue-600">First 100 users get 3 months Pro free — no credit card required.</p>
+          </div>
+        </div>
+
+        {/* Signup form */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">GigAnalytics</h1>
           <p className="text-gray-500 text-sm mt-1">Create your free account</p>
@@ -244,7 +274,8 @@ export default function SignupPage() {
           Already have an account?{' '}
           <a href="/login" className="text-blue-600 hover:underline">Sign in</a>
         </p>
-      </div>
+        </div> {/* end form card */}
+      </div> {/* end flex row */}
     </div>
   )
 }
