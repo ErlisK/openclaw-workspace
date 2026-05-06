@@ -35,12 +35,44 @@ export default function SuggestionsPage() {
     setLoading(false)
   }
 
+  const fetchTxCount = async (): Promise<number> => {
+    const resp = await fetch('/api/analytics/summary').catch(() => null)
+    if (resp?.ok) {
+      const d = await resp.json()
+      return d.transaction_count ?? 0
+    }
+    return 0
+  }
+
   useEffect(() => {
-    fetchSuggestions()
+    const init = async () => {
+      // Fetch suggestions first
+      const resp = await fetch('/api/suggestions')
+      const existing: Suggestion[] = resp.ok ? await resp.json() : []
+      setSuggestions(existing)
+
+      // Check if there are transactions
+      const count = await fetchTxCount()
+      setTxCount(count)
+
+      // Auto-run engine if there's data but no suggestions yet
+      if (count > 0 && existing.length === 0) {
+        setLoading(true)
+        setRunning(true)
+        try {
+          const eResp = await fetch('/api/engine/recommend', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+          if (eResp.ok) {
+            const fresh = await fetch('/api/suggestions')
+            if (fresh.ok) setSuggestions(await fresh.json())
+          }
+        } catch { /* ignore */ }
+        setRunning(false)
+      }
+      setLoading(false)
+    }
+    init()
     fetch('/api/analytics', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ event: 'page_view', page: 'suggestions' }) })
       .catch(() => {})
-    // Fetch transaction count to determine empty state
-    setTxCount(1) // default non-zero so Run Analysis is always accessible
   }, [])
 
   const runEngine = async () => {
@@ -120,9 +152,16 @@ export default function SuggestionsPage() {
           </div>
         )}
 
-        {loading && <div style={{ textAlign: 'center', padding: '3rem' }}><span className="spinner" /></div>}
+        {(loading || running) && suggestions.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '3rem' }}>
+            <span className="spinner" style={{ width: 32, height: 32 }} />
+            <p style={{ color: 'var(--muted)', marginTop: '1rem' }}>
+              {running && !loading ? '✨ Running Bayesian analysis on your sales data…' : 'Loading…'}
+            </p>
+          </div>
+        )}
 
-        {!loading && txCount === 0 && (
+        {!loading && !running && txCount === 0 && (
           <div className="card" style={{ textAlign: 'center', padding: '3rem' }} data-testid="no-data-empty-state">
             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>📊</p>
             <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>No transaction data yet</h2>
@@ -131,7 +170,7 @@ export default function SuggestionsPage() {
           </div>
         )}
 
-        {!loading && txCount !== 0 && suggestions.length === 0 && (
+        {!loading && !running && txCount !== 0 && suggestions.length === 0 && (
           <div className="card" style={{ textAlign: 'center', padding: '3rem' }}>
             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>🎯</p>
             <h2 style={{ fontWeight: 700, marginBottom: '0.75rem' }}>No suggestions yet</h2>

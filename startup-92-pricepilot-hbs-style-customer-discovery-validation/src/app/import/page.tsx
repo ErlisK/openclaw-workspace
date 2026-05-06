@@ -313,8 +313,8 @@ export default function ImportPage() {
                 <p className="stat-label">Products</p>
               </div>
               <div style={{ textAlign: 'center' }}>
-                <p className="stat-big">{result.skipped as number}</p>
-                <p className="stat-label">Skipped</p>
+                <p className="stat-big">{(result.suggestions as unknown[])?.length ?? 0}</p>
+                <p className="stat-label">Suggestions ready</p>
               </div>
             </div>
 
@@ -324,9 +324,27 @@ export default function ImportPage() {
               </div>
             ) : null}
 
+            {(result.suggestions as Array<{ product_name: string; current_price: number; suggested_price: number | null; confidence_label: string; rationale: string }> | undefined)?.length ? (
+              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.5rem', padding: '1rem', marginBottom: '1.25rem' }}>
+                <p style={{ fontWeight: 700, color: '#166534', marginBottom: '0.5rem' }}>🎯 Price suggestions generated:</p>
+                {(result.suggestions as Array<{ product_name: string; current_price: number; suggested_price: number | null; confidence_label: string; rationale: string }>).map((s, i) => (
+                  <div key={i} style={{ marginBottom: i < (result.suggestions as unknown[]).length - 1 ? '0.75rem' : 0, paddingBottom: i < (result.suggestions as unknown[]).length - 1 ? '0.75rem' : 0, borderBottom: i < (result.suggestions as unknown[]).length - 1 ? '1px solid #bbf7d0' : 'none' }}>
+                    <p style={{ fontWeight: 600, fontSize: '0.9rem' }}>{s.product_name}</p>
+                    {s.suggested_price && s.suggested_price !== s.current_price ? (
+                      <p style={{ color: '#166534', fontSize: '0.85rem' }}>
+                        ${s.current_price} → <strong>${s.suggested_price.toFixed(0)}</strong> · {s.confidence_label}
+                      </p>
+                    ) : (
+                      <p style={{ color: '#166534', fontSize: '0.85rem' }}>{s.confidence_label}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : null}
+
             <div style={{ display: 'flex', gap: '0.75rem' }}>
               <button className="btn btn-primary" onClick={() => router.push('/suggestions')} style={{ flex: 1, justifyContent: 'center' }}>
-                Get price suggestions →
+                View suggestions →
               </button>
               <button className="btn btn-secondary" onClick={() => { setStep('upload'); setFile(null); setResult(null) }}>
                 Import more
